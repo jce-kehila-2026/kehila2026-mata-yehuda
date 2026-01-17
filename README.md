@@ -13,9 +13,12 @@ Briefly describe what the project does, who it serves, and the main value (1–2
 - Key deliverable for them: e.g., "Simple roster export and sign-up form."
 
 ## Team
-- Team lead — Name — email — GitHub  
-- Members — Name — role — GitHub  
-Include student IDs if required.
+- **Rannen Kharma** — email : raneenkh@post.jce.ac.il — GitHub: @raneen12kh
+- **Sujood Totah** — GitHub: @sujood-totah
+- **Doha Abdelnabi** — GitHub: @doha-abdelnabi
+- **Widad Rajabi** — GitHub: @WidadRajabi
+
+
 
 ## Quick start (local)
 1. git clone https://github.com/<org>/<repo>.git
