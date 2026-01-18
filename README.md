@@ -18,6 +18,12 @@ Briefly describe what the project does, who it serves, and the main value (1–2
 - **Doha Abdelnabi** — GitHub: @doha-abdelnabi
 - **Widad Rajabi** — GitHub: @WidadRajabi
 
+### Team Roles
+- **Team Lead** – Responsible for coordination, task distribution, and final decisions.
+- **Backend Developer** – Handles server-side logic and data management.
+- **Frontend Developer** – Responsible for user interface and user experience.
+- **Documentation** – Maintains README, Wiki, and project documentation.
+
 ## Project goals
 - Describe the main goal of the project
 - List 2-3 key objectives.
