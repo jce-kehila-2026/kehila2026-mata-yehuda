@@ -29,7 +29,6 @@ Admin (Staff Member):
 - Send Notification (via WhatsApp)
   
 <img src="../images/use-case-diagram.jpeg" width="600">
-# Use-Case Templates
 
 ## UC1 – View Monthly Calendar
 
@@ -182,6 +181,7 @@ Admin (Staff Member):
 ### Exception Flows:
 - If there is no data → system displays “No data available”.
 - If DB is unavailable → system displays an error message.
+
 
 
 
