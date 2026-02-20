@@ -28,7 +28,7 @@ Admin (Staff Member):
 - View Statistics
 - Send Notification (via WhatsApp)
   
-![Use Case Diagram](../images/use-case-diagram.png)
+![Use Case Diagram](../images/use-case-diagram.jpeg)
 
 # Use-Case Templates
 
@@ -183,6 +183,7 @@ Admin (Staff Member):
 ### Exception Flows:
 - If there is no data → system displays “No data available”.
 - If DB is unavailable → system displays an error message.
+
 
 
 
