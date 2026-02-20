@@ -8,18 +8,28 @@
 
 4. **DB** - External Data Storage Service
 
+5. **WhatsApp API** – External messaging service for sending confirmations / reminders / updates.
+
+
 ## Use-Case UML
 
 The system includes the following main use cases:
 
-- View Monthly Calendar
+Participant / Registered User:
+- View Activities / View Monthly Calendar
 - View Activity Details
 - Register for Activity
 - Pay by Credit Card
+Admin (Staff Member):
+- Staff Login
 - Manage Activities
-- View and Manage Registrations
+- View Activity Registrations
+- Check Attendance
+- View Statistics
+- Send Notification (via WhatsApp)
   
 ![Use Case Diagram](../images/use-case-diagram.png)
+
 # Use-Case Templates
 
 ## UC1 – View Monthly Calendar
@@ -100,5 +110,80 @@ The system includes the following main use cases:
 
 ### Exception Flows:
 - If invalid data is entered, the system displays an error message.
+
+## UC6 – View and Manage Registrations (View Activity Registration)
+**Primary Actor:** Admin (Staff Member)
+**Supporting Actors:** DB
+**Preconditions:** Admin is authorized (logged in). Activities exist.
+**Postconditions:** Registration list is displayed and changes (if any) are saved.
+
+### Basic Flow:
+1. Admin opens the management panel.
+2. Admin selects an activity.
+3. The system displays all registrations for that activity (name, phone, status, payment/attendance flags).
+4. Admin filters/sorts registrations (optional).
+5. Admin updates a registration status (e.g., cancel / mark as paid / move to waitlist).
+6. The system validates the change.
+7. The system saves the update in the DB and shows a success message.
+   
+### Exception Flows:
+- If the activity does not exist anymore → system shows an error message.
+- If DB is unavailable → system shows “Try again later” and no changes are saved.
+- If admin is not authorized → access denied.
+
+## UC7 – Check Attendance
+**Primary Actor:** Admin (Staff Member)
+**Supporting Actors:** DB
+**Preconditions:** Admin is authorized. The activity exists and has registrations.
+**Postconditions:** Attendance is updated for selected participants.
+
+### Basic Flow:
+1. Admin selects an activity from the management panel.
+2. The system displays the list of registered participants.
+3. Admin marks participants as “Present/Absent”.
+4. The system saves attendance results in the DB.
+5. The system shows updated attendance summary.
+   
+### Exception Flows:
+- If no registrations exist → system displays “No participants registered”.
+- If saving fails → system shows an error and keeps previous attendance state.
+  
+## UC8 – Send Notification
+**Primary Actor:** Admin (Staff Member)
+**Supporting Actors:** WhatsApp API, DB
+**Preconditions:** Admin is authorized. Recipients exist (registered participants).
+**Postconditions:** Notification status is stored (sent/failed).
+
+### Basic Flow:
+1. Admin selects an activity and clicks “Send Notification”.
+2. Admin chooses message type (confirmation / reminder / change / cancellation).
+3. The system builds the recipient list from DB.
+4. The system sends messages via WhatsApp API.
+5. The system logs results (sent/failed) in DB and shows a summary.
+   
+### Exception Flows:
+- If WhatsApp API is unavailable → system shows “Service unavailable” and logs failure.
+- If some numbers are invalid → system sends to valid recipients and reports invalid ones.
+  
+## UC9 – View Statistics
+**Primary Actor:** Admin (Staff Member)
+**Supporting Actors:** DB
+**Preconditions:** Admin is authorized.
+**Postconditions:** Statistics are displayed.
+
+### Basic Flow:
+1. Admin opens “Statistics”.
+2. The system shows stats such as:
+3. Number of registrations per activity
+4. Attendance rate
+5. Paid vs unpaid registrations
+6. Admin can filter by date range/activity.
+7. The system updates the view accordingly.
+
+### Exception Flows:
+- If there is no data → system displays “No data available”.
+- If DB is unavailable → system displays an error message.
+
+
 
 
