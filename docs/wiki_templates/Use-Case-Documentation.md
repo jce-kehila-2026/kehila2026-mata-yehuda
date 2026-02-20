@@ -18,7 +18,7 @@ The system includes the following main use cases:
 - Pay by Credit Card
 - Manage Activities
 - View and Manage Registrations
-
+![Use Case Diagram](../images/use-case-diagram.png)
 # Use-Case Templates
 
 ## UC1 – View Monthly Calendar
@@ -99,3 +99,4 @@ The system includes the following main use cases:
 
 ### Exception Flows:
 - If invalid data is entered, the system displays an error message.
+
