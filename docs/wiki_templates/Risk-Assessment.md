@@ -8,9 +8,12 @@
 | 4 | Security vulnerability (admin or payment data) | 25 | Very High | R4 | Use HTTPS, secure sessions, input validation, CSRF protection | Open |
 | 5 | Data loss of registrations | 20 | High | R5 | Daily database backups and audit log | Open |
 | 6 | Team member time constraints | 50 | Medium | R6 | Divide tasks clearly and set weekly milestones | Open |
+| 7 | WhatsApp API failure may prevent sending confirmations or reminders | 30 | Medium | R7 | Implement retry mechanism and message status logging; allow manual resend | Open |
+| 8 | Incorrect statistics due to data inconsistency | 25 | Medium | R8 | Validate data queries, use tested aggregation logic, and verify with sample datasets | Open |
 ## Monitoring & Review
 
 - **Weekly** review of high-risk items  
 - **Monthly** review of medium-risk items  
 - **Immediate** review upon incident occurrence
+
 
