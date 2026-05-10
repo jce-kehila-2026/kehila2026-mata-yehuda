@@ -1,0 +1,55 @@
+Fullstack Installation Verification Report
+Generated on: Mon Apr 27 16:26:45 IDT 2026
+Username: storyalmaicloud.com
+-----------------------------------------
+Node Version:
+v25.9.0
+
+npm Version:
+11.12.1
+
+Git Version:
+git version 2.50.1 (Apple Git-155)
+
+package.json Present:
+true
+
+Installed npm Packages:
+matayehuda@0.0.0 /Users/storyalmaicloud.com/cs-projects/matayehuda
+├── @eslint/js@10.0.1
+├── @types/react-dom@19.2.3
+├── @types/react@19.2.14
+├── @vitejs/plugin-react@6.0.1
+├── eslint-plugin-react-hooks@7.1.1
+├── eslint-plugin-react-refresh@0.5.2
+├── eslint@10.2.1
+├── firebase@12.12.1
+├── globals@17.5.0
+├── react-dom@19.2.5
+├── react@19.2.5
+└── vite@8.0.10
+
+
+React Installed:
+matayehuda@0.0.0 /Users/storyalmaicloud.com/cs-projects/matayehuda
+├─┬ react-dom@19.2.5
+│ └── react@19.2.5 deduped
+└── react@19.2.5
+
+
+Vite Installed:
+matayehuda@0.0.0 /Users/storyalmaicloud.com/cs-projects/matayehuda
+├─┬ @vitejs/plugin-react@6.0.1
+│ └── vite@8.0.10 deduped
+└── vite@8.0.10
+
+
+Firebase Installed:
+matayehuda@0.0.0 /Users/storyalmaicloud.com/cs-projects/matayehuda
+└── firebase@12.12.1
+
+
+-----------------------------------------
+Verification complete. Submit the file:
+fullstack-install-storyalmaicloud.com.txt
+-----------------------------------------
