@@ -11,3 +11,15 @@
     border-radius: 10px;
 }
 
+.dashboard-buttons {
+    display: flex;
+    flex-direction: column;
+    gap: 15px;
+    width: 300px;
+    margin: 20px auto;
+}
+
+.dashboard-buttons button {
+    padding: 10px;
+    font-size: 18px;
+}
