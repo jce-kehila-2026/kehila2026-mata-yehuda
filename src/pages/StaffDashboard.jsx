@@ -12,59 +12,62 @@ function StaffDashboard({ onLogout }) {
     }
     return (
         <div>
-            <h1>Welcome Staff</h1>
+            <h1>ברוך הבא צוות</h1>
+
             <button onClick={handleLogout}>
-                Logout
+                התנתקות
             </button>
+
             {currentPage === "dashboard" && (
                 <div className="dashboard-buttons">
 
                     <button onClick={() => setCurrentPage("activities")}>
-                        Manage Activities
+                        ניהול פעילויות
                     </button>
 
                     <button onClick={() => setCurrentPage("addStaff")}>
-                        Add Staff Member
+                        הוספת איש צוות
                     </button>
 
                     <button onClick={() => setCurrentPage("notifications")}>
-                        Send Notification
+                        שליחת הודעות
                     </button>
 
                     <button onClick={() => setCurrentPage("statistics")}>
-                        View Statistics
+                        צפייה בסטטיסטיקות
                     </button>
 
                     <button onClick={() => setCurrentPage("filterData")}>
-                        Filter The Data
+                        סינון נתונים
                     </button>
 
                     <button onClick={() => setCurrentPage("calendar")}>
-                        Update Monthly Calendar
+                        עדכון לוח חודשי
                     </button>
 
                     <button onClick={() => setCurrentPage("requests")}>
-                        View Requests
+                        צפייה בבקשות
                     </button>
 
                     <button onClick={() => setCurrentPage("cancelledRegistrations")}>
-                        Manage Cancelled Registration
+                        ניהול ביטולי הרשמה
                     </button>
 
                     <button onClick={() => setCurrentPage("activityRegistrations")}>
-                        Manage Activity Registration
+                        ניהול הרשמות לפעילויות
                     </button>
 
                     <button onClick={() => setCurrentPage("attendance")}>
-                        Check Attendance
+                        בדיקת נוכחות
                     </button>
 
                 </div>
             )}
+
             {currentPage === "activities" && (
                 <div>
                     <button onClick={() => setCurrentPage("dashboard")}>
-                        Back to Dashboard
+                        חזרה ללוח הבקרה
                     </button>
 
                     <ManageActivities />

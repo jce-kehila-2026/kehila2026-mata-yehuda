@@ -25,43 +25,43 @@ function ManageActivities() {
 
     function validateActivity() {
         if (!name.trim()) {
-            setError("Activity name is required");
+            setError("יש להזין שם פעילות");
             setSuccess("");
             return false;
         }
 
         if (!description.trim()) {
-            setError("Description is required");
+            setError("יש להזין תיאור");
             setSuccess("");
             return false;
         }
 
         if (!activityTypeId) {
-            setError("Please select activity type");
+            setError("יש לבחור סוג פעילות");
             setSuccess("");
             return false;
         }
 
         if (!startDate) {
-            setError("Start date is required");
+            setError("יש להזין תאריך התחלה");
             setSuccess("");
             return false;
         }
 
         if (!endDate) {
-            setError("End date is required");
+            setError("יש להזין תאריך סיום");
             setSuccess("");
             return false;
         }
 
         if (Number(maxParticipants) <= 0) {
-            setError("Max participants must be greater than 0");
+            setError("מספר המשתתפים חייב להיות גדול מ־0");
             setSuccess("");
             return false;
         }
 
         if (Number(price) < 0) {
-            setError("Price cannot be negative");
+            setError("המחיר לא יכול להיות שלילי");
             setSuccess("");
             return false;
         }
@@ -110,7 +110,7 @@ function ManageActivities() {
         }
         await addDoc(collection(db, "activities"), activityData);
         await fetchActivities();
-        setSuccess("Activity added successfully");
+        setSuccess("הפעילות נוספה בהצלחה");
         setError("");
         setName("");
         setDescription("");
@@ -136,7 +136,7 @@ function ManageActivities() {
     async function handleDeleteActivity(activityId) {
         await deleteDoc(doc(db, "activities", activityId));
         await fetchActivities();
-        setSuccess("Activity deleted successfully");
+        setSuccess("הפעילות נמחקה בהצלחה");
         setError("");
     }
 
@@ -201,7 +201,7 @@ function ManageActivities() {
         }
         await updateDoc(doc(db, "activities", editingActivity.id), activityData);
         await fetchActivities();
-        setSuccess("Activity updated successfully");
+        setSuccess("הפעילות עודכנה בהצלחה");
         setError("");
         setName("");
         setDescription("");
@@ -224,13 +224,13 @@ function ManageActivities() {
 
     return (
         <div>
-            <h1>Manage Activities</h1>
+            <h1>ניהול פעילויות</h1>
             {error && <p style={{ color: "red" }}>{error}</p>}
             {success && <p style={{ color: "green" }}>{success}</p>}
             <div className="row">
                 <input
                     type="text"
-                    placeholder="Activity Name"
+                    placeholder="שם הפעילות"
                     value={name}
                     onChange={(e) => setName(e.target.value)}
                 />
@@ -238,7 +238,7 @@ function ManageActivities() {
             <div className="row">
                 <textarea
                     type="text"
-                    placeholder="Description"
+                    placeholder="תיאור"
                     value={description}
                     onChange={(e) => setDescription(e.target.value)}
                 />
@@ -246,7 +246,7 @@ function ManageActivities() {
             <div className="row">
                 <input
                     type="text"
-                    placeholder="Image URL"
+                    placeholder="קישור לתמונה"
                     value={imageURL}
                     onChange={(e) => setImageURL(e.target.value)}
                 />
@@ -256,7 +256,7 @@ function ManageActivities() {
                     value={activityTypeId}
                     onChange={(e) => setActivityTypeId(e.target.value)}
                 >
-                    <option value="">Select Activity Type</option>
+                    <option value="">בחר סוג פעילות</option>
                     {activityTypes.map(type => (
                         <option key={type.id} value={type.id}>
                             {type.data.type_name}
@@ -267,7 +267,7 @@ function ManageActivities() {
             <div className="row">
                 <input
                     type="date"
-                    placeholder="Start Date"
+                    placeholder="תאריך התחלה"
                     value={startDate}
                     onChange={(e) => setStartDate(e.target.value)}
                 />
@@ -275,7 +275,7 @@ function ManageActivities() {
             <div className="row">
                 <input
                     type="date"
-                    placeholder="End Date"
+                    placeholder="תאריך סיום"
                     value={endDate}
                     onChange={(e) => setEndDate(e.target.value)}
                 />
@@ -283,7 +283,7 @@ function ManageActivities() {
             <div className="row">
                 <input
                     type="number"
-                    placeholder="Max Participants"
+                    placeholder="מספר משתתפים מקסימלי"
                     value={maxParticipants}
                     onChange={(e) => setMaxParticipants(e.target.value)}
                 />
@@ -291,7 +291,7 @@ function ManageActivities() {
             <div className="row">
                 <input
                     type="date"
-                    placeholder="Registration Deadline"
+                    placeholder="תאריך אחרון להרשמה"
                     value={registrationDeadLine}
                     onChange={(e) => setRegistrationDeadLine(e.target.value)}
                 />
@@ -299,7 +299,7 @@ function ManageActivities() {
             <div className="row">
                 <input
                     type="time"
-                    placeholder="Start Time"
+                    placeholder="שעת התחלה"
                     value={startTime}
                     onChange={(e) => setStartTime(e.target.value)}
                 />
@@ -307,21 +307,21 @@ function ManageActivities() {
             <div className="row">
                 <input
                     type="time"
-                    placeholder="End Time"
+                    placeholder="שעת סיום"
                     value={endTime}
                     onChange={(e) => setEndTime(e.target.value)}
                 />
             </div>
             <input
                 type="text"
-                placeholder="Day Of Week"
+                placeholder="יום בשבוע"
                 value={dayOfWeek}
                 onChange={(e) => setDayOfWeek(e.target.value)}
             />
             <div className="row">
                 <input
                     type="number"
-                    placeholder="Price"
+                    placeholder="מחיר"
                     value={price}
                     onChange={(e) => setPrice(e.target.value)}
                 />
@@ -329,7 +329,7 @@ function ManageActivities() {
             <div className="row">
                 <input
                     type="text"
-                    placeholder="Price Note"
+                    placeholder="הערת מחיר"
                     value={priceNote}
                     onChange={(e) => setPriceNote(e.target.value)}
                 />
@@ -341,43 +341,43 @@ function ManageActivities() {
                         checked={isOpen}
                         onChange={(e) => setIsOpen(e.target.checked)}
                     />
-                    Open For Registration
+                    פתוח להרשמה
                 </label>
             </div>
             <button onClick={editingActivity ? handleUpdateActivity : handleAddActivity}>
-                {editingActivity ? "Update Activity" : "Add Activity"}
+                {editingActivity ? "עדכון פעילות" : "הוספת פעילות"}
             </button>
 
             {editingActivity && (
                 <button onClick={handleCancelEdit}>
-                    Cancel Edit
+                    ביטול עריכה
                 </button>
             )}
             <div className="activities-container">
                 {activities.map((activity) => (
                     <div className="activity-card" key={activity.id}>                        <h3>{activity.data.name}</h3>
 
-                        <p>Description: {activity.data.description}</p>
+                        <p>תיאור: {activity.data.description}</p>
 
-                        <p>Activity Type: {activity.data.activity_type_id}</p>
+                        <p>סוג פעילות: {activity.data.activity_type_id}</p>
 
-                        <p>Start Date: {activity.data.start_date}</p>
-                        <p>End Date: {activity.data.end_date}</p>
+                        <p>תאריך התחלה: {activity.data.start_date}</p>
+                        <p>תאריך סיום: {activity.data.end_date}</p>
 
-                        <p>Registration Deadline: {activity.data.registration_deadline}</p>
+                        <p>תאריך אחרון להרשמה: {activity.data.registration_deadline}</p>
 
-                        <p>Start Time: {activity.data.start_time}</p>
-                        <p>End Time: {activity.data.end_time}</p>
+                        <p>שעת התחלה: {activity.data.start_time}</p>
+                        <p>שעת סיום: {activity.data.end_time}</p>
 
-                        <p>Day Of Week: {activity.data.day_of_week}</p>
+                        <p>יום בשבוע: {activity.data.day_of_week}</p>
 
-                        <p>Max Participants: {activity.data.max_participants}</p>
+                        <p>מספר משתתפים: {activity.data.max_participants}</p>
 
-                        <p>Price: {activity.data.price}</p>
+                        <p>מחיר: {activity.data.price}</p>
 
-                        <p>Price Note: {activity.data.price_note}</p>
+                        <p>הערות מחיר: {activity.data.price_note}</p>
 
-                        <p>Status: {activity.data.is_open ? "Open" : "Closed"}</p>
+                        <p>סטטוס: {activity.data.is_open ? "פתוח" : "סגור"}</p>
 
                         <p><img
                             src={activity.data.image_url}
@@ -387,10 +387,10 @@ function ManageActivities() {
                         </p>
 
                         <button onClick={() => handleDeleteActivity(activity.id)}>
-                            Delete
+                            מחיקה
                         </button>
                         <button onClick={() => handleEditActivity(activity)}>
-                            Edit
+                            עריכה
                         </button>
                     </div>
                 ))}
