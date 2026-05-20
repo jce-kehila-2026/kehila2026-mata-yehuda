@@ -1,6 +1,7 @@
 
 import { signOut } from "firebase/auth";
 import { auth } from "../config/firebase";
+import ManageActivities from "./ManageActivities";
 
 function StaffDashboard ( { onLogout } ) {
     async function handleLogout () {
@@ -14,6 +15,7 @@ function StaffDashboard ( { onLogout } ) {
             <button onClick = {handleLogout}>
                  Logout
             </button>
+            <ManageActivities />
         </div>
     )
 }
