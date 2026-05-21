@@ -2,6 +2,7 @@ import { useState } from "react";
 import { signOut } from "firebase/auth";
 import { auth } from "../config/firebase";
 import ManageActivities from "./ManageActivities";
+import ManageStaff from "./ManageStaff";
 
 function StaffDashboard({ onLogout }) {
     const [currentPage, setCurrentPage] = useState("dashboard");
@@ -25,8 +26,8 @@ function StaffDashboard({ onLogout }) {
                         ניהול פעילויות
                     </button>
 
-                    <button onClick={() => setCurrentPage("addStaff")}>
-                        הוספת איש צוות
+                    <button onClick={() => setCurrentPage("manageStaff")}>
+                        ניהול אנשי צוות
                     </button>
 
                     <button onClick={() => setCurrentPage("notifications")}>
@@ -63,7 +64,6 @@ function StaffDashboard({ onLogout }) {
 
                 </div>
             )}
-
             {currentPage === "activities" && (
                 <div>
                     <button onClick={() => setCurrentPage("dashboard")}>
@@ -73,6 +73,17 @@ function StaffDashboard({ onLogout }) {
                     <ManageActivities />
                 </div>
             )}
+
+            {currentPage === "manageStaff" && (
+                <div>
+                    <button onClick={() => setCurrentPage("dashboard")}>
+                        חזרה ללוח הבקרה
+                    </button>
+
+                    <ManageStaff />
+                </div>
+            )}
+
         </div>
     )
 }

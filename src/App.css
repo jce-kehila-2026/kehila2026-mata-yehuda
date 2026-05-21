@@ -23,3 +23,27 @@
     padding: 10px;
     font-size: 18px;
 }
+.staff-form {
+    display: flex;
+    flex-direction: column;
+    gap: 15px;
+    width: 450px;
+    margin: 0 auto;
+}
+
+.staff-form input,
+.staff-form select,
+.staff-form button {
+    width: 100%;
+    box-sizing: border-box;
+    padding: 10px;
+    font-size: 18px;
+}
+
+.staff-form .row {
+    width: 100%;
+}
+
+.staff-form label {
+    font-size: 18px;
+}
