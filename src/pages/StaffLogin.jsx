@@ -18,16 +18,24 @@ function StaffLogin() {
     try {
       let userCredential = await signInWithEmailAndPassword(auth, email, password);
       let user = userCredential.user;
-      console.log("Logged user UID:", user.uid);
+
       let staffRef = doc(db, "Staff", user.uid);
       let staffSnap = await getDoc(staffRef);
-      console.log("Staff document exists:", staffSnap.exists());
 
       if (!staffSnap.exists()) {
+        setError("המשתמש אינו איש צוות");
         await signOut(auth);
-        setError("You are not authorized as staff");
         return;
       }
+
+      const staffData = staffSnap.data();
+
+      if (!staffData.is_active) {
+        setError("איש צוות זה אינו פעיל");
+        await signOut(auth);
+        return;
+      }
+
       setisLoggedIn(true);
     }
     catch (error) {
