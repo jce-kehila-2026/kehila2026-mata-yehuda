@@ -221,6 +221,15 @@ function ManageActivities() {
 
     }
 
+    function formatDate(value) {
+        if (!value) return "";
+
+        if (value.seconds) {
+            return new Date(value.seconds * 1000).toLocaleDateString("he-IL");
+        }
+
+        return value;
+    }
 
     return (
         <div>
@@ -361,10 +370,9 @@ function ManageActivities() {
 
                         <p>סוג פעילות: {activity.data.activity_type_id}</p>
 
-                        <p>תאריך התחלה: {activity.data.start_date}</p>
-                        <p>תאריך סיום: {activity.data.end_date}</p>
-
-                        <p>תאריך אחרון להרשמה: {activity.data.registration_deadline}</p>
+                        <p>תאריך התחלה: {formatDate(activity.data.start_date)}</p>
+                        <p>תאריך סיום: {formatDate(activity.data.end_date)}</p>
+                        <p>תאריך אחרון להרשמה: {formatDate(activity.data.registration_deadline)}</p>
 
                         <p>שעת התחלה: {activity.data.start_time}</p>
                         <p>שעת סיום: {activity.data.end_time}</p>
@@ -379,12 +387,13 @@ function ManageActivities() {
 
                         <p>סטטוס: {activity.data.is_open ? "פתוח" : "סגור"}</p>
 
-                        <p><img
-                            src={activity.data.image_url}
-                            alt={activity.data.name}
-                            width="200"
-                        />
-                        </p>
+                        {activity.data.image_url && (
+                            <img
+                                src={activity.data.image_url}
+                                alt={activity.data.name}
+                                width="200"
+                            />
+                        )}
 
                         <button onClick={() => handleDeleteActivity(activity.id)}>
                             מחיקה
