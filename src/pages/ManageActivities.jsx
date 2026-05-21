@@ -22,6 +22,8 @@ function ManageActivities() {
     const [editingActivity, setEditingActivity] = useState(null);
     const [error, setError] = useState("");
     const [success, setSuccess] = useState("");
+    const [filterType, setFilterType] = useState("");
+    const [filterOpen, setFilterOpen] = useState("");
 
     function validateActivity() {
         if (!name.trim()) {
@@ -231,6 +233,16 @@ function ManageActivities() {
         return value;
     }
 
+    const filteredActivities = activities.filter((activity) => {
+        return (
+            (filterType === "" ||
+                activity.data.activity_type_id === filterType) &&
+
+            (filterOpen === "" ||
+                String(activity.data.is_open) === filterOpen)
+        );
+    });
+
     return (
         <div>
             <h1>ניהול פעילויות</h1>
@@ -362,8 +374,35 @@ function ManageActivities() {
                     ביטול עריכה
                 </button>
             )}
+            <h2>סינון פעילויות</h2>
+
+            <div className="row">
+                <select
+                    value={filterType}
+                    onChange={(e) => setFilterType(e.target.value)}
+                >
+                    <option value="">כל סוגי הפעילויות</option>
+
+                    {activityTypes.map(type => (
+                        <option key={type.id} value={type.id}>
+                            {type.data.type_name}
+                        </option>
+                    ))}
+                </select>
+            </div>
+
+            <div className="row">
+                <select
+                    value={filterOpen}
+                    onChange={(e) => setFilterOpen(e.target.value)}
+                >
+                    <option value="">כל הסטטוסים</option>
+                    <option value="true">פתוח</option>
+                    <option value="false">סגור</option>
+                </select>
+            </div>
             <div className="activities-container">
-                {activities.map((activity) => (
+                {filteredActivities.map((activity) => (
                     <div className="activity-card" key={activity.id}>                        <h3>{activity.data.name}</h3>
 
                         <p>תיאור: {activity.data.description}</p>
