@@ -48,6 +48,13 @@ function PaymentForm() {
         } else {
           alert("הייתה שגיאה בשמירת ההרשמה");
         }
+
+        setFormData({
+          firstName: "",
+          lastName: "",
+          phone: "",
+          paymentMethod: "",
+        });
       } catch (error) {
         console.error(error);
         alert("שגיאה בחיבור לשרת");
@@ -114,6 +121,13 @@ function PaymentForm() {
             alert(
               "ההרשמה נשמרה. אנא בצעו תשלום ב-Bit למספר 050-0000000"
             );
+
+            setFormData({
+              firstName: "",
+              lastName: "",
+              phone: "",
+              paymentMethod: "",
+            });
 
           }
 
