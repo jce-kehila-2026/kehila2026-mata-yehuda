@@ -1,0 +1,33 @@
+.page-container {
+  max-width: 650px;
+  margin: 40px auto;
+  padding: 30px;
+  direction: rtl;
+  text-align: center;
+}
+
+.section {
+  margin-bottom: 35px;
+}
+
+.options-container {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 14px;
+}
+
+.option-label {
+  width: 220px;
+  display: flex;
+  justify-content: flex-start;
+  align-items: center;
+  gap: 10px;
+  font-size: 18px;
+}
+
+.save-button {
+  padding: 10px 30px;
+  font-size: 18px;
+  cursor: pointer;
+}
