@@ -13,7 +13,7 @@ Briefly describe what the project does, who it serves, and the main value (1–2
 - Key deliverable for them: e.g., "Simple roster export and sign-up form."
 
 ## Team
-- **Rannen Kharma** — email : raneenkh@post.jce.ac.il — GitHub: @raneen12kh
+- **Raneen Kharma** — email : raneenkh@post.jce.ac.il — GitHub: @raneen12kh
 - **Sujood Totah** — GitHub: @sujood-totah
 - **Doha Abdelnabi** — GitHub: @doha-abdelnabi
 - **Widad Rajabi** — GitHub: @WidadRajabi
