@@ -11,8 +11,8 @@
   --shadow:
     rgba(0, 0, 0, 0.1) 0 10px 15px -3px, rgba(0, 0, 0, 0.05) 0 4px 6px -2px;
 
-  --sans: system-ui, 'Segoe UI', Roboto, sans-serif;
-  --heading: system-ui, 'Segoe UI', Roboto, sans-serif;
+  --sans: 'Segoe UI', 'Arial Hebrew', 'Rubik', 'Heebo', system-ui, sans-serif;
+  --heading: 'Segoe UI', 'Arial Hebrew', 'Rubik', 'Heebo', system-ui, sans-serif;
   --mono: ui-monospace, Consolas, monospace;
 
   font: 18px/145% var(--sans);
@@ -50,20 +50,162 @@
   }
 }
 
+html {
+  direction: rtl;
+}
+
 body {
   margin: 0;
+  direction: rtl;
+  text-align: right;
 }
 
 #root {
   width: 1126px;
   max-width: 100%;
   margin: 0 auto;
-  text-align: center;
+  text-align: right;
+  direction: rtl;
   border-inline: 1px solid var(--border);
   min-height: 100svh;
   display: flex;
   flex-direction: column;
   box-sizing: border-box;
+  padding: 0 16px;
+}
+
+.page-content {
+  width: 100%;
+  max-width: 520px;
+  margin: 0 auto;
+  text-align: right;
+  direction: rtl;
+}
+
+.payment-form {
+  display: flex;
+  flex-direction: column;
+  align-items: stretch;
+  gap: 12px;
+  text-align: right;
+  direction: rtl;
+}
+
+.payment-form input[type="text"],
+.payment-form input[type="tel"] {
+  width: 100%;
+  max-width: 100%;
+  box-sizing: border-box;
+  padding: 10px 12px;
+  font-size: 16px;
+  font-family: var(--sans);
+  border-radius: 6px;
+  border: 1px solid var(--border);
+  text-align: right;
+  direction: rtl;
+}
+
+.payment-form input[type="tel"] {
+  direction: ltr;
+  text-align: right;
+}
+
+.payment-form h3 {
+  margin: 16px 0 8px;
+  text-align: right;
+}
+
+.payment-form label {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  cursor: pointer;
+  text-align: right;
+}
+
+.payment-form button[type="submit"] {
+  margin-top: 8px;
+  padding: 10px 24px;
+  font-size: 16px;
+  font-family: var(--sans);
+  cursor: pointer;
+  border-radius: 6px;
+  border: 1px solid var(--border);
+  background: var(--accent-bg);
+  color: var(--text-h);
+}
+
+.page-content button {
+  font-family: var(--sans);
+  cursor: pointer;
+  padding: 10px 20px;
+  border-radius: 6px;
+  border: 1px solid var(--border);
+  background: var(--accent-bg);
+  color: var(--text-h);
+}
+
+.lookup-screen {
+  display: flex;
+  flex-direction: column;
+  align-items: stretch;
+  gap: 12px;
+}
+
+.lookup-screen p {
+  margin: 4px 0;
+}
+
+.lookup-phone-input {
+  width: 100%;
+  box-sizing: border-box;
+  padding: 10px 12px;
+  font-size: 16px;
+  font-family: var(--sans);
+  border-radius: 6px;
+  border: 1px solid var(--border);
+  direction: ltr;
+  text-align: right;
+}
+
+.lookup-error {
+  color: #c62828;
+  font-weight: 500;
+  font-size: 18px;
+}
+
+.lookup-success {
+  color: #2e7d32;
+  font-weight: 500;
+}
+
+.primary-btn {
+  margin-top: 8px;
+  padding: 10px 24px;
+  font-size: 16px;
+  font-family: var(--sans);
+  cursor: pointer;
+  border-radius: 6px;
+  border: none;
+  background: var(--accent);
+  color: #fff;
+}
+
+.primary-btn:disabled {
+  opacity: 0.6;
+  cursor: not-allowed;
+}
+
+.secondary-btn {
+  margin-top: 8px;
+  padding: 10px 20px;
+  font-size: 16px;
+  font-family: var(--sans);
+  cursor: pointer;
+  border-radius: 6px;
+  border: 1px solid var(--border);
+  background: transparent;
+  color: var(--text-h);
 }
 
 h1,
@@ -93,6 +235,91 @@ h2 {
 }
 p {
   margin: 0;
+}
+
+.cancel-registration-btn {
+  margin: 16px 0;
+  padding: 12px 24px;
+  font-size: 18px;
+  font-family: var(--sans);
+  color: #fff;
+  background: #c62828;
+  border: none;
+  border-radius: 8px;
+  cursor: pointer;
+  display: inline-block;
+}
+
+.cancel-registration-btn:hover:not(:disabled) {
+  background: #b71c1c;
+}
+
+.cancel-registration-btn:disabled {
+  opacity: 0.6;
+  cursor: not-allowed;
+}
+
+.staff-page {
+  padding: 24px 0 48px;
+  text-align: right;
+  max-width: 100%;
+}
+
+.staff-login {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 12px;
+  align-items: flex-end;
+  justify-content: flex-start;
+  margin: 24px 0;
+}
+
+.staff-login label {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  text-align: right;
+}
+
+.staff-login input {
+  padding: 8px 12px;
+  font-size: 16px;
+  border-radius: 6px;
+  border: 1px solid var(--border);
+}
+
+.staff-error {
+  color: #c62828;
+  margin: 12px 0;
+}
+
+.staff-count {
+  margin: 16px 0;
+  font-weight: 500;
+  color: var(--text-h);
+}
+
+.staff-table-wrap {
+  overflow-x: auto;
+  margin-top: 16px;
+}
+
+.staff-table {
+  width: 100%;
+  border-collapse: collapse;
+  font-size: 15px;
+  text-align: right;
+}
+
+.staff-table th,
+.staff-table td {
+  border: 1px solid var(--border);
+  padding: 10px 12px;
+}
+
+.staff-table th {
+  background: var(--code-bg);
+  color: var(--text-h);
 }
 
 code,

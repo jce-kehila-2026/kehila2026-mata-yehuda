@@ -4,8 +4,8 @@ import { useNavigate } from "react-router-dom";
 function PaymentCancel() {
     const navigate = useNavigate();
   return (
-    <div>
-      <h1>!!התשלום לא הצליח</h1>
+    <div className="page-content">
+      <h1>התשלום לא הצליח!!</h1>
 
       <p>
         ניתן לנסות שוב או לבחור שיטת תשלום אחרת

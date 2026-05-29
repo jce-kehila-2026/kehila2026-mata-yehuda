@@ -3,8 +3,9 @@ import PaymentForm from "../components/PaymentForm";
 
 function PaymentPage(){
     return (
-    <div>
+    <div className="page-content">
       <h1>תשלום</h1>
+
       <PaymentForm />
     </div>
     // <div> 

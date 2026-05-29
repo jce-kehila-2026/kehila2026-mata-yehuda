@@ -1,21 +1,30 @@
-import { useEffect } from "react";
+import { useEffect, useRef, useState } from "react";
 import { useNavigate } from "react-router-dom";
-
+import CancelRegistrationButton from "../components/CancelRegistrationButton";
 
 function PaymentSuccess() {
-    
-    const navigate = useNavigate();
+  const navigate = useNavigate();
+  const [paymentId, setPaymentId] = useState(() =>
+    localStorage.getItem("registrationPaymentId")
+  );
+  const [cancelled, setCancelled] = useState(false);
+  const captureStarted = useRef(false);
 
   useEffect(() => {
+    if (captureStarted.current) {
+      return;
+    }
+    captureStarted.current = true;
 
     const capturePayment = async () => {
-
       const params = new URLSearchParams(window.location.search);
-
       const token = params.get("token");
 
-      try {
+      if (!token) {
+        return;
+      }
 
+      try {
         const response = await fetch(
           "http://localhost:5001/capture-paypal-order",
           {
@@ -39,23 +48,44 @@ function PaymentSuccess() {
 
         const data = await response.json();
 
-        console.log(data);
-
+        if (data.success && data.paymentId) {
+          setPaymentId(data.paymentId);
+          localStorage.setItem("registrationPaymentId", data.paymentId);
+        }
       } catch (error) {
         console.error(error);
       }
     };
 
     capturePayment();
-
   }, []);
 
-  return (
-    <div>
-      <h1>העסקה בוצעה בהצלחה!!</h1>
-      <br/>
-      <button onClick={() => navigate("/")}>חזרה למסך הראשי</button>
+  if (cancelled) {
+    return (
+      <div className="page-content">
+        <h1>ההרשמה בוטלה</h1>
+        <br />
+        <button onClick={() => navigate("/")}>חזרה למסך הראשי</button>
+      </div>
+    );
+  }
 
+  return (
+    <div className="page-content">
+      <h1>העסקה בוצעה בהצלחה!!</h1>
+      <p>ניתן לבטל את ההרשמה בכל עת לפני האירוע.</p>
+      <br />
+      {paymentId ? (
+        <CancelRegistrationButton
+          paymentId={paymentId}
+          onCancelled={() => setCancelled(true)}
+        />
+      ) : (
+        <p>טוען אפשרות ביטול...</p>
+      )}
+      <br />
+      <br />
+      <button onClick={() => navigate("/")}>חזרה למסך הראשי</button>
     </div>
   );
 }

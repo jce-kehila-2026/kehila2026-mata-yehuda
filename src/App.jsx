@@ -7,6 +7,7 @@ import { BrowserRouter , Routes , Route} from "react-router-dom"
 import PaymentPage from "./pages/PaymentPage";
 import PaymentSuccess from "./pages/PaymentSuccess";
 import PaymentCancel from "./pages/PaymentCancel";
+import StaffCancellations from "./pages/StaffCancellations";
 
 function App() {
   return(
@@ -14,6 +15,8 @@ function App() {
       <Routes>
 
         <Route path="/" element={<PaymentPage />} />
+
+        <Route path="/staff" element={<StaffCancellations />} />
 
         <Route
           path="/payment-success"
