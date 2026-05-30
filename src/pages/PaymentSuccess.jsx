@@ -51,6 +51,7 @@ function PaymentSuccess() {
         if (data.success && data.paymentId) {
           setPaymentId(data.paymentId);
           localStorage.setItem("registrationPaymentId", data.paymentId);
+          localStorage.setItem("registrationPaymentMethod", "paypal");
         }
       } catch (error) {
         console.error(error);
@@ -73,19 +74,20 @@ function PaymentSuccess() {
   return (
     <div className="page-content">
       <h1>העסקה בוצעה בהצלחה!!</h1>
-      <p>ניתן לבטל את ההרשמה בכל עת לפני האירוע.</p>
-      <br />
-      {paymentId ? (
-        <CancelRegistrationButton
-          paymentId={paymentId}
-          onCancelled={() => setCancelled(true)}
-        />
-      ) : (
-        <p>טוען אפשרות ביטול...</p>
-      )}
-      <br />
-      <br />
-      <button onClick={() => navigate("/")}>חזרה למסך הראשי</button>
+      <p>ניתן לבטל את ההרשמה בכל עת לפני האירוע ב 48 .</p>
+      <div className="post-payment-actions">
+        {paymentId ? (
+          <CancelRegistrationButton
+            paymentId={paymentId}
+            onCancelled={() => setCancelled(true)}
+          />
+        ) : (
+          <p>טוען אפשרות ביטול...</p>
+        )}
+        <button type="button" className="secondary-btn" onClick={() => navigate("/")}>
+          חזרה למסך הראשי
+        </button>
+      </div>
     </div>
   );
 }

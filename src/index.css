@@ -208,6 +208,67 @@ body {
   color: var(--text-h);
 }
 
+.post-payment-actions {
+  display: flex;
+  flex-direction: column;
+  align-items: stretch;
+  gap: 12px;
+  margin-top: 16px;
+}
+
+.post-payment-screen {
+  text-align: right;
+}
+
+.active-registration-banner {
+  margin-bottom: 20px;
+  padding: 16px;
+  border: 1px solid var(--border);
+  border-radius: 8px;
+  background: var(--accent-bg);
+  text-align: right;
+}
+
+.payment-success-message {
+  margin: 16px 0;
+  text-align: right;
+}
+
+.payment-success-message p {
+  margin: 8px 0;
+  line-height: 1.5;
+}
+
+.payment-success-lead {
+  font-size: 20px;
+  font-weight: 600;
+  color: var(--text-h);
+}
+
+.payment-success-note {
+  font-size: 15px;
+  color: var(--text);
+}
+
+.bit-phone-number {
+  font-size: 28px;
+  font-weight: 700;
+  color: var(--text-h);
+  letter-spacing: 0.05em;
+  direction: ltr;
+  text-align: center;
+  margin: 12px 0;
+  padding: 12px;
+  border-radius: 8px;
+  background: var(--code-bg);
+  border: 1px solid var(--border);
+}
+
+.cancel-hint {
+  margin-top: 20px;
+  font-size: 15px;
+}
+
 h1,
 h2 {
   font-family: var(--heading);

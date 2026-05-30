@@ -1,46 +1,107 @@
-import { useEffect, useState } from "react";
+import { useState } from "react";
+import { useNavigate } from "react-router-dom";
 import CancelRegistrationButton from "./CancelRegistrationButton";
+import {
+  validateIsraeliPhone,
+  validateRegistrationForm,
+} from "../utils/validation";
+import { BIT_TRANSFER_PHONE } from "../config/payment";
+
+const EMPTY_FORM_DATA = {
+  firstName: "",
+  lastName: "",
+  phone: "",
+  paymentMethod: "",
+};
+
+function PaymentSuccessMessage({ paymentMethod }) {
+  if (paymentMethod === "cash") {
+    return (
+      <div className="payment-success-message">
+        <p className="payment-success-lead">ההרשמה הצליחה!</p>
+        <p>
+          אחד מהעמותה יחזור אליכם בטלפון בקרוב כדי להשלים את פרטי התשלום במזומן.
+        </p>
+      </div>
+    );
+  }
+
+  if (paymentMethod === "bit") {
+    return (
+      <div className="payment-success-message">
+        <p className="payment-success-lead">ההרשמה הצליחה!</p>
+        <p>אנא העבירו את התשלום ב-Bit למספר הבא:</p>
+        <p className="bit-phone-number">{BIT_TRANSFER_PHONE}</p>
+        <p className="payment-success-note">לאחר ההעברה, המקום שלכם שמור.</p>
+      </div>
+    );
+  }
+
+  return (
+    <p>לחצו למטה אם ברצונכם לבטל את ההרשמה.</p>
+  );
+}
 
 function PaymentForm({ onRegistrationCancelled }) {
-  const [completedPaymentId, setCompletedPaymentId] = useState(() =>
-    localStorage.getItem("registrationPaymentId")
-  );
+  const navigate = useNavigate();
+  const [completedPaymentId, setCompletedPaymentId] = useState(null);
+  const [showPaymentConfirmation, setShowPaymentConfirmation] = useState(true);
+  const [completedPaymentMethod, setCompletedPaymentMethod] = useState("");
   const [showLookupScreen, setShowLookupScreen] = useState(false);
   const [lookupPhone, setLookupPhone] = useState("");
   const [lookupStatus, setLookupStatus] = useState(null);
   const [lookupPaymentId, setLookupPaymentId] = useState(null);
   const [lookupLoading, setLookupLoading] = useState(false);
 
-  useEffect(() => {
-    const savedId = localStorage.getItem("registrationPaymentId");
-    if (savedId) {
-      setCompletedPaymentId(savedId);
-    }
-  }, []);
+  const saveCompletedRegistration = (paymentId, paymentMethod) => {
+    localStorage.setItem("registrationPaymentId", paymentId);
+    localStorage.setItem("registrationPaymentMethod", paymentMethod);
+    setCompletedPaymentId(paymentId);
+    setCompletedPaymentMethod(paymentMethod);
+    setShowPaymentConfirmation(true);
+  };
 
-  const [formData, setFormData] = useState({
-    firstName: "",
-    lastName: "",
-    phone: "",
-    paymentMethod: "",
-  });
+  const clearCompletedRegistration = () => {
+    localStorage.removeItem("registrationPaymentId");
+    localStorage.removeItem("registrationPaymentMethod");
+    setCompletedPaymentId(null);
+    setCompletedPaymentMethod("");
+    setShowPaymentConfirmation(true);
+  };
+
+  const [formData, setFormData] = useState(EMPTY_FORM_DATA);
 
   const handleChange = (e) => {
     const { name, value } = e.target;
+    let filtered = value;
+
+    if (name === "phone") {
+      filtered = value.replace(/\D/g, "").slice(0, 10);
+    } else if (name === "firstName" || name === "lastName") {
+      filtered = value.replace(/[^\u0590-\u05FFa-zA-Z\s'-]/g, "");
+    }
 
     setFormData({
       ...formData,
-      [name]: value,
+      [name]: filtered,
     });
+  };
+
+  const handleLookupPhoneChange = (e) => {
+    setLookupPhone(e.target.value.replace(/\D/g, "").slice(0, 10));
   };
 
   const handlePayment = async (e) => {
     e.preventDefault();
 
-    if (!formData.firstName || !formData.lastName || !formData.phone || !formData.paymentMethod) {
-      alert("בבקשה תמלא את כל הפרטים");
+    const validation = validateRegistrationForm(formData);
+
+    if (!validation.valid) {
+      alert(validation.message);
       return;
     }
+
+    const { firstName, lastName, phone } = validation;
 
     if (formData.paymentMethod === "cash") {
       try {
@@ -50,9 +111,9 @@ function PaymentForm({ onRegistrationCancelled }) {
             "Content-Type": "application/json",
           },
           body: JSON.stringify({
-            firstName: formData.firstName,
-            lastName: formData.lastName,
-            phone: formData.phone,
+            firstName,
+            lastName,
+            phone,
             paymentMethod: "cash",
             amount: 50,
           }),
@@ -61,22 +122,15 @@ function PaymentForm({ onRegistrationCancelled }) {
         const data = await response.json();
 
         if (data.success) {
-          alert("המקום שלך שמור. התשלום במזומן יתבצע ביום האירוע או לפני כן.");
           if (data.paymentId) {
-            localStorage.setItem("registrationPaymentId", data.paymentId);
-            setCompletedPaymentId(data.paymentId);
+            saveCompletedRegistration(data.paymentId, "cash");
           }
         } else {
           alert("הייתה שגיאה בשמירת ההרשמה");
         }
 
         if (!data.success) {
-          setFormData({
-            firstName: "",
-            lastName: "",
-            phone: "",
-            paymentMethod: "",
-          });
+          setFormData(EMPTY_FORM_DATA);
         }
       } catch (error) {
         console.error(error);
@@ -107,9 +161,9 @@ function PaymentForm({ onRegistrationCancelled }) {
             }
 
             window.location.href = approveLink.href;
-            localStorage.setItem("firstName", formData.firstName);
-            localStorage.setItem("lastName", formData.lastName);
-            localStorage.setItem("phone", formData.phone);
+            localStorage.setItem("firstName", firstName);
+            localStorage.setItem("lastName", lastName);
+            localStorage.setItem("phone", phone);
         } catch (error) {
             console.error("FULL ERROR:", error);
             alert("Error: " + String(error));
@@ -128,9 +182,9 @@ function PaymentForm({ onRegistrationCancelled }) {
               },
 
               body: JSON.stringify({
-                firstName: formData.firstName,
-                lastName: formData.lastName,
-                phone: formData.phone,
+                firstName,
+                lastName,
+                phone,
                 paymentMethod: "bit",
                 amount: 50,
               }),
@@ -139,17 +193,8 @@ function PaymentForm({ onRegistrationCancelled }) {
 
           const data = await response.json();
 
-          if (data.success) {
-
-            alert(
-              "ההרשמה נשמרה. אנא בצעו תשלום ב-Bit למספר 050-0000000"
-            );
-
-            if (data.paymentId) {
-              localStorage.setItem("registrationPaymentId", data.paymentId);
-              setCompletedPaymentId(data.paymentId);
-            }
-
+          if (data.success && data.paymentId) {
+            saveCompletedRegistration(data.paymentId, "bit");
           }
 
         } catch (error) {
@@ -187,12 +232,14 @@ function PaymentForm({ onRegistrationCancelled }) {
   };
 
   const searchRegistrationByPhone = async () => {
-    const phone = lookupPhone.trim();
+    const phoneValidation = validateIsraeliPhone(lookupPhone);
 
-    if (!phone) {
-      alert("אנא הזינו מספר טלפון");
+    if (!phoneValidation.valid) {
+      alert(phoneValidation.message);
       return;
     }
+
+    const phone = phoneValidation.phone;
 
     setLookupLoading(true);
     setLookupStatus(null);
@@ -214,6 +261,7 @@ function PaymentForm({ onRegistrationCancelled }) {
         setLookupPaymentId(data.paymentId);
         localStorage.setItem("registrationPaymentId", data.paymentId);
         setLookupStatus("found");
+        // payment method unknown from lookup – keep existing if any
       } else {
         setLookupStatus("not_found");
       }
@@ -225,24 +273,40 @@ function PaymentForm({ onRegistrationCancelled }) {
     }
   };
 
-  if (completedPaymentId && !showLookupScreen) {
+  const goToHomeScreen = () => {
+    setShowPaymentConfirmation(false);
+    setCompletedPaymentId(null);
+    setCompletedPaymentMethod("");
+    setFormData(EMPTY_FORM_DATA);
+    setShowLookupScreen(false);
+    setLookupPhone("");
+    setLookupStatus(null);
+    setLookupPaymentId(null);
+    localStorage.removeItem("firstName");
+    localStorage.removeItem("lastName");
+    localStorage.removeItem("phone");
+    navigate("/");
+  };
+
+  if (completedPaymentId && showPaymentConfirmation && !showLookupScreen) {
     return (
-      <div className="page-content">
+      <div className="page-content post-payment-screen">
         <h2>ההרשמה נשמרה בהצלחה</h2>
-        <p>לחץ למטה אם ברצונך לבטל את ההרשמה.</p>
-        <CancelRegistrationButton
-          paymentId={completedPaymentId}
-          onCancelled={() => {
-            setCompletedPaymentId(null);
-            setFormData({
-              firstName: "",
-              lastName: "",
-              phone: "",
-              paymentMethod: "",
-            });
-            onRegistrationCancelled?.();
-          }}
-        />
+        <PaymentSuccessMessage paymentMethod={completedPaymentMethod} />
+        <p className="cancel-hint">ניתן לבטל את ההרשמה בכל עת לפני האירוע:</p>
+        <div className="post-payment-actions">
+          <CancelRegistrationButton
+            paymentId={completedPaymentId}
+            onCancelled={() => {
+              clearCompletedRegistration();
+              setFormData(EMPTY_FORM_DATA);
+              onRegistrationCancelled?.();
+            }}
+          />
+          <button type="button" className="secondary-btn" onClick={goToHomeScreen}>
+            חזרה למסך הראשי
+          </button>
+        </div>
       </div>
     );
   }
@@ -259,7 +323,7 @@ function PaymentForm({ onRegistrationCancelled }) {
             <CancelRegistrationButton
               paymentId={lookupPaymentId}
               onCancelled={() => {
-                setCompletedPaymentId(null);
+                clearCompletedRegistration();
                 closeLookupScreen();
                 onRegistrationCancelled?.();
               }}
@@ -290,10 +354,12 @@ function PaymentForm({ onRegistrationCancelled }) {
             <input
               type="tel"
               className="lookup-phone-input"
-              placeholder="מספר טלפון"
+              placeholder="05XXXXXXXX"
               value={lookupPhone}
-              onChange={(e) => setLookupPhone(e.target.value)}
+              onChange={handleLookupPhoneChange}
               disabled={lookupLoading}
+              maxLength={10}
+              inputMode="numeric"
             />
             <button
               type="button"
@@ -324,7 +390,7 @@ function PaymentForm({ onRegistrationCancelled }) {
       <input
         type="text"
         name="firstName"
-        placeholder="שם פרטי"
+        placeholder="שם פרטי (אותיות בלבד)"
         value={formData.firstName}
         onChange={handleChange}
       />
@@ -332,7 +398,7 @@ function PaymentForm({ onRegistrationCancelled }) {
       <input
         type="text"
         name="lastName"
-        placeholder="שם משפחה"
+        placeholder="שם משפחה (אותיות בלבד)"
         value={formData.lastName}
         onChange={handleChange}
       />
@@ -340,9 +406,11 @@ function PaymentForm({ onRegistrationCancelled }) {
       <input
         type="tel"
         name="phone"
-        placeholder="מספר טלפון"
+        placeholder="05XXXXXXXX"
         value={formData.phone}
         onChange={handleChange}
+        maxLength={10}
+        inputMode="numeric"
       />
 
       <h3>בחר שיטת התשלום:</h3>
@@ -352,6 +420,7 @@ function PaymentForm({ onRegistrationCancelled }) {
           type="radio"
           name="paymentMethod"
           value="credit card"
+          checked={formData.paymentMethod === "credit card"}
           onChange={handleChange}
         />
         כרטיס אשראי
@@ -364,6 +433,7 @@ function PaymentForm({ onRegistrationCancelled }) {
           type="radio"
           name="paymentMethod"
           value="paypal"
+          checked={formData.paymentMethod === "paypal"}
           onChange={handleChange}
         />
         PayPal
@@ -376,6 +446,7 @@ function PaymentForm({ onRegistrationCancelled }) {
           type="radio"
           name="paymentMethod"
           value="bit"
+          checked={formData.paymentMethod === "bit"}
           onChange={handleChange}
         />
         Bit
@@ -388,6 +459,7 @@ function PaymentForm({ onRegistrationCancelled }) {
           type="radio"
           name="paymentMethod"
           value="cash"
+          checked={formData.paymentMethod === "cash"}
           onChange={handleChange}
         />
         מזומן
