@@ -12,7 +12,7 @@ import {
 
 export async function fetchStaffList() {
 
-    const staffSnapshot = await getDocs(collection(db, "Staff"));
+    const staffSnapshot = await getDocs(collection(db, "staff"));
     return staffSnapshot.docs.map((staffDoc) => ({
         id: staffDoc.id,
         ...staffDoc.data()
@@ -27,7 +27,7 @@ export async function addStaffMember(staffData) {
     );
     const uid = userCredential.user.uid;
 
-    await setDoc(doc(db, "Staff", uid), {
+    await setDoc(doc(db, "staff", uid), {
         full_name: staffData.full_name,
         phone: staffData.phone,
         email: staffData.email,
@@ -60,7 +60,7 @@ export async function updateStaffMember(staff) {
 
 
 
-    await updateDoc(doc(db, "Staff", staff.id), updates);
+    await updateDoc(doc(db, "staff", staff.id), updates);
 
 }
 
@@ -68,7 +68,7 @@ export async function updateStaffMember(staff) {
 
 export async function disableStaffMember(staffId) {
 
-    return updateDoc(doc(db, "Staff", staffId), {
+    return updateDoc(doc(db, "staff", staffId), {
 
         is_active: false
 

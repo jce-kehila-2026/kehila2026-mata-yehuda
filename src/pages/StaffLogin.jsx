@@ -19,7 +19,7 @@ function StaffLogin() {
       let userCredential = await signInWithEmailAndPassword(auth, email, password);
       let user = userCredential.user;
 
-      let staffRef = doc(db, "Staff", user.uid);
+      let staffRef = doc(db, "staff", user.uid);
       let staffSnap = await getDoc(staffRef);
 
       if (!staffSnap.exists()) {

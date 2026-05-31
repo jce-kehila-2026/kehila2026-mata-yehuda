@@ -106,3 +106,8 @@
     border-radius: 8px;
     align-self: center;
 }
+
+.staff-card-day-center {
+    border-color: #4a7c59;
+    background: #f6faf7;
+}
