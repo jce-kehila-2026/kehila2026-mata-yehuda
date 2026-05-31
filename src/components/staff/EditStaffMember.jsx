@@ -2,14 +2,10 @@ import { useState } from "react";
 import { updateStaffMember } from "../../services/staffService";
 
 function EditStaffMember({ staff }) {
-    const [firstName, setFirstName] = useState(staff.user?.firstName || "");
-    const [lastName, setLastName] = useState(staff.user?.lastName || "");
-    const [phone, setPhone] = useState(staff.user?.phone || "");
-    const [gender, setGender] = useState(staff.user?.gender || "");
-    const [birthDate, setBirthDate] = useState(staff.user?.birthDate || "");
-    const [address, setAddress] = useState(staff.user?.address || "");
-    const [role, setRole] = useState(staff.role || "");
-    const [isActive, setIsActive] = useState(staff.is_active || false);
+    const [fullName, setFullName] = useState(staff?.full_name || "");
+    const [phone, setPhone] = useState(staff?.phone || "");
+    const [password, setPassword] = useState("");
+    const [isActive, setIsActive] = useState(staff?.is_active ?? false);
     const [success, setSuccess] = useState("");
     const [error, setError] = useState("");
 
@@ -21,15 +17,10 @@ function EditStaffMember({ staff }) {
         try {
             await updateStaffMember({
                 id: staff.id,
-                user_id: staff.user_id,
-                firstName,
-                lastName,
+                full_name: fullName,
                 phone,
-                gender,
-                birthDate,
-                address,
-                role,
-                isActive
+                is_active: isActive,
+                password
             });
 
             setSuccess("איש הצוות עודכן בהצלחה");
@@ -51,16 +42,9 @@ function EditStaffMember({ staff }) {
 
                 <input
                     type="text"
-                    placeholder="שם פרטי"
-                    value={firstName}
-                    onChange={(e) => setFirstName(e.target.value)}
-                />
-
-                <input
-                    type="text"
-                    placeholder="שם משפחה"
-                    value={lastName}
-                    onChange={(e) => setLastName(e.target.value)}
+                    placeholder="שם מלא"
+                    value={fullName}
+                    onChange={(e) => setFullName(e.target.value)}
                 />
 
                 <input
@@ -68,26 +52,6 @@ function EditStaffMember({ staff }) {
                     placeholder="טלפון"
                     value={phone}
                     onChange={(e) => setPhone(e.target.value)}
-                />
-
-                <select value={gender} onChange={(e) => setGender(e.target.value)}>
-                    <option value="">בחר מין</option>
-                    <option value="male">זכר</option>
-                    <option value="female">נקבה</option>
-                    <option value="other">אחר</option>
-                </select>
-
-                <input
-                    type="date"
-                    value={birthDate}
-                    onChange={(e) => setBirthDate(e.target.value)}
-                />
-
-                <input
-                    type="text"
-                    placeholder="כתובת"
-                    value={address}
-                    onChange={(e) => setAddress(e.target.value)}
                 />
 
                 <input
@@ -100,20 +64,21 @@ function EditStaffMember({ staff }) {
                     לא ניתן לשנות את האימייל
                 </p>
 
-                <select value={role} onChange={(e) => setRole(e.target.value)}>
-                    <option value="">בחר תפקיד</option>
-                    <option value="admin">מנהל</option>
-                    <option value="guide">מדריך</option>
-                </select>
+                <input
+                    type="password"
+                    placeholder="סיסמה חדשה (אופציונלי)"
+                    value={password}
+                    onChange={(e) => setPassword(e.target.value)}
+                />
 
-                <label>
+                <div className="row checkbox-row">
+                    <label>פעיל</label>
                     <input
                         type="checkbox"
                         checked={isActive}
                         onChange={(e) => setIsActive(e.target.checked)}
                     />
-                    פעיל
-                </label>
+                </div>
 
                 <button onClick={handleUpdateStaff}>
                     שמירת שינויים

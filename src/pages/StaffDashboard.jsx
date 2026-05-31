@@ -90,15 +90,6 @@ function StaffDashboard({ onLogout }) {
                     <ManageStaff />
                 </div>
             )}
-            {currentPage === "statistics" && (
-                <div>
-                    <button onClick={() => setCurrentPage("dashboard")}>
-                        חזרה ללוח הבקרה
-                    </button>
-
-                    <ViewStatistics />
-                </div>
-            )}
         </div>
     )
 }
