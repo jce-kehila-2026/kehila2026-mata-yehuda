@@ -1,7 +1,7 @@
 import { useState } from "react";
-import AddStaffMember from "./AddStaffMember";
-import StaffList from "./StaffList";
-import EditStaffMember from "./EditStaffMember";
+import AddStaffMember from "../components/staff/AddStaffMember";
+import StaffList from "../components/staff/StaffList";
+import EditStaffMember from "../components/staff/EditStaffMember";
 
 function ManageStaff() {
     const [staffPage, setStaffPage] = useState("menu");
@@ -34,7 +34,6 @@ function ManageStaff() {
             {staffPage === "edit" && (
                 <EditStaffMember staff={selectedStaff} />
             )}
-            {staffPage === "remove" && <h2>כאן תהיה מחיקת איש צוות</h2>}
 
             {staffPage === "list" && (
                 <StaffList

@@ -14,7 +14,6 @@ function StaffDashboard({ onLogout }) {
     return (
         <div>
             <h1>ברוך הבא צוות</h1>
-
             <button onClick={handleLogout}>
                 התנתקות
             </button>
@@ -23,11 +22,23 @@ function StaffDashboard({ onLogout }) {
                 <div className="dashboard-buttons">
 
                     <button onClick={() => setCurrentPage("activities")}>
-                        ניהול פעילויות
+                        ניהול פעילויות חד פעמיות
+                    </button>
+
+                    <button onClick={() => setCurrentPage("calendar")}>
+                        ניהול מרכז יום
+                    </button>
+
+                    <button onClick={() => setCurrentPage("calendar")}>
+                        הוספת תוכנית חדשה
                     </button>
 
                     <button onClick={() => setCurrentPage("manageStaff")}>
                         ניהול אנשי צוות
+                    </button>
+
+                    <button onClick={() => setCurrentPage("manageStaff")}>
+                        ניהול משתתפים
                     </button>
 
                     <button onClick={() => setCurrentPage("notifications")}>
@@ -38,28 +49,24 @@ function StaffDashboard({ onLogout }) {
                         צפייה בסטטיסטיקות
                     </button>
 
-                    <button onClick={() => setCurrentPage("filterData")}>
-                        סינון נתונים
-                    </button>
-
-                    <button onClick={() => setCurrentPage("calendar")}>
-                        עדכון לוח חודשי
-                    </button>
-
                     <button onClick={() => setCurrentPage("requests")}>
                         צפייה בבקשות
                     </button>
 
-                    <button onClick={() => setCurrentPage("cancelledRegistrations")}>
-                        ניהול ביטולי הרשמה
+                    <button onClick={() => setCurrentPage("manageStaff")}>
+                        צפיה בפניות
                     </button>
 
-                    <button onClick={() => setCurrentPage("activityRegistrations")}>
-                        ניהול הרשמות לפעילויות
+                    <button onClick={() => setCurrentPage("manageStaff")}>
+                        ניהול ביטולים
                     </button>
 
                     <button onClick={() => setCurrentPage("attendance")}>
                         בדיקת נוכחות
+                    </button>
+
+                    <button onClick={() => setCurrentPage("manageStaff")}>
+                        ניהול מתנדבים
                     </button>
 
                 </div>
@@ -83,7 +90,15 @@ function StaffDashboard({ onLogout }) {
                     <ManageStaff />
                 </div>
             )}
+            {currentPage === "statistics" && (
+                <div>
+                    <button onClick={() => setCurrentPage("dashboard")}>
+                        חזרה ללוח הבקרה
+                    </button>
 
+                    <ViewStatistics />
+                </div>
+            )}
         </div>
     )
 }

@@ -1,15 +1,13 @@
 import { useEffect, useState } from "react";
 import {
-    collection,
-    getDocs,
-    doc,
-    getDoc,
-    updateDoc
-} from "firebase/firestore";
-import { db } from "../config/firebase";
+    fetchStaffList,
+    disableStaffMember
+} from "../../services/staffService";
+
 
 function StaffList({ onEditStaff }) {
     const [staffList, setStaffList] = useState([]);
+
     async function handleDeleteStaff(staff) {
         const confirmDelete = window.confirm(
             "האם אתה בטוח שברצונך להשבית איש צוות זה?"
@@ -20,11 +18,11 @@ function StaffList({ onEditStaff }) {
         }
 
         try {
-            await updateDoc(doc(db, "Staff", staff.id), {
-                is_active: false
-            });
+            await disableStaffMember(staff.id);
 
-            loadStaff();
+            setStaffList(
+                staffList.filter((item) => item.id !== staff.id)
+            );
 
             alert("איש הצוות הושבת בהצלחה");
 
@@ -34,50 +32,9 @@ function StaffList({ onEditStaff }) {
         }
     }
 
-    async function handleDeleteStaff(staff) {
-        const confirmDelete = window.confirm(
-            "האם אתה בטוח שברצונך למחוק איש צוות זה?"
-        );
-
-        if (!confirmDelete) {
-            return;
-        }
-
-        try {
-            await updateDoc(doc(db, "Staff", staff.id), {
-                is_active: false
-            });
-
-            setStaffList(
-                staffList.filter((item) => item.id !== staff.id)
-            );
-
-            alert("איש הצוות נמחק בהצלחה");
-
-        } catch (err) {
-            console.log(err);
-            alert(err.message);
-        }
-    }
-
     async function loadStaff() {
-        const staffSnapshot = await getDocs(collection(db, "Staff"));
-
-        const staffData = await Promise.all(
-            staffSnapshot.docs.map(async (staffDoc) => {
-                const staff = staffDoc.data();
-
-                const userSnap = await getDoc(doc(db, "user", staff.user_id));
-
-                return {
-                    id: staffDoc.id,
-                    ...staff,
-                    user: userSnap.exists() ? userSnap.data() : null
-                };
-            })
-        );
-
-        setStaffList(staffData);
+        const data = await fetchStaffList();
+        setStaffList(data);
     }
 
     useEffect(() => {

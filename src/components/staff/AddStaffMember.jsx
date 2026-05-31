@@ -1,8 +1,7 @@
 import { useState } from "react";
 import { createUserWithEmailAndPassword } from "firebase/auth";
 import { doc, setDoc } from "firebase/firestore";
-import { auth, db } from "../config/firebase";
-
+import { auth, db } from "../../config/firebase";
 
 
 function AddStaffMember() {
@@ -107,10 +106,29 @@ function AddStaffMember() {
             setSuccess("איש הצוות נוסף בהצלחה");
             setError("");
 
+            setFirstName("");
+            setLastName("");
+            setPhone("");
+            setGender("");
+            setBirthDate("");
+            setAddress("");
+            setEmail("");
+            setPassword("");
+            setRole("");
+            setIsActive(false);
+
         } catch (error) {
-            setError("שגיאה בהוספת איש צוות");
+            console.log(error.code);
+
+            if (error.code === "auth/email-already-in-use") {
+                setError("האימייל כבר קיים במערכת");
+            } else if (error.code === "auth/weak-password") {
+                setError("הסיסמה חייבת להכיל לפחות 6 תווים");
+            } else {
+                setError("שגיאה בהוספת איש צוות");
+            }
+
             setSuccess("");
-            console.log(error);
         }
     }
 

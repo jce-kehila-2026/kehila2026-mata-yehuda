@@ -1,6 +1,5 @@
 import { useState } from "react";
-import { doc, updateDoc } from "firebase/firestore";
-import { db } from "../config/firebase";
+import { updateStaffMember } from "../../services/staffService";
 
 function EditStaffMember({ staff }) {
     const [firstName, setFirstName] = useState(staff.user?.firstName || "");
@@ -14,20 +13,23 @@ function EditStaffMember({ staff }) {
     const [success, setSuccess] = useState("");
     const [error, setError] = useState("");
 
+    if (!staff) {
+        return <p>לא נבחר איש צוות לעריכה</p>;
+    }
+
     async function handleUpdateStaff() {
         try {
-            await updateDoc(doc(db, "user", staff.user_id), {
+            await updateStaffMember({
+                id: staff.id,
+                user_id: staff.user_id,
                 firstName,
                 lastName,
                 phone,
                 gender,
                 birthDate,
-                address
-            });
-
-            await updateDoc(doc(db, "Staff", staff.id), {
+                address,
                 role,
-                is_active: isActive
+                isActive
             });
 
             setSuccess("איש הצוות עודכן בהצלחה");
@@ -93,7 +95,7 @@ function EditStaffMember({ staff }) {
                     value={staff.email}
                     disabled
                 />
-                
+
                 <p style={{ fontSize: "14px", color: "gray" }}>
                     לא ניתן לשנות את האימייל
                 </p>
