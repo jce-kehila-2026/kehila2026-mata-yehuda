@@ -4,9 +4,10 @@ import {
     addProgram,
     updateProgram,
     deleteProgram,
-    DAY_CENTER_ID,
-    isDayCenterEntry
+    DAY_CENTER_ID
 } from "../services/programService";
+import ProgramForm from "../components/programs/ProgramForm";
+import ProgramList from "../components/programs/ProgramList";
 
 function ManagePrograms() {
     const [programs, setPrograms] = useState([]);
@@ -140,106 +141,27 @@ function ManagePrograms() {
                         : "הוספת תוכנית חדשה"}
             </h1>
 
-            <div className="staff-form">
-                {error && <p style={{ color: "red" }}>{error}</p>}
-                {success && <p style={{ color: "green" }}>{success}</p>}
+            <ProgramForm
+                title={title}
+                description={description}
+                imageUrl={imageUrl}
+                editingId={editingId}
+                saving={saving}
+                error={error}
+                success={success}
+                onTitleChange={setTitle}
+                onDescriptionChange={setDescription}
+                onImageUrlChange={setImageUrl}
+                onSave={handleSave}
+                onCancelEdit={handleCancelEdit}
+            />
 
-                <label htmlFor="program-title">כותרת</label>
-                <input
-                    id="program-title"
-                    type="text"
-                    placeholder="שם התוכנית"
-                    value={title}
-                    onChange={(e) => setTitle(e.target.value)}
-                />
-
-                <label htmlFor="program-description">תיאור</label>
-                <textarea
-                    id="program-description"
-                    placeholder="תיאור התוכנית"
-                    value={description}
-                    onChange={(e) => setDescription(e.target.value)}
-                />
-
-                <label htmlFor="program-image-url">קישור לתמונה</label>
-                <input
-                    id="program-image-url"
-                    type="url"
-                    placeholder="https://..."
-                    value={imageUrl}
-                    onChange={(e) => setImageUrl(e.target.value)}
-                />
-
-                {imageUrl.trim() && (
-                    <img
-                        src={imageUrl}
-                        alt="תצוגה מקדימה"
-                        className="day-center-preview"
-                        onError={(e) => {
-                            e.target.style.display = "none";
-                        }}
-                        onLoad={(e) => {
-                            e.target.style.display = "block";
-                        }}
-                    />
-                )}
-
-                <button onClick={handleSave} disabled={saving}>
-                    {saving
-                        ? "שומר..."
-                        : editingId
-                            ? "עדכון תוכנית"
-                            : "הוספת תוכנית"}
-                </button>
-
-                {editingId && (
-                    <button type="button" onClick={handleCancelEdit}>
-                        ביטול עריכה
-                    </button>
-                )}
-            </div>
-
-            <h2>רשימת תוכניות</h2>
-
-            {loading && <p>טוען...</p>}
-
-            {!loading && programs.length === 0 && (
-                <p>אין תוכניות במערכת</p>
-            )}
-
-            {programs.map((program) => {
-                const isDayCenter = isDayCenterEntry(program);
-
-                return (
-                    <div
-                        key={program.id}
-                        className={`staff-card${isDayCenter ? " staff-card-day-center" : ""}`}
-                    >
-                        <h3>{program.title}</h3>
-                        <p>{program.description || "—"}</p>
-
-                        {program.image_url && (
-                            <img
-                                src={program.image_url}
-                                alt={program.title}
-                                className="day-center-preview"
-                            />
-                        )}
-
-                        <div className="row">
-                            <button onClick={() => handleEdit(program)}>
-                                עריכה
-                            </button>
-                            {!isDayCenter && (
-                                <button onClick={() => handleDelete(program.id)}>
-                                    מחיקה
-                                </button>
-                            )}
-                        </div>
-                        <hr />
-                    </div>
-                );
-            })}
+            <ProgramList
+                programs={programs}
+                loading={loading}
+                onEdit={handleEdit}
+                onDelete={handleDelete}
+            />
         </div>
     );
 }
