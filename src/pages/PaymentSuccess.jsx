@@ -7,7 +7,6 @@ function PaymentSuccess() {
   const [paymentId, setPaymentId] = useState(() =>
     localStorage.getItem("registrationPaymentId")
   );
-  const [cancelled, setCancelled] = useState(false);
   const captureStarted = useRef(false);
 
   useEffect(() => {
@@ -37,7 +36,7 @@ function PaymentSuccess() {
               orderID: token,
 
               firstName: localStorage.getItem("firstName"),
-              lastName: localStorage.getItem("lastName"),
+              idNumber: localStorage.getItem("idNumber"),
               phone: localStorage.getItem("phone"),
 
               paymentMethod: "PayPal/Credit Card",
@@ -61,16 +60,6 @@ function PaymentSuccess() {
     capturePayment();
   }, []);
 
-  if (cancelled) {
-    return (
-      <div className="page-content">
-        <h1>ההרשמה בוטלה</h1>
-        <br />
-        <button onClick={() => navigate("/")}>חזרה למסך הראשי</button>
-      </div>
-    );
-  }
-
   return (
     <div className="page-content">
       <h1>העסקה בוצעה בהצלחה!!</h1>
@@ -79,7 +68,7 @@ function PaymentSuccess() {
         {paymentId ? (
           <CancelRegistrationButton
             paymentId={paymentId}
-            onCancelled={() => setCancelled(true)}
+            onCancelled={() => navigate("/")}
           />
         ) : (
           <p>טוען אפשרות ביטול...</p>

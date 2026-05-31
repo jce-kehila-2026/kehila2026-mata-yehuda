@@ -26,6 +26,45 @@ admin.initializeApp({
 
 const db = admin.firestore();
 
+const FIRESTORE_TIMEOUT_MS = 15000;
+const PAYPAL_FETCH_TIMEOUT_MS = 20000;
+
+function withTimeout(
+  promise,
+  ms = FIRESTORE_TIMEOUT_MS,
+  errorMessage = "Firestore timeout"
+) {
+  return Promise.race([
+    promise,
+    new Promise((_, reject) => {
+      setTimeout(() => reject(new Error(errorMessage)), ms);
+    }),
+  ]);
+}
+
+async function fetchWithTimeout(url, options = {}, ms = PAYPAL_FETCH_TIMEOUT_MS) {
+  const controller = new AbortController();
+  const timeoutId = setTimeout(() => controller.abort(), ms);
+
+  try {
+    return await fetch(url, { ...options, signal: controller.signal });
+  } finally {
+    clearTimeout(timeoutId);
+  }
+}
+
+function serverErrorMessage(error, fallback) {
+  if (
+    error?.message?.includes("timeout") ||
+    error?.message?.includes("יותר מדי") ||
+    error?.name === "AbortError" ||
+    error?.code === 14
+  ) {
+    return "לא ניתן להתחבר למסד הנתונים. בדקו חיבור לאינטרנט ונסו שוב.";
+  }
+  return fallback;
+}
+
 // =========================
 // Get PayPal Access Token
 // =========================
@@ -142,7 +181,7 @@ function isOrderAlreadyCapturedError(data) {
 async function savePayPalPayment({
   orderID,
   firstName,
-  lastName,
+  idNumber,
   phone,
   paymentMethod,
   amount,
@@ -157,7 +196,7 @@ async function savePayPalPayment({
 
   const paymentRef = await db.collection("payments").add({
     firstName,
-    lastName,
+    idNumber,
     phone,
     paymentMethod: paymentMethod || "PayPal",
     amount,
@@ -180,7 +219,7 @@ app.post("/capture-paypal-order", async (req, res) => {
     const {
       orderID,
       firstName,
-      lastName,
+      idNumber,
       phone,
       paymentMethod,
       amount,
@@ -227,7 +266,7 @@ app.post("/capture-paypal-order", async (req, res) => {
       const paymentId = await savePayPalPayment({
         orderID,
         firstName,
-        lastName,
+        idNumber,
         phone,
         paymentMethod,
         amount,
@@ -253,7 +292,7 @@ app.post("/capture-paypal-order", async (req, res) => {
         const paymentId = await savePayPalPayment({
           orderID,
           firstName,
-          lastName,
+          idNumber,
           phone,
           paymentMethod,
           amount,
@@ -286,11 +325,11 @@ app.post("/capture-paypal-order", async (req, res) => {
 
 app.post("/save-cash-payment", async (req, res) => {
   try {
-    const { firstName, lastName, phone, paymentMethod, amount } = req.body;
+    const { firstName, idNumber, phone, paymentMethod, amount } = req.body;
 
     const paymentRef = await db.collection("payments").add({
       firstName,
-      lastName,
+      idNumber,
       phone,
       paymentMethod: paymentMethod || "cash",
       amount,
@@ -320,7 +359,7 @@ app.post("/save-bit-payment", async (req, res) => {
 
     const {
       firstName,
-      lastName,
+      idNumber,
       phone,
       paymentMethod,
       amount,
@@ -329,7 +368,7 @@ app.post("/save-bit-payment", async (req, res) => {
     const paymentRef = await db.collection("payments").add({
 
       firstName,
-      lastName,
+      idNumber,
       phone,
 
       paymentMethod: paymentMethod || "bit",
@@ -373,11 +412,11 @@ app.post("/find-active-registration", async (req, res) => {
       });
     }
 
-    const snapshot = await db
-      .collection("payments")
-      .where("phone", "==", phone)
-      .limit(1)
-      .get();
+    const snapshot = await withTimeout(
+      db.collection("payments").where("phone", "==", phone).limit(1).get(),
+      FIRESTORE_TIMEOUT_MS,
+      "Firestore search timeout"
+    );
 
     if (snapshot.empty) {
       return res.json({
@@ -396,7 +435,7 @@ app.post("/find-active-registration", async (req, res) => {
     console.error(error);
     res.status(500).json({
       success: false,
-      message: "שגיאה בחיפוש הרשמה",
+      message: serverErrorMessage(error, "שגיאה בחיפוש הרשמה"),
     });
   }
 });
@@ -417,6 +456,24 @@ function isPayPalPayment(paymentData) {
 function isManualRefundPayment(paymentData) {
   const method = (paymentData.paymentMethod || "").toLowerCase();
   return method === "cash" || method === "bit";
+}
+
+function getCancellationSuccessMessage(paymentData) {
+  const method = (paymentData.paymentMethod || "").toLowerCase();
+
+  if (method.includes("credit card")) {
+    return "הביטול בוצע בהצלחה. הסכום יוחזר לכרטיס האשראי תוך 3 ימי עסקים.";
+  }
+
+  if (method.includes("paypal") || paymentData.status === "COMPLETED") {
+    return "הביטול בוצע בהצלחה. הסכום יוחזר לחשבון PayPal שלך תוך 3 ימי עסקים.";
+  }
+
+  if (method === "cash" || method === "bit") {
+    return "הביטול בוצע בהצלחה. מישהו מהעמותה ייצור איתכם קשר בקרוב להחזרת התשלום.";
+  }
+
+  return "הביטול בוצע בהצלחה.";
 }
 
 function paymentMethodLabel(method) {
@@ -442,12 +499,12 @@ function refundNoteForStaff(refundStatus) {
 
 function buildCancellationRecord(paymentData, paymentId, refundStatus, refundResult) {
   const firstName = paymentData.firstName || "";
-  const lastName = paymentData.lastName || "";
+  const idNumber = paymentData.idNumber || paymentData.lastName || "";
 
   return {
     firstName,
-    lastName,
-    fullName: `${firstName} ${lastName}`.trim(),
+    idNumber,
+    fullName: firstName,
     phone: paymentData.phone || "",
 
     amount: paymentData.amount ?? null,
@@ -459,12 +516,39 @@ function buildCancellationRecord(paymentData, paymentId, refundStatus, refundRes
     originalPaymentId: paymentId,
     paypalOrderId: paymentData.paypalOrderId || null,
     transactionId: paymentData.transactionId || null,
+    originalMessage: paymentData.message || null,
+    registeredAt: paymentData.createdAt || null,
 
     cancelledAt: admin.firestore.FieldValue.serverTimestamp(),
     refundStatus,
     refundNoteForStaff: refundNoteForStaff(refundStatus),
     refundResult: refundResult || null,
   };
+}
+
+async function movePaymentToCancellations(
+  paymentRef,
+  paymentData,
+  paymentId,
+  refundStatus,
+  refundResult
+) {
+  const cancellationRef = db.collection("cancellations").doc();
+  const batch = db.batch();
+
+  batch.set(
+    cancellationRef,
+    buildCancellationRecord(paymentData, paymentId, refundStatus, refundResult)
+  );
+  batch.delete(paymentRef);
+
+  await withTimeout(
+    batch.commit(),
+    FIRESTORE_TIMEOUT_MS,
+    "Firestore move to cancellations timeout"
+  );
+
+  return cancellationRef.id;
 }
 
 function verifyStaffAccess(req, res) {
@@ -501,9 +585,33 @@ app.post("/cancel-registration", async (req, res) => {
     }
 
     const paymentRef = db.collection("payments").doc(paymentId);
-    const paymentDoc = await paymentRef.get();
+    const paymentDoc = await withTimeout(
+      paymentRef.get(),
+      FIRESTORE_TIMEOUT_MS,
+      "Firestore get timeout"
+    );
 
     if (!paymentDoc.exists) {
+      const existingCancel = await withTimeout(
+        db
+          .collection("cancellations")
+          .where("originalPaymentId", "==", paymentId)
+          .limit(1)
+          .get(),
+        FIRESTORE_TIMEOUT_MS,
+        "Firestore check cancellation timeout"
+      );
+
+      if (!existingCancel.empty) {
+        const cancelled = existingCancel.docs[0].data();
+        return res.json({
+          success: true,
+          alreadyCancelled: true,
+          message: getCancellationSuccessMessage(cancelled),
+          paymentMethod: cancelled.paymentMethod || "",
+        });
+      }
+
       return res.status(404).json({
         success: false,
         message: "ההרשמה לא נמצאה או כבר בוטלה",
@@ -517,7 +625,7 @@ app.post("/cancel-registration", async (req, res) => {
     if (isPayPalPayment(paymentData) && paymentData.transactionId) {
       const accessToken = await generateAccessToken();
 
-      const refundResponse = await fetch(
+      const refundResponse = await fetchWithTimeout(
         `${process.env.PAYPAL_BASE_URL}/v2/payments/captures/${paymentData.transactionId}/refund`,
         {
           method: "POST",
@@ -544,33 +652,36 @@ app.post("/cancel-registration", async (req, res) => {
       refundStatus = "MANUAL_REFUND_REQUIRED";
     }
 
-    await db.collection("cancellations").add(
-      buildCancellationRecord(paymentData, paymentId, refundStatus, refundResult)
+    const cancellationId = await movePaymentToCancellations(
+      paymentRef,
+      paymentData,
+      paymentId,
+      refundStatus,
+      refundResult
     );
 
-    await paymentRef.delete();
+    console.log(
+      `Cancelled: payment ${paymentId} moved to cancellations/${cancellationId}`
+    );
 
-    let message = "ההרשמה בוטלה בהצלחה.";
-
-    if (refundStatus === "AUTOMATIC_REFUNDED") {
-      message =
-        "ההרשמה בוטלה. התשלום יוחזר אוטומטית לחשבון PayPal או כרטיס האשראי שלך.";
-    } else if (refundStatus === "MANUAL_REFUND_REQUIRED") {
-      message =
-        "ההרשמה בוטלה. אם שילמת במזומן או ב-Bit, העמותה תחזיר לך את התשלום.";
-    }
+    const message = getCancellationSuccessMessage(paymentData);
 
     res.json({
       success: true,
       refundStatus,
       message,
+      paymentMethod: paymentData.paymentMethod || "",
+      movedToCancellations: true,
+      cancellationId,
     });
   } catch (error) {
     console.error(error);
-    res.status(500).json({
-      success: false,
-      message: "שגיאה בביטול ההרשמה",
-    });
+    if (!res.headersSent) {
+      res.status(500).json({
+        success: false,
+        message: serverErrorMessage(error, "שגיאה בביטול ההרשמה"),
+      });
+    }
   }
 });
 

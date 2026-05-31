@@ -83,6 +83,7 @@ function StaffCancellations() {
               <tr>
                 <th>תאריך ביטול</th>
                 <th>שם</th>
+                <th>ת.ז.</th>
                 <th>טלפון</th>
                 <th>סכום</th>
                 <th>איך שילם</th>
@@ -94,7 +95,8 @@ function StaffCancellations() {
               {cancellations.map((row) => (
                 <tr key={row.id}>
                   <td>{formatDate(row.cancelledAt)}</td>
-                  <td>{row.fullName || `${row.firstName || ""} ${row.lastName || ""}`.trim()}</td>
+                  <td>{row.fullName || row.firstName || "—"}</td>
+                  <td>{row.idNumber || row.lastName || "—"}</td>
                   <td>{row.phone || "—"}</td>
                   <td>
                     {row.amount != null ? `$${row.amount}` : "—"}

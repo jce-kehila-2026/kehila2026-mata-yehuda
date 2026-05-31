@@ -55,15 +55,59 @@ export function validateName(name, fieldLabel) {
   return { valid: true, name: trimmed };
 }
 
+export function normalizeIdNumber(idNumber) {
+  return idNumber.replace(/\D/g, "");
+}
+
+export function validateIsraeliId(idNumber) {
+  const digits = normalizeIdNumber(idNumber);
+
+  if (!digits) {
+    return { valid: false, message: "אנא הזינו מספר תעודת זהות" };
+  }
+
+  if (!/^\d+$/.test(digits)) {
+    return {
+      valid: false,
+      message: "מספר תעודת זהות חייב להכיל ספרות בלבד. אנא תקנו.",
+    };
+  }
+
+  if (digits.length !== 9) {
+    return {
+      valid: false,
+      message: "מספר תעודת זהות חייב להיות בן 9 ספרות. אנא תקנו.",
+    };
+  }
+
+  let sum = 0;
+  for (let i = 0; i < 9; i++) {
+    let num = Number(digits[i]) * ((i % 2) + 1);
+    if (num > 9) {
+      num -= 9;
+    }
+    sum += num;
+  }
+
+  if (sum % 10 !== 0) {
+    return {
+      valid: false,
+      message: "מספר תעודת זהות לא תקין. אנא בדקו ותקנו.",
+    };
+  }
+
+  return { valid: true, idNumber: digits };
+}
+
 export function validateRegistrationForm(formData) {
   const firstName = validateName(formData.firstName, "שם פרטי");
   if (!firstName.valid) {
     return firstName;
   }
 
-  const lastName = validateName(formData.lastName, "שם משפחה");
-  if (!lastName.valid) {
-    return lastName;
+  const idNumber = validateIsraeliId(formData.idNumber);
+  if (!idNumber.valid) {
+    return idNumber;
   }
 
   const phone = validateIsraeliPhone(formData.phone);
@@ -81,7 +125,7 @@ export function validateRegistrationForm(formData) {
   return {
     valid: true,
     firstName: firstName.name,
-    lastName: lastName.name,
+    idNumber: idNumber.idNumber,
     phone: phone.phone,
   };
 }

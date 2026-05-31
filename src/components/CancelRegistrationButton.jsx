@@ -1,9 +1,9 @@
 import { useState } from "react";
-
-const API_BASE = "http://localhost:5001";
+import { apiPost } from "../services/api";
 
 function CancelRegistrationButton({ paymentId, onCancelled }) {
   const [loading, setLoading] = useState(false);
+  const [successMessage, setSuccessMessage] = useState(null);
 
   const handleCancel = async () => {
     if (!paymentId) {
@@ -22,30 +22,39 @@ function CancelRegistrationButton({ paymentId, onCancelled }) {
     setLoading(true);
 
     try {
-      const response = await fetch(`${API_BASE}/cancel-registration`, {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-        },
-        body: JSON.stringify({ paymentId }),
-      });
-
-      const data = await response.json();
+      const { data } = await apiPost("/cancel-registration", { paymentId });
 
       if (data.success) {
         localStorage.removeItem("registrationPaymentId");
-        alert(data.message);
-        onCancelled?.();
+        localStorage.removeItem("registrationPaymentMethod");
+        setSuccessMessage(data.message);
       } else {
         alert(data.message || "ביטול ההרשמה נכשל");
       }
     } catch (error) {
       console.error(error);
-      alert("שגיאה בחיבור לשרת");
+      alert(error.message || "שגיאה בחיבור לשרת");
     } finally {
       setLoading(false);
     }
   };
+
+  const handleBackHome = () => {
+    setSuccessMessage(null);
+    onCancelled?.();
+  };
+
+  if (successMessage) {
+    return (
+      <div className="cancel-success-screen">
+        <h3 className="cancel-success-title">הביטול בוצע בהצלחה</h3>
+        <p className="cancel-success-message">{successMessage}</p>
+        <button type="button" className="secondary-btn" onClick={handleBackHome}>
+          חזרה למסך הראשי
+        </button>
+      </div>
+    );
+  }
 
   return (
     <button

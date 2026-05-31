@@ -4,12 +4,13 @@ import CancelRegistrationButton from "./CancelRegistrationButton";
 import {
   validateIsraeliPhone,
   validateRegistrationForm,
-} from "../utils/validation";
+} from "../services/validation";
 import { BIT_TRANSFER_PHONE } from "../config/payment";
+import { apiPost } from "../services/api";
 
 const EMPTY_FORM_DATA = {
   firstName: "",
-  lastName: "",
+  idNumber: "",
   phone: "",
   paymentMethod: "",
 };
@@ -77,7 +78,9 @@ function PaymentForm({ onRegistrationCancelled }) {
 
     if (name === "phone") {
       filtered = value.replace(/\D/g, "").slice(0, 10);
-    } else if (name === "firstName" || name === "lastName") {
+    } else if (name === "idNumber") {
+      filtered = value.replace(/\D/g, "").slice(0, 9);
+    } else if (name === "firstName") {
       filtered = value.replace(/[^\u0590-\u05FFa-zA-Z\s'-]/g, "");
     }
 
@@ -101,7 +104,7 @@ function PaymentForm({ onRegistrationCancelled }) {
       return;
     }
 
-    const { firstName, lastName, phone } = validation;
+    const { firstName, idNumber, phone } = validation;
 
     if (formData.paymentMethod === "cash") {
       try {
@@ -112,7 +115,7 @@ function PaymentForm({ onRegistrationCancelled }) {
           },
           body: JSON.stringify({
             firstName,
-            lastName,
+            idNumber,
             phone,
             paymentMethod: "cash",
             amount: 50,
@@ -162,7 +165,7 @@ function PaymentForm({ onRegistrationCancelled }) {
 
             window.location.href = approveLink.href;
             localStorage.setItem("firstName", firstName);
-            localStorage.setItem("lastName", lastName);
+            localStorage.setItem("idNumber", idNumber);
             localStorage.setItem("phone", phone);
         } catch (error) {
             console.error("FULL ERROR:", error);
@@ -183,7 +186,7 @@ function PaymentForm({ onRegistrationCancelled }) {
 
               body: JSON.stringify({
                 firstName,
-                lastName,
+                idNumber,
                 phone,
                 paymentMethod: "bit",
                 amount: 50,
@@ -246,28 +249,18 @@ function PaymentForm({ onRegistrationCancelled }) {
     setLookupPaymentId(null);
 
     try {
-      const response = await fetch(
-        "http://localhost:5001/find-active-registration",
-        {
-          method: "POST",
-          headers: { "Content-Type": "application/json" },
-          body: JSON.stringify({ phone }),
-        }
-      );
-
-      const data = await response.json();
+      const { data } = await apiPost("/find-active-registration", { phone });
 
       if (data.success && data.paymentId) {
         setLookupPaymentId(data.paymentId);
         localStorage.setItem("registrationPaymentId", data.paymentId);
         setLookupStatus("found");
-        // payment method unknown from lookup – keep existing if any
       } else {
         setLookupStatus("not_found");
       }
     } catch (error) {
       console.error(error);
-      alert("שגיאה בחיבור לשרת");
+      alert(error.message || "שגיאה בחיבור לשרת");
     } finally {
       setLookupLoading(false);
     }
@@ -283,7 +276,7 @@ function PaymentForm({ onRegistrationCancelled }) {
     setLookupStatus(null);
     setLookupPaymentId(null);
     localStorage.removeItem("firstName");
-    localStorage.removeItem("lastName");
+    localStorage.removeItem("idNumber");
     localStorage.removeItem("phone");
     navigate("/");
   };
@@ -396,11 +389,13 @@ function PaymentForm({ onRegistrationCancelled }) {
       />
 
       <input
-        type="text"
-        name="lastName"
-        placeholder="שם משפחה (אותיות בלבד)"
-        value={formData.lastName}
+        type="tel"
+        name="idNumber"
+        placeholder="מספר תעודת זהות (9 ספרות)"
+        value={formData.idNumber}
         onChange={handleChange}
+        maxLength={9}
+        inputMode="numeric"
       />
 
       <input
