@@ -8,8 +8,8 @@ import {
 } from "../helpers/cancellationHelpers";
 
 function CancellationCard({ item, onMarkRefunded }) {
-    const { cancellation, payment, phone } = item;
-    const paymentMethod = payment?.payment_method || "";
+    const { cancellation, phone, paymentDisplay } = item;
+    const paymentMethod = paymentDisplay?.payment_method || "";
     const isRefunded = cancellation.refund_status === REFUND_STATUS_REFUNDED;
     const whatsAppUrl = isBitPaymentMethod(paymentMethod)
         ? buildWhatsAppRefundUrl(phone)
@@ -35,13 +35,13 @@ function CancellationCard({ item, onMarkRefunded }) {
             <hr />
 
             <p>
-                <strong>סכום:</strong> {formatPaymentAmount(payment)}
+                <strong>סכום:</strong> {formatPaymentAmount(paymentDisplay)}
             </p>
             <p>
                 <strong>אמצעי תשלום:</strong> {paymentMethod || "—"}
             </p>
             <p>
-                <strong>סטטוס תשלום:</strong> {payment?.payment_status || "—"}
+                <strong>סטטוס תשלום:</strong> {paymentDisplay?.payment_status || "—"}
             </p>
 
             <hr />

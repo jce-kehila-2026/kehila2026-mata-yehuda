@@ -16,9 +16,13 @@ import {
     resolveRegistrationActivityId
 } from "./registrationService";
 import {
-    formatParticipantFullName,
+    buildPaymentDisplay,
+    normalizeCancellationRefundStatus,
+    readAmount,
     readField,
-    REFUND_STATUS_PENDING
+    REFUND_STATUS_PENDING,
+    resolveDisplayPhone,
+    resolveParticipantDisplayName
 } from "../components/cancellations/helpers/cancellationHelpers";
 import {
     formatProgramTitle,
@@ -34,20 +38,48 @@ function normalizeCancellation(cancellationDoc) {
     const data = cancellationDoc.data ? cancellationDoc.data() : cancellationDoc;
     const id = cancellationDoc.id || data.id;
 
+    const paymentId = readField(data, "payment_id", "paymentId");
+    const originalPaymentId = readField(
+        data,
+        "original_payment_id",
+        "originalPaymentId"
+    );
+
     return {
         id,
         participant_id: readField(data, "participant_id", "participantId"),
         registration_id: readField(data, "registration_id", "registrationId"),
-        payment_id: readField(data, "payment_id", "paymentId"),
+        payment_id: paymentId || originalPaymentId,
+        original_payment_id: originalPaymentId,
         cancellation_reason: readField(
             data,
             "cancellation_reason",
             "cancellationReason"
         ),
-        cancelled_at: data.cancelled_at ?? data.cancelledAt ?? null,
-        refund_status: readField(data, "refund_status", "refundStatus") || REFUND_STATUS_PENDING,
-        refund_notes: readField(data, "refund_notes", "refundNotes")
+        cancelled_at: readRawCancelledAt(data),
+        refund_status: normalizeCancellationRefundStatus(data),
+        refund_notes:
+            readField(data, "refund_notes", "refundNotes") ||
+            readField(data, "refund_note_for_staff", "refundNoteForStaff"),
+        first_name: readField(data, "first_name", "firstName"),
+        last_name: readField(data, "last_name", "lastName"),
+        full_name: readField(data, "full_name", "fullName"),
+        phone: readField(data, "phone", "phone"),
+        amount: readAmount(data),
+        fallback_payment_method: readField(data, "payment_method", "paymentMethod"),
+        fallback_payment_status: readField(data, "payment_status", "paymentStatus"),
+        payment_method_label: readField(
+            data,
+            "payment_method_label",
+            "paymentMethodLabel"
+        ),
+        program_title: readField(data, "program_title", "programTitle"),
+        activity_name: readField(data, "activity_name", "activityName")
     };
+}
+
+function readRawCancelledAt(data) {
+    return data?.cancelled_at ?? data?.cancelledAt ?? null;
 }
 
 function normalizePayment(paymentDoc) {
@@ -84,30 +116,51 @@ function getCancelledAtTime(cancellation) {
     return Number.isNaN(parsed) ? 0 : parsed;
 }
 
-function resolveProgramTitle(programId, programs) {
+function resolveProgramTitle(programId, programs, cancellation) {
     const canonicalId = resolveCanonicalProgramId(programId);
 
-    if (!canonicalId) {
-        return "";
+    if (canonicalId) {
+        const program = programs.find((item) => item.id === canonicalId);
+
+        if (program) {
+            return formatProgramTitle(program);
+        }
+
+        const fixedTitle = getFixedProgramTitle(canonicalId);
+
+        if (fixedTitle) {
+            return fixedTitle;
+        }
     }
 
-    const program = programs.find((item) => item.id === canonicalId);
-
-    if (program) {
-        return formatProgramTitle(program);
-    }
-
-    return getFixedProgramTitle(canonicalId);
+    return cancellation.program_title?.trim() || "";
 }
 
-function resolveActivityName(activityId, activities) {
-    if (!activityId) {
-        return "";
+function resolveActivityName(activityId, activities, cancellation) {
+    if (activityId) {
+        const activity = activities.find((item) => item.id === activityId);
+
+        return activity?.data?.name || activity?.name || "";
     }
 
-    const activity = activities.find((item) => item.id === activityId);
+    return cancellation.activity_name?.trim() || "";
+}
 
-    return activity?.data?.name || activity?.name || "";
+function lookupPayment(cancellation, paymentsById) {
+    const paymentIds = [
+        cancellation.payment_id,
+        cancellation.original_payment_id
+    ].filter(Boolean);
+
+    for (const paymentId of paymentIds) {
+        const payment = paymentsById.get(paymentId);
+
+        if (payment) {
+            return payment;
+        }
+    }
+
+    return null;
 }
 
 function buildCancellationViewModel(
@@ -117,7 +170,7 @@ function buildCancellationViewModel(
     const participant = participantsById.get(cancellation.participant_id) || null;
     const registration =
         registrationsById.get(cancellation.registration_id) || null;
-    const payment = paymentsById.get(cancellation.payment_id) || null;
+    const payment = lookupPayment(cancellation, paymentsById);
 
     const programId = resolveRegistrationProgramId(registration || {});
     const activityId = resolveRegistrationActivityId(
@@ -125,16 +178,23 @@ function buildCancellationViewModel(
         programId
     );
 
+    const programTitle = resolveProgramTitle(programId, programs, cancellation);
+    const activityName = resolveActivityName(activityId, activities, cancellation);
+    const resolvedActivityName = activityName || cancellation.activity_name || "";
+    const showActivity = Boolean(activityId || resolvedActivityName);
+    const paymentDisplay = buildPaymentDisplay(cancellation, payment);
+
     return {
         cancellation,
         participant,
         registration,
         payment,
-        participantFullName: formatParticipantFullName(participant),
-        phone: participant?.phone || "",
-        programTitle: resolveProgramTitle(programId, programs),
-        activityName: resolveActivityName(activityId, activities),
-        showActivity: Boolean(activityId),
+        paymentDisplay,
+        participantFullName: resolveParticipantDisplayName(participant, cancellation),
+        phone: resolveDisplayPhone(participant, cancellation),
+        programTitle,
+        activityName: resolvedActivityName,
+        showActivity,
         programId,
         activityId
     };
