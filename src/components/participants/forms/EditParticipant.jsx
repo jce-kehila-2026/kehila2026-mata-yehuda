@@ -1,17 +1,25 @@
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import {
     completeParticipantRegistration,
     updateParticipant
 } from "../../../services/participantService";
-import { formatDate } from "../../../utils/dateUtils";
+import { fetchRegistrationByParticipantId } from "../../../services/registrationService";
 import { useParticipantForm } from "../hooks/useParticipantForm";
 import ParticipantProgramFields from "./ParticipantProgramFields";
 import {
-    participantToForm,
+    buildEditParticipantForm,
+    emptyParticipantForm,
     applyProgramSelection,
     applyActivitySelection,
-    validateParticipantForm
+    validateParticipantForm,
+    resolveEditParticipantRegistration
 } from "../helpers/participantFormHelpers";
+
+const EDIT_PARTICIPANT_DEBUG_PARTICIPANT_ID = "a6SqVwA9kZHOVcc2lyam";
+
+function isEditParticipantDebug(participantId) {
+    return String(participantId || "").trim() === EDIT_PARTICIPANT_DEBUG_PARTICIPANT_ID;
+}
 
 function EditParticipant({
     participant,
@@ -19,13 +27,109 @@ function EditParticipant({
     onCompleted,
     onCancel
 }) {
-    const [form, setForm] = useState(() => ({
-        ...participantToForm(participant),
-        birth_date: formatDate(participant?.birth_date) || ""
-    }));
+    const [form, setForm] = useState(emptyParticipantForm);
+    const [linkedRegistration, setLinkedRegistration] = useState(null);
+    const [registrationId, setRegistrationId] = useState(null);
     const [error, setError] = useState("");
     const [success, setSuccess] = useState("");
     const { programs, activities, loading, loadError } = useParticipantForm();
+
+    useEffect(() => {
+        let cancelled = false;
+
+        async function loadLinkedRegistration() {
+            if (!participant?.id) {
+                return;
+            }
+
+            let registration = null;
+
+            try {
+                registration = await fetchRegistrationByParticipantId(
+                    participant.id
+                );
+            } catch (err) {
+                console.log(err);
+            }
+
+            const resolvedRegistration = resolveEditParticipantRegistration(
+                participant,
+                registration
+            );
+
+            if (cancelled) {
+                return;
+            }
+
+            setLinkedRegistration(resolvedRegistration);
+            setRegistrationId(
+                resolvedRegistration?.id ||
+                    participant.registrationId ||
+                    participant.registration?.id ||
+                    null
+            );
+        }
+
+        loadLinkedRegistration();
+
+        return () => {
+            cancelled = true;
+        };
+    }, [participant?.id, participant?.registration, participant?.registrationId]);
+
+    useEffect(() => {
+        if (!participant?.id) {
+            return;
+        }
+
+        const registrationForForm = resolveEditParticipantRegistration(
+            participant,
+            linkedRegistration
+        );
+
+        const builtForm = buildEditParticipantForm(
+            participant,
+            registrationForForm,
+            programs,
+            activities
+        );
+
+        if (isEditParticipantDebug(participant.id)) {
+            console.log("[EditParticipantFinal]", {
+                participantId: participant?.id,
+                registration: registrationForForm,
+                linkedRegistration,
+                programs,
+                builtForm,
+                currentFormAfterSet: form
+            });
+        }
+
+        setForm(builtForm);
+    }, [
+        participant?.id,
+        participant?.registration,
+        participant?.program_id,
+        participant?.registrationId,
+        participant?.registration_status,
+        participant?.activity_id,
+        linkedRegistration,
+        programs,
+        activities
+    ]);
+
+    useEffect(() => {
+        if (!isEditParticipantDebug(participant?.id)) {
+            return;
+        }
+
+        console.log("[EditParticipantFinal] form state after render", {
+            participantId: participant?.id,
+            registration: linkedRegistration,
+            formProgramId: form.program_id,
+            form
+        });
+    }, [participant?.id, linkedRegistration, form]);
 
     if (!participant) {
         return <p>לא נבחר משתתף לעריכה</p>;
@@ -60,7 +164,11 @@ function EditParticipant({
 
         try {
             if (completeRegistration) {
-                await completeParticipantRegistration(participant.id, form);
+                await completeParticipantRegistration(
+                    participant.id,
+                    form,
+                    registrationId || participant.registrationId
+                );
                 setSuccess("הרישום הושלם בהצלחה");
             } else {
                 await updateParticipant(participant.id, form);
@@ -148,6 +256,7 @@ function EditParticipant({
                     optionsLoading={loading}
                     onProgramChange={handleProgramChange}
                     onActivityChange={handleActivityChange}
+                    debugParticipantId={participant.id}
                 />
 
                 <label htmlFor="edit-address">כתובת</label>

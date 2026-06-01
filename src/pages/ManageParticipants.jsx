@@ -31,8 +31,11 @@ function ManageParticipants() {
 
             {participantPage === "add" && <AddParticipant />}
 
-            {participantPage === "edit" && (
-                <EditParticipant participant={selectedParticipant} />
+            {participantPage === "edit" && selectedParticipant && (
+                <EditParticipant
+                    key={selectedParticipant.id}
+                    participant={selectedParticipant}
+                />
             )}
 
             {participantPage === "list" && (

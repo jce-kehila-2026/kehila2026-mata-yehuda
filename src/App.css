@@ -100,6 +100,25 @@
     direction: rtl;
 }
 
+.staff-link-button {
+    display: inline-block;
+    padding: 10px;
+    text-align: center;
+    text-decoration: none;
+    color: inherit;
+    border: 1px solid #ccc;
+    border-radius: 4px;
+    background: #f5f5f5;
+}
+
+.cancellation-refund-form {
+    margin-top: 12px;
+}
+
+.cancellation-filters {
+    margin-bottom: 16px;
+}
+
 .day-center-preview {
     max-width: 100%;
     max-height: 240px;

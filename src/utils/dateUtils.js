@@ -1,3 +1,5 @@
+import { Timestamp } from "firebase/firestore";
+
 export function formatDate(value) {
     if (!value) return "";
 
@@ -10,6 +12,38 @@ export function formatDate(value) {
     }
 
     return value;
+}
+
+export function parseBirthDateToTimestamp(value) {
+    if (!value) {
+        return null;
+    }
+
+    if (value instanceof Timestamp) {
+        return value;
+    }
+
+    if (value.toDate) {
+        return Timestamp.fromDate(value.toDate());
+    }
+
+    if (value.seconds) {
+        return new Timestamp(value.seconds, value.nanoseconds || 0);
+    }
+
+    const trimmed = typeof value === "string" ? value.trim() : "";
+
+    if (!trimmed) {
+        return null;
+    }
+
+    const parsed = new Date(trimmed);
+
+    if (Number.isNaN(parsed.getTime())) {
+        return null;
+    }
+
+    return Timestamp.fromDate(parsed);
 }
 
 export function formatTime(value) {

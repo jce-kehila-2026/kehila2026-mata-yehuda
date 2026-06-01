@@ -18,9 +18,11 @@ import {
 } from "../utils/programConstants";
 import {
     REGISTRATION_STATUS_COMPLETED,
-    shouldShowParticipantAsInitialRequest,
-    shouldShowRegistrationAsInitialRequest
+    explainRegistrationRequestVisibility,
+    hasRequiredRequestDisplayFields,
+    shouldShowParticipantAsInitialRequest
 } from "../utils/initialRequestFilters";
+import { fetchActivities } from "./activityService";
 
 const registrationsCollection = collection(db, "registrations");
 const participantsCollection = collection(db, "participants");
@@ -29,19 +31,125 @@ export const REGISTRATION_STATUS_PENDING = "ממתין";
 
 export { REGISTRATION_STATUS_COMPLETED };
 
+/** Read a Firestore field by exact or trimmed key (handles accidental leading/trailing spaces in field names). */
+function readRawByKeys(data, snakeKey, camelKey) {
+    if (!data) {
+        return undefined;
+    }
+
+    if (data[snakeKey] !== undefined && data[snakeKey] !== null) {
+        return data[snakeKey];
+    }
+
+    if (data[camelKey] !== undefined && data[camelKey] !== null) {
+        return data[camelKey];
+    }
+
+    for (const key of Object.keys(data)) {
+        const trimmedKey = key.trim();
+
+        if (trimmedKey === snakeKey || trimmedKey === camelKey) {
+            return data[key];
+        }
+    }
+
+    return undefined;
+}
+
 function readField(data, snakeKey, camelKey) {
-    const value = data?.[snakeKey] ?? data?.[camelKey];
+    const value = readRawByKeys(data, snakeKey, camelKey);
     return typeof value === "string" ? value.trim() : value ?? "";
 }
 
-export function resolveRegistrationProgramId(registration) {
-    const programId = readField(registration, "program_id", "programId");
-
-    if (programId) {
-        return programId;
+/** Normalize Firestore document ids (string, reference, or path). */
+export function normalizeFirestoreId(value) {
+    if (value == null || value === "") {
+        return "";
     }
 
-    const activityId = readField(registration, "activity_id", "activityId");
+    if (typeof value === "string") {
+        const trimmed = value.trim();
+
+        if (trimmed.includes("/")) {
+            const segments = trimmed.split("/").filter(Boolean);
+            return (segments[segments.length - 1] || "").trim();
+        }
+
+        return trimmed;
+    }
+
+    if (typeof value === "object") {
+        if (typeof value.id === "string" && value.id.trim()) {
+            return value.id.trim();
+        }
+
+        if (typeof value.path === "string" && value.path.trim()) {
+            const segments = value.path.split("/").filter(Boolean);
+            return (segments[segments.length - 1] || "").trim();
+        }
+    }
+
+    return String(value).trim();
+}
+
+function readIdField(data, snakeKey, camelKey) {
+    const raw = readRawByKeys(data, snakeKey, camelKey);
+    return normalizeFirestoreId(raw);
+}
+
+function readParticipantIdFromData(data) {
+    return readIdField(data, "participant_id", "participantId");
+}
+
+export function getRegistrationParticipantId(registration) {
+    if (!registration) {
+        return "";
+    }
+
+    return normalizeFirestoreId(
+        registration.participant_id ?? registration.participantId
+    );
+}
+
+export function registrationMatchesParticipantId(registration, participantId) {
+    const registrationParticipantId = getRegistrationParticipantId(registration);
+    const normalizedParticipantId = normalizeFirestoreId(participantId);
+
+    return (
+        Boolean(registrationParticipantId) &&
+        Boolean(normalizedParticipantId) &&
+        registrationParticipantId === normalizedParticipantId
+    );
+}
+
+function readParticipantIdFromRegistrationData(data) {
+    return readIdField(data, "participant_id", "participantId");
+}
+
+export function getRegistrationProgramId(registration) {
+    if (!registration) {
+        return "";
+    }
+
+    return normalizeFirestoreId(registration.program_id ?? registration.programId);
+}
+
+export function getRegistrationActivityId(registration) {
+    if (!registration) {
+        return "";
+    }
+
+    return normalizeFirestoreId(registration.activity_id ?? registration.activityId);
+}
+
+export function resolveRegistrationProgramId(registration) {
+    const programId = readIdField(registration, "program_id", "programId");
+
+    if (programId) {
+        return resolveCanonicalProgramId(programId);
+    }
+
+    const activityId = readIdField(registration, "activity_id", "activityId");
 
     if (activityId) {
         return PROGRAM_60_PLUS_MINUS_ID;
@@ -51,7 +159,7 @@ export function resolveRegistrationProgramId(registration) {
 }
 
 export function resolveRegistrationActivityId(registration, programId) {
-    const activityId = readField(registration, "activity_id", "activityId");
+    const activityId = readIdField(registration, "activity_id", "activityId");
     const resolvedProgramId = programId || resolveRegistrationProgramId(registration);
 
     if (resolvedProgramId === PROGRAM_60_PLUS_MINUS_ID) {
@@ -65,10 +173,11 @@ export function normalizeRegistration(registrationDoc) {
     const data = registrationDoc.data ? registrationDoc.data() : registrationDoc;
     const id = registrationDoc.id || data.id;
     const programId = resolveRegistrationProgramId(data);
+    const participant_id = readParticipantIdFromData(data);
 
     return {
         id,
-        participant_id: readField(data, "participant_id", "participantId"),
+        participant_id,
         program_id: programId,
         program_title: data.program_title || getFixedProgramTitle(programId),
         activity_id: resolveRegistrationActivityId(data, programId),
@@ -131,31 +240,104 @@ function getRegistrationSortTime(registration) {
 export async function fetchRegistrations() {
     const snapshot = await getDocs(registrationsCollection);
 
-    return snapshot.docs.map((registrationDoc) =>
+    const registrations = snapshot.docs.map((registrationDoc) =>
         normalizeRegistration(registrationDoc)
+    );
+
+    const registration00 = registrations.find((registration) => registration.id === "00");
+
+    if (registration00) {
+        console.log("[Registration00]", registration00);
+    }
+
+    return registrations;
+}
+
+const REGISTRATION_LOOKUP_DEBUG_PARTICIPANT_ID = "a6SqVwA9kZHOVcc2lyam";
+
+function shouldLogRegistrationLookup(participantId) {
+    return (
+        normalizeFirestoreId(participantId) === REGISTRATION_LOOKUP_DEBUG_PARTICIPANT_ID
     );
 }
 
-function mergeRegistrationWithParticipant(registration, participant) {
-    const programId = registration.program_id || participant?.program_id || "";
-    const activityId =
-        registration.activity_id || participant?.activity_id || "";
+export async function getRegistrationByParticipantId(participantId) {
+    const normalizedParticipantId = normalizeFirestoreId(participantId);
+
+    if (!normalizedParticipantId) {
+        return null;
+    }
+
+    const snapshot = await getDocs(registrationsCollection);
+    const rawDocs = snapshot.docs;
+
+    let matchedDoc = rawDocs.find((registrationDoc) => {
+        const data = registrationDoc.data();
+        const docParticipantId = readParticipantIdFromRegistrationData(data);
+
+        return docParticipantId === normalizedParticipantId;
+    });
+
+    if (!matchedDoc) {
+        matchedDoc = rawDocs.find((registrationDoc) =>
+            registrationMatchesParticipantId(
+                normalizeRegistration(registrationDoc),
+                normalizedParticipantId
+            )
+        );
+    }
+
+    const matched = matchedDoc ? normalizeRegistration(matchedDoc) : null;
+
+    if (shouldLogRegistrationLookup(participantId)) {
+        console.log("[RegistrationLookupFinal]", {
+            targetParticipantId: normalizedParticipantId,
+            rawRegistrations: rawDocs.map((registrationDoc) => {
+                const data = registrationDoc.data();
+
+                return {
+                    id: registrationDoc.id,
+                    participant_id: data.participant_id,
+                    participantId: data.participantId,
+                    program_id: data.program_id,
+                    programId: data.programId
+                };
+            }),
+            matched
+        });
+    }
+
+    return matched;
+}
+
+/** Alias for edit/load flows — registration linked by participant id. */
+export const fetchRegistrationByParticipantId = getRegistrationByParticipantId;
+
+function mergeRegistrationWithParticipant(
+    registration,
+    participant,
+    activities = []
+) {
+    const programId = registration.program_id || "";
+    const activityId = registration.activity_id || "";
 
     return {
         ...participant,
         id: participant?.id || registration.participant_id,
         registrationId: registration.id,
+        registration,
         program_id: programId,
         program_title:
-            participant?.program_title ||
-            registration.program_title ||
-            getFixedProgramTitle(programId),
+            registration.program_title || getFixedProgramTitle(programId),
         activity_id: activityId,
-        activity_name: participant?.activity_name || "",
-        registration_status:
-            registration.registration_status || participant?.registration_status || "",
-        id_number: participant?.id_number || "",
-        phone: participant?.phone || ""
+        activity_name: getRegistrationDisplayActivityName(
+            registration,
+            activities
+        ),
+        registration_status: registration.registration_status || "",
+        id_number: String(participant?.id_number ?? "").trim(),
+        phone: String(participant?.phone ?? "").trim(),
+        registered_at: registration.registered_at ?? null
     };
 }
 
@@ -168,39 +350,77 @@ async function fetchParticipantsForRequests() {
     }));
 }
 
+function buildParticipantLookupMap(participants) {
+    const participantMap = new Map();
+
+    participants.forEach((participant) => {
+        const docId = normalizeFirestoreId(participant.id);
+
+        if (docId) {
+            participantMap.set(docId, participant);
+        }
+    });
+
+    return participantMap;
+}
+
+function lookupParticipantForRegistration(participantMap, participantId) {
+    const normalizedParticipantId = normalizeFirestoreId(participantId);
+
+    if (!normalizedParticipantId) {
+        return null;
+    }
+
+    return participantMap.get(normalizedParticipantId) || null;
+}
+
 export async function fetchInitialRegistrationRequests() {
-    const [registrations, participants] = await Promise.all([
+    const [registrations, participants, activities] = await Promise.all([
         fetchRegistrations(),
-        fetchParticipantsForRequests()
+        fetchParticipantsForRequests(),
+        fetchActivities()
     ]);
 
-    const participantMap = new Map(participants.map((item) => [item.id, item]));
+    const participantMap = buildParticipantLookupMap(participants);
     const registrationParticipantIds = new Set();
+    const fromRegistrations = [];
 
-    const fromRegistrations = registrations
-        .filter(shouldShowRegistrationAsInitialRequest)
-        .map((registration) => {
-            if (registration.participant_id) {
-                registrationParticipantIds.add(registration.participant_id);
-            }
+    registrations.forEach((registration) => {
+        const { shouldShow } = explainRegistrationRequestVisibility(registration);
 
-            const participant = participantMap.get(registration.participant_id);
-            const merged = mergeRegistrationWithParticipant(
-                registration,
-                participant
-            );
+        if (!shouldShow) {
+            return;
+        }
 
-            if (!merged.id_number || !merged.phone || !merged.program_id) {
-                return null;
-            }
+        const participantId = normalizeFirestoreId(registration.participant_id);
+        const participant = lookupParticipantForRegistration(
+            participantMap,
+            participantId
+        );
 
-            return merged;
-        })
-        .filter(Boolean);
+        if (participantId) {
+            registrationParticipantIds.add(participantId);
+        }
+
+        const merged = mergeRegistrationWithParticipant(
+            registration,
+            participant,
+            activities
+        );
+
+        if (!hasRequiredRequestDisplayFields(merged)) {
+            return;
+        }
+
+        fromRegistrations.push(merged);
+    });
 
     const fromParticipants = participants
         .filter(shouldShowParticipantAsInitialRequest)
-        .filter((participant) => !registrationParticipantIds.has(participant.id));
+        .filter(
+            (participant) =>
+                !registrationParticipantIds.has(normalizeFirestoreId(participant.id))
+        );
 
     const combined = [...fromRegistrations, ...fromParticipants];
 
@@ -269,14 +489,7 @@ export async function createInitialRegistration(
         programs
     );
 
-    console.log("[createInitialRegistration] registration payload", payload);
-
     const registrationRef = await addDoc(registrationsCollection, payload);
-
-    console.log(
-        "[createInitialRegistration] registration created id",
-        registrationRef.id
-    );
 
     return registrationRef;
 }
@@ -323,13 +536,14 @@ export async function completeRegistration(registrationId, registrationData) {
 }
 
 export async function syncRegistrationForParticipant(participantId, participantData) {
+    const normalizedParticipantId = normalizeFirestoreId(participantId);
     const registrations = await fetchRegistrations();
     const existing = registrations.find(
-        (item) => item.participant_id === participantId
+        (item) => getRegistrationParticipantId(item) === normalizedParticipantId
     );
 
     const registrationData = {
-        participant_id: participantId,
+        participant_id: normalizedParticipantId,
         program_id: participantData.program_id,
         activity_id: participantData.activity_id,
         payment_method: existing?.payment_method || "",

@@ -1,6 +1,6 @@
 import { useEffect, useMemo, useState } from "react";
 import {
-    fetchParticipants,
+    fetchParticipantsWithRegistrations,
     deleteParticipant
 } from "../../../services/participantService";
 import { formatDate } from "../../../utils/dateUtils";
@@ -50,7 +50,7 @@ function ParticipantList({ onEditParticipant }) {
         setLoading(true);
         setError("");
         try {
-            const data = await fetchParticipants();
+            const data = await fetchParticipantsWithRegistrations();
             setParticipantList(data);
         } catch (err) {
             console.log(err);
@@ -134,6 +134,9 @@ function ParticipantList({ onEditParticipant }) {
                     {participant.address && <p>כתובת: {participant.address}</p>}
                     {participant.emergency_number && (
                         <p>מספר חירום: {participant.emergency_number}</p>
+                    )}
+                    {participant.registration_status && (
+                        <p>סטטוס הרשמה: {participant.registration_status}</p>
                     )}
 
                     <div className="row">

@@ -29,7 +29,8 @@ export async function addActivity(activityData) {
 }
 
 export async function updateActivity(activityId, activityData) {
-  return updateDoc(doc(db, "activities", activityId), activityData);
+  const activityRef = doc(db, "activities", activityId);
+  await updateDoc(activityRef, activityData);
 }
 
 export async function deleteActivity(activityId) {

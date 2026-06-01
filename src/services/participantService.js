@@ -7,17 +7,16 @@ import {
     updateDoc,
     deleteDoc
 } from "firebase/firestore";
+import { shouldShowParticipantAsInitialRequest } from "../utils/initialRequestFilters";
 import {
-    DAY_CENTER_ID,
-    PROGRAM_60_PLUS_MINUS_ID
-} from "../utils/programConstants";
-import {
-    REGISTRATION_STATUS_COMPLETED,
-    shouldShowParticipantAsInitialRequest
-} from "../utils/initialRequestFilters";
-import { validateParticipantForm } from "../components/participants/helpers/participantFormHelpers";
+    extractParticipantPersonalFields,
+    validateParticipantForm
+} from "../components/participants/helpers/participantFormHelpers";
+import { parseBirthDateToTimestamp } from "../utils/dateUtils";
 import {
     createInitialRegistration,
+    completeRegistration,
+    fetchRegistrations,
     syncRegistrationForParticipant
 } from "./registrationService";
 
@@ -28,33 +27,36 @@ export const PARTICIPANT_CREATED_REGISTRATION_FAILED =
 
 const participantsCollection = collection(db, "participants");
 
-export { REGISTRATION_STATUS_COMPLETED, shouldShowParticipantAsInitialRequest as shouldShowAsInitialRequest };
+export {
+    REGISTRATION_STATUS_COMPLETED,
+    shouldShowParticipantAsInitialRequest as shouldShowAsInitialRequest
+} from "../utils/initialRequestFilters";
 
 function buildPersonalParticipantPayload(participantData) {
+    const personal = extractParticipantPersonalFields(participantData);
+
     return {
-        first_name: participantData.first_name.trim(),
-        last_name: participantData.last_name.trim(),
-        id_number: participantData.id_number.trim(),
-        birth_date: participantData.birth_date?.trim() || "",
-        gender: participantData.gender?.trim() || "",
-        phone: participantData.phone.trim(),
-        address: participantData.address?.trim() || "",
-        emergency_number: participantData.emergency_number?.trim() || "",
-        medical_notes: participantData.medical_notes?.trim() || "",
-        mobility_limitations: participantData.mobility_limitations?.trim() || ""
+        first_name: personal.first_name,
+        last_name: personal.last_name,
+        id_number: personal.id_number,
+        birth_date: parseBirthDateToTimestamp(personal.birth_date),
+        gender: personal.gender,
+        phone: personal.phone,
+        address: personal.address,
+        emergency_number: personal.emergency_number,
+        medical_notes: personal.medical_notes,
+        mobility_limitations: personal.mobility_limitations
     };
 }
 
-function buildParticipantPayload(participantData) {
-    const programId = participantData.program_id?.trim() || "";
-    const is60Plus = programId === PROGRAM_60_PLUS_MINUS_ID;
-
+function buildRegistrationSyncData(participantId, participantData) {
     return {
-        ...buildPersonalParticipantPayload(participantData),
-        program_id: programId,
-        program_title: participantData.program_title?.trim() || "",
-        activity_id: is60Plus ? participantData.activity_id?.trim() || "" : "",
-        activity_name: is60Plus ? participantData.activity_name?.trim() || "" : ""
+        participant_id: participantId,
+        program_id: participantData.program_id?.trim() || "",
+        activity_id: participantData.activity_id?.trim() || "",
+        payment_method: participantData.payment_method?.trim() || "",
+        payment_status: participantData.payment_status?.trim() || "",
+        registration_status: participantData.registration_status?.trim() || ""
     };
 }
 
@@ -67,19 +69,55 @@ export async function fetchParticipants() {
     }));
 }
 
-export async function completeParticipantRegistration(participantId, participantData) {
-    const payload = buildParticipantPayload(participantData);
-    const programId = payload.program_id;
+export async function fetchParticipantsWithRegistrations() {
+    const [participants, registrations] = await Promise.all([
+        fetchParticipants(),
+        fetchRegistrations()
+    ]);
 
-    if (programId !== DAY_CENTER_ID) {
-        payload.registration_status = REGISTRATION_STATUS_COMPLETED;
+    const registrationByParticipantId = new Map();
+
+    registrations.forEach((registration) => {
+        if (registration.participant_id) {
+            registrationByParticipantId.set(
+                registration.participant_id,
+                registration
+            );
+        }
+    });
+
+    return participants.map((participant) => {
+        const registration =
+            registrationByParticipantId.get(participant.id) || null;
+
+        return {
+            ...participant,
+            registration,
+            registrationId: registration?.id || null,
+            registration_status: registration?.registration_status || "",
+            program_id: registration?.program_id || "",
+            activity_id: registration?.activity_id || ""
+        };
+    });
+}
+
+export async function completeParticipantRegistration(
+    participantId,
+    participantData,
+    registrationId = null
+) {
+    const personalPayload = buildPersonalParticipantPayload(participantData);
+
+    await updateDoc(doc(db, "participants", participantId), personalPayload);
+
+    if (registrationId) {
+        return completeRegistration(
+            registrationId,
+            buildRegistrationSyncData(participantId, participantData)
+        );
     }
 
-    await updateDoc(doc(db, "participants", participantId), payload);
-
-    await syncRegistrationForParticipant(participantId, payload);
-
-    return payload;
+    return syncRegistrationForParticipant(participantId, participantData);
 }
 
 export async function addParticipant(participantData, programs = []) {
@@ -94,8 +132,6 @@ export async function addParticipant(participantData, programs = []) {
     const participantPayload = buildPersonalParticipantPayload(participantData);
 
     const participantRef = await addDoc(participantsCollection, participantPayload);
-
-    console.log("[addParticipant] participant created id", participantRef.id);
 
     try {
         await createInitialRegistration(
@@ -116,10 +152,12 @@ export async function addParticipant(participantData, programs = []) {
 }
 
 export async function updateParticipant(participantId, participantData) {
-    return updateDoc(
+    await updateDoc(
         doc(db, "participants", participantId),
-        buildParticipantPayload(participantData)
+        buildPersonalParticipantPayload(participantData)
     );
+
+    return syncRegistrationForParticipant(participantId, participantData);
 }
 
 export async function deleteParticipant(participantId) {
