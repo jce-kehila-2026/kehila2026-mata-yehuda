@@ -1,16 +1,24 @@
 import { useState } from "react";
-import { updateParticipant } from "../../services/participantService";
-import { formatDate } from "../../utils/dateUtils";
-import { useParticipantForm } from "./hooks/useParticipantForm";
+import {
+    completeParticipantRegistration,
+    updateParticipant
+} from "../../../services/participantService";
+import { formatDate } from "../../../utils/dateUtils";
+import { useParticipantForm } from "../hooks/useParticipantForm";
 import ParticipantProgramFields from "./ParticipantProgramFields";
 import {
     participantToForm,
     applyProgramSelection,
     applyActivitySelection,
     validateParticipantForm
-} from "./participantFormHelpers";
+} from "../helpers/participantFormHelpers";
 
-function EditParticipant({ participant }) {
+function EditParticipant({
+    participant,
+    completeRegistration = false,
+    onCompleted,
+    onCancel
+}) {
     const [form, setForm] = useState(() => ({
         ...participantToForm(participant),
         birth_date: formatDate(participant?.birth_date) || ""
@@ -42,7 +50,7 @@ function EditParticipant({ participant }) {
     }
 
     async function handleUpdateParticipant() {
-        const validationError = validateParticipantForm(form);
+        const validationError = validateParticipantForm(form, programs);
 
         if (validationError) {
             setError(validationError);
@@ -51,9 +59,15 @@ function EditParticipant({ participant }) {
         }
 
         try {
-            await updateParticipant(participant.id, form);
-            setSuccess("המשתתף עודכן בהצלחה");
+            if (completeRegistration) {
+                await completeParticipantRegistration(participant.id, form);
+                setSuccess("הרישום הושלם בהצלחה");
+            } else {
+                await updateParticipant(participant.id, form);
+                setSuccess("המשתתף עודכן בהצלחה");
+            }
             setError("");
+            onCompleted?.();
         } catch (err) {
             console.log(err);
             setError("שגיאה בעדכון המשתתף");
@@ -63,7 +77,7 @@ function EditParticipant({ participant }) {
 
     return (
         <div>
-            <h2>עריכת משתתף</h2>
+            <h2>{completeRegistration ? "השלמת רישום משתתף" : "עריכת משתתף"}</h2>
 
             <div className="staff-form">
                 {loadError && <p style={{ color: "red" }}>{loadError}</p>}
@@ -170,8 +184,14 @@ function EditParticipant({ participant }) {
                     onChange={(e) => updateField("mobility_limitations", e.target.value)}
                 />
 
+                {onCancel && (
+                    <button type="button" onClick={onCancel}>
+                        חזרה לרשימת בקשות
+                    </button>
+                )}
+
                 <button type="button" onClick={handleUpdateParticipant} disabled={loading}>
-                    שמירת שינויים
+                    {completeRegistration ? "השלמת רישום" : "שמירת שינויים"}
                 </button>
             </div>
         </div>

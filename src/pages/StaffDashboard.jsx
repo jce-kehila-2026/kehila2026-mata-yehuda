@@ -5,6 +5,7 @@ import ManageActivities from "./ManageActivities";
 import ManageStaff from "./ManageStaff";
 import ManagePrograms from "./ManagePrograms";
 import ManageParticipants from "./ManageParticipants";
+import ViewRequests from "./ViewRequests";
 
 function StaffDashboard({ onLogout }) {
     const [currentPage, setCurrentPage] = useState("dashboard");
@@ -108,8 +109,19 @@ function StaffDashboard({ onLogout }) {
                     <ManageParticipants />
                 </div>
             )}
+
+            {currentPage === "requests" && (
+                <div>
+                    <button onClick={() => setCurrentPage("dashboard")}>
+                        חזרה ללוח הבקרה
+                    </button>
+
+                    <ViewRequests />
+                </div>
+            )}
         </div>
-    )
+    );
 }
+
 export default StaffDashboard;
 

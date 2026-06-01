@@ -1,3 +1,7 @@
+export const PROGRAM_TYPE_DAY_CENTER = "day_center";
+export const PROGRAM_TYPE_ACTIVITY_BASED = "activity_based";
+export const PROGRAM_TYPE_SUPPORTIVE_COMMUNITY = "supportive_community";
+
 export const DAY_CENTER_ID = "day_center";
 export const DAY_CENTER_NAME = "מרכז יום";
 
@@ -13,22 +17,118 @@ export const FIXED_PROGRAMS = [
     {
         id: DAY_CENTER_ID,
         title: DAY_CENTER_NAME,
+        type: PROGRAM_TYPE_DAY_CENTER,
         legacyDayCenter: true
     },
     {
         id: PROGRAM_60_PLUS_MINUS_ID,
-        title: PROGRAM_60_PLUS_MINUS_NAME
+        title: PROGRAM_60_PLUS_MINUS_NAME,
+        type: PROGRAM_TYPE_ACTIVITY_BASED
     },
     {
         id: SUPPORTIVE_COMMUNITY_ID,
-        title: SUPPORTIVE_COMMUNITY_NAME
+        title: SUPPORTIVE_COMMUNITY_NAME,
+        type: PROGRAM_TYPE_SUPPORTIVE_COMMUNITY
     }
 ];
 
 export const FIXED_PROGRAM_IDS = FIXED_PROGRAMS.map((program) => program.id);
 
+const PROGRAM_ID_TYPE_MAP = {
+    [DAY_CENTER_ID]: PROGRAM_TYPE_DAY_CENTER,
+    [PROGRAM_60_PLUS_MINUS_ID]: PROGRAM_TYPE_ACTIVITY_BASED,
+    [SUPPORTIVE_COMMUNITY_ID]: PROGRAM_TYPE_SUPPORTIVE_COMMUNITY
+};
+
+export function getProgramType(program) {
+    if (!program) {
+        return "";
+    }
+
+    if (program.type) {
+        return program.type;
+    }
+
+    if (program.is_day_center === true) {
+        return PROGRAM_TYPE_DAY_CENTER;
+    }
+
+    if (program.id && PROGRAM_ID_TYPE_MAP[program.id]) {
+        return PROGRAM_ID_TYPE_MAP[program.id];
+    }
+
+    return "";
+}
+
+export function getProgramTypeById(programId, programs) {
+    if (!programId) {
+        return "";
+    }
+
+    if (programs?.length) {
+        const program = programs.find((item) => item.id === programId);
+
+        if (program) {
+            return getProgramType(program);
+        }
+    }
+
+    return PROGRAM_ID_TYPE_MAP[programId] || "";
+}
+
+export function isDayCenterProgram(program) {
+    return getProgramType(program) === PROGRAM_TYPE_DAY_CENTER;
+}
+
+export function isActivityBasedProgram(program) {
+    return getProgramType(program) === PROGRAM_TYPE_ACTIVITY_BASED;
+}
+
+export function isActivityRequiredForProgram(programId, programs = []) {
+    if (!programId?.trim()) {
+        return false;
+    }
+
+    const selectedProgram = programs.find((program) => program.id === programId);
+
+    if (selectedProgram) {
+        return isActivityBasedProgram(selectedProgram);
+    }
+
+    const canonicalProgramId = resolveCanonicalProgramId(programId);
+
+    return (
+        getProgramTypeById(canonicalProgramId, programs) ===
+        PROGRAM_TYPE_ACTIVITY_BASED
+    );
+}
+
+export function isSupportiveCommunityProgram(program) {
+    return getProgramType(program) === PROGRAM_TYPE_SUPPORTIVE_COMMUNITY;
+}
+
 /** Old Firestore doc ids — excluded from the list (replaced by FIXED_PROGRAM_IDS). */
 export const DEPRECATED_FIXED_PROGRAM_IDS = ["program_60_plus"];
+
+/** Legacy programs doc id that should map to PROGRAM_60_PLUS_MINUS_ID in registrations. */
+export const LEGACY_ACTIVITY_PROGRAM_DOC_ID = "60+-";
+
+export function resolveCanonicalProgramId(programId) {
+    const trimmedId = programId?.trim() || "";
+
+    if (!trimmedId) {
+        return "";
+    }
+
+    if (
+        trimmedId === LEGACY_ACTIVITY_PROGRAM_DOC_ID ||
+        trimmedId === "program_60_plus"
+    ) {
+        return PROGRAM_60_PLUS_MINUS_ID;
+    }
+
+    return trimmedId;
+}
 
 export function isDeprecatedFixedProgramId(programId) {
     return DEPRECATED_FIXED_PROGRAM_IDS.includes(programId);
@@ -92,6 +192,7 @@ export function createFixedProgramPlaceholder(programId) {
     return {
         id: fixedProgram.id,
         title: fixedProgram.title,
+        type: fixedProgram.type,
         description: "",
         image_url: "",
         is_system_program: true,

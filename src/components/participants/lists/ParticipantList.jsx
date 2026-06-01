@@ -2,8 +2,8 @@ import { useEffect, useMemo, useState } from "react";
 import {
     fetchParticipants,
     deleteParticipant
-} from "../../services/participantService";
-import { formatDate } from "../../utils/dateUtils";
+} from "../../../services/participantService";
+import { formatDate } from "../../../utils/dateUtils";
 
 const GENDER_LABELS = {
     male: "זכר",

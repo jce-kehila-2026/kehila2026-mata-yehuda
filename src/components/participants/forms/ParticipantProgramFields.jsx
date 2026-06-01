@@ -1,5 +1,7 @@
-import { formatProgramTitle } from "../../utils/programConstants";
-import { is60PlusProgram } from "./participantFormHelpers";
+import {
+    formatProgramTitle,
+    isActivityBasedProgram
+} from "../../../utils/programConstants";
 
 function ParticipantProgramFields({
     idPrefix,
@@ -10,7 +12,8 @@ function ParticipantProgramFields({
     onProgramChange,
     onActivityChange
 }) {
-    const showActivityField = is60PlusProgram(form.program_id);
+    const selectedProgram = programs.find((program) => program.id === form.program_id);
+    const showActivityField = isActivityBasedProgram(selectedProgram);
 
     return (
         <>

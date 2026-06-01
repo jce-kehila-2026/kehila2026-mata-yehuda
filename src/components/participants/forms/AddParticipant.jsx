@@ -1,13 +1,17 @@
 import { useState } from "react";
-import { addParticipant } from "../../services/participantService";
-import { useParticipantForm } from "./hooks/useParticipantForm";
+import {
+    addParticipant,
+    PARTICIPANT_CREATED_REGISTRATION_FAILED,
+    PARTICIPANT_VALIDATION_FAILED
+} from "../../../services/participantService";
+import { useParticipantForm } from "../hooks/useParticipantForm";
 import ParticipantProgramFields from "./ParticipantProgramFields";
 import {
     emptyParticipantForm,
     applyProgramSelection,
     applyActivitySelection,
     validateParticipantForm
-} from "./participantFormHelpers";
+} from "../helpers/participantFormHelpers";
 
 function AddParticipant() {
     const [form, setForm] = useState(emptyParticipantForm);
@@ -34,7 +38,7 @@ function AddParticipant() {
     }
 
     async function handleAddParticipant() {
-        const validationError = validateParticipantForm(form);
+        const validationError = validateParticipantForm(form, programs);
 
         if (validationError) {
             setError(validationError);
@@ -43,13 +47,23 @@ function AddParticipant() {
         }
 
         try {
-            await addParticipant(form);
+            await addParticipant(form, programs);
             setSuccess("המשתתף נוסף בהצלחה");
             setError("");
             setForm(emptyParticipantForm);
         } catch (err) {
             console.log(err);
-            setError("שגיאה בהוספת משתתף");
+
+            if (err.message === PARTICIPANT_VALIDATION_FAILED) {
+                setError(err.validationMessage || "יש לבחור פעילות");
+            } else if (err.message === PARTICIPANT_CREATED_REGISTRATION_FAILED) {
+                setError(
+                    "המשתתף נוסף, אך יצירת ההרשמה נכשלה. אנא עדכן את ההרשמה ידנית."
+                );
+            } else {
+                setError("שגיאה בהוספת משתתף");
+            }
+
             setSuccess("");
         }
     }

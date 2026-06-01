@@ -1,7 +1,14 @@
+import { isActivityRequiredForProgram } from "../../../utils/programConstants";
 import {
-    PROGRAM_60_PLUS_MINUS_ID,
-    formatProgramTitle
-} from "../../utils/programConstants";
+    applyProgramSelection,
+    applyActivitySelection
+} from "../../../utils/programSelectionHelpers";
+
+export { applyProgramSelection, applyActivitySelection };
+export { isActivityRequiredForProgram } from "../../../utils/programConstants";
+
+/** @deprecated Phase 1 — use isActivityBasedProgram; kept for RequestCard until Phase 2 */
+export { is60PlusProgram } from "../../../utils/programSelectionHelpers";
 
 export const emptyParticipantForm = {
     first_name: "",
@@ -19,10 +26,6 @@ export const emptyParticipantForm = {
     activity_id: "",
     activity_name: ""
 };
-
-export function is60PlusProgram(programId) {
-    return programId === PROGRAM_60_PLUS_MINUS_ID;
-}
 
 export function participantToForm(participant) {
     return {
@@ -43,29 +46,7 @@ export function participantToForm(participant) {
     };
 }
 
-export function applyProgramSelection(programId, programs) {
-    const program = programs.find((item) => item.id === programId);
-    const programTitle = program ? formatProgramTitle(program) : "";
-
-    return {
-        program_id: programId,
-        program_title: programTitle,
-        ...(is60PlusProgram(programId)
-            ? {}
-            : { activity_id: "", activity_name: "" })
-    };
-}
-
-export function applyActivitySelection(activityId, activities) {
-    const activity = activities.find((item) => item.id === activityId);
-
-    return {
-        activity_id: activityId,
-        activity_name: activity?.data?.name || ""
-    };
-}
-
-export function validateParticipantForm(form) {
+export function validateParticipantForm(form, programs = []) {
     if (!form.id_number.trim()) {
         return "יש להזין תעודת זהות";
     }
@@ -78,7 +59,10 @@ export function validateParticipantForm(form) {
         return "יש לבחור תוכנית";
     }
 
-    if (is60PlusProgram(form.program_id) && !form.activity_id) {
+    if (
+        isActivityRequiredForProgram(form.program_id, programs) &&
+        !form.activity_id?.trim()
+    ) {
         return "יש לבחור פעילות";
     }
 

@@ -1,7 +1,7 @@
 import { useState } from "react";
-import AddParticipant from "../components/participants/AddParticipant";
-import ParticipantList from "../components/participants/ParticipantList";
-import EditParticipant from "../components/participants/EditParticipant";
+import AddParticipant from "../components/participants/forms/AddParticipant";
+import ParticipantList from "../components/participants/lists/ParticipantList";
+import EditParticipant from "../components/participants/forms/EditParticipant";
 
 function ManageParticipants() {
     const [participantPage, setParticipantPage] = useState("menu");
