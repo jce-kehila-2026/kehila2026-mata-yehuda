@@ -7,7 +7,7 @@ import {
 } from "../services/activityService";
 
 import ActivityForm from "../components/activities/ActivityForm";
-import ActivityCard from "../components/activities/ActivityCard";
+import ActivityList from "../components/activities/ActivityList";
 
 function ManageActivities() {
     const [activities, setActivities] = useState([]);
@@ -79,16 +79,11 @@ function ManageActivities() {
 
             <h2>רשימת פעילויות</h2>
 
-            <div className="activities-container">
-                {activities.map((activity) => (
-                    <ActivityCard
-                        key={activity.id}
-                        activity={activity}
-                        onDelete={handleDeleteActivity}
-                        onEdit={handleEditActivity}
-                    />
-                ))}
-            </div>
+            <ActivityList
+                activities={activities}
+                onDelete={handleDeleteActivity}
+                onEdit={handleEditActivity}
+            />
         </div>
     );
 }
