@@ -1,11 +1,12 @@
 import { useEffect, useRef, useState } from "react";
 import { useNavigate } from "react-router-dom";
-import CancelRegistrationButton from "../components/CancelRegistrationButton";
+import PaymentSuccessMessage from "../components/PaymentSuccessMessage";
 
 function PaymentSuccess() {
   const navigate = useNavigate();
-  const [paymentId, setPaymentId] = useState(() =>
-    localStorage.getItem("registrationPaymentId")
+  const [status, setStatus] = useState("loading");
+  const [paymentMethod, setPaymentMethod] = useState(
+    () => localStorage.getItem("registrationPaymentMethod") || "paypal"
   );
   const captureStarted = useRef(false);
 
@@ -20,8 +21,13 @@ function PaymentSuccess() {
       const token = params.get("token");
 
       if (!token) {
+        setStatus("error");
         return;
       }
+
+      const method =
+        localStorage.getItem("registrationPaymentMethod") || "paypal";
+      setPaymentMethod(method);
 
       try {
         const response = await fetch(
@@ -39,7 +45,8 @@ function PaymentSuccess() {
               idNumber: localStorage.getItem("idNumber"),
               phone: localStorage.getItem("phone"),
 
-              paymentMethod: "PayPal/Credit Card",
+              paymentMethod:
+                method === "credit card" ? "PayPal/Credit Card" : "PayPal",
               amount: 50,
             }),
           }
@@ -48,12 +55,15 @@ function PaymentSuccess() {
         const data = await response.json();
 
         if (data.success && data.paymentId) {
-          setPaymentId(data.paymentId);
           localStorage.setItem("registrationPaymentId", data.paymentId);
-          localStorage.setItem("registrationPaymentMethod", "paypal");
+          localStorage.setItem("registrationPaymentMethod", method);
+          setStatus("success");
+        } else {
+          setStatus("error");
         }
       } catch (error) {
         console.error(error);
+        setStatus("error");
       }
     };
 
@@ -61,22 +71,32 @@ function PaymentSuccess() {
   }, []);
 
   return (
-    <div className="page-content">
-      <h1>העסקה בוצעה בהצלחה!!</h1>
-      <p>ניתן לבטל את ההרשמה בכל עת לפני האירוע ב 48 .</p>
-      <div className="post-payment-actions">
-        {paymentId ? (
-          <CancelRegistrationButton
-            paymentId={paymentId}
-            onCancelled={() => navigate("/")}
-          />
-        ) : (
-          <p>טוען אפשרות ביטול...</p>
-        )}
-        <button type="button" className="secondary-btn" onClick={() => navigate("/")}>
+    <div className="page-content post-payment-screen">
+      {status === "loading" && (
+        <p className="payment-loading-text">מאשרים את התשלום...</p>
+      )}
+
+      {status === "success" && (
+        <PaymentSuccessMessage paymentMethod={paymentMethod} />
+      )}
+
+      {status === "error" && (
+        <div className="payment-success-message">
+          <p className="lookup-error">
+            לא הצלחנו לאשר את התשלום. אנא פנו לעמותה או נסו שוב.
+          </p>
+        </div>
+      )}
+
+      {status !== "loading" && (
+        <button
+          type="button"
+          className="secondary-btn"
+          onClick={() => navigate("/")}
+        >
           חזרה למסך הראשי
         </button>
-      </div>
+      )}
     </div>
   );
 }

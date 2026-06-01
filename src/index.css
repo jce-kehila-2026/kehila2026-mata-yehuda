@@ -270,6 +270,16 @@ body {
   font-size: 15px;
 }
 
+.payment-loading-text {
+  font-size: 18px;
+  color: var(--text-h);
+  margin: 24px 0;
+}
+
+.post-payment-screen .secondary-btn {
+  margin-top: 20px;
+}
+
 .cancel-success-screen {
   margin: 16px 0;
   padding: 20px;

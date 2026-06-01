@@ -1,11 +1,11 @@
 import { useState } from "react";
 import { useNavigate } from "react-router-dom";
 import CancelRegistrationButton from "./CancelRegistrationButton";
+import PaymentSuccessMessage from "./PaymentSuccessMessage";
 import {
   validateIsraeliPhone,
   validateRegistrationForm,
 } from "../services/validation";
-import { BIT_TRANSFER_PHONE } from "../config/payment";
 import { apiPost } from "../services/api";
 
 const EMPTY_FORM_DATA = {
@@ -14,34 +14,6 @@ const EMPTY_FORM_DATA = {
   phone: "",
   paymentMethod: "",
 };
-
-function PaymentSuccessMessage({ paymentMethod }) {
-  if (paymentMethod === "cash") {
-    return (
-      <div className="payment-success-message">
-        <p className="payment-success-lead">ההרשמה הצליחה!</p>
-        <p>
-          אחד מהעמותה יחזור אליכם בטלפון בקרוב כדי להשלים את פרטי התשלום במזומן.
-        </p>
-      </div>
-    );
-  }
-
-  if (paymentMethod === "bit") {
-    return (
-      <div className="payment-success-message">
-        <p className="payment-success-lead">ההרשמה הצליחה!</p>
-        <p>אנא העבירו את התשלום ב-Bit למספר הבא:</p>
-        <p className="bit-phone-number">{BIT_TRANSFER_PHONE}</p>
-        <p className="payment-success-note">לאחר ההעברה, המקום שלכם שמור.</p>
-      </div>
-    );
-  }
-
-  return (
-    <p>לחצו למטה אם ברצונכם לבטל את ההרשמה.</p>
-  );
-}
 
 function PaymentForm({ onRegistrationCancelled }) {
   const navigate = useNavigate();
@@ -163,10 +135,14 @@ function PaymentForm({ onRegistrationCancelled }) {
             return;
             }
 
-            window.location.href = approveLink.href;
             localStorage.setItem("firstName", firstName);
             localStorage.setItem("idNumber", idNumber);
             localStorage.setItem("phone", phone);
+            localStorage.setItem(
+              "registrationPaymentMethod",
+              formData.paymentMethod
+            );
+            window.location.href = approveLink.href;
         } catch (error) {
             console.error("FULL ERROR:", error);
             alert("Error: " + String(error));
@@ -284,22 +260,10 @@ function PaymentForm({ onRegistrationCancelled }) {
   if (completedPaymentId && showPaymentConfirmation && !showLookupScreen) {
     return (
       <div className="page-content post-payment-screen">
-        <h2>ההרשמה נשמרה בהצלחה</h2>
         <PaymentSuccessMessage paymentMethod={completedPaymentMethod} />
-        <p className="cancel-hint">ניתן לבטל את ההרשמה בכל עת לפני האירוע:</p>
-        <div className="post-payment-actions">
-          <CancelRegistrationButton
-            paymentId={completedPaymentId}
-            onCancelled={() => {
-              clearCompletedRegistration();
-              setFormData(EMPTY_FORM_DATA);
-              onRegistrationCancelled?.();
-            }}
-          />
-          <button type="button" className="secondary-btn" onClick={goToHomeScreen}>
-            חזרה למסך הראשי
-          </button>
-        </div>
+        <button type="button" className="secondary-btn" onClick={goToHomeScreen}>
+          חזרה למסך הראשי
+        </button>
       </div>
     );
   }
