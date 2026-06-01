@@ -1,32 +1,31 @@
-function ProgramCard({ program, isDayCenter, onEdit, onDelete }) {
+import { formatProgramTitle } from "../../utils/programConstants";
+
+function ProgramCard({ program, isFixedProgram, onEdit, onDelete }) {
+    const displayTitle = formatProgramTitle(program);
+    const description = program.description?.trim();
 
     return (
-        <div
-            className={`staff-card${isDayCenter ? " staff-card-day-center" : ""}`}
+        <article
+            className={`program-card${isFixedProgram ? " program-card--fixed" : ""}`}
         >
-            <h3>{program.title}</h3>
-            <p>{program.description || "—"}</p>
+            <div className="program-card__body">
+                <h3 className="program-card__title">{displayTitle}</h3>
+                {description && (
+                    <p className="program-card__description">{description}</p>
+                )}
+            </div>
 
-            {program.image_url && (
-                <img
-                    src={program.image_url}
-                    alt={program.title}
-                    className="day-center-preview"
-                />
-            )}
-
-            <div className="row">
-                <button onClick={() => onEdit(program)}>
+            <div className="program-card__actions">
+                <button type="button" onClick={() => onEdit(program)}>
                     עריכה
                 </button>
-                {!isDayCenter && (
-                    <button onClick={() => onDelete(program.id)}>
+                {!isFixedProgram && (
+                    <button type="button" onClick={() => onDelete(program.id)}>
                         מחיקה
                     </button>
                 )}
             </div>
-            <hr />
-        </div>
+        </article>
     );
 }
 

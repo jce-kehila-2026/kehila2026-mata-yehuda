@@ -62,7 +62,7 @@ function ProgramForm({
                     ? "שומר..."
                     : editingId
                         ? "עדכון תוכנית"
-                        : "הוספת תוכנית"}
+                        : "הוספת תוכנית חדשה"}
             </button>
 
             {editingId && (

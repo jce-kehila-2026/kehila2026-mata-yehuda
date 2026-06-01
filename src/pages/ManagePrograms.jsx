@@ -3,9 +3,14 @@ import {
     fetchPrograms,
     addProgram,
     updateProgram,
-    deleteProgram,
-    DAY_CENTER_ID
+    deleteProgram
 } from "../services/programService";
+import {
+    isFixedProgramId,
+    getProgramsPageTitle,
+    getProgramUpdateSuccessMessage,
+    formatProgramTitle
+} from "../utils/programConstants";
 import ProgramForm from "../components/programs/ProgramForm";
 import ProgramList from "../components/programs/ProgramList";
 
@@ -28,7 +33,7 @@ function ManagePrograms() {
     }
 
     function fillForm(program) {
-        setTitle(program.title || "");
+        setTitle(formatProgramTitle(program));
         setDescription(program.description || "");
         setImageUrl(program.image_url || "");
         setEditingId(program.id);
@@ -79,11 +84,7 @@ function ManagePrograms() {
         try {
             if (editingId) {
                 await updateProgram(editingId, programData);
-                setSuccess(
-                    editingId === DAY_CENTER_ID
-                        ? "מרכז היום עודכן בהצלחה"
-                        : "התוכנית עודכנה בהצלחה"
-                );
+                setSuccess(getProgramUpdateSuccessMessage(editingId));
             } else {
                 await addProgram(programData);
                 setSuccess("התוכנית נוספה בהצלחה");
@@ -112,6 +113,12 @@ function ManagePrograms() {
     }
 
     async function handleDelete(programId) {
+        if (isFixedProgramId(programId)) {
+            setError("לא ניתן למחוק תוכנית מערכת");
+            setSuccess("");
+            return;
+        }
+
         const confirmed = window.confirm("האם למחוק תוכנית זו?");
         if (!confirmed) {
             return;
@@ -133,13 +140,11 @@ function ManagePrograms() {
 
     return (
         <div>
-            <h1>
-                {editingId === DAY_CENTER_ID
-                    ? "עריכת מרכז יום"
-                    : editingId
-                        ? "עריכת תוכנית"
-                        : "הוספת תוכנית חדשה"}
-            </h1>
+            <h1>ניהול תוכניות</h1>
+
+            {editingId && (
+                <h2>{getProgramsPageTitle(editingId)}</h2>
+            )}
 
             <ProgramForm
                 title={title}

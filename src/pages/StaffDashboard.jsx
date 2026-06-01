@@ -3,7 +3,6 @@ import { signOut } from "firebase/auth";
 import { auth } from "../config/firebase";
 import ManageActivities from "./ManageActivities";
 import ManageStaff from "./ManageStaff";
-import ManageDayCenter from "./ManageDayCenter";
 import ManagePrograms from "./ManagePrograms";
 
 function StaffDashboard({ onLogout }) {
@@ -27,12 +26,8 @@ function StaffDashboard({ onLogout }) {
                         ניהול פעילויות חד פעמיות
                     </button>
 
-                    <button onClick={() => setCurrentPage("dayCenter")}>
-                        ניהול מרכז יום
-                    </button>
-
                     <button onClick={() => setCurrentPage("programs")}>
-                        הוספת תוכנית חדשה
+                        ניהול תוכניות
                     </button>
 
                     <button onClick={() => setCurrentPage("manageStaff")}>
@@ -90,16 +85,6 @@ function StaffDashboard({ onLogout }) {
                     </button>
 
                     <ManageStaff />
-                </div>
-            )}
-
-            {currentPage === "dayCenter" && (
-                <div>
-                    <button onClick={() => setCurrentPage("dashboard")}>
-                        חזרה ללוח הבקרה
-                    </button>
-
-                    <ManageDayCenter />
                 </div>
             )}
 

@@ -1,4 +1,4 @@
-import { isDayCenterEntry } from "../../services/programService";
+import { isFixedProgram, isFixedProgramId } from "../../utils/programConstants";
 import ProgramCard from "./ProgramCard";
 
 function ProgramList({ programs, loading, onEdit, onDelete }) {
@@ -12,15 +12,17 @@ function ProgramList({ programs, loading, onEdit, onDelete }) {
                 <p>אין תוכניות במערכת</p>
             )}
 
-            {programs.map((program) => (
-                <ProgramCard
-                    key={program.id}
-                    program={program}
-                    isDayCenter={isDayCenterEntry(program)}
-                    onEdit={onEdit}
-                    onDelete={onDelete}
-                />
-            ))}
+            <div className="programs-list">
+                {programs.map((program) => (
+                    <ProgramCard
+                        key={program.id}
+                        program={program}
+                        isFixedProgram={isFixedProgram(program)}
+                        onEdit={onEdit}
+                        onDelete={onDelete}
+                    />
+                ))}
+            </div>
         </>
     );
 }

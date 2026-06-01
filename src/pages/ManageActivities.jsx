@@ -6,8 +6,8 @@ import {
     deleteActivity
 } from "../services/activityService";
 
-import ActivityForm from "../components/ActivityForm";
-import ActivityCard from "../components/ActivityCard";
+import ActivityForm from "../components/activities/ActivityForm";
+import ActivityCard from "../components/activities/ActivityCard";
 
 function ManageActivities() {
     const [activities, setActivities] = useState([]);

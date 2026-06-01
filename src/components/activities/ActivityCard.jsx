@@ -1,4 +1,4 @@
-import { formatDate, formatTime } from "../utils/dateUtils";
+import { formatDate, formatTime } from "../../utils/dateUtils";
 
 function ActivityCard({ activity, onDelete, onEdit }) {
 
