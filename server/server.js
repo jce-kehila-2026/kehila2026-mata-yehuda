@@ -66,6 +66,560 @@ function serverErrorMessage(error, fallback) {
 }
 
 // =========================
+// Participants & registrations
+// =========================
+
+async function findParticipantByIdNumber(idNumber) {
+  const trimmed = String(idNumber || "").trim();
+  if (!trimmed) {
+    return null;
+  }
+
+  const snapshot = await withTimeout(
+    db
+      .collection("participants")
+      .where("id_number", "==", trimmed)
+      .limit(1)
+      .get(),
+    FIRESTORE_TIMEOUT_MS,
+    "Firestore participants lookup timeout"
+  );
+
+  if (snapshot.empty) {
+    return null;
+  }
+
+  const doc = snapshot.docs[0];
+  return { id: doc.id, data: doc.data() };
+}
+
+async function findOrCreateParticipant({ firstName, idNumber, phone }) {
+  const trimmedId = String(idNumber || "").trim();
+  const existing = await findParticipantByIdNumber(trimmedId);
+
+  if (existing) {
+    await withTimeout(
+      db
+        .collection("participants")
+        .doc(existing.id)
+        .set(
+          {
+            first_name: firstName || existing.data.first_name || "",
+            phone: phone || existing.data.phone || "",
+          },
+          { merge: true }
+        ),
+      FIRESTORE_TIMEOUT_MS,
+      "Firestore participant update timeout"
+    );
+    return { id: existing.id, isNew: false };
+  }
+
+  const ref = await withTimeout(
+    db.collection("participants").add({
+      first_name: firstName || "",
+      last_name: "",
+      id_number: trimmedId,
+      phone: phone || "",
+      address: "",
+      gender: "",
+      emergency_number: "",
+      medical_notes: "",
+      mobility_limitations: "",
+    }),
+    FIRESTORE_TIMEOUT_MS,
+    "Firestore participant create timeout"
+  );
+
+  return { id: ref.id, isNew: true };
+}
+
+function registrationStatusForPayment(paymentStatus) {
+  const paid =
+    paymentStatus === "COMPLETED" ||
+    paymentStatus === "PAID" ||
+    paymentStatus === "paid";
+  return paid ? "registered" : "pending_payment";
+}
+
+async function createRegistrationRecord({
+  participantId,
+  activityId,
+  programId,
+  paymentMethod,
+  paymentStatus,
+  registrationStatus,
+  paymentId,
+  amount,
+}) {
+  const regRef = await withTimeout(
+    db.collection("registrations").add({
+      participant_id: participantId,
+      activity_id: activityId || "",
+      program_id: programId || "",
+      payment_method: paymentMethod || "",
+      payment_status: paymentStatus || "",
+      registration_status:
+        registrationStatus || registrationStatusForPayment(paymentStatus),
+      registered_at: admin.firestore.FieldValue.serverTimestamp(),
+      payment_id: paymentId || "",
+      amount: amount ?? null,
+    }),
+    FIRESTORE_TIMEOUT_MS,
+    "Firestore registration create timeout"
+  );
+
+  return regRef.id;
+}
+
+async function savePaymentWithRegistration({
+  firstName,
+  idNumber,
+  phone,
+  paymentMethod,
+  amount,
+  activityId,
+  programId,
+  status,
+  currency,
+  activityTitle,
+  extraFields = {},
+}) {
+  await assertNoDuplicateRegistration(idNumber, activityId);
+
+  const participant = await findOrCreateParticipant({
+    firstName,
+    idNumber,
+    phone,
+  });
+
+  const paymentRef = db.collection("payments").doc();
+  const registrationStatus = registrationStatusForPayment(status);
+
+  const paymentPayload = {
+    firstName,
+    idNumber,
+    phone,
+    participantId: participant.id,
+    activityId: activityId || null,
+    activityTitle: activityTitle || null,
+    programId: programId || null,
+    paymentMethod,
+    amount,
+    currency: currency || "ILS",
+    status,
+    ...extraFields,
+    createdAt: admin.firestore.FieldValue.serverTimestamp(),
+  };
+
+  let spotReserved = false;
+  let registrationId;
+
+  try {
+    if (activityId) {
+      await incrementActivityParticipants(activityId);
+      spotReserved = true;
+    }
+
+    registrationId = await createRegistrationRecord({
+      participantId: participant.id,
+      activityId,
+      programId,
+      paymentMethod,
+      paymentStatus: status,
+      registrationStatus,
+      paymentId: paymentRef.id,
+      amount,
+    });
+
+    paymentPayload.registrationId = registrationId;
+
+    await withTimeout(
+      paymentRef.set(paymentPayload),
+      FIRESTORE_TIMEOUT_MS,
+      "Firestore payment create timeout"
+    );
+
+    return {
+      paymentId: paymentRef.id,
+      registrationId,
+      participantId: participant.id,
+      isNewParticipant: participant.isNew,
+    };
+  } catch (error) {
+    if (spotReserved && activityId) {
+      try {
+        await decrementActivityParticipants(activityId);
+      } catch (rollbackError) {
+        console.error("Failed to rollback participant count:", rollbackError);
+      }
+    }
+    throw error;
+  }
+}
+
+async function markRegistrationCancelled(paymentData, paymentId) {
+  const updates = {
+    registration_status: "cancelled",
+    payment_status: "cancelled",
+    cancelled_at: admin.firestore.FieldValue.serverTimestamp(),
+  };
+
+  const registrationId = paymentData.registrationId;
+
+  if (registrationId) {
+    await withTimeout(
+      db.collection("registrations").doc(registrationId).update(updates),
+      FIRESTORE_TIMEOUT_MS,
+      "Firestore registration cancel timeout"
+    );
+    return;
+  }
+
+  const snapshot = await withTimeout(
+    db
+      .collection("registrations")
+      .where("payment_id", "==", paymentId)
+      .limit(1)
+      .get(),
+    FIRESTORE_TIMEOUT_MS,
+    "Firestore registration lookup timeout"
+  );
+
+  if (!snapshot.empty) {
+    await withTimeout(
+      snapshot.docs[0].ref.update(updates),
+      FIRESTORE_TIMEOUT_MS,
+      "Firestore registration cancel timeout"
+    );
+  }
+}
+
+const DUPLICATE_REGISTRATION_MESSAGE = "כבר נרשמת לפעילות הזו";
+
+function pickAllActivePayments(docs) {
+  const active = docs.filter((doc) => {
+    const status = (doc.data().status || "").toLowerCase();
+    return status !== "cancelled";
+  });
+
+  active.sort((a, b) => {
+    const aTime = a.data().createdAt?.toMillis?.() ?? 0;
+    const bTime = b.data().createdAt?.toMillis?.() ?? 0;
+    return bTime - aTime;
+  });
+
+  return active;
+}
+
+async function findActivePaymentForActivity(idNumber, activityId) {
+  const trimmedId = String(idNumber || "").trim();
+  const trimmedActivityId = String(activityId || "").trim();
+
+  if (!trimmedId || !trimmedActivityId) {
+    return null;
+  }
+
+  const snapshot = await withTimeout(
+    db.collection("payments").where("idNumber", "==", trimmedId).get(),
+    FIRESTORE_TIMEOUT_MS,
+    "Firestore duplicate registration check timeout"
+  );
+
+  const active = pickAllActivePayments(snapshot.docs);
+  return (
+    active.find(
+      (doc) => String(doc.data().activityId || "") === trimmedActivityId
+    ) || null
+  );
+}
+
+async function assertNoDuplicateRegistration(idNumber, activityId) {
+  const existing = await findActivePaymentForActivity(idNumber, activityId);
+  if (existing) {
+    const error = new Error(DUPLICATE_REGISTRATION_MESSAGE);
+    error.code = "DUPLICATE_REGISTRATION";
+    throw error;
+  }
+}
+
+function duplicateRegistrationResponse(res) {
+  return res.status(409).json({
+    success: false,
+    message: DUPLICATE_REGISTRATION_MESSAGE,
+  });
+}
+
+function mapPaymentToRegistrationSummary(doc) {
+  const data = doc.data();
+  return {
+    paymentId: doc.id,
+    registrationId: data.registrationId || null,
+    participantId: data.participantId || null,
+    activityTitle: data.activityTitle || "",
+    activityId: data.activityId || "",
+    paymentMethod: data.paymentMethod || "",
+    amount: data.amount ?? null,
+    currency: data.currency || "ILS",
+    createdAt: data.createdAt?.toMillis?.() ?? null,
+  };
+}
+
+// =========================
+// Activities (price from Firestore document ID)
+// =========================
+
+function formatPayPalAmount(amount) {
+  return Number(amount).toFixed(2);
+}
+
+const REGISTRATION_NOT_OPEN_MESSAGE = "עדיין לא נפתחה ההרשמה";
+const REGISTRATION_CLOSED_MESSAGE = "תאריך ההרשמה לפעילות זו הסתיים";
+const ACTIVITY_FULL_MESSAGE = "אין מקומות פנויים בפעילות זו";
+
+function parseFirestoreTimestamp(value) {
+  if (!value) {
+    return null;
+  }
+  if (typeof value.toDate === "function") {
+    return value.toDate();
+  }
+  if (value instanceof Date) {
+    return value;
+  }
+  if (typeof value === "number") {
+    return new Date(value);
+  }
+  if (typeof value === "string") {
+    const parsed = new Date(value);
+    return Number.isNaN(parsed.getTime()) ? null : parsed;
+  }
+  return null;
+}
+
+function isActivityOpenForRegistration(data) {
+  if (data.is_open === true) {
+    return true;
+  }
+  return (
+    data.published === true ||
+    String(data.status || "").toLowerCase() === "published"
+  );
+}
+
+function getRegistrationBlockReason(data) {
+  if (!isActivityOpenForRegistration(data)) {
+    return {
+      code: "REGISTRATION_NOT_OPEN",
+      message: REGISTRATION_NOT_OPEN_MESSAGE,
+    };
+  }
+
+  const deadline = parseFirestoreTimestamp(data.registration_deadline);
+  if (deadline && Date.now() > deadline.getTime()) {
+    return {
+      code: "REGISTRATION_CLOSED",
+      message: REGISTRATION_CLOSED_MESSAGE,
+    };
+  }
+
+  const current = Number(data.current_participants) || 0;
+  const max = Number(data.max_participants);
+  if (Number.isFinite(max) && max > 0 && current >= max) {
+    return {
+      code: "ACTIVITY_FULL",
+      message: ACTIVITY_FULL_MESSAGE,
+    };
+  }
+
+  return null;
+}
+
+function assertActivityRegistrationAllowed(data) {
+  const block = getRegistrationBlockReason(data);
+  if (block) {
+    const error = new Error(block.message);
+    error.code = block.code;
+    throw error;
+  }
+}
+
+async function incrementActivityParticipants(activityId) {
+  const ref = db.collection("activities").doc(activityId);
+
+  await withTimeout(
+    db.runTransaction(async (transaction) => {
+      const snap = await transaction.get(ref);
+      if (!snap.exists) {
+        throw new Error("הפעילות לא נמצאה");
+      }
+
+      const data = snap.data();
+      assertActivityRegistrationAllowed(data);
+
+      const current = Number(data.current_participants) || 0;
+      transaction.update(ref, { current_participants: current + 1 });
+    }),
+    FIRESTORE_TIMEOUT_MS,
+    "Firestore activity participant increment timeout"
+  );
+}
+
+async function decrementActivityParticipants(activityId) {
+  if (!activityId) {
+    return;
+  }
+
+  const ref = db.collection("activities").doc(activityId);
+
+  await withTimeout(
+    db.runTransaction(async (transaction) => {
+      const snap = await transaction.get(ref);
+      if (!snap.exists) {
+        return;
+      }
+
+      const current = Number(snap.data().current_participants) || 0;
+      transaction.update(ref, {
+        current_participants: Math.max(0, current - 1),
+      });
+    }),
+    FIRESTORE_TIMEOUT_MS,
+    "Firestore activity participant decrement timeout"
+  );
+}
+
+function isActivityRegistrationError(error) {
+  return (
+    error?.code === "REGISTRATION_NOT_OPEN" ||
+    error?.code === "REGISTRATION_CLOSED" ||
+    error?.code === "ACTIVITY_FULL"
+  );
+}
+
+function parseActivityPricing(data) {
+  const price = data.price ?? data.amount;
+  if (price == null || Number(price) <= 0) {
+    return null;
+  }
+  const description =
+    data.description || data.shortDescription || data.summary || "";
+
+  return {
+    price: Number(price),
+    currency: String(data.currency || "ILS").toUpperCase(),
+    title: data.title || data.name || "פעילות",
+    description: typeof description === "string" ? description.trim() : "",
+  };
+}
+
+// activityDocId = Firestore document ID in activities/{id}
+async function getActivityForPayment(activityDocId) {
+  if (!activityDocId) {
+    throw new Error("חסר מזהה פעילות");
+  }
+
+  const activityDoc = await withTimeout(
+    db.collection("activities").doc(activityDocId).get(),
+    FIRESTORE_TIMEOUT_MS,
+    "Firestore activity lookup timeout"
+  );
+
+  if (!activityDoc.exists) {
+    throw new Error("הפעילות לא נמצאה");
+  }
+
+  const data = activityDoc.data();
+
+  assertActivityRegistrationAllowed(data);
+
+  const pricing = parseActivityPricing(data);
+  if (!pricing) {
+    throw new Error("לפעילות זו לא הוגדר מחיר");
+  }
+
+  return {
+    activityId: activityDoc.id,
+    ...pricing,
+  };
+}
+
+function activityErrorResponse(res, error, fallbackStatus = 400) {
+  const message = error?.message || "שגיאה בטעינת הפעילות";
+  const status = message.includes("לא נמצאה") ? 404 : fallbackStatus;
+  return res.status(status).json({
+    success: false,
+    message,
+    code: error?.code || undefined,
+  });
+}
+
+function handlePaymentRouteError(res, error, fallbackMessage) {
+  if (error.code === "DUPLICATE_REGISTRATION") {
+    return duplicateRegistrationResponse(res);
+  }
+  if (isActivityRegistrationError(error)) {
+    return activityErrorResponse(res, error);
+  }
+  if (error.message?.includes("פעילות") || error.message?.includes("מחיר")) {
+    return activityErrorResponse(res, error);
+  }
+  return res.status(500).json({
+    success: false,
+    message: serverErrorMessage(error, fallbackMessage),
+  });
+}
+
+app.get("/activities", async (req, res) => {
+  try {
+    const snapshot = await withTimeout(
+      db.collection("activities").get(),
+      FIRESTORE_TIMEOUT_MS,
+      "Firestore activities list timeout"
+    );
+
+    const activities = snapshot.docs
+      .map((doc) => {
+        const data = doc.data();
+        const pricing = parseActivityPricing(data);
+        if (!pricing) {
+          return null;
+        }
+        const block = getRegistrationBlockReason(data);
+        return {
+          activityId: doc.id,
+          title: pricing.title,
+          price: pricing.price,
+          currency: pricing.currency,
+          description: pricing.description,
+          openForRegistration: !block,
+          registrationBlockMessage: block?.message || null,
+        };
+      })
+      .filter(Boolean)
+      .sort((a, b) => a.title.localeCompare(b.title, "he"));
+
+    res.json({ success: true, activities });
+  } catch (error) {
+    console.error(error);
+    res.status(500).json({
+      success: false,
+      message: serverErrorMessage(error, "שגיאה בטעינת רשימת הפעילויות"),
+    });
+  }
+});
+
+app.get("/activities/:activityId/payment-info", async (req, res) => {
+  try {
+    const activity = await getActivityForPayment(req.params.activityId);
+    res.json({ success: true, ...activity });
+  } catch (error) {
+    console.error(error);
+    activityErrorResponse(res, error);
+  }
+});
+
+// =========================
 // Get PayPal Access Token
 // =========================
 
@@ -103,7 +657,17 @@ async function generateAccessToken() {
 
 app.post("/create-paypal-order", async (req, res) => {
   try {
+    const { activityId, idNumber } = req.body;
+    const activity = await getActivityForPayment(activityId);
+
+    if (idNumber) {
+      await assertNoDuplicateRegistration(idNumber, activity.activityId);
+    }
+
     const accessToken = await generateAccessToken();
+
+    const frontendUrl =
+      process.env.FRONTEND_URL || "http://localhost:5173";
 
     const response = await fetch(
       `${process.env.PAYPAL_BASE_URL}/v2/checkout/orders`,
@@ -115,30 +679,38 @@ app.post("/create-paypal-order", async (req, res) => {
         },
         body: JSON.stringify({
           intent: "CAPTURE",
-
-        purchase_units: [
+          purchase_units: [
             {
               amount: {
-                currency_code: "USD",
-                value: "50.00",
+                currency_code: activity.currency,
+                value: formatPayPalAmount(activity.price),
               },
+              description: activity.title,
             },
           ],
-application_context: {
-  return_url: "http://localhost:5173/payment-success",
-  cancel_url: "http://localhost:5173/payment-cancel",
-  user_action: "PAY_NOW",
-},
+          application_context: {
+            return_url: `${frontendUrl}/payment-success`,
+            cancel_url: `${frontendUrl}/payment-cancel`,
+            user_action: "PAY_NOW",
+          },
         }),
       }
     );
 
     const data = await response.json();
 
+    if (!response.ok) {
+      console.error("PayPal create order failed:", data);
+      return res.status(500).json({
+        success: false,
+        message: "יצירת הזמנת PayPal נכשלה",
+      });
+    }
+
     res.json(data);
   } catch (error) {
     console.error(error);
-    res.status(500).send("Something went wrong");
+    return handlePaymentRouteError(res, error, "שגיאה ביצירת תשלום");
   }
 });
 
@@ -187,6 +759,10 @@ async function savePayPalPayment({
   amount,
   transactionId,
   status,
+  activityId,
+  programId,
+  currency,
+  activityTitle,
 }) {
   const existing = await findPaymentByPaypalOrderId(orderID);
 
@@ -194,19 +770,24 @@ async function savePayPalPayment({
     return existing.paymentId;
   }
 
-  const paymentRef = await db.collection("payments").add({
+  const result = await savePaymentWithRegistration({
     firstName,
     idNumber,
     phone,
     paymentMethod: paymentMethod || "PayPal",
     amount,
-    paypalOrderId: orderID,
-    transactionId,
+    activityId,
+    programId,
+    currency,
+    activityTitle,
     status,
-    createdAt: admin.firestore.FieldValue.serverTimestamp(),
+    extraFields: {
+      paypalOrderId: orderID,
+      transactionId,
+    },
   });
 
-  return paymentRef.id;
+  return result.paymentId;
 }
 
 // =========================
@@ -223,6 +804,8 @@ app.post("/capture-paypal-order", async (req, res) => {
       phone,
       paymentMethod,
       amount,
+      activityId,
+      programId,
     } = req.body;
 
     if (!orderID) {
@@ -241,6 +824,11 @@ app.post("/capture-paypal-order", async (req, res) => {
         paymentId: existingPayment.paymentId,
         transactionId: existingPayment.transactionId,
       });
+    }
+
+    let activity = null;
+    if (activityId) {
+      activity = await getActivityForPayment(activityId);
     }
 
     const accessToken = await generateAccessToken();
@@ -269,9 +857,13 @@ app.post("/capture-paypal-order", async (req, res) => {
         idNumber,
         phone,
         paymentMethod,
-        amount,
+        amount: activity?.price ?? amount,
         transactionId,
         status: data.status,
+        activityId: activity?.activityId ?? activityId,
+        programId,
+        currency: activity?.currency,
+        activityTitle: activity?.title,
       });
 
       return res.json({
@@ -295,9 +887,13 @@ app.post("/capture-paypal-order", async (req, res) => {
           idNumber,
           phone,
           paymentMethod,
-          amount,
+          amount: activity?.price ?? amount,
           transactionId,
           status: order.status,
+          activityId: activity?.activityId ?? activityId,
+          programId,
+          currency: activity?.currency,
+          activityTitle: activity?.title,
         });
 
         return res.json({
@@ -316,40 +912,49 @@ app.post("/capture-paypal-order", async (req, res) => {
     });
   } catch (error) {
     console.error(error);
-    res.status(500).json({
-      success: false,
-      message: "Something went wrong",
-    });
+    return handlePaymentRouteError(res, error, "שגיאה באישור התשלום");
   }
 });
 
 app.post("/save-cash-payment", async (req, res) => {
   try {
-    const { firstName, idNumber, phone, paymentMethod, amount } = req.body;
+    const {
+      firstName,
+      idNumber,
+      phone,
+      paymentMethod,
+      activityId,
+      programId,
+    } = req.body;
 
-    const paymentRef = await db.collection("payments").add({
+    const activity = await getActivityForPayment(activityId);
+
+    const result = await savePaymentWithRegistration({
       firstName,
       idNumber,
       phone,
       paymentMethod: paymentMethod || "cash",
-      amount,
+      amount: activity.price,
+      activityId: activity.activityId,
+      programId,
+      currency: activity.currency,
+      activityTitle: activity.title,
       status: "PENDING_CASH_PAYMENT",
-      message: "Seat reserved. Waiting for cash payment.",
-      createdAt: admin.firestore.FieldValue.serverTimestamp(),
+      extraFields: {
+        message: "Seat reserved. Waiting for cash payment.",
+      },
     });
 
     res.json({
       success: true,
       message: "Cash reservation saved",
-      paymentId: paymentRef.id,
+      paymentId: result.paymentId,
+      registrationId: result.registrationId,
+      participantId: result.participantId,
     });
   } catch (error) {
     console.error(error);
-
-    res.status(500).json({
-      success: false,
-      message: "Failed to save cash payment",
-    });
+    return handlePaymentRouteError(res, error, "שגיאה בשמירת תשלום מזומן");
   }
 }); 
 
@@ -362,38 +967,35 @@ app.post("/save-bit-payment", async (req, res) => {
       idNumber,
       phone,
       paymentMethod,
-      amount,
+      activityId,
+      programId,
     } = req.body;
 
-    const paymentRef = await db.collection("payments").add({
+    const activity = await getActivityForPayment(activityId);
 
+    const result = await savePaymentWithRegistration({
       firstName,
       idNumber,
       phone,
-
       paymentMethod: paymentMethod || "bit",
-
-      amount,
-
+      amount: activity.price,
+      activityId: activity.activityId,
+      programId,
+      currency: activity.currency,
+      activityTitle: activity.title,
       status: "WAITING_FOR_BIT_PAYMENT",
-
-      createdAt:
-        admin.firestore.FieldValue.serverTimestamp(),
-
     });
 
     res.json({
       success: true,
-      paymentId: paymentRef.id,
+      paymentId: result.paymentId,
+      registrationId: result.registrationId,
+      participantId: result.participantId,
     });
 
   } catch (error) {
-
     console.error(error);
-
-    res.status(500).json({
-      success: false,
-    });
+    return handlePaymentRouteError(res, error, "שגיאה בשמירת תשלום Bit");
   }
 });
 
@@ -403,17 +1005,17 @@ app.post("/save-bit-payment", async (req, res) => {
 
 app.post("/find-active-registration", async (req, res) => {
   try {
-    const { phone } = req.body;
+    const idNumber = String(req.body.idNumber || "").trim();
 
-    if (!phone) {
+    if (!idNumber) {
       return res.status(400).json({
         success: false,
-        message: "חסר מספר טלפון",
+        message: "חסר מספר תעודת זהות",
       });
     }
 
     const snapshot = await withTimeout(
-      db.collection("payments").where("phone", "==", phone).limit(1).get(),
+      db.collection("payments").where("idNumber", "==", idNumber).get(),
       FIRESTORE_TIMEOUT_MS,
       "Firestore search timeout"
     );
@@ -421,15 +1023,27 @@ app.post("/find-active-registration", async (req, res) => {
     if (snapshot.empty) {
       return res.json({
         success: false,
-        message: "לא נמצאה הרשמה פעילה",
+        message: "לא נמצאו הרשמות פעילות",
       });
     }
 
-    const doc = snapshot.docs[0];
+    const activeDocs = pickAllActivePayments(snapshot.docs);
+
+    if (activeDocs.length === 0) {
+      return res.json({
+        success: false,
+        message: "לא נמצאו הרשמות פעילות",
+      });
+    }
+
+    const registrations = activeDocs.map(mapPaymentToRegistrationSummary);
 
     res.json({
       success: true,
-      paymentId: doc.id,
+      registrations,
+      paymentId: registrations[0].paymentId,
+      registrationId: registrations[0].registrationId,
+      participantId: registrations[0].participantId,
     });
   } catch (error) {
     console.error(error);
@@ -508,12 +1122,16 @@ function buildCancellationRecord(paymentData, paymentId, refundStatus, refundRes
     phone: paymentData.phone || "",
 
     amount: paymentData.amount ?? null,
-    currency: "USD",
+    currency: paymentData.currency || "ILS",
+    activityId: paymentData.activityId || null,
+    activityTitle: paymentData.activityTitle || null,
     paymentMethod: paymentData.paymentMethod || "",
     paymentMethodLabel: paymentMethodLabel(paymentData.paymentMethod),
     paymentStatus: paymentData.status || "",
 
     originalPaymentId: paymentId,
+    participantId: paymentData.participantId || null,
+    registrationId: paymentData.registrationId || null,
     paypalOrderId: paymentData.paypalOrderId || null,
     transactionId: paymentData.transactionId || null,
     originalMessage: paymentData.message || null,
@@ -652,6 +1270,8 @@ app.post("/cancel-registration", async (req, res) => {
       refundStatus = "MANUAL_REFUND_REQUIRED";
     }
 
+    await markRegistrationCancelled(paymentData, paymentId);
+
     const cancellationId = await movePaymentToCancellations(
       paymentRef,
       paymentData,
@@ -659,6 +1279,10 @@ app.post("/cancel-registration", async (req, res) => {
       refundStatus,
       refundResult
     );
+
+    if (paymentData.activityId) {
+      await decrementActivityParticipants(paymentData.activityId);
+    }
 
     console.log(
       `Cancelled: payment ${paymentId} moved to cancellations/${cancellationId}`
