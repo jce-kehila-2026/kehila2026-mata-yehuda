@@ -2,11 +2,15 @@ import { useState } from "react";
 import { useNavigate } from "react-router-dom";
 import CancelRegistrationButton from "./CancelRegistrationButton";
 import PaymentSuccessMessage from "./PaymentSuccessMessage";
+import RegistrationStepper, { REGISTRATION_STEPS } from "./RegistrationStepper";
 import {
-  validateIsraeliPhone,
+  validateIsraeliId,
+  validateRegistrationDetails,
   validateRegistrationForm,
 } from "../services/validation";
 import { apiPost } from "../services/api";
+import { formatDisplayPrice } from "../services/formatPrice";
+import { notifyRegistrationBlock } from "../services/registrationErrors";
 
 const EMPTY_FORM_DATA = {
   firstName: "",
@@ -15,16 +19,44 @@ const EMPTY_FORM_DATA = {
   paymentMethod: "",
 };
 
-function PaymentForm({ onRegistrationCancelled }) {
+const PAYMENT_METHOD_LABELS = {
+  "credit card": "כרטיס אשראי",
+  paypal: "PayPal",
+  bit: "Bit",
+  cash: "מזומן",
+};
+
+function PaymentForm({
+  onRegistrationCancelled,
+  activityId = "",
+  programId = "",
+  paymentInfo = null,
+  registrationOnly = false,
+  showLookupScreen: showLookupScreenProp = false,
+  onLookupScreenChange,
+}) {
   const navigate = useNavigate();
+  const [currentStep, setCurrentStep] = useState(1);
   const [completedPaymentId, setCompletedPaymentId] = useState(null);
   const [showPaymentConfirmation, setShowPaymentConfirmation] = useState(true);
   const [completedPaymentMethod, setCompletedPaymentMethod] = useState("");
-  const [showLookupScreen, setShowLookupScreen] = useState(false);
-  const [lookupPhone, setLookupPhone] = useState("");
+  const [lookupScreenInternal, setLookupScreenInternal] = useState(false);
+  const showLookupScreen = onLookupScreenChange
+    ? showLookupScreenProp
+    : lookupScreenInternal;
+  const setShowLookupScreen = onLookupScreenChange ?? setLookupScreenInternal;
+  const [lookupIdNumber, setLookupIdNumber] = useState("");
   const [lookupStatus, setLookupStatus] = useState(null);
-  const [lookupPaymentId, setLookupPaymentId] = useState(null);
+  const [lookupRegistrations, setLookupRegistrations] = useState([]);
+  const [lookupCancelMessage, setLookupCancelMessage] = useState("");
   const [lookupLoading, setLookupLoading] = useState(false);
+  const [formError, setFormError] = useState("");
+  const [isSubmitting, setIsSubmitting] = useState(false);
+  const [formData, setFormData] = useState(EMPTY_FORM_DATA);
+
+  const successStep = REGISTRATION_STEPS.length;
+  const lookupBackLabel =
+    registrationOnly || !paymentInfo ? "חזרה" : "חזרה להרשמה";
 
   const saveCompletedRegistration = (paymentId, paymentMethod) => {
     localStorage.setItem("registrationPaymentId", paymentId);
@@ -32,6 +64,7 @@ function PaymentForm({ onRegistrationCancelled }) {
     setCompletedPaymentId(paymentId);
     setCompletedPaymentMethod(paymentMethod);
     setShowPaymentConfirmation(true);
+    setCurrentStep(successStep);
   };
 
   const clearCompletedRegistration = () => {
@@ -41,8 +74,6 @@ function PaymentForm({ onRegistrationCancelled }) {
     setCompletedPaymentMethod("");
     setShowPaymentConfirmation(true);
   };
-
-  const [formData, setFormData] = useState(EMPTY_FORM_DATA);
 
   const handleChange = (e) => {
     const { name, value } = e.target;
@@ -56,180 +87,212 @@ function PaymentForm({ onRegistrationCancelled }) {
       filtered = value.replace(/[^\u0590-\u05FFa-zA-Z\s'-]/g, "");
     }
 
-    setFormData({
-      ...formData,
-      [name]: filtered,
+    setFormData({ ...formData, [name]: filtered });
+  };
+
+  const handleLookupIdNumberChange = (e) => {
+    setLookupIdNumber(e.target.value.replace(/\D/g, "").slice(0, 9));
+  };
+
+  const formatRegistrationDate = (timestampMs) => {
+    if (!timestampMs) {
+      return "";
+    }
+    return new Date(timestampMs).toLocaleDateString("he-IL", {
+      day: "numeric",
+      month: "long",
+      year: "numeric",
     });
   };
 
-  const handleLookupPhoneChange = (e) => {
-    setLookupPhone(e.target.value.replace(/\D/g, "").slice(0, 10));
+  const goToDetailsStep = () => {
+    setFormError("");
+    setCurrentStep(1);
+  };
+
+  const goToPaymentMethodStep = () => {
+    setFormError("");
+    const validation = validateRegistrationDetails(formData);
+    if (!validation.valid) {
+      setFormError(validation.message);
+      return;
+    }
+    setCurrentStep(2);
+  };
+
+  const goToPaymentStep = () => {
+    setFormError("");
+    if (!formData.paymentMethod) {
+      setFormError("אנא בחרו שיטת תשלום");
+      return;
+    }
+    setCurrentStep(3);
   };
 
   const handlePayment = async (e) => {
     e.preventDefault();
+    setFormError("");
 
     const validation = validateRegistrationForm(formData);
-
     if (!validation.valid) {
-      alert(validation.message);
+      setFormError(validation.message);
       return;
     }
 
     const { firstName, idNumber, phone } = validation;
 
-    if (formData.paymentMethod === "cash") {
-      try {
-        const response = await fetch("http://localhost:5001/save-cash-payment", {
-          method: "POST",
-          headers: {
-            "Content-Type": "application/json",
-          },
-          body: JSON.stringify({
-            firstName,
-            idNumber,
-            phone,
-            paymentMethod: "cash",
-            amount: 50,
-          }),
+    if (!paymentInfo?.activityId) {
+      setFormError("לא נטענו פרטי פעילות. בדקו את הקישור לתשלום.");
+      return;
+    }
+
+    const paymentPayload = {
+      firstName,
+      idNumber,
+      phone,
+      amount: paymentInfo.price,
+      activityId: paymentInfo.activityId,
+      programId: programId || undefined,
+    };
+
+    const persistPaymentContext = () => {
+      localStorage.setItem("paymentAmount", String(paymentInfo.price));
+      localStorage.setItem("paymentCurrency", paymentInfo.currency);
+      localStorage.setItem("activityTitle", paymentInfo.title);
+      if (activityId) {
+        localStorage.setItem("activityId", activityId);
+      }
+      if (programId) {
+        localStorage.setItem("programId", programId);
+      }
+    };
+
+    setIsSubmitting(true);
+
+    try {
+      if (formData.paymentMethod === "cash") {
+        const { data } = await apiPost("/save-cash-payment", {
+          ...paymentPayload,
+          paymentMethod: "cash",
         });
 
-        const data = await response.json();
-
-        if (data.success) {
-          if (data.paymentId) {
-            saveCompletedRegistration(data.paymentId, "cash");
-          }
+        if (data.success && data.paymentId) {
+          persistPaymentContext();
+          saveCompletedRegistration(data.paymentId, "cash");
         } else {
-          alert("הייתה שגיאה בשמירת ההרשמה");
-        }
-
-        if (!data.success) {
-          setFormData(EMPTY_FORM_DATA);
-        }
-      } catch (error) {
-        console.error(error);
-        alert("שגיאה בחיבור לשרת");
-      }
-    }
-    else if (formData.paymentMethod === "paypal" || formData.paymentMethod === "credit card") {
-        try {
-            const response = await fetch("http://localhost:5001/create-paypal-order", {
-            method: "POST",
-            });
-
-            console.log("response status:", response.status);
-
-            const data = await response.json();
-            console.log("paypal data:", data);
-
-            if (!data.links) {
-            alert("PayPal did not return links. Check server terminal.");
-            return;
-            }
-
-            const approveLink = data.links.find((link) => link.rel === "approve");
-
-            if (!approveLink) {
-            alert("No approve link found");
-            return;
-            }
-
-            localStorage.setItem("firstName", firstName);
-            localStorage.setItem("idNumber", idNumber);
-            localStorage.setItem("phone", phone);
-            localStorage.setItem(
-              "registrationPaymentMethod",
-              formData.paymentMethod
-            );
-            window.location.href = approveLink.href;
-        } catch (error) {
-            console.error("FULL ERROR:", error);
-            alert("Error: " + String(error));
-        }
-    }
-    else if (formData.paymentMethod === "bit") {
-
-        try {
-
-          const response = await fetch(
-            "http://localhost:5001/save-bit-payment",
-            {
-              method: "POST",
-              headers: {
-                "Content-Type": "application/json",
-              },
-
-              body: JSON.stringify({
-                firstName,
-                idNumber,
-                phone,
-                paymentMethod: "bit",
-                amount: 50,
-              }),
-            }
+          notifyRegistrationBlock(
+            data.message || "הייתה שגיאה בשמירת ההרשמה",
+            setFormError
           );
-
-          const data = await response.json();
-
-          if (data.success && data.paymentId) {
-            saveCompletedRegistration(data.paymentId, "bit");
-          }
-
-        } catch (error) {
-
-          console.error(error);
-
         }
+      } else if (
+        formData.paymentMethod === "paypal" ||
+        formData.paymentMethod === "credit card"
+      ) {
+        const { response, data } = await apiPost("/create-paypal-order", {
+          activityId: paymentInfo.activityId,
+          idNumber,
+        });
+
+        if (data?.success === false && data?.message) {
+          notifyRegistrationBlock(data.message, setFormError);
+          return;
+        }
+
+        if (!response.ok || !data?.links) {
+          notifyRegistrationBlock(
+            data?.message ||
+              "לא ניתן לפתוח תשלום PayPal. בדקו שהשרת רץ ושהגדרות PayPal ב-.env תקינות.",
+            setFormError
+          );
+          return;
+        }
+
+        const approveLink = data.links.find((link) => link.rel === "approve");
+        if (!approveLink) {
+          setFormError("לא נמצא קישור לאישור תשלום ב-PayPal.");
+          return;
+        }
+
+        localStorage.setItem("firstName", firstName);
+        localStorage.setItem("idNumber", idNumber);
+        localStorage.setItem("phone", phone);
+        persistPaymentContext();
+        localStorage.setItem(
+          "registrationPaymentMethod",
+          formData.paymentMethod
+        );
+        window.location.href = approveLink.href;
+      } else if (formData.paymentMethod === "bit") {
+        const { data } = await apiPost("/save-bit-payment", {
+          ...paymentPayload,
+          paymentMethod: "bit",
+        });
+
+        if (data.success && data.paymentId) {
+          persistPaymentContext();
+          saveCompletedRegistration(data.paymentId, "bit");
+        } else {
+          notifyRegistrationBlock(
+            data.message || "הייתה שגיאה בשמירת ההרשמה",
+            setFormError
+          );
+        }
+      } else {
+        setFormError("אנא בחרו שיטת תשלום");
       }
-     else {
-      alert(`Redirecting to ${formData.paymentMethod} payment...`);
+    } catch (error) {
+      console.error(error);
+      setFormError(error.message || "שגיאה בחיבור לשרת");
+    } finally {
+      setIsSubmitting(false);
     }
-
-    console.log(formData);
-  };
-
-  const openLookupScreen = () => {
-    setLookupPhone("");
-    setLookupStatus(null);
-    setLookupPaymentId(null);
-    setShowLookupScreen(true);
   };
 
   const closeLookupScreen = () => {
     setShowLookupScreen(false);
-    setLookupPhone("");
+    setLookupIdNumber("");
     setLookupStatus(null);
-    setLookupPaymentId(null);
+    setLookupRegistrations([]);
+    setLookupCancelMessage("");
     setLookupLoading(false);
   };
 
   const resetLookupSearch = () => {
     setLookupStatus(null);
-    setLookupPaymentId(null);
-    setLookupPhone("");
+    setLookupRegistrations([]);
+    setLookupCancelMessage("");
+    setLookupIdNumber("");
   };
 
-  const searchRegistrationByPhone = async () => {
-    const phoneValidation = validateIsraeliPhone(lookupPhone);
+  const handleLookupRegistrationCancelled = ({ message, paymentId }) => {
+    setLookupRegistrations((prev) =>
+      prev.filter((registration) => registration.paymentId !== paymentId)
+    );
+    setLookupCancelMessage(message || "הביטול בוצע בהצלחה.");
+    clearCompletedRegistration();
+    onRegistrationCancelled?.();
+  };
 
-    if (!phoneValidation.valid) {
-      alert(phoneValidation.message);
+  const searchRegistrationsByIdNumber = async () => {
+    const idValidation = validateIsraeliId(lookupIdNumber);
+    if (!idValidation.valid) {
+      alert(idValidation.message);
       return;
     }
 
-    const phone = phoneValidation.phone;
-
     setLookupLoading(true);
     setLookupStatus(null);
-    setLookupPaymentId(null);
+    setLookupRegistrations([]);
+    setLookupCancelMessage("");
 
     try {
-      const { data } = await apiPost("/find-active-registration", { phone });
+      const { data } = await apiPost("/find-active-registration", {
+        idNumber: idValidation.idNumber,
+      });
 
-      if (data.success && data.paymentId) {
-        setLookupPaymentId(data.paymentId);
-        localStorage.setItem("registrationPaymentId", data.paymentId);
+      if (data.success && Array.isArray(data.registrations) && data.registrations.length > 0) {
+        setLookupRegistrations(data.registrations);
         setLookupStatus("found");
       } else {
         setLookupStatus("not_found");
@@ -247,194 +310,335 @@ function PaymentForm({ onRegistrationCancelled }) {
     setCompletedPaymentId(null);
     setCompletedPaymentMethod("");
     setFormData(EMPTY_FORM_DATA);
+    setCurrentStep(1);
     setShowLookupScreen(false);
-    setLookupPhone("");
+    setLookupIdNumber("");
     setLookupStatus(null);
-    setLookupPaymentId(null);
+    setLookupRegistrations([]);
+    setLookupCancelMessage("");
+    setFormError("");
     localStorage.removeItem("firstName");
     localStorage.removeItem("idNumber");
     localStorage.removeItem("phone");
     navigate("/");
   };
 
+  const submitLabel =
+    formData.paymentMethod === "paypal" ||
+    formData.paymentMethod === "credit card"
+      ? "מעבר לתשלום מאובטח"
+      : "השלמת הרשמה";
+
   if (completedPaymentId && showPaymentConfirmation && !showLookupScreen) {
     return (
-      <div className="page-content post-payment-screen">
+      <section className="community-section registration-flow">
+        <RegistrationStepper currentStep={successStep} />
         <PaymentSuccessMessage paymentMethod={completedPaymentMethod} />
-        <button type="button" className="secondary-btn" onClick={goToHomeScreen}>
-          חזרה למסך הראשי
-        </button>
-      </div>
+        <div className="community-actions">
+          <button type="button" className="secondary-btn" onClick={goToHomeScreen}>
+            חזרה למסך הראשי
+          </button>
+        </div>
+      </section>
     );
   }
 
   if (showLookupScreen) {
     return (
-      <div className="page-content lookup-screen">
-        <h2>ביטול הרשמה</h2>
+      <section className="community-section lookup-screen">
+        <h2>ביטול הרשמה לפי ת.ז.</h2>
+        <p className="lookup-screen-intro">
+          הזינו את מספר תעודת הזהות שבו בוצעה ההרשמה. יוצגו כל ההרשמות הפעילות שלכם,
+          וליד כל אחת ניתן להגיש בקשת ביטול.
+        </p>
 
-        {lookupStatus === "found" && lookupPaymentId && (
+        {lookupStatus === "found" && lookupRegistrations.length > 0 && (
           <>
-            <p className="lookup-success">נמצאה הרשמה פעילה למספר זה.</p>
-            <p>לחצו על הכפתור למטה כדי לבטל את ההרשמה.</p>
-            <CancelRegistrationButton
-              paymentId={lookupPaymentId}
-              onCancelled={() => {
-                clearCompletedRegistration();
-                closeLookupScreen();
-                onRegistrationCancelled?.();
-              }}
-            />
-            <br />
-            <button type="button" className="secondary-btn" onClick={closeLookupScreen}>
-              חזרה לטופס תשלום
-            </button>
+            <p className="lookup-success">
+              נמצאו {lookupRegistrations.length} הרשמות פעילות.
+            </p>
+            {lookupCancelMessage && (
+              <p className="lookup-success">{lookupCancelMessage}</p>
+            )}
+            <ul className="volunteer-services-list lookup-registrations-list">
+              {lookupRegistrations.map((registration) => (
+                <li key={registration.paymentId} className="lookup-registration-item">
+                  <div className="lookup-registration-details">
+                    <p className="lookup-registration-title">
+                      <strong>
+                        {registration.activityTitle || "הרשמה לפעילות"}
+                      </strong>
+                    </p>
+                    {registration.createdAt > 0 && (
+                      <p className="lookup-registration-meta">
+                        תאריך הרשמה: {formatRegistrationDate(registration.createdAt)}
+                      </p>
+                    )}
+                    <p className="lookup-registration-meta">
+                      שיטת תשלום:{" "}
+                      {PAYMENT_METHOD_LABELS[registration.paymentMethod] ||
+                        registration.paymentMethod ||
+                        "—"}
+                    </p>
+                    {registration.amount != null && (
+                      <p className="lookup-registration-meta">
+                        סכום:{" "}
+                        {formatDisplayPrice(
+                          registration.amount,
+                          registration.currency
+                        )}
+                      </p>
+                    )}
+                  </div>
+                  <CancelRegistrationButton
+                    paymentId={registration.paymentId}
+                    buttonLabel="ביטול הרשמה"
+                    compact
+                    className="lookup-registration-cancel-btn"
+                    onCancelled={handleLookupRegistrationCancelled}
+                  />
+                </li>
+              ))}
+            </ul>
+            <div className="community-actions">
+              <button type="button" className="secondary-btn" onClick={resetLookupSearch}>
+                חיפוש עם ת.ז. אחרת
+              </button>
+              <button type="button" className="secondary-btn" onClick={closeLookupScreen}>
+                {lookupBackLabel}
+              </button>
+            </div>
+          </>
+        )}
+
+        {lookupStatus === "found" && lookupRegistrations.length === 0 && (
+          <>
+            <p className="lookup-success">
+              {lookupCancelMessage || "כל ההרשמות הפעילות בוטלו."}
+            </p>
+            <div className="community-actions">
+              <button type="button" className="secondary-btn" onClick={resetLookupSearch}>
+                חיפוש עם ת.ז. אחרת
+              </button>
+              <button type="button" className="secondary-btn" onClick={closeLookupScreen}>
+                {lookupBackLabel}
+              </button>
+            </div>
           </>
         )}
 
         {lookupStatus === "not_found" && (
           <>
-            <p className="lookup-error">אין הרשמה עבור המספר הזה</p>
-            <button type="button" className="secondary-btn" onClick={resetLookupSearch}>
-              חיפוש עם מספר אחר
-            </button>
-            <br />
-            <button type="button" className="secondary-btn" onClick={closeLookupScreen}>
-              חזרה לטופס תשלום
-            </button>
+            <p className="lookup-error">לא נמצאו הרשמות פעילות למספר תעודת זהות זה.</p>
+            <div className="community-actions">
+              <button type="button" className="secondary-btn" onClick={resetLookupSearch}>
+                חיפוש עם מספר אחר
+              </button>
+              <button type="button" className="secondary-btn" onClick={closeLookupScreen}>
+                {lookupBackLabel}
+              </button>
+            </div>
           </>
         )}
 
         {lookupStatus !== "found" && lookupStatus !== "not_found" && (
           <>
-            <p>הזינו את מספר הטלפון שאיתו נרשמתם</p>
+            <p className="section-description">מספר תעודת זהות</p>
             <input
-              type="tel"
-              className="lookup-phone-input"
-              placeholder="05XXXXXXXX"
-              value={lookupPhone}
-              onChange={handleLookupPhoneChange}
+              type="text"
+              className="lookup-id-input"
+              placeholder="9 ספרות"
+              value={lookupIdNumber}
+              onChange={handleLookupIdNumberChange}
               disabled={lookupLoading}
-              maxLength={10}
+              maxLength={9}
               inputMode="numeric"
             />
-            <button
-              type="button"
-              className="primary-btn"
-              onClick={searchRegistrationByPhone}
-              disabled={lookupLoading}
-            >
-              {lookupLoading ? "מחפש..." : "חפש הרשמה"}
-            </button>
-            <br />
-            <button
-              type="button"
-              className="secondary-btn"
-              onClick={closeLookupScreen}
-              disabled={lookupLoading}
-            >
-              חזרה לטופס תשלום
-            </button>
+            <div className="community-actions">
+              <button
+                type="button"
+                className="primary-btn"
+                onClick={searchRegistrationsByIdNumber}
+                disabled={lookupLoading}
+              >
+                {lookupLoading ? "מחפש..." : "חיפוש הרשמות"}
+              </button>
+              <button
+                type="button"
+                className="secondary-btn"
+                onClick={closeLookupScreen}
+                disabled={lookupLoading}
+              >
+                {lookupBackLabel}
+              </button>
+            </div>
           </>
         )}
-      </div>
+      </section>
     );
   }
 
+  if (!paymentInfo) {
+    return null;
+  }
+
   return (
-    <form className="payment-form" onSubmit={handlePayment}>
-        
-      <input
-        type="text"
-        name="firstName"
-        placeholder="שם פרטי (אותיות בלבד)"
-        value={formData.firstName}
-        onChange={handleChange}
-      />
+    <section className="community-section registration-flow">
+      <RegistrationStepper currentStep={currentStep} />
 
-      <input
-        type="tel"
-        name="idNumber"
-        placeholder="מספר תעודת זהות (9 ספרות)"
-        value={formData.idNumber}
-        onChange={handleChange}
-        maxLength={9}
-        inputMode="numeric"
-      />
+      <form className="payment-form" onSubmit={handlePayment}>
+        {formError && (
+          <p className="form-error" role="alert">
+            {formError}
+          </p>
+        )}
 
-      <input
-        type="tel"
-        name="phone"
-        placeholder="05XXXXXXXX"
-        value={formData.phone}
-        onChange={handleChange}
-        maxLength={10}
-        inputMode="numeric"
-      />
+        {currentStep === 1 && (
+          <>
+            <h2 className="step-panel-title">פרטים אישיים</h2>
+            <p className="step-panel-hint">הזינו את הפרטים של המשתתף/ת</p>
 
-      <h3>בחר שיטת התשלום:</h3>
+            <div className="form-field">
+              <label className="form-label" htmlFor="firstName">
+                שם פרטי
+              </label>
+              <input
+                id="firstName"
+                type="text"
+                name="firstName"
+                placeholder="לדוגמה: יוסי"
+                value={formData.firstName}
+                onChange={handleChange}
+              />
+            </div>
 
-            <label>
-        <input
-          type="radio"
-          name="paymentMethod"
-          value="credit card"
-          checked={formData.paymentMethod === "credit card"}
-          onChange={handleChange}
-        />
-        כרטיס אשראי
-      </label>
+            <div className="form-field">
+              <label className="form-label" htmlFor="idNumber">
+                מספר תעודת זהות
+              </label>
+              <input
+                id="idNumber"
+                type="tel"
+                name="idNumber"
+                placeholder="9 ספרות"
+                value={formData.idNumber}
+                onChange={handleChange}
+                maxLength={9}
+                inputMode="numeric"
+              />
+            </div>
 
-      <br/>
+            <div className="form-field">
+              <label className="form-label" htmlFor="phone">
+                טלפון נייד
+              </label>
+              <input
+                id="phone"
+                type="tel"
+                name="phone"
+                placeholder="05XXXXXXXX"
+                value={formData.phone}
+                onChange={handleChange}
+                maxLength={10}
+                inputMode="numeric"
+              />
+            </div>
 
-      <label>
-        <input
-          type="radio"
-          name="paymentMethod"
-          value="paypal"
-          checked={formData.paymentMethod === "paypal"}
-          onChange={handleChange}
-        />
-        PayPal
-      </label>
+            <div className="community-actions form-actions">
+              <button type="button" className="primary-btn" onClick={goToPaymentMethodStep}>
+                המשך
+              </button>
+            </div>
+          </>
+        )}
 
-      <br/>
+        {currentStep === 2 && (
+          <>
+            <h2 className="step-panel-title">אמצעי תשלום</h2>
+            <p className="step-panel-hint">בחרו כיצד תשלמו</p>
 
-      <label>
-        <input
-          type="radio"
-          name="paymentMethod"
-          value="bit"
-          checked={formData.paymentMethod === "bit"}
-          onChange={handleChange}
-        />
-        Bit
-      </label>
+            <fieldset className="payment-methods">
+              <legend className="visually-hidden">שיטת תשלום</legend>
+              <div className="payment-methods-grid">
+                {[
+                  ["credit card", "כרטיס אשראי"],
+                  ["paypal", "PayPal"],
+                  ["bit", "Bit"],
+                  ["cash", "מזומן"],
+                ].map(([value, label]) => (
+                  <label key={value} className="payment-method-option">
+                    <input
+                      type="radio"
+                      name="paymentMethod"
+                      value={value}
+                      checked={formData.paymentMethod === value}
+                      onChange={handleChange}
+                    />
+                    {label}
+                  </label>
+                ))}
+              </div>
+            </fieldset>
 
-      <br/>
+            <div className="community-actions form-actions form-actions--split">
+              <button type="button" className="secondary-btn" onClick={goToDetailsStep}>
+                חזרה
+              </button>
+              <button type="button" className="primary-btn" onClick={goToPaymentStep}>
+                המשך
+              </button>
+            </div>
+          </>
+        )}
 
-      <label>
-        <input
-          type="radio"
-          name="paymentMethod"
-          value="cash"
-          checked={formData.paymentMethod === "cash"}
-          onChange={handleChange}
-        />
-        מזומן
-      </label>
+        {currentStep === 3 && (
+          <>
+            <h2 className="step-panel-title">אישור ותשלום</h2>
+            <p className="step-panel-hint">בדקו את הפרטים ולחצו להשלמה</p>
 
-      <br />
+            <dl className="payment-summary">
+              <div className="payment-summary__row">
+                <dt>שם</dt>
+                <dd>{formData.firstName}</dd>
+              </div>
+              <div className="payment-summary__row">
+                <dt>טלפון</dt>
+                <dd dir="ltr">{formData.phone}</dd>
+              </div>
+              <div className="payment-summary__row">
+                <dt>אמצעי תשלום</dt>
+                <dd>
+                  {PAYMENT_METHOD_LABELS[formData.paymentMethod] ||
+                    formData.paymentMethod}
+                </dd>
+              </div>
+              <div className="payment-summary__row payment-summary__row--total">
+                <dt>לתשלום</dt>
+                <dd>
+                  {formatDisplayPrice(paymentInfo.price, paymentInfo.currency)}
+                </dd>
+              </div>
+            </dl>
 
-      <button type="submit">שלם</button>
-
-      <br />
-      <br />
-      <p>כבר נרשמת ורוצה לבטל?</p>
-      <button type="button" className="cancel-registration-btn" onClick={openLookupScreen}>
-        מצא את ההרשמה שלי לביטול
-      </button>
-    </form>
+            <div className="community-actions form-actions form-actions--split">
+              <button
+                type="button"
+                className="secondary-btn"
+                onClick={() => {
+                  setFormError("");
+                  setCurrentStep(2);
+                }}
+              >
+                חזרה
+              </button>
+              <button type="submit" className="primary-btn" disabled={isSubmitting}>
+                {isSubmitting ? "שולח..." : submitLabel}
+              </button>
+            </div>
+          </>
+        )}
+      </form>
+    </section>
   );
 }
 

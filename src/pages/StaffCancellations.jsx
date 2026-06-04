@@ -1,6 +1,5 @@
 import { useState } from "react";
-
-const API_BASE = "http://localhost:5001";
+import { API_BASE } from "../services/api";
 const STAFF_PIN_KEY = "staffPin";
 
 function StaffCancellations() {

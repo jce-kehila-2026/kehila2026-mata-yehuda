@@ -99,7 +99,7 @@ export function validateIsraeliId(idNumber) {
   return { valid: true, idNumber: digits };
 }
 
-export function validateRegistrationForm(formData) {
+export function validateRegistrationDetails(formData) {
   const firstName = validateName(formData.firstName, "שם פרטי");
   if (!firstName.valid) {
     return firstName;
@@ -115,6 +115,20 @@ export function validateRegistrationForm(formData) {
     return phone;
   }
 
+  return {
+    valid: true,
+    firstName: firstName.name,
+    idNumber: idNumber.idNumber,
+    phone: phone.phone,
+  };
+}
+
+export function validateRegistrationForm(formData) {
+  const details = validateRegistrationDetails(formData);
+  if (!details.valid) {
+    return details;
+  }
+
   if (!formData.paymentMethod) {
     return {
       valid: false,
@@ -124,8 +138,8 @@ export function validateRegistrationForm(formData) {
 
   return {
     valid: true,
-    firstName: firstName.name,
-    idNumber: idNumber.idNumber,
-    phone: phone.phone,
+    firstName: details.firstName,
+    idNumber: details.idNumber,
+    phone: details.phone,
   };
 }

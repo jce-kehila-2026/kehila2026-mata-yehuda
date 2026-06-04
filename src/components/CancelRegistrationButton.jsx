@@ -1,7 +1,13 @@
 import { useState } from "react";
 import { apiPost } from "../services/api";
 
-function CancelRegistrationButton({ paymentId, onCancelled }) {
+function CancelRegistrationButton({
+  paymentId,
+  onCancelled,
+  buttonLabel = "אישור ביטול ההרשמה",
+  compact = false,
+  className = "",
+}) {
   const [loading, setLoading] = useState(false);
   const [successMessage, setSuccessMessage] = useState(null);
 
@@ -12,7 +18,7 @@ function CancelRegistrationButton({ paymentId, onCancelled }) {
     }
 
     const confirmed = window.confirm(
-      "האם אתה בטוח שברצונך לבטל את ההרשמה?\nפעולה זו אינה ניתנת לביטול."
+      "האם לאשר ביטול ההרשמה?\nלאחר האישור לא ניתן לשחזר את ההרשמה."
     );
 
     if (!confirmed) {
@@ -27,6 +33,10 @@ function CancelRegistrationButton({ paymentId, onCancelled }) {
       if (data.success) {
         localStorage.removeItem("registrationPaymentId");
         localStorage.removeItem("registrationPaymentMethod");
+        if (compact) {
+          onCancelled?.({ message: data.message, paymentId });
+          return;
+        }
         setSuccessMessage(data.message);
       } else {
         alert(data.message || "ביטול ההרשמה נכשל");
@@ -47,7 +57,7 @@ function CancelRegistrationButton({ paymentId, onCancelled }) {
   if (successMessage) {
     return (
       <div className="cancel-success-screen">
-        <h3 className="cancel-success-title">הביטול בוצע בהצלחה</h3>
+        <h3 className="cancel-success-title">בקשת הביטול התקבלה</h3>
         <p className="cancel-success-message">{successMessage}</p>
         <button type="button" className="secondary-btn" onClick={handleBackHome}>
           חזרה למסך הראשי
@@ -59,11 +69,11 @@ function CancelRegistrationButton({ paymentId, onCancelled }) {
   return (
     <button
       type="button"
-      className="cancel-registration-btn"
+      className={`cancel-registration-btn${className ? ` ${className}` : ""}`}
       onClick={handleCancel}
       disabled={loading || !paymentId}
     >
-      {loading ? "מבטל הרשמה..." : "ביטול הרשמה"}
+      {loading ? "מעבד..." : buttonLabel}
     </button>
   );
 }

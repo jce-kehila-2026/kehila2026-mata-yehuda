@@ -20,7 +20,7 @@ function PaymentSuccessMessage({ paymentMethod }) {
         <p className="payment-success-lead">ההרשמה הצליחה!</p>
         <p>אנא העבירו את התשלום ב-Bit למספר הבא:</p>
         <p className="bit-phone-number">{BIT_TRANSFER_PHONE}</p>
-        <p className="payment-success-note">לאחר ההעברה, המקום שלכם שמור.</p>
+        <p className="payment-success-note">מצורף מספר טלפון שבו ניתן להעביר את התשלום, המקום שלכם שמורר.</p>
       </div>
     );
   }

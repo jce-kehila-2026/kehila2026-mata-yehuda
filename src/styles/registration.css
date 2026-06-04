@@ -1,0 +1,654 @@
+@import url("https://fonts.googleapis.com/css2?family=Heebo:wght@400;500;600;700&display=swap");
+
+.supportive-community-page {
+  --color-bg: #ffffff;
+  --color-primary: #2d7d46;
+  --color-primary-hover: #236b38;
+  --color-accent-light: #faf4ec;
+  --color-border: #e5c29f;
+  --color-card-border: #e8e2dc;
+  --color-text: #1f1f1f;
+  --color-muted: #444444;
+  --radius: 18px;
+  --max-width: 760px;
+
+  font-family: "Heebo", system-ui, sans-serif;
+  font-size: 20px;
+  line-height: 1.7;
+  color: var(--color-text);
+  background: var(--color-bg);
+  min-height: 100vh;
+  text-align: right;
+  direction: rtl;
+}
+
+/* HERO */
+.supportive-community-page .community-hero {
+  background: var(--color-primary);
+  color: white;
+  text-align: center;
+  padding: 1.4rem 1.2rem 1.6rem;
+}
+
+.supportive-community-page .hero-icon {
+  display: block;
+  font-size: 2.6rem;
+  margin-bottom: 0.4rem;
+}
+
+.supportive-community-page .community-hero h1 {
+  font-size: 2rem;
+  margin: 0 0 0.6rem;
+  line-height: 1.25;
+}
+
+.supportive-community-page .community-hero p {
+  max-width: var(--max-width);
+  margin: 0 auto;
+  font-size: 1.15rem;
+  line-height: 1.7;
+}
+
+/* SECTIONS */
+.supportive-community-page .community-section,
+.supportive-community-page .payment-info {
+  max-width: var(--max-width);
+  margin: 0 auto;
+  padding: 1.8rem 1.2rem;
+}
+
+.supportive-community-page .community-section h2,
+.supportive-community-page .payment-info h2 {
+  font-size: 1.65rem;
+  color: var(--color-primary);
+  margin: 0 0 1.2rem;
+  padding-bottom: 0.55rem;
+  border-bottom: 3px solid var(--color-primary);
+}
+
+.supportive-community-page .section-icon,
+.supportive-community-page .item-icon,
+.supportive-community-page .btn-icon {
+  display: none;
+}
+
+/* CARDS */
+.supportive-community-page .services-grid {
+  display: flex;
+  flex-direction: column;
+  gap: 1rem;
+}
+
+.supportive-community-page .service-card {
+  background: #ffffff;
+  border: 1.5px solid var(--color-card-border);
+  border-radius: var(--radius);
+  padding: 1.25rem;
+  box-shadow: 0 3px 10px rgba(0, 0, 0, 0.04);
+}
+
+.supportive-community-page .service-card h3 {
+  font-size: 1.35rem;
+  color: var(--color-primary);
+  margin: 0 0 0.55rem;
+  line-height: 1.35;
+}
+
+.supportive-community-page .service-card p {
+  margin: 0;
+  color: var(--color-text);
+  font-size: 1.1rem;
+}
+
+/* VOLUNTEER LIST */
+.supportive-community-page .section-description {
+  font-size: 1.1rem;
+  color: var(--color-muted);
+  margin-bottom: 1rem;
+}
+
+.supportive-community-page .volunteer-services-list {
+  list-style: none;
+  padding: 0;
+  margin: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 0.9rem;
+}
+
+.supportive-community-page .volunteer-services-list li {
+  background: var(--color-accent-light);
+  border: 1.5px solid var(--color-border);
+  border-radius: var(--radius);
+  padding: 1rem 1.15rem;
+  font-size: 1.15rem;
+  font-weight: 600;
+}
+
+/* PAYMENT */
+.supportive-community-page .payment-info {
+  background: var(--color-accent-light);
+  border: 1.5px solid var(--color-border);
+  border-radius: var(--radius);
+  margin: 1rem auto;
+}
+
+.supportive-community-page .payment-info p {
+  margin: 0 0 1rem;
+  font-size: 1.1rem;
+}
+
+.supportive-community-page .payment-info strong {
+  color: var(--color-primary);
+}
+
+/* BUTTONS */
+.supportive-community-page .community-actions {
+  max-width: var(--max-width);
+  margin: 0 auto;
+  padding: 1rem 1.2rem 2.5rem;
+  display: flex;
+  flex-direction: column;
+  gap: 1rem;
+}
+
+.supportive-community-page .community-actions button {
+  font-family: "Heebo", system-ui, sans-serif;
+  font-size: 1.25rem;
+  font-weight: 700;
+  color: white;
+  background: var(--color-primary);
+  border: none;
+  border-radius: var(--radius);
+  padding: 1.05rem 1.2rem;
+  min-height: 58px;
+  cursor: pointer;
+}
+
+.supportive-community-page .community-actions button:hover,
+.supportive-community-page .community-actions button:active {
+  background: var(--color-primary-hover);
+}
+
+.supportive-community-page .community-actions button:focus-visible {
+  outline: 4px solid var(--color-border);
+  outline-offset: 3px;
+}
+
+/* DESKTOP */
+@media (min-width: 900px) {
+  .supportive-community-page .services-grid {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+  }
+
+  .supportive-community-page .volunteer-services-list {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+  }
+}
+
+.supportive-community-page h1,
+.supportive-community-page h2,
+.supportive-community-page h3 {
+  font-family: "Heebo", system-ui, sans-serif;
+  font-weight: 600;
+  color: inherit;
+  letter-spacing: normal;
+}
+
+/* Hero secondary action */
+.supportive-community-page .community-hero .hero-secondary-btn {
+  margin-top: 0.85rem;
+  font-family: "Heebo", system-ui, sans-serif;
+  font-size: 1rem;
+  font-weight: 600;
+  color: white;
+  background: transparent;
+  border: 2px solid rgba(255, 255, 255, 0.9);
+  border-radius: var(--radius);
+  padding: 0.65rem 1.1rem;
+  cursor: pointer;
+}
+
+.supportive-community-page .community-hero .hero-secondary-btn:hover,
+.supportive-community-page .community-hero .hero-secondary-btn:active {
+  background: rgba(255, 255, 255, 0.15);
+}
+
+.supportive-community-page .community-hero .hero-secondary-btn:focus-visible {
+  outline: 4px solid var(--color-border);
+  outline-offset: 3px;
+}
+
+/* Cards with CTA */
+.supportive-community-page .service-card .primary-btn {
+  width: 100%;
+  margin-top: 1rem;
+}
+
+.supportive-community-page .community-actions--inline {
+  padding-top: 0;
+  padding-bottom: 0;
+}
+
+/* Primary / secondary buttons (shared) */
+.supportive-community-page .primary-btn,
+.supportive-community-page .community-actions .primary-btn,
+.supportive-community-page .payment-form .primary-btn,
+.supportive-community-page .payment-form button[type="submit"] {
+  font-family: "Heebo", system-ui, sans-serif;
+  font-size: 1.25rem;
+  font-weight: 700;
+  color: white;
+  background: var(--color-primary);
+  border: none;
+  border-radius: var(--radius);
+  padding: 1.05rem 1.2rem;
+  min-height: 58px;
+  width: 100%;
+  margin-top: 0;
+  cursor: pointer;
+  box-sizing: border-box;
+}
+
+.supportive-community-page .primary-btn:hover:not(:disabled),
+.supportive-community-page .community-actions .primary-btn:hover:not(:disabled),
+.supportive-community-page .payment-form .primary-btn:hover:not(:disabled),
+.supportive-community-page .payment-form button[type="submit"]:hover:not(:disabled) {
+  background: var(--color-primary-hover);
+}
+
+.supportive-community-page .primary-btn:disabled,
+.supportive-community-page .payment-form button[type="submit"]:disabled {
+  opacity: 0.6;
+  cursor: not-allowed;
+}
+
+.supportive-community-page .secondary-btn,
+.supportive-community-page .community-actions .secondary-btn {
+  font-family: "Heebo", system-ui, sans-serif;
+  font-size: 1.1rem;
+  font-weight: 600;
+  color: var(--color-primary);
+  background: #ffffff;
+  border: 1.5px solid var(--color-border);
+  border-radius: var(--radius);
+  padding: 0.95rem 1.2rem;
+  min-height: 52px;
+  width: 100%;
+  margin-top: 0;
+  cursor: pointer;
+  box-sizing: border-box;
+}
+
+.supportive-community-page .secondary-btn:hover:not(:disabled) {
+  background: var(--color-accent-light);
+}
+
+.supportive-community-page .community-actions.form-actions--split {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 1rem;
+}
+
+.supportive-community-page .form-actions--split .primary-btn,
+.supportive-community-page .form-actions--split button[type="submit"] {
+  grid-column: 2;
+}
+
+.supportive-community-page .form-actions--split .secondary-btn {
+  grid-column: 1;
+}
+
+/* Forms */
+.supportive-community-page .payment-form {
+  display: flex;
+  flex-direction: column;
+  gap: 1rem;
+  margin-top: 0.5rem;
+}
+
+.supportive-community-page .payment-form input[type="text"],
+.supportive-community-page .payment-form input[type="tel"],
+.supportive-community-page .lookup-id-input {
+  width: 100%;
+  box-sizing: border-box;
+  padding: 0.85rem 1rem;
+  font-size: 1.1rem;
+  font-family: "Heebo", system-ui, sans-serif;
+  border-radius: var(--radius);
+  border: 1.5px solid var(--color-card-border);
+  text-align: right;
+  direction: rtl;
+  color: var(--color-text);
+}
+
+.supportive-community-page .payment-form input[type="tel"],
+.supportive-community-page .payment-form input[name="idNumber"],
+.supportive-community-page .lookup-id-input {
+  direction: ltr;
+  text-align: right;
+}
+
+.supportive-community-page .form-label {
+  font-size: 1rem;
+  font-weight: 600;
+  color: var(--color-text);
+}
+
+.supportive-community-page .step-panel-title {
+  font-size: 1.35rem;
+  color: var(--color-primary);
+  margin: 0 0 0.35rem;
+}
+
+.supportive-community-page .step-panel-hint,
+.supportive-community-page .lookup-screen-intro {
+  margin: 0 0 1rem;
+  font-size: 1.05rem;
+  color: var(--color-muted);
+  line-height: 1.6;
+}
+
+.supportive-community-page .form-error {
+  margin: 0;
+  padding: 1rem 1.1rem;
+  border-radius: var(--radius);
+  background: #fef2f2;
+  border: 1.5px solid #fecaca;
+  color: #991b1b;
+  font-size: 1.05rem;
+}
+
+.supportive-community-page code {
+  font-size: 0.9rem;
+  padding: 0.15rem 0.4rem;
+  border-radius: 6px;
+  background: var(--color-accent-light);
+  color: var(--color-text);
+}
+
+/* Payment methods */
+.supportive-community-page .payment-methods-grid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 0.75rem;
+}
+
+@media (max-width: 400px) {
+  .supportive-community-page .payment-methods-grid {
+    grid-template-columns: 1fr;
+  }
+}
+
+.supportive-community-page .payment-method-option {
+  display: flex;
+  align-items: center;
+  gap: 0.65rem;
+  padding: 1rem 1.1rem;
+  border-radius: var(--radius);
+  border: 1.5px solid var(--color-card-border);
+  background: #fff;
+  cursor: pointer;
+  font-size: 1.05rem;
+  color: var(--color-text);
+}
+
+.supportive-community-page .payment-method-option:has(input:checked) {
+  border-color: var(--color-primary);
+  background: var(--color-accent-light);
+}
+
+.supportive-community-page .payment-method-option input {
+  accent-color: var(--color-primary);
+  width: 1.15rem;
+  height: 1.15rem;
+  margin: 0;
+}
+
+.supportive-community-page .payment-summary {
+  display: flex;
+  flex-direction: column;
+  gap: 0.75rem;
+  padding: 1.15rem;
+  border-radius: var(--radius);
+  background: var(--color-accent-light);
+  border: 1.5px solid var(--color-border);
+}
+
+.supportive-community-page .payment-summary__row--total dd {
+  color: var(--color-primary);
+}
+
+/* Registration flow layout */
+.supportive-community-page .registration-flow {
+  display: flex;
+  flex-direction: column;
+  gap: 1rem;
+}
+
+.supportive-community-page .form-field {
+  display: flex;
+  flex-direction: column;
+  gap: 0.4rem;
+}
+
+.supportive-community-page .payment-methods {
+  margin: 0;
+  padding: 0;
+  border: none;
+}
+
+.supportive-community-page .payment-summary__row {
+  display: flex;
+  justify-content: space-between;
+  align-items: baseline;
+  gap: 0.75rem;
+  font-size: 1.05rem;
+}
+
+.supportive-community-page .payment-summary__row dt {
+  margin: 0;
+  color: var(--color-muted);
+}
+
+.supportive-community-page .payment-summary__row dd {
+  margin: 0;
+  font-weight: 600;
+  color: var(--color-text);
+}
+
+.supportive-community-page .cancel-registration-btn {
+  padding: 0.75rem 1rem;
+  font-size: 1rem;
+  font-weight: 600;
+  font-family: "Heebo", system-ui, sans-serif;
+  color: #7f1d1d;
+  background: #fff;
+  border: 1.5px solid var(--color-card-border);
+  border-radius: var(--radius);
+  cursor: pointer;
+}
+
+.supportive-community-page .cancel-registration-btn:hover:not(:disabled) {
+  background: #fef2f2;
+}
+
+.supportive-community-page .cancel-registration-btn:disabled {
+  opacity: 0.55;
+  cursor: not-allowed;
+}
+
+/* Stepper */
+.supportive-community-page .registration-stepper {
+  margin-bottom: 1.25rem;
+  max-width: var(--max-width);
+  margin-inline: auto;
+  padding: 0 1.2rem;
+}
+
+.supportive-community-page .registration-stepper__list {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 4px;
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+
+.supportive-community-page .registration-stepper__item {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 8px;
+  position: relative;
+  min-width: 0;
+  text-align: center;
+}
+
+.supportive-community-page .registration-stepper__item:not(:last-child)::after {
+  content: "";
+  position: absolute;
+  top: 16px;
+  inset-inline-start: 50%;
+  width: 100%;
+  height: 2px;
+  z-index: 0;
+}
+
+.supportive-community-page .registration-stepper__marker {
+  position: relative;
+  z-index: 1;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 32px;
+  height: 32px;
+  border-radius: 50%;
+  font-size: 0.85rem;
+  font-weight: 600;
+  color: var(--color-muted);
+  background: #fff;
+  border: 2px solid var(--color-card-border);
+}
+
+.supportive-community-page .registration-stepper__check {
+  font-size: 1rem;
+  line-height: 1;
+  font-weight: 700;
+}
+
+.supportive-community-page .registration-stepper__label {
+  font-size: 0.72rem;
+  line-height: 1.25;
+  color: var(--color-muted);
+  max-width: 72px;
+}
+
+.supportive-community-page .registration-stepper__item--current .registration-stepper__label {
+  color: var(--color-text);
+  font-weight: 600;
+}
+
+@media (min-width: 420px) {
+  .supportive-community-page .registration-stepper__label {
+    font-size: 0.8rem;
+    max-width: none;
+  }
+}
+
+.supportive-community-page .registration-stepper__item:not(:last-child)::after {
+  background: var(--color-card-border);
+}
+
+.supportive-community-page .registration-stepper__item--complete:not(:last-child)::after {
+  background: var(--color-primary);
+}
+
+.supportive-community-page .registration-stepper__item--current .registration-stepper__marker {
+  border-color: var(--color-primary);
+  color: var(--color-primary);
+  box-shadow: 0 0 0 3px var(--color-accent-light);
+}
+
+.supportive-community-page .registration-stepper__item--complete .registration-stepper__marker {
+  border-color: var(--color-primary);
+  background: var(--color-primary);
+  color: #fff;
+}
+
+.supportive-community-page .registration-stepper__item--complete .registration-stepper__label {
+  color: var(--color-primary);
+}
+
+/* Lookup */
+.supportive-community-page .lookup-registration-item {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 0.75rem;
+}
+
+.supportive-community-page .lookup-registration-meta {
+  margin: 0.25rem 0 0;
+  font-size: 1rem;
+  font-weight: 400;
+  color: var(--color-muted);
+}
+
+.supportive-community-page .lookup-success {
+  margin: 0 0 1rem;
+  padding: 1rem 1.1rem;
+  border-radius: var(--radius);
+  background: #f0fdf4;
+  border: 1.5px solid #bbf7d0;
+  color: #166534;
+  font-weight: 600;
+}
+
+.supportive-community-page .lookup-error {
+  margin: 0 0 1rem;
+  padding: 1rem 1.1rem;
+  border-radius: var(--radius);
+  background: #fef2f2;
+  border: 1.5px solid #fecaca;
+  color: #991b1b;
+  font-weight: 600;
+}
+
+.supportive-community-page .payment-success-message {
+  margin: 0 0 1rem;
+}
+
+.supportive-community-page .payment-success-lead {
+  font-size: 1.35rem;
+  font-weight: 700;
+  color: var(--color-primary);
+  margin: 0 0 0.75rem;
+}
+
+.supportive-community-page .payment-success-note {
+  font-size: 1.05rem;
+  color: var(--color-muted);
+}
+
+.supportive-community-page .bit-phone-number {
+  font-size: 1.75rem;
+  font-weight: 700;
+  color: var(--color-primary);
+  direction: ltr;
+  text-align: center;
+  margin: 0.75rem 0;
+  padding: 1rem;
+  border-radius: var(--radius);
+  background: #fff;
+  border: 1.5px solid var(--color-border);
+}
+
+.supportive-community-page .registration-flow.community-section {
+  padding-top: 1.2rem;
+}
