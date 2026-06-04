@@ -1,0 +1,49 @@
+/* Plus60Page.css */
+.plus60-page {
+  max-width: var(--max-width);
+  margin: 0 auto;
+  padding: 1.8rem 1.2rem;
+}
+
+.activity-card {
+  background: #ffffff;
+  border: 1.5px solid var(--color-card-border);
+  border-radius: var(--radius);
+  padding: 1.25rem;
+  margin-bottom: 1.5rem;
+  box-shadow: 0 3px 10px rgba(0, 0, 0, 0.04);
+}
+
+.status {
+  display: inline-block;
+  padding: 4px 14px;
+  border-radius: 20px;
+  font-weight: 600;
+}
+
+.open { background-color: #dff5df; color: #236b38; }
+.closed { background-color: #ffe0e0; color: #ef4444; }
+
+/* تنسيقات التقويم والمنبثقة */
+.activities-calendar {
+  background: white;
+  border: 1.5px solid var(--color-card-border);
+  border-radius: var(--radius);
+  padding: 1.5rem;
+  margin-top: 2rem;
+}
+
+.calendar-popup {
+  position: fixed;
+  top: 0; left: 0; width: 100%; height: 100%;
+  background: rgba(0, 0, 0, 0.4);
+  display: flex; justify-content: center; align-items: center;
+  z-index: 1000;
+}
+
+.calendar-popup-box {
+  background: white;
+  width: 85%; max-width: 400px;
+  border-radius: var(--radius);
+  padding: 1.5rem; position: relative;
+}

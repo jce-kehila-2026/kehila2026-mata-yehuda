@@ -1,0 +1,185 @@
+.home-page {
+  max-width: var(--max-width);
+  margin: 0 auto;
+  padding: 1.8rem 1.2rem;
+}
+
+h1 {
+  font-size: 2rem;
+  color: var(--color-primary);
+  margin: 0 0 1.2rem;
+  padding-bottom: 0.55rem;
+  border-bottom: 3px solid var(--color-primary);
+  text-align: center;
+}
+
+.program-card {
+  background: #ffffff;
+  border: 1.5px solid var(--color-card-border);
+  border-radius: var(--radius);
+  padding: 1.25rem;
+  margin-bottom: 1.5rem;
+  box-shadow: 0 3px 10px rgba(0, 0, 0, 0.04);
+  text-align: center;
+}
+
+.program-card h2 {
+  font-size: 1.4rem;
+  color: var(--color-primary);
+  margin: 0 0 0.55rem;
+}
+
+.program-card img {
+  width: 100%;
+  max-height: 220px;
+  object-fit: cover;
+  border-radius: calc(var(--radius) - 4px);
+  margin-bottom: 1rem;
+}
+
+.program-buttons {
+  display: flex;
+  gap: 10px;
+  justify-content: center;
+  margin-top: 1rem;
+}
+
+.login-area {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-end;
+  margin-bottom: 1rem;
+  position: relative;
+}
+
+.login-box {
+  position: absolute;
+  top: 45px;
+  background: white;
+  border: 1.5px solid var(--color-card-border);
+  border-radius: 12px;
+  padding: 0.5rem;
+  display: flex;
+  flex-direction: column;
+  gap: 0.5rem;
+  box-shadow: 0 4px 12px rgba(0,0,0,0.1);
+  z-index: 10;
+}
+
+.react-calendar {
+  width: 100% !important;
+  max-width: 100%;
+  background: white;
+  font-family: "Heebo", system-ui, sans-serif !important; 
+  border: none !important; 
+  direction: rtl !important;
+}
+
+.react-calendar__navigation {
+  display: flex;
+  height: 48px;
+  margin-bottom: 1rem;
+  direction: ltr !important;
+}
+
+.react-calendar__navigation button {
+  min-width: 44px;
+  background: none !important;
+  color: var(--color-primary) !important; 
+  font-size: 1.2rem;
+  border-radius: 8px !important;
+  padding: 0 !important;
+}
+
+.react-calendar__navigation button:enabled:hover,
+.react-calendar__navigation button:enabled:focus {
+  background-color: var(--color-accent-light) !important;
+}
+
+.react-calendar__month-view__weekdays {
+  display: grid !important;
+  grid-template-columns: repeat(7, 1fr) !important;
+  text-align: center;
+  font-weight: 600;
+  font-size: 0.85rem;
+  color: var(--color-muted);
+  padding-bottom: 0.5rem;
+  direction: rtl !important;
+}
+
+.react-calendar__month-view__weekdays__weekday abbr {
+  text-decoration: none; 
+}
+
+.react-calendar__month-view__days {
+  display: grid !important;
+  grid-template-columns: repeat(7, 1fr) !important;
+  direction: rtl !important;
+}
+
+.react-calendar__tile {
+  width: 100% !important;
+  max-width: 100% !important;
+  padding: 8px 4px !important;
+  background: none;
+  text-align: center;
+  line-height: 1.2;
+  border-radius: 10px; 
+  transition: all 0.15s ease;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: flex-start;
+  min-height: 65px;
+  box-sizing: border-box;
+}
+
+.react-calendar__tile:enabled:hover,
+.react-calendar__tile:enabled:focus {
+  background-color: var(--color-accent-light) !important;
+  color: var(--color-primary-hover) !important;
+}
+
+.react-calendar__tile--now {
+  background: #eef7f0 !important;
+  color: var(--color-primary) !important;
+  font-weight: bold;
+  border: 1px dashed var(--color-primary) !important;
+}
+
+.react-calendar__tile--active {
+  background: var(--color-primary) !important;
+  color: white !important;
+  font-weight: bold;
+  box-shadow: 0 4px 10px rgba(45, 125, 70, 0.3);
+}
+
+.react-calendar__tile--active:enabled:hover,
+.react-calendar__tile--active:enabled:focus {
+  background: var(--color-primary-hover) !important;
+  color: white !important;
+}
+
+.calendar-activity-name {
+  font-size: 0.7rem !important;
+  background-color: var(--color-accent-light);
+  color: var(--color-primary);
+  padding: 2px 4px;
+  border-radius: 4px;
+  margin: 4px 0 0 0 !important;
+  width: 90%;
+  text-align: center;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  display: block;
+}
+
+.react-calendar__tile--active .calendar-activity-name {
+  background-color: rgba(255, 255, 255, 0.25);
+  color: white;
+}
+
+.react-calendar__month-view__days__day--neighboringMonth {
+  color: #ccc !important;
+}
