@@ -189,7 +189,12 @@ function AddParticipant() {
                     onChange={(e) => updateField("mobility_limitations", e.target.value)}
                 />
 
-                <button type="button" onClick={handleAddParticipant} disabled={loading}>
+                <button
+                    type="button"
+                    className="staff-button"
+                    onClick={handleAddParticipant}
+                    disabled={loading}
+                >
                     הוספת משתתף
                 </button>
             </div>

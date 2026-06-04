@@ -1,0 +1,121 @@
+/* Staff login page */
+
+.staff-login-page {
+  width: 100vw;
+  min-height: 100vh;
+  min-height: 100dvh;
+  margin: 0;
+  padding: 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: var(--color-accent-light);
+  font-family: var(--staff-font-family);
+  font-size: 20px;
+  line-height: 1.7;
+  color: var(--color-text);
+  text-align: right;
+  direction: rtl;
+  box-sizing: border-box;
+  flex: 1;
+}
+
+.staff-login-page *,
+.staff-login-page *::before,
+.staff-login-page *::after {
+  box-sizing: border-box;
+}
+
+.staff-login-card {
+  width: min(90%, 520px);
+  margin: 1.5rem 1.25rem;
+  background: var(--color-bg);
+  border: 1.5px solid var(--color-card-border);
+  border-radius: var(--radius);
+  box-shadow: 0 3px 10px rgba(0, 0, 0, 0.04);
+  overflow: hidden;
+}
+
+.staff-login-header {
+  background: linear-gradient(
+    135deg,
+    var(--color-primary) 0%,
+    var(--color-primary-mid) 50%,
+    var(--color-primary-light) 100%
+  );
+  color: var(--color-bg);
+  text-align: center;
+  padding: 1.5rem 1.25rem 1.35rem;
+}
+
+.staff-login-header__title {
+  margin: 0 0 0.4rem;
+  font-size: 1.85rem;
+  font-weight: 700;
+  line-height: 1.25;
+  color: var(--color-bg);
+}
+
+.staff-login-header__subtitle {
+  margin: 0;
+  font-size: 1.05rem;
+  line-height: 1.6;
+  color: var(--color-bg);
+  opacity: 0.95;
+}
+
+.staff-login-body {
+  padding: 1.5rem 1.35rem 1.75rem;
+}
+
+.staff-login-icon {
+  display: block;
+  width: fit-content;
+  margin: 0 auto 1.1rem;
+  font-size: 2.5rem;
+  line-height: 1;
+  text-align: center;
+}
+
+.staff-login-form {
+  gap: 1rem;
+  max-width: none;
+  margin: 0;
+}
+
+.staff-login-form label {
+  font-size: 1.1rem;
+  font-weight: 600;
+}
+
+.staff-login-submit {
+  margin-top: 0.35rem;
+  width: 100%;
+}
+
+.staff-login-form .staff-alert {
+  margin: 0;
+}
+
+@media (max-width: 768px) {
+  .staff-login-page {
+    width: 100%;
+    padding: 1rem;
+  }
+
+  .staff-login-card {
+    width: 100%;
+    max-width: 100%;
+    margin: 0;
+  }
+
+  .staff-login-body {
+    padding: 1.25rem 1rem 1.5rem;
+  }
+}
+
+@media (max-width: 480px) {
+  .staff-login-header__title {
+    font-size: 1.5rem;
+  }
+}

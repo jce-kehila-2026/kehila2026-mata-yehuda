@@ -100,36 +100,45 @@ function SendMessages() {
     }
 
     return (
-        <div>
-            <h1>שליחת הודעות</h1>
+        <div className="staff-page staff-page--messages">
+            <header className="staff-header">
+                <h1>שליחת הודעות</h1>
+            </header>
 
-            {error && <p style={{ color: "red" }}>{error}</p>}
-            {success && <p style={{ color: "green", whiteSpace: "pre-line" }}>{success}</p>}
-            {loading && <p>טוען נמענים...</p>}
+            <div className="staff-container">
+                {error && <p className="staff-alert staff-alert--error">{error}</p>}
+                {success && (
+                    <p className="staff-alert staff-alert--success" style={{ whiteSpace: "pre-line" }}>
+                        {success}
+                    </p>
+                )}
+                {loading && <p className="staff-meta">טוען נמענים...</p>}
 
-            {!loading && (
-                <>
-                    <MessageForm
-                        title={title}
-                        body={body}
-                        complianceNote={WHATSAPP_COMPLIANCE_NOTE}
-                        recipientCount={recipients.length}
-                        consentedCount={consentedCount}
-                        onTitleChange={setTitle}
-                        onBodyChange={setBody}
-                    />
+                {!loading && (
+                    <section className="staff-section">
+                        <MessageForm
+                            title={title}
+                            body={body}
+                            complianceNote={WHATSAPP_COMPLIANCE_NOTE}
+                            recipientCount={recipients.length}
+                            consentedCount={consentedCount}
+                            onTitleChange={setTitle}
+                            onBodyChange={setBody}
+                        />
 
-                    <div className="staff-form message-actions">
-                        <button
-                            type="button"
-                            onClick={handleSendToAll}
-                            disabled={sending || recipients.length === 0}
-                        >
-                            {sending ? "שולח..." : "שליחה לכל המשתתפים"}
-                        </button>
-                    </div>
-                </>
-            )}
+                        <div className="staff-actions staff-actions--inline message-actions">
+                            <button
+                                type="button"
+                                className="staff-button"
+                                onClick={handleSendToAll}
+                                disabled={sending || recipients.length === 0}
+                            >
+                                {sending ? "שולח..." : "שליחה לכל המשתתפים"}
+                            </button>
+                        </div>
+                    </section>
+                )}
+            </div>
         </div>
     );
 }

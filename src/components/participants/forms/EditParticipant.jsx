@@ -306,12 +306,21 @@ function EditParticipant({
                 />
 
                 {onCancel && (
-                    <button type="button" onClick={onCancel}>
+                    <button
+                        type="button"
+                        className="staff-button staff-button--secondary"
+                        onClick={onCancel}
+                    >
                         חזרה לרשימת בקשות
                     </button>
                 )}
 
-                <button type="button" onClick={handleUpdateParticipant} disabled={loading}>
+                <button
+                    type="button"
+                    className="staff-button"
+                    onClick={handleUpdateParticipant}
+                    disabled={loading}
+                >
                     {completeRegistration ? "השלמת רישום" : "שמירת שינויים"}
                 </button>
             </div>

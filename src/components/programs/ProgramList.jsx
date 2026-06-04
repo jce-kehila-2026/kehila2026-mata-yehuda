@@ -12,7 +12,7 @@ function ProgramList({ programs, loading, onEdit, onDelete }) {
                 <p>אין תוכניות במערכת</p>
             )}
 
-            <div className="programs-list">
+            <div className="staff-grid staff-grid--cards staff-grid--compact staff-grid--programs programs-list">
                 {programs.map((program) => (
                     <ProgramCard
                         key={program.id}

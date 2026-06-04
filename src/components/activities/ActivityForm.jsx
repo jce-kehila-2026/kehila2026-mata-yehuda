@@ -123,9 +123,14 @@ function ActivityForm({
                 : 0,
             price: Number(price),
             price_note: priceNote,
-            is_open: isOpen,
-            created_at: editingActivity ? editingActivity.data.created_at : Timestamp.now()
+            is_open: isOpen
         };
+
+        if (!editingActivity) {
+            activityData.created_at = Timestamp.now();
+        } else if (editingActivity.data?.created_at) {
+            activityData.created_at = editingActivity.data.created_at;
+        }
         await onSubmit(activityData);
         setName("");
         setDescription("");
@@ -143,104 +148,92 @@ function ActivityForm({
 
 
     return (
-        <div>
-            <div className="staff-form">
-                <label>שם הפעולה</label>
-                <input
-                    type="text"
-                    value={name}
-                    onChange={(e) => setName(e.target.value)}
-                />
-            </div>
-            <div className="staff-form">
-                <label>תיאור</label>
-                <textarea
-                    type="text"
-                    value={description}
-                    onChange={(e) => setDescription(e.target.value)}
-                />
-            </div>
-            <div className="staff-form">
-                <label>קישור לתמונה</label>
-                <input
-                    type="text"
-                    value={imageURL}
-                    onChange={(e) => setImageURL(e.target.value)}
-                />
-            </div>
-            <div className="staff-form">
-                <label>תאריך הפעולה</label>
-                <input
-                    type="date"
-                    value={startDate}
-                    onChange={(e) => setStartDate(e.target.value)}
-                />
-            </div>
-            <div className="staff-form">
-                <label>מספר משתתפים מקסימלי</label>
-                <input
-                    type="number"
-                    value={maxParticipants}
-                    onChange={(e) => setMaxParticipants(e.target.value)}
-                />
-            </div>
-            <div className="staff-form">
-                <label>תאריך אחרון להרשמה</label>
-                <input
-                    type="date"
-                    value={registrationDeadLine}
-                    onChange={(e) => setRegistrationDeadLine(e.target.value)}
-                />
-            </div>
-            <div className="staff-form">
-                <label>שעת התחלה</label>
-                <input
-                    type="time"
-                    value={startTime}
-                    onChange={(e) => setStartTime(e.target.value)}
-                />
-            </div>
-            <div className="staff-form">
-                <label>שעת סיום</label>
-                <input
-                    type="time"
-                    value={endTime}
-                    onChange={(e) => setEndTime(e.target.value)}
-                />
-            </div>
-            <div className="staff-form">
-                <label>יום בשבוע</label>
-                <select
-                    value={dayOfWeek}
-                    onChange={(e) => setDayOfWeek(e.target.value)}
-                >
-                    <option value="">בחר יום</option>
-                    <option value="sunday">יום ראשון</option>
-                    <option value="monday">יום שני</option>
-                    <option value="tuesday">יום שלישי</option>
-                    <option value="wednesday">יום רביעי</option>
-                    <option value="thursday">יום חמישי</option>
-                    <option value="friday">יום שישי</option>
-                    <option value="saturday">יום שבת</option>
-                </select>
-            </div>
-            <div className="staff-form">
-                <label>מחיר</label>
-                <input
-                    type="number"
-                    value={price}
-                    onChange={(e) => setPrice(e.target.value)}
-                />
-            </div>
-            <div className="staff-form">
-                <label>הערת מחיר</label>
-                <input
-                    type="text"
-                    value={priceNote}
-                    onChange={(e) => setPriceNote(e.target.value)}
-                />
-            </div>
-            <div className="row checkbox-row">
+        <div className="staff-form">
+            <label>שם הפעולה</label>
+            <input
+                type="text"
+                value={name}
+                onChange={(e) => setName(e.target.value)}
+            />
+
+            <label>תיאור</label>
+            <textarea
+                value={description}
+                onChange={(e) => setDescription(e.target.value)}
+            />
+
+            <label>קישור לתמונה</label>
+            <input
+                type="text"
+                value={imageURL}
+                onChange={(e) => setImageURL(e.target.value)}
+            />
+
+            <label>תאריך הפעולה</label>
+            <input
+                type="date"
+                value={startDate}
+                onChange={(e) => setStartDate(e.target.value)}
+            />
+
+            <label>מספר משתתפים מקסימלי</label>
+            <input
+                type="number"
+                value={maxParticipants}
+                onChange={(e) => setMaxParticipants(e.target.value)}
+            />
+
+            <label>תאריך אחרון להרשמה</label>
+            <input
+                type="date"
+                value={registrationDeadLine}
+                onChange={(e) => setRegistrationDeadLine(e.target.value)}
+            />
+
+            <label>שעת התחלה</label>
+            <input
+                type="time"
+                value={startTime}
+                onChange={(e) => setStartTime(e.target.value)}
+            />
+
+            <label>שעת סיום</label>
+            <input
+                type="time"
+                value={endTime}
+                onChange={(e) => setEndTime(e.target.value)}
+            />
+
+            <label>יום בשבוע</label>
+            <select
+                value={dayOfWeek}
+                onChange={(e) => setDayOfWeek(e.target.value)}
+            >
+                <option value="">בחר יום</option>
+                <option value="sunday">יום ראשון</option>
+                <option value="monday">יום שני</option>
+                <option value="tuesday">יום שלישי</option>
+                <option value="wednesday">יום רביעי</option>
+                <option value="thursday">יום חמישי</option>
+                <option value="friday">יום שישי</option>
+                <option value="saturday">יום שבת</option>
+            </select>
+
+            <label>מחיר</label>
+            <input
+                type="number"
+                value={price}
+                onChange={(e) => setPrice(e.target.value)}
+            />
+
+            <label>הערת מחיר</label>
+            <input
+                type="text"
+                value={priceNote}
+                onChange={(e) => setPriceNote(e.target.value)}
+            />
+
+            <div className="checkbox-row">
                 <label>פתוח להרשמה</label>
                 <input
                     type="checkbox"
@@ -248,12 +241,21 @@ function ActivityForm({
                     onChange={(e) => setIsOpen(e.target.checked)}
                 />
             </div>
-            <button type="button" onClick={handleSubmit}>
+
+            <button
+                type="button"
+                className="staff-button"
+                onClick={handleSubmit}
+            >
                 {editingActivity ? "עדכון פעילות" : "הוספת פעילות"}
             </button>
 
             {editingActivity && (
-                <button type="button" onClick={handleCancel}>
+                <button
+                    type="button"
+                    className="staff-button staff-button--secondary"
+                    onClick={handleCancel}
+                >
                     ביטול עריכה
                 </button>
             )}

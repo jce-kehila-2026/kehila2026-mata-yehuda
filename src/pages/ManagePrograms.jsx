@@ -1,4 +1,5 @@
 import { useEffect, useState } from "react";
+import { buildStaffPage, staffNavigateBack } from "../utils/staffNavigation";
 import {
     fetchPrograms,
     addProgram,
@@ -14,7 +15,7 @@ import {
 import ProgramForm from "../components/programs/ProgramForm";
 import ProgramList from "../components/programs/ProgramList";
 
-function ManagePrograms() {
+function ManagePrograms({ programView, onNavigate }) {
     const [programs, setPrograms] = useState([]);
     const [title, setTitle] = useState("");
     const [description, setDescription] = useState("");
@@ -57,6 +58,14 @@ function ManagePrograms() {
         loadPrograms();
     }, []);
 
+    useEffect(() => {
+        if (programView !== "edit" && editingId) {
+            resetForm();
+            setError("");
+            setSuccess("");
+        }
+    }, [programView]);
+
     function validateForm() {
         if (!title.trim()) {
             setError("יש להזין כותרת");
@@ -91,6 +100,11 @@ function ManagePrograms() {
             }
 
             resetForm();
+            if (programView === "edit") {
+                staffNavigateBack();
+            } else {
+                onNavigate("programs");
+            }
             await loadPrograms();
         } catch (err) {
             console.log(err);
@@ -104,12 +118,18 @@ function ManagePrograms() {
         fillForm(program);
         setError("");
         setSuccess("");
+        onNavigate(buildStaffPage("programs", "edit"));
     }
 
     function handleCancelEdit() {
         resetForm();
         setError("");
         setSuccess("");
+        if (programView === "edit") {
+            staffNavigateBack();
+        } else {
+            onNavigate("programs");
+        }
     }
 
     async function handleDelete(programId) {
@@ -128,6 +148,11 @@ function ManagePrograms() {
             await deleteProgram(programId);
             if (editingId === programId) {
                 resetForm();
+                if (programView === "edit") {
+                    staffNavigateBack();
+                } else {
+                    onNavigate("programs");
+                }
             }
             setSuccess("התוכנית נמחקה בהצלחה");
             setError("");
@@ -139,34 +164,44 @@ function ManagePrograms() {
     }
 
     return (
-        <div>
-            <h1>ניהול תוכניות</h1>
+        <div className="staff-page staff-page--programs">
+            <header className="staff-header">
+                <h1>ניהול תוכניות</h1>
+            </header>
 
-            {editingId && (
-                <h2>{getProgramsPageTitle(editingId)}</h2>
-            )}
+            <div className="staff-container">
+                {editingId && (
+                    <section className="staff-section">
+                        <h2>{getProgramsPageTitle(editingId)}</h2>
+                    </section>
+                )}
 
-            <ProgramForm
-                title={title}
-                description={description}
-                imageUrl={imageUrl}
-                editingId={editingId}
-                saving={saving}
-                error={error}
-                success={success}
-                onTitleChange={setTitle}
-                onDescriptionChange={setDescription}
-                onImageUrlChange={setImageUrl}
-                onSave={handleSave}
-                onCancelEdit={handleCancelEdit}
-            />
+                <section className="staff-section">
+                    <ProgramForm
+                        title={title}
+                        description={description}
+                        imageUrl={imageUrl}
+                        editingId={editingId}
+                        saving={saving}
+                        error={error}
+                        success={success}
+                        onTitleChange={setTitle}
+                        onDescriptionChange={setDescription}
+                        onImageUrlChange={setImageUrl}
+                        onSave={handleSave}
+                        onCancelEdit={handleCancelEdit}
+                    />
+                </section>
 
-            <ProgramList
-                programs={programs}
-                loading={loading}
-                onEdit={handleEdit}
-                onDelete={handleDelete}
-            />
+                <section className="staff-section">
+                    <ProgramList
+                        programs={programs}
+                        loading={loading}
+                        onEdit={handleEdit}
+                        onDelete={handleDelete}
+                    />
+                </section>
+            </div>
         </div>
     );
 }

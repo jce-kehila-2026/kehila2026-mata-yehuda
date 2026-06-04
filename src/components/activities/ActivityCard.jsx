@@ -1,45 +1,76 @@
 import { formatDate, formatTime } from "../../utils/dateUtils";
+import { hasDisplayNumber, hasFormattedDisplay, hasValue } from "../../utils/hasValue";
 
 function ActivityCard({ activity, onDelete, onEdit }) {
-
+    const data = activity.data;
+    const imageUrl = data.image_url?.trim();
+    const startDateLabel = formatDate(data.start_date);
+    const registrationDeadlineLabel = formatDate(data.registration_deadline);
+    const startTimeLabel = formatTime(data.start_date);
+    const endTimeLabel = formatTime(data.end_date);
 
     return (
-        <div className="activity-card">
-            <h3>{activity.data.name}</h3>
+        <article className="staff-card activity-card">
+            <div className="staff-card-body">
+                {hasValue(data.name) && <h3>{data.name}</h3>}
 
-            <p>תיאור: {activity.data.description}</p>
+                {hasValue(data.description) && <p>תיאור: {data.description}</p>}
 
-            <p>תאריך הפעולה: {formatDate(activity.data.start_date)}</p>
-            <p>תאריך אחרון להרשמה: {formatDate(activity.data.registration_deadline)}</p>
+                {hasFormattedDisplay(startDateLabel) && (
+                    <p>תאריך הפעולה: {startDateLabel}</p>
+                )}
+                {hasFormattedDisplay(registrationDeadlineLabel) && (
+                    <p>תאריך אחרון להרשמה: {registrationDeadlineLabel}</p>
+                )}
 
-            <p>שעת התחלה: {formatTime(activity.data.start_date)}</p>
-            <p>שעת סיום: {formatTime(activity.data.end_date)}</p>
+                {hasFormattedDisplay(startTimeLabel) && (
+                    <p>שעת התחלה: {startTimeLabel}</p>
+                )}
+                {hasFormattedDisplay(endTimeLabel) && (
+                    <p>שעת סיום: {endTimeLabel}</p>
+                )}
 
-            <p>יום בשבוע: {activity.data.day_of_week}</p>
-            <p>מספר משתתפים: {activity.data.max_participants}</p>
-            <p>מחיר: {activity.data.price}</p>
-            <p>הערות מחיר: {activity.data.price_note}</p>
+                {hasValue(data.day_of_week) && (
+                    <p>יום בשבוע: {data.day_of_week}</p>
+                )}
+                {hasDisplayNumber(data.max_participants) && (
+                    <p>מספר משתתפים: {data.max_participants}</p>
+                )}
+                {hasDisplayNumber(data.price) && <p>מחיר: {data.price}</p>}
+                {hasValue(data.price_note) && <p>הערות מחיר: {data.price_note}</p>}
 
-            <p>סטטוס: {activity.data.is_open ? "פתוח" : "סגור"}</p>
+                <p>סטטוס: {data.is_open ? "פתוח" : "סגור"}</p>
 
-            {activity.data.image_url && (
-                <img
-                    src={activity.data.image_url}
-                    alt={activity.data.name}
-                    width="200"
-                />
-            )}
+                {imageUrl && (
+                    <img
+                        src={imageUrl}
+                        alt={data.name || "פעילות"}
+                        onError={(e) => {
+                            e.currentTarget.style.display = "none";
+                        }}
+                    />
+                )}
+            </div>
 
-            <button onClick={() => onDelete(activity.id)}>
-                מחיקה
-            </button>
-
-            {onEdit && (
-                <button onClick={() => onEdit(activity)}>
-                    עריכה
+            <div className="activity-card-actions">
+                {onEdit && (
+                    <button
+                        type="button"
+                        className="staff-button staff-button--small staff-button--secondary"
+                        onClick={() => onEdit(activity)}
+                    >
+                        עריכה
+                    </button>
+                )}
+                <button
+                    type="button"
+                    className="staff-button staff-button--small staff-button--danger"
+                    onClick={() => onDelete(activity.id)}
+                >
+                    מחיקה
                 </button>
-            )}
-        </div>
+            </div>
+        </article>
     );
 }
 

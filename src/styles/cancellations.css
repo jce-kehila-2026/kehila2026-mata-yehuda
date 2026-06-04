@@ -1,0 +1,11 @@
+/* ManageCancellations — cancellation filters & CancellationCard */
+
+.cancellation-filters,
+.staff-list-filters.cancellation-filters {
+  margin-bottom: 0;
+}
+
+.cancellation-refund-form {
+  margin-top: 0.75rem;
+  width: 100%;
+}

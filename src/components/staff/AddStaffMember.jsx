@@ -118,7 +118,11 @@ function AddStaffMember() {
                     />
                 </div>
 
-                <button onClick={handleAddStaffMember}>
+                <button
+                    type="button"
+                    className="staff-button"
+                    onClick={handleAddStaffMember}
+                >
                     הוספת איש צוות
                 </button>
 

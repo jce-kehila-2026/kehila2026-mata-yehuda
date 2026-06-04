@@ -6,7 +6,7 @@ function RequestList({ requests, onCompleteRegistration }) {
     }
 
     return (
-        <div>
+        <div className="staff-grid staff-grid--cards staff-grid--detailed">
             {requests.map((request) => (
                 <RequestCard
                     key={request.registrationId || request.id}

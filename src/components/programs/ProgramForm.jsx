@@ -57,7 +57,12 @@ function ProgramForm({
                 />
             )}
 
-            <button onClick={onSave} disabled={saving}>
+            <button
+                type="button"
+                className="staff-button"
+                onClick={onSave}
+                disabled={saving}
+            >
                 {saving
                     ? "שומר..."
                     : editingId
@@ -66,7 +71,11 @@ function ProgramForm({
             </button>
 
             {editingId && (
-                <button type="button" onClick={onCancelEdit}>
+                <button
+                    type="button"
+                    className="staff-button staff-button--secondary"
+                    onClick={onCancelEdit}
+                >
                     ביטול עריכה
                 </button>
             )}

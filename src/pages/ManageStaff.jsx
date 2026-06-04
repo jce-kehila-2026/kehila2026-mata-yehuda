@@ -1,48 +1,90 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import AddStaffMember from "../components/staff/AddStaffMember";
 import StaffList from "../components/staff/StaffList";
 import EditStaffMember from "../components/staff/EditStaffMember";
+import { buildStaffPage, staffNavigateBack } from "../utils/staffNavigation";
 
-function ManageStaff() {
-    const [staffPage, setStaffPage] = useState("menu");
+function ManageStaff({ staffView, onNavigate }) {
     const [selectedStaff, setSelectedStaff] = useState(null);
+    const staffPage = staffView || "menu";
+
+    function navigateToView(view) {
+        onNavigate(buildStaffPage("manageStaff", view));
+    }
+
+    function goBack() {
+        staffNavigateBack();
+    }
+
+    useEffect(() => {
+        if (staffPage !== "edit") {
+            setSelectedStaff(null);
+        }
+    }, [staffPage]);
 
     return (
-        <div>
-            <h1>ניהול אנשי צוות</h1>
+        <div className="staff-page staff-page--staff">
+            <header className="staff-header">
+                <h1>ניהול אנשי צוות</h1>
+            </header>
 
-            {staffPage === "menu" && (
-                <div className="dashboard-buttons">
-                    <button onClick={() => setStaffPage("add")}>
-                        הוספת איש צוות
-                    </button>
+            <div className="staff-container">
+                {staffPage === "menu" && (
+                    <div className="staff-actions staff-actions--inline">
+                        <button
+                            type="button"
+                            className="staff-button"
+                            onClick={() => navigateToView("add")}
+                        >
+                            הוספת איש צוות
+                        </button>
 
-                    <button onClick={() => setStaffPage("list")}>
-                        רשימת אנשי צוות
-                    </button>
-                </div>
-            )}
+                        <button
+                            type="button"
+                            className="staff-button"
+                            onClick={() => navigateToView("list")}
+                        >
+                            רשימת אנשי צוות
+                        </button>
+                    </div>
+                )}
 
-            {staffPage !== "menu" && (
-                <button onClick={() => setStaffPage("menu")}>
-                    חזרה לניהול אנשי צוות
-                </button>
-            )}
+                {staffPage !== "menu" && (
+                    <div className="staff-toolbar">
+                        <button
+                            type="button"
+                            className="staff-button staff-button--secondary staff-button--small"
+                            onClick={goBack}
+                        >
+                            חזרה לניהול אנשי צוות
+                        </button>
+                    </div>
+                )}
 
-            {staffPage === "add" && <AddStaffMember />}
+                {staffPage === "add" && (
+                    <section className="staff-section">
+                        <AddStaffMember />
+                    </section>
+                )}
 
-            {staffPage === "edit" && (
-                <EditStaffMember staff={selectedStaff} />
-            )}
+                {staffPage === "edit" && (
+                    <section className="staff-section">
+                        <EditStaffMember staff={selectedStaff} />
+                    </section>
+                )}
 
-            {staffPage === "list" && (
-                <StaffList
-                    onEditStaff={(staff) => {
-                        setSelectedStaff(staff);
-                        setStaffPage("edit");
-                    }}
-                />
-            )}            </div>
+                {staffPage === "list" && (
+                    <section className="staff-section staff-section--list">
+                        <StaffList
+                            onEditStaff={(staff) => {
+                                setSelectedStaff(staff);
+                                navigateToView("edit");
+                            }}
+                        />
+                    </section>
+                )}
+            </div>
+        </div>
     );
 }
 

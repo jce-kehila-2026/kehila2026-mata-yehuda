@@ -38,6 +38,7 @@ function RefundForm({ cancellationId, currentNotes, onMarkRefunded, disabled }) 
 
             <button
                 type="button"
+                className="staff-button"
                 onClick={handleMarkRefunded}
                 disabled={disabled || saving}
             >

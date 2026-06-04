@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useState, useEffect, useRef } from "react";
 import { signOut } from "firebase/auth";
 import { auth } from "../config/firebase";
 import ManageActivities from "./ManageActivities";
@@ -8,11 +8,110 @@ import ManageParticipants from "./ManageParticipants";
 import ViewRequests from "./ViewRequests";
 import ManageCancellations from "./ManageCancellations";
 import SendMessages from "./SendMessages";
+import ViewStatistics from "./ViewStatistics";
+import DashboardControlPanels from "../components/dashboard/DashboardControlPanels";
+import { fetchDashboardOverview } from "../services/dashboardService";
+import {
+    applyStaffPopState,
+    createStaffNavStack,
+    getStaffSection,
+    getStaffView,
+    getStepsBackToDashboard,
+    parseStaffPage,
+    pushStaffNavStack,
+    pushStaffPage,
+    replaceStaffPage,
+    staffNavigateToDashboard
+} from "../utils/staffNavigation";
 
-const TEAMMATE_PAGE_TOOLTIP = "העמוד יחובר לאחר מיזוג עם הצוות";
+const DASHBOARD_ACTIONS = [
+    { id: "activities", icon: "📅", label: "ניהול פעילויות", page: "activities" },
+    { id: "programs", icon: "📋", label: "ניהול תוכניות", page: "programs" },
+    { id: "manageStaff", icon: "👥", label: "ניהול אנשי צוות", page: "manageStaff" },
+    {
+        id: "manageParticipants",
+        icon: "🧑",
+        label: "ניהול משתתפים",
+        page: "manageParticipants"
+    },
+    { id: "messages", icon: "💬", label: "שליחת הודעות", page: "messages" },
+    { id: "statistics", icon: "📊", label: "צפייה בסטטיסטיקות", page: null },
+    { id: "requests", icon: "📝", label: "צפייה בבקשות", page: "requests" },
+    { id: "inquiries", icon: "📬", label: "צפיה בפניות", page: null },
+    { id: "cancellations", icon: "↩️", label: "ניהול ביטולים", page: "cancellations" },
+    { id: "attendance", icon: "✓", label: "בדיקת נוכחות", page: null },
+    { id: "volunteers", icon: "🤝", label: "ניהול מתנדבים", page: null }
+];
+
+const DASHBOARD_SUMMARY_LABELS = [
+    { id: "open-activities", label: "פעילויות פתוחות" },
+    { id: "pending-requests", label: "בקשות ממתינות" },
+    { id: "sent-messages", label: "הודעות שנשלחו" }
+];
+
+const SUBPAGE_TITLES = {
+    activities: "ניהול פעילויות",
+    manageStaff: "ניהול אנשי צוות",
+    programs: "ניהול תוכניות",
+    manageParticipants: "ניהול משתתפים",
+    requests: "צפייה בבקשות",
+    cancellations: "ניהול ביטולים",
+    messages: "שליחת הודעות",
+    statistics: "צפייה בסטטיסטיקות",
+    attendance: "בדיקת נוכחות"
+};
 
 function StaffDashboard({ onLogout }) {
     const [currentPage, setCurrentPage] = useState("dashboard");
+    const [dashboardOverview, setDashboardOverview] = useState(null);
+    const [dashboardLoading, setDashboardLoading] = useState(true);
+    const staffNavStackRef = useRef(createStaffNavStack("dashboard"));
+
+    useEffect(() => {
+        if (currentPage !== "dashboard") {
+            return undefined;
+        }
+
+        let cancelled = false;
+
+        setDashboardLoading(true);
+
+        fetchDashboardOverview()
+            .then((data) => {
+                if (!cancelled) {
+                    setDashboardOverview(data);
+                    setDashboardLoading(false);
+                }
+            })
+            .catch(() => {
+                if (!cancelled) {
+                    setDashboardOverview(null);
+                    setDashboardLoading(false);
+                }
+            });
+
+        return () => {
+            cancelled = true;
+        };
+    }, [currentPage]);
+
+    useEffect(() => {
+        replaceStaffPage("dashboard");
+        staffNavStackRef.current = createStaffNavStack("dashboard");
+
+        function handlePopState(event) {
+            const nextStaffPage =
+                event?.state?.staffPage ?? parseStaffPage(event?.state);
+            setCurrentPage(nextStaffPage);
+            staffNavStackRef.current = applyStaffPopState(
+                staffNavStackRef.current,
+                nextStaffPage
+            );
+        }
+
+        window.addEventListener("popstate", handlePopState);
+        return () => window.removeEventListener("popstate", handlePopState);
+    }, []);
 
     async function handleLogout() {
         await signOut(auth);
@@ -21,80 +120,138 @@ function StaffDashboard({ onLogout }) {
     }
 
     function goToPage(page) {
+        if (page === currentPage) {
+            return;
+        }
+
+        if (page === "dashboard") {
+            const stepsBack = getStepsBackToDashboard(staffNavStackRef.current);
+            staffNavigateToDashboard(stepsBack);
+            setCurrentPage("dashboard");
+            staffNavStackRef.current = createStaffNavStack("dashboard");
+            return;
+        }
+
         setCurrentPage(page);
+        pushStaffPage(page);
+        staffNavStackRef.current = pushStaffNavStack(
+            staffNavStackRef.current,
+            page
+        );
     }
 
-    function renderBackToDashboard() {
+    function goToDashboard() {
+        goToPage("dashboard");
+    }
+
+    function renderSubpageToolbar(pageTitle) {
         return (
-            <button type="button" onClick={() => goToPage("dashboard")}>
-                חזרה ללוח הבקרה
-            </button>
+            <div className="staff-subpage-toolbar">
+                <h2 className="staff-subpage-title">{pageTitle}</h2>
+                <button
+                    type="button"
+                    className="staff-back-button"
+                    onClick={goToDashboard}
+                >
+                    <span className="staff-back-button__icon" aria-hidden="true">
+                        →
+                    </span>
+                    חזרה ללוח הבקרה
+                </button>
+            </div>
         );
     }
 
     function renderPlaceholderPage(title) {
         return (
-            <div data-dashboard-page={currentPage}>
-                {renderBackToDashboard()}
-                <h2>{title}</h2>
-                <p>העמוד בפיתוח</p>
-            </div>
+            <>
+                {renderSubpageToolbar(title)}
+                <div className="staff-page">
+                    <header className="staff-header">
+                        <h1>{title}</h1>
+                        <p>העמוד בפיתוח</p>
+                    </header>
+                    <div className="staff-container" />
+                </div>
+            </>
         );
     }
 
     function renderCurrentPage() {
-        switch (currentPage) {
+        const section = getStaffSection(currentPage);
+
+        switch (section) {
             case "activities":
                 return (
                     <div data-dashboard-page="activities">
-                        {renderBackToDashboard()}
-                        <ManageActivities />
+                        {renderSubpageToolbar(SUBPAGE_TITLES.activities)}
+                        <ManageActivities
+                            activityView={getStaffView(currentPage, "list")}
+                            onNavigate={goToPage}
+                        />
                     </div>
                 );
             case "manageStaff":
                 return (
                     <div data-dashboard-page="manageStaff">
-                        {renderBackToDashboard()}
-                        <ManageStaff />
+                        {renderSubpageToolbar(SUBPAGE_TITLES.manageStaff)}
+                        <ManageStaff
+                            staffView={getStaffView(currentPage, "menu")}
+                            onNavigate={goToPage}
+                        />
                     </div>
                 );
             case "programs":
                 return (
                     <div data-dashboard-page="programs">
-                        {renderBackToDashboard()}
-                        <ManagePrograms />
+                        {renderSubpageToolbar(SUBPAGE_TITLES.programs)}
+                        <ManagePrograms
+                            programView={getStaffView(currentPage, "list")}
+                            onNavigate={goToPage}
+                        />
                     </div>
                 );
             case "manageParticipants":
                 return (
                     <div data-dashboard-page="manageParticipants">
-                        {renderBackToDashboard()}
-                        <ManageParticipants />
+                        {renderSubpageToolbar(SUBPAGE_TITLES.manageParticipants)}
+                        <ManageParticipants
+                            participantView={getStaffView(currentPage, "menu")}
+                            onNavigate={goToPage}
+                        />
                     </div>
                 );
             case "requests":
                 return (
                     <div data-dashboard-page="requests">
-                        {renderBackToDashboard()}
-                        <ViewRequests />
+                        {renderSubpageToolbar(SUBPAGE_TITLES.requests)}
+                        <ViewRequests
+                            requestView={getStaffView(currentPage, "list")}
+                            onNavigate={goToPage}
+                        />
                     </div>
                 );
             case "cancellations":
                 return (
                     <div data-dashboard-page="cancellations">
-                        {renderBackToDashboard()}
+                        {renderSubpageToolbar(SUBPAGE_TITLES.cancellations)}
                         <ManageCancellations />
                     </div>
                 );
             case "messages":
                 return (
                     <div data-dashboard-page="messages">
-                        {renderBackToDashboard()}
+                        {renderSubpageToolbar(SUBPAGE_TITLES.messages)}
                         <SendMessages />
                     </div>
                 );
             case "statistics":
-                return renderPlaceholderPage("צפייה בסטטיסטיקות");
+                return (
+                    <div data-dashboard-page="statistics">
+                        {renderSubpageToolbar(SUBPAGE_TITLES.statistics)}
+                        <ViewStatistics />
+                    </div>
+                );
             case "attendance":
                 return renderPlaceholderPage("בדיקת נוכחות");
             case "dashboard":
@@ -102,72 +259,122 @@ function StaffDashboard({ onLogout }) {
             default:
                 return (
                     <div data-dashboard-page={currentPage}>
-                        {renderBackToDashboard()}
-                        <p>עמוד לא נמצא</p>
+                        {renderSubpageToolbar("עמוד לא נמצא")}
+                        <div className="staff-container">
+                            <p>עמוד לא נמצא</p>
+                        </div>
                     </div>
                 );
         }
     }
 
+    function handleDashboardAction(page) {
+        if (page) {
+            goToPage(page);
+        }
+    }
+
+    function getSummaryValue(summaryId) {
+        if (dashboardLoading) {
+            return "…";
+        }
+
+        if (!dashboardOverview) {
+            return "—";
+        }
+
+        switch (summaryId) {
+            case "open-activities":
+                return dashboardOverview.upcomingActivityCount;
+            case "pending-requests":
+                return dashboardOverview.pendingCount;
+            case "sent-messages":
+                return dashboardOverview.sentMessageCount;
+            default:
+                return "—";
+        }
+    }
+
     return (
-        <div>
-            <h1>ברוך הבא צוות</h1>
-            <button type="button" onClick={handleLogout}>
-                התנתקות
-            </button>
-
+        <div className="staff-page staff-page--dashboard">
             {currentPage === "dashboard" && (
-                <div className="dashboard-buttons">
-                    <button type="button" onClick={() => goToPage("activities")}>
-                        ניהול פעילויות חד פעמיות
-                    </button>
+                <div className="staff-dashboard-page">
+                    <header className="staff-dashboard-hero">
+                        <div className="staff-dashboard-hero__bar">
+                            <h1 className="staff-dashboard-title">לוח בקרה לצוות</h1>
+                            <button
+                                type="button"
+                                className="staff-dashboard-logout"
+                                onClick={handleLogout}
+                            >
+                                התנתקות
+                            </button>
+                        </div>
 
-                    <button type="button" onClick={() => goToPage("programs")}>
-                        ניהול תוכניות
-                    </button>
+                        <div className="staff-dashboard-hero__intro">
+                            <p className="staff-dashboard-subtitle">
+                                גישה מהירה לניהול פעילויות, משתתפים, בקשות והודעות
+                            </p>
+                        </div>
 
-                    <button type="button" onClick={() => goToPage("manageStaff")}>
-                        ניהול אנשי צוות
-                    </button>
+                        <div className="staff-dashboard-actions">
+                            {DASHBOARD_ACTIONS.map((action) => (
+                                <button
+                                    key={action.id}
+                                    type="button"
+                                    className="staff-dashboard-circle"
+                                    onClick={
+                                        action.page
+                                            ? () => handleDashboardAction(action.page)
+                                            : undefined
+                                    }
+                                >
+                                    <span
+                                        className="staff-dashboard-icon"
+                                        aria-hidden="true"
+                                    >
+                                        {action.icon}
+                                    </span>
+                                    <span className="staff-dashboard-label">
+                                        {action.label}
+                                    </span>
+                                </button>
+                            ))}
+                        </div>
+                    </header>
 
-                    <button
-                        type="button"
-                        onClick={() => goToPage("manageParticipants")}
-                    >
-                        ניהול משתתפים
-                    </button>
+                    <main className="staff-dashboard-content">
+                        <section className="staff-dashboard-summary">
+                            <h2 className="staff-dashboard-section-title">סיכום מהיר</h2>
+                            <div className="staff-dashboard-summary-grid">
+                                {DASHBOARD_SUMMARY_LABELS.map((item) => (
+                                    <article
+                                        key={item.id}
+                                        className="staff-dashboard-summary-card"
+                                    >
+                                        <span className="staff-dashboard-summary-card__value">
+                                            {getSummaryValue(item.id)}
+                                        </span>
+                                        <span className="staff-dashboard-summary-card__label">
+                                            {item.label}
+                                        </span>
+                                    </article>
+                                ))}
+                            </div>
+                        </section>
 
-                    <button type="button" onClick={() => goToPage("messages")}>
-                        שליחת הודעות
-                    </button>
-
-                    <button>
-                        צפייה בסטטיסטיקות
-                    </button>
-
-                    <button type="button" onClick={() => goToPage("requests")}>
-                        צפייה בבקשות
-                    </button>
-
-                    <button>
-                        צפיה בפניות
-                    </button>
-
-                    <button type="button" onClick={() => goToPage("cancellations")}>
-                        ניהול ביטולים
-                    </button>
-
-                    <button>
-                        בדיקת נוכחות
-                    </button>
-
-                    <button>  
-                        ניהול מתנדבים
-                    </button>
+                        <DashboardControlPanels
+                            overview={dashboardOverview}
+                            loading={dashboardLoading}
+                            onNavigate={handleDashboardAction}
+                        />
+                    </main>
                 </div>
             )}
 
-            {renderCurrentPage()}
+            {currentPage !== "dashboard" && (
+                <div className="staff-subpage">{renderCurrentPage()}</div>
+            )}
         </div>
     );
 }

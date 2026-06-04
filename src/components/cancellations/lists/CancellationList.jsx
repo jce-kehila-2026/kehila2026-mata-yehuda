@@ -6,7 +6,7 @@ function CancellationList({ items, onMarkRefunded }) {
     }
 
     return (
-        <div>
+        <div className="staff-grid staff-grid--cards staff-grid--detailed">
             {items.map((item) => (
                 <CancellationCard
                     key={item.cancellation.id}

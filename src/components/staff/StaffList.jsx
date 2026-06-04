@@ -3,6 +3,7 @@ import {
     fetchStaffList,
     disableStaffMember
 } from "../../services/staffService";
+import { hasValue } from "../../utils/hasValue";
 
 function filterStaffList(staffList, searchQuery, statusFilter) {
     const query = searchQuery.trim().toLowerCase();
@@ -82,7 +83,7 @@ function StaffList({ onEditStaff }) {
     }, []);
 
     return (
-        <div>
+        <div className="staff-list-section">
             <h2>רשימת אנשי צוות</h2>
 
             <div className="staff-form staff-list-filters">
@@ -121,29 +122,39 @@ function StaffList({ onEditStaff }) {
                 <p>לא נמצאו תוצאות לחיפוש</p>
             )}
 
-            {filteredStaff.map((staff) => (
-                <div key={staff.id} className="staff-card">
-                    <p>שם: {staff.full_name || "לא קיים"}</p>
-                    <p>אימייל: {staff.email}</p>
-                    <p>טלפון: {staff.phone || "לא קיים"}</p>
-                    <p>סטטוס: {staff.is_active ? "פעיל" : "לא פעיל"}</p>
+            <div className="staff-list staff-grid staff-grid--cards">
+                {filteredStaff.map((staff) => (
+                    <div key={staff.id} className="staff-card">
+                        <div className="staff-card-body">
+                            {hasValue(staff.full_name) && (
+                                <p>שם: {staff.full_name}</p>
+                            )}
+                            {hasValue(staff.email) && <p>אימייל: {staff.email}</p>}
+                            {hasValue(staff.phone) && <p>טלפון: {staff.phone}</p>}
+                            <p>סטטוס: {staff.is_active ? "פעיל" : "לא פעיל"}</p>
+                        </div>
 
-                    <div className="row">
-                        <button onClick={() => onEditStaff(staff)}>
-                            עריכה
-                        </button>
+                        <div className="staff-card-actions">
+                            <button
+                                type="button"
+                                className="staff-button staff-button--small staff-button--secondary"
+                                onClick={() => onEditStaff(staff)}
+                            >
+                                עריכה
+                            </button>
 
-                        <button
-                            onClick={() => handleDeleteStaff(staff)}
-                            disabled={!staff.is_active}
-                        >
-                            השבתה
-                        </button>
+                            <button
+                                type="button"
+                                className="staff-button staff-button--small staff-button--danger"
+                                onClick={() => handleDeleteStaff(staff)}
+                                disabled={!staff.is_active}
+                            >
+                                השבתה
+                            </button>
+                        </div>
                     </div>
-
-                    <hr />
-                </div>
-            ))}
+                ))}
+            </div>
         </div>
     );
 }

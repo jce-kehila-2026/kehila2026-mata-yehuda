@@ -57,34 +57,51 @@ function StaffLogin() {
   }
 
   return (
-    <div>
-      <h1>כניסת צוות</h1>
+    <div className="staff-login-page">
+      <div className="staff-login-card">
+        <header className="staff-login-header">
+          <h1 className="staff-login-header__title">כניסת צוות</h1>
+          <p className="staff-login-header__subtitle">
+            התחברות למערכת ניהול הקהילה
+          </p>
+        </header>
 
-      <form onSubmit={handleLogin}>
-        <input
-          type="email"
-          placeholder="אימייל"
-          value={email}
-          onChange={(e) => setEmail(e.target.value)}
-        />
+        <div className="staff-login-body">
+          <span className="staff-login-icon" aria-hidden="true">
+            👤
+          </span>
 
-        <input
-          type="password"
-          placeholder="סיסמה"
-          value={password}
-          onChange={(e) => setPassword(e.target.value)}
-        />
+          <form className="staff-login-form staff-form" onSubmit={handleLogin}>
+            <label htmlFor="staff-login-email">אימייל</label>
+            <input
+              id="staff-login-email"
+              type="email"
+              placeholder="אימייל"
+              value={email}
+              onChange={(e) => setEmail(e.target.value)}
+              autoComplete="email"
+            />
 
-        <button type="submit">
-          {loading ? "מתחבר..." : "התחברות"}
-        </button>
+            <label htmlFor="staff-login-password">סיסמה</label>
+            <input
+              id="staff-login-password"
+              type="password"
+              placeholder="סיסמה"
+              value={password}
+              onChange={(e) => setPassword(e.target.value)}
+              autoComplete="current-password"
+            />
 
-        {error && <p>{error}</p>}
-      </form>
+            {error && <p className="staff-alert staff-alert--error">{error}</p>}
+
+            <button type="submit" className="staff-button staff-login-submit">
+              {loading ? "מתחבר..." : "התחברות"}
+            </button>
+          </form>
+        </div>
+      </div>
     </div>
   );
 
 }
 export default StaffLogin;
-
-

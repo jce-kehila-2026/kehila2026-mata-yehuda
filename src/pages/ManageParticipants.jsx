@@ -1,51 +1,92 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import AddParticipant from "../components/participants/forms/AddParticipant";
 import ParticipantList from "../components/participants/lists/ParticipantList";
 import EditParticipant from "../components/participants/forms/EditParticipant";
+import { buildStaffPage, staffNavigateBack } from "../utils/staffNavigation";
 
-function ManageParticipants() {
-    const [participantPage, setParticipantPage] = useState("menu");
+function ManageParticipants({ participantView, onNavigate }) {
     const [selectedParticipant, setSelectedParticipant] = useState(null);
+    const participantPage = participantView || "menu";
+
+    function navigateToView(view) {
+        onNavigate(buildStaffPage("manageParticipants", view));
+    }
+
+    function goBack() {
+        staffNavigateBack();
+    }
+
+    useEffect(() => {
+        if (participantPage !== "edit") {
+            setSelectedParticipant(null);
+        }
+    }, [participantPage]);
 
     return (
-        <div>
-            <h1>ניהול משתתפים</h1>
+        <div className="staff-page staff-page--participants">
+            <header className="staff-header">
+                <h1>ניהול משתתפים</h1>
+            </header>
 
-            {participantPage === "menu" && (
-                <div className="dashboard-buttons">
-                    <button onClick={() => setParticipantPage("add")}>
-                        הוספת משתתף
-                    </button>
+            <div className="staff-container">
+                {participantPage === "menu" && (
+                    <div className="staff-actions staff-actions--inline">
+                        <button
+                            type="button"
+                            className="staff-button"
+                            onClick={() => navigateToView("add")}
+                        >
+                            הוספת משתתף
+                        </button>
 
-                    <button onClick={() => setParticipantPage("list")}>
-                        רשימת משתתפים
-                    </button>
-                </div>
-            )}
+                        <button
+                            type="button"
+                            className="staff-button"
+                            onClick={() => navigateToView("list")}
+                        >
+                            רשימת משתתפים
+                        </button>
+                    </div>
+                )}
 
-            {participantPage !== "menu" && (
-                <button onClick={() => setParticipantPage("menu")}>
-                    חזרה לניהול משתתפים
-                </button>
-            )}
+                {participantPage !== "menu" && (
+                    <div className="staff-toolbar">
+                        <button
+                            type="button"
+                            className="staff-button staff-button--secondary staff-button--small"
+                            onClick={goBack}
+                        >
+                            חזרה לניהול משתתפים
+                        </button>
+                    </div>
+                )}
 
-            {participantPage === "add" && <AddParticipant />}
+                {participantPage === "add" && (
+                    <section className="staff-section">
+                        <AddParticipant />
+                    </section>
+                )}
 
-            {participantPage === "edit" && selectedParticipant && (
-                <EditParticipant
-                    key={selectedParticipant.id}
-                    participant={selectedParticipant}
-                />
-            )}
+                {participantPage === "edit" && selectedParticipant && (
+                    <section className="staff-section">
+                        <EditParticipant
+                            key={selectedParticipant.id}
+                            participant={selectedParticipant}
+                        />
+                    </section>
+                )}
 
-            {participantPage === "list" && (
-                <ParticipantList
-                    onEditParticipant={(participant) => {
-                        setSelectedParticipant(participant);
-                        setParticipantPage("edit");
-                    }}
-                />
-            )}
+                {participantPage === "list" && (
+                    <section className="staff-section staff-section--list">
+                        <ParticipantList
+                            onEditParticipant={(participant) => {
+                                setSelectedParticipant(participant);
+                                navigateToView("edit");
+                            }}
+                        />
+                    </section>
+                )}
+            </div>
         </div>
     );
 }

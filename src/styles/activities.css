@@ -1,0 +1,94 @@
+/* ManageActivities — activity list & ActivityCard */
+
+.activity-list,
+.activities-list,
+.staff-page .activity-list,
+.staff-page .activities-list {
+  width: 100%;
+  max-width: none;
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(320px, 1fr));
+  gap: 1.25rem;
+  align-items: stretch;
+}
+
+.staff-page .activity-card,
+.staff-page .staff-card.activity-card {
+  width: 100%;
+  height: 100%;
+  box-sizing: border-box;
+  display: flex;
+  flex-direction: column;
+  margin: 0;
+}
+
+.staff-page .activity-card .staff-card-body {
+  flex: 1;
+  min-height: 0;
+}
+
+.staff-page .activity-card .staff-card-body h3 {
+  margin: 0 0 0.5rem;
+  font-size: 1.25rem;
+  color: var(--color-primary);
+}
+
+.staff-page .activity-card img {
+  width: 100%;
+  height: 160px;
+  object-fit: cover;
+  border-radius: 14px;
+  margin-top: 0.75rem;
+  display: block;
+}
+
+.staff-page .activity-card-actions {
+  margin-top: auto;
+  display: flex;
+  gap: 0.75rem;
+  justify-content: flex-start;
+  flex-wrap: wrap;
+  flex-direction: row-reverse;
+  flex-shrink: 0;
+}
+
+.staff-page .activity-card-actions .staff-button {
+  width: auto;
+}
+
+.staff-page .staff-form button.staff-button,
+.staff-page--activities .staff-section--form .staff-button {
+  width: 100%;
+  align-self: stretch;
+}
+
+@media (max-width: 768px) {
+  .staff-page .activity-card-actions {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0.5rem;
+    justify-content: center;
+  }
+
+  .staff-page .activity-card-actions .staff-button {
+    flex: 1 1 auto;
+    min-width: 120px;
+    max-width: 100%;
+  }
+}
+
+@media (max-width: 480px) {
+  .staff-page .activity-card-actions .staff-button {
+    flex: 1 1 100%;
+    min-width: 0;
+    width: 100%;
+  }
+
+  @media (min-width: 360px) {
+    .staff-page .activity-card-actions .staff-button {
+      flex: 1 1 calc(50% - 0.25rem);
+      min-width: 120px;
+      width: auto;
+    }
+  }
+}

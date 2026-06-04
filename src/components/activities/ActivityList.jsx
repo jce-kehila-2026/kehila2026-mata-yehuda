@@ -2,7 +2,7 @@ import ActivityCard from "./ActivityCard";
 
 function ActivityList({ activities, onDelete, onEdit }) {
     return (
-        <div className="activities-container">
+        <div className="activity-list staff-grid staff-grid--cards">
             {activities.map((activity) => (
                 <ActivityCard
                     key={activity.id}

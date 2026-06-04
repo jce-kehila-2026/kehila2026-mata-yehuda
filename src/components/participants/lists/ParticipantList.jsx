@@ -4,6 +4,7 @@ import {
     deleteParticipant
 } from "../../../services/participantService";
 import { formatDate } from "../../../utils/dateUtils";
+import { hasFormattedDisplay, hasValue } from "../../../utils/hasValue";
 
 const GENDER_LABELS = {
     male: "זכר",
@@ -86,7 +87,7 @@ function ParticipantList({ onEditParticipant }) {
     }
 
     return (
-        <div>
+        <div className="participants-list-section">
             <h2>רשימת משתתפים</h2>
 
             {error && <p style={{ color: "red" }}>{error}</p>}
@@ -116,41 +117,62 @@ function ParticipantList({ onEditParticipant }) {
                 <p>לא נמצאו תוצאות לחיפוש</p>
             )}
 
-            {filteredParticipants.map((participant) => (
-                <div key={participant.id} className="staff-card">
-                    <p>
-                        שם: {participant.first_name} {participant.last_name}
-                    </p>
-                    <p>תעודת זהות: {participant.id_number}</p>
-                    <p>טלפון: {participant.phone}</p>
-                    {participant.birth_date && (
-                        <p>תאריך לידה: {formatDate(participant.birth_date)}</p>
-                    )}
-                    {participant.gender && (
-                        <p>
-                            מגדר: {GENDER_LABELS[participant.gender] || participant.gender}
-                        </p>
-                    )}
-                    {participant.address && <p>כתובת: {participant.address}</p>}
-                    {participant.emergency_number && (
-                        <p>מספר חירום: {participant.emergency_number}</p>
-                    )}
-                    {participant.registration_status && (
-                        <p>סטטוס הרשמה: {participant.registration_status}</p>
-                    )}
+            <div className="participants-list staff-grid staff-grid--cards">
+                {filteredParticipants.map((participant) => {
+                    const fullName = [participant.first_name, participant.last_name]
+                        .filter(hasValue)
+                        .join(" ");
+                    const birthDateLabel = formatDate(participant.birth_date);
+                    const genderLabel =
+                        GENDER_LABELS[participant.gender] || participant.gender;
 
-                    <div className="row">
-                        <button onClick={() => onEditParticipant(participant)}>
-                            עריכה
-                        </button>
-                        <button onClick={() => handleDeleteParticipant(participant)}>
-                            מחיקה
-                        </button>
+                    return (
+                    <div key={participant.id} className="staff-card">
+                        <div className="staff-card-body">
+                            {hasValue(fullName) && <p>שם: {fullName}</p>}
+                            {hasValue(participant.id_number) && (
+                                <p>תעודת זהות: {participant.id_number}</p>
+                            )}
+                            {hasValue(participant.phone) && (
+                                <p>טלפון: {participant.phone}</p>
+                            )}
+                            {hasFormattedDisplay(birthDateLabel) && (
+                                <p>תאריך לידה: {birthDateLabel}</p>
+                            )}
+                            {hasValue(genderLabel) && (
+                                <p>מגדר: {genderLabel}</p>
+                            )}
+                            {hasValue(participant.address) && (
+                                <p>כתובת: {participant.address}</p>
+                            )}
+                            {hasValue(participant.emergency_number) && (
+                                <p>מספר חירום: {participant.emergency_number}</p>
+                            )}
+                            {hasValue(participant.registration_status) && (
+                                <p>סטטוס הרשמה: {participant.registration_status}</p>
+                            )}
+                        </div>
+
+                        <div className="staff-card-actions">
+                            <button
+                                type="button"
+                                className="staff-button staff-button--small staff-button--secondary"
+                                onClick={() => onEditParticipant(participant)}
+                            >
+                                עריכה
+                            </button>
+                            <button
+                                type="button"
+                                className="staff-button staff-button--small staff-button--danger"
+                                onClick={() => handleDeleteParticipant(participant)}
+                            >
+                                מחיקה
+                            </button>
+                        </div>
                     </div>
-
-                    <hr />
-                </div>
-            ))}
+                    );
+                })}
+            </div>
         </div>
     );
 }

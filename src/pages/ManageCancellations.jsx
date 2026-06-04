@@ -46,37 +46,43 @@ function ManageCancellations() {
     }
 
     return (
-        <div>
-            <h1>ניהול ביטולים</h1>
+        <div className="staff-page staff-page--cancellations">
+            <header className="staff-header">
+                <h1>ניהול ביטולים</h1>
+            </header>
 
-            <div className="staff-form staff-list-filters cancellation-filters">
-                <label htmlFor="cancellation-refund-filter">סינון לפי החזר</label>
-                <select
-                    id="cancellation-refund-filter"
-                    value={refundFilter}
-                    onChange={(e) => setRefundFilter(e.target.value)}
-                >
-                    {REFUND_FILTERS.map((filter) => (
-                        <option key={filter.id} value={filter.id}>
-                            {filter.label}
-                        </option>
-                    ))}
-                </select>
+            <div className="staff-container">
+                <section className="staff-section staff-section--filters staff-form staff-list-filters cancellation-filters">
+                    <label htmlFor="cancellation-refund-filter">סינון לפי החזר</label>
+                    <select
+                        id="cancellation-refund-filter"
+                        value={refundFilter}
+                        onChange={(e) => setRefundFilter(e.target.value)}
+                    >
+                        {REFUND_FILTERS.map((filter) => (
+                            <option key={filter.id} value={filter.id}>
+                                {filter.label}
+                            </option>
+                        ))}
+                    </select>
 
-                <p className="staff-list-count">
-                    מוצגים {filteredItems.length} מתוך {items.length}
-                </p>
+                    <p className="staff-list-count">
+                        מוצגים {filteredItems.length} מתוך {items.length}
+                    </p>
+                </section>
+
+                {error && <p className="staff-alert staff-alert--error">{error}</p>}
+                {loading && <p className="staff-meta">טוען...</p>}
+
+                {!loading && !error && (
+                    <section className="staff-section staff-section--list">
+                        <CancellationList
+                            items={filteredItems}
+                            onMarkRefunded={handleMarkRefunded}
+                        />
+                    </section>
+                )}
             </div>
-
-            {error && <p style={{ color: "red" }}>{error}</p>}
-            {loading && <p>טוען...</p>}
-
-            {!loading && !error && (
-                <CancellationList
-                    items={filteredItems}
-                    onMarkRefunded={handleMarkRefunded}
-                />
-            )}
         </div>
     );
 }

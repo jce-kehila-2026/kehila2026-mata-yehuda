@@ -1,25 +1,36 @@
+import { hasValue } from "../../../utils/hasValue";
+
 function RequestCard({ request, onCompleteRegistration }) {
-    const programTitle = request.program_title || "—";
-    const hasActivity = Boolean(String(request.activity_id || "").trim());
+    const showActivity =
+        Boolean(String(request.activity_id || "").trim()) &&
+        hasValue(request.activity_name);
 
     return (
         <div className="staff-card">
-            <p>שם: {request.full_name || "—"}</p>
-            <p>תעודת זהות: {request.id_number || "—"}</p>
-            <p>טלפון: {request.phone || "—"}</p>
-            <p>תוכנית: {programTitle}</p>
-            {hasActivity && (
-                <p>פעילות: {request.activity_name || "—"}</p>
-            )}
-            <p>סטטוס הרשמה: {request.registration_status || "—"}</p>
+            <div className="staff-card-body">
+                {hasValue(request.full_name) && <p>שם: {request.full_name}</p>}
+                {hasValue(request.id_number) && (
+                    <p>תעודת זהות: {request.id_number}</p>
+                )}
+                {hasValue(request.phone) && <p>טלפון: {request.phone}</p>}
+                {hasValue(request.program_title) && (
+                    <p>תוכנית: {request.program_title}</p>
+                )}
+                {showActivity && <p>פעילות: {request.activity_name}</p>}
+                {hasValue(request.registration_status) && (
+                    <p>סטטוס הרשמה: {request.registration_status}</p>
+                )}
+            </div>
 
-            <div className="row">
-                <button type="button" onClick={() => onCompleteRegistration(request)}>
+            <div className="staff-card-actions row">
+                <button
+                    type="button"
+                    className="staff-button"
+                    onClick={() => onCompleteRegistration(request)}
+                >
                     השלמת רישום
                 </button>
             </div>
-
-            <hr />
         </div>
     );
 }

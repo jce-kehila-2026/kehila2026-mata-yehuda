@@ -1,11 +1,11 @@
-.activities-container {
+.activities-container:not(.staff-grid):not(.activity-list) {
     display: grid;
     grid-template-columns: repeat(2, 1fr);
     gap: 30px;
     padding: 20px;
 }
 
-.activity-card {
+.activity-card:not(.staff-card) {
     border: 1px solid #ccc;
     padding: 25px;
     border-radius: 10px;
@@ -24,13 +24,21 @@
     font-size: 18px;
 }
 
-.staff-form {
+/* Legacy defaults — staffCommon.css / formCommon.css override inside .staff-page */
+.staff-form:not(.staff-page .staff-form):not(.staff-login-page .staff-form) {
     display: flex;
     flex-direction: column;
     gap: 10px;
-    width: 360px;
+    width: 100%;
+    max-width: 360px;
     margin: 0 auto;
     direction: rtl;
+}
+
+.staff-page .staff-form,
+.staff-login-page .staff-form {
+    width: 100%;
+    max-width: 100%;
 }
 
 .staff-form .row {
@@ -59,7 +67,7 @@
     min-height: 70px;
 }
 
-.staff-form button {
+.staff-form button:not(.staff-button) {
     width: fit-content;
     align-self: center;
     padding: 6px 14px;
@@ -94,9 +102,9 @@
     margin: 0;
 }
 
-.staff-card {
-    max-width: 360px;
-    margin: 0 auto 16px;
+.staff-page .staff-card {
+    max-width: none;
+    margin: 0;
     direction: rtl;
 }
 
@@ -131,13 +139,10 @@
     background: #f6faf7;
 }
 
-.programs-list {
-    display: flex;
-    flex-direction: column;
-    gap: 10px;
-    max-width: 520px;
-    margin: 0 auto 24px;
-    padding: 0 12px;
+.staff-page .programs-list {
+    max-width: none;
+    margin: 0 0 24px;
+    padding: 0;
     direction: rtl;
 }
 

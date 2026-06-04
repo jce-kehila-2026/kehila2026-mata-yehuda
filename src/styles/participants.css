@@ -1,0 +1,15 @@
+/* ManageParticipants — participant lists & cards */
+
+.participants-list {
+  width: 100%;
+  max-width: none;
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+  gap: 1.25rem;
+  align-items: stretch;
+}
+
+.participants-list-section {
+  width: 100%;
+  max-width: none;
+}

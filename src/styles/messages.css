@@ -1,0 +1,21 @@
+/* SendMessages — broadcast form & actions */
+
+.staff-page--messages .staff-section {
+  width: 100%;
+}
+
+.message-form {
+  width: 100%;
+}
+
+.message-actions {
+  width: 100%;
+  max-width: var(--staff-max-width);
+  margin-inline: auto;
+}
+
+@media (max-width: 768px) {
+  .message-actions .staff-button {
+    width: 100%;
+  }
+}

@@ -1,0 +1,81 @@
+/* ManagePrograms — ProgramForm, ProgramList, ProgramCard */
+
+.staff-page .programs-list {
+  width: 100%;
+  max-width: none;
+  margin: 0 0 1.5rem;
+  padding: 0;
+  direction: rtl;
+}
+
+.staff-page .program-card {
+  display: flex;
+  flex-direction: column;
+  align-items: stretch;
+  justify-content: flex-start;
+  gap: 12px;
+  width: 100%;
+  height: 100%;
+  box-sizing: border-box;
+  padding: 1.15rem 1.25rem;
+  border: 1.5px solid var(--staff-color-card-border);
+  border-radius: var(--staff-radius);
+  background: #ffffff;
+  box-shadow: 0 3px 10px rgba(0, 0, 0, 0.04);
+}
+
+.staff-page .program-card--fixed {
+  border-color: var(--staff-color-primary);
+  background: #f6faf7;
+}
+
+.staff-page .program-card__body {
+  flex: 1;
+  min-height: 0;
+}
+
+.staff-page .program-card__title {
+  margin: 0 0 0.35rem;
+  font-size: 1.25rem;
+  color: var(--staff-color-primary);
+}
+
+.staff-page .program-card__description {
+  margin: 0;
+  font-size: 1.05rem;
+  color: var(--staff-color-muted);
+}
+
+.staff-page .program-card__actions {
+  margin-top: auto;
+  flex-shrink: 0;
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.5rem;
+  align-items: center;
+}
+
+.staff-page .program-card__actions .staff-button {
+  width: auto;
+  flex: 0 0 auto;
+}
+
+@media (max-width: 768px) {
+  .staff-page .program-card {
+    flex-direction: column;
+    align-items: stretch;
+  }
+
+  .staff-page .program-card__actions {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0.5rem;
+    justify-content: center;
+  }
+
+  .staff-page .program-card__actions .staff-button {
+    flex: 1 1 auto;
+    min-width: 120px;
+    max-width: 100%;
+  }
+}

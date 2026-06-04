@@ -80,7 +80,11 @@ function EditStaffMember({ staff }) {
                     />
                 </div>
 
-                <button onClick={handleUpdateStaff}>
+                <button
+                    type="button"
+                    className="staff-button"
+                    onClick={handleUpdateStaff}
+                >
                     שמירת שינויים
                 </button>
             </div>
