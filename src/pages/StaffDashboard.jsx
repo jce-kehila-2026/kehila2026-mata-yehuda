@@ -14,6 +14,8 @@ import {
 } from "lucide-react";
 import { signOut } from "firebase/auth";
 import { auth } from "../config/firebase";
+import DashboardMobileMenu from "../components/dashboard/DashboardMobileMenu";
+import DashboardSidebar from "../components/dashboard/DashboardSidebar";
 import ManageActivities from "./ManageActivities";
 import ManageStaff from "./ManageStaff";
 import ManagePrograms from "./ManagePrograms";
@@ -36,6 +38,7 @@ import {
     replaceStaffPage,
     staffNavigateToDashboard
 } from "../utils/staffNavigation";
+import { useMediaQuery } from "../hooks/useMediaQuery";
 
 const DASHBOARD_ACTION_ICONS = {
     activities: Calendar,
@@ -52,32 +55,42 @@ const DASHBOARD_ACTION_ICONS = {
 };
 
 const DASHBOARD_ACTIONS = [
-    { id: "activities", label: "ניהול פעילויות", page: "activities" },
-    { id: "programs", label: "ניהול תוכניות", page: "programs" },
-    { id: "manageStaff", label: "ניהול אנשי צוות", page: "manageStaff" },
+    { id: "activities", label: "פעילויות", page: "activities" },
+    { id: "programs", label: "תוכניות", page: "programs" },
+    { id: "manageStaff", label: "אנשי צוות", page: "manageStaff" },
     {
         id: "manageParticipants",
-        label: "ניהול משתתפים",
+        label: "משתתפים",
         page: "manageParticipants"
     },
-    { id: "messages", label: "שליחת הודעות", page: "messages" },
-    { id: "statistics", label: "צפייה בסטטיסטיקות", page: null },
+    { id: "messages", label: "הודעות", page: "messages" },
+    { id: "statistics", label: "סטטיסטיקות", page: null },
     {
         id: "registrations",
-        label: "צפייה בבקשות",
+        label: "בקשות",
         page: "registrations"
     },
-    { id: "inquiries", label: "צפיה בפניות", page: null },
-    { id: "cancellations", label: "ניהול ביטולים", page: "cancellations" },
-    { id: "attendance", label: "בדיקת נוכחות", page: null },
-    { id: "volunteers", label: "ניהול מתנדבים", page: null }
+    { id: "inquiries", label: "פניות", page: null },
+    { id: "cancellations", label: "ביטולים", page: "cancellations" },
+    { id: "attendance", label: "נוכחות", page: null },
+    { id: "volunteers", label: "מתנדבים", page: null }
 ];
 
+const DASHBOARD_ACTIONS_BY_ID = Object.fromEntries(
+    DASHBOARD_ACTIONS.map((action) => [action.id, action])
+);
+
 const DASHBOARD_SUMMARY_LABELS = [
-    { id: "open-activities", label: "פעילויות פתוחות" },
     { id: "pending-requests", label: "בקשות ממתינות" },
+    { id: "open-activities", label: "פעילויות פתוחות" },
     { id: "sent-messages", label: "הודעות שנשלחו" }
 ];
+
+const DASHBOARD_SUMMARY_ICONS = {
+    "pending-requests": ClipboardList,
+    "open-activities": Calendar,
+    "sent-messages": MessageCircle
+};
 
 const SUBPAGE_TITLES = {
     activities: "ניהול פעילויות",
@@ -95,10 +108,58 @@ function StaffDashboard({ onLogout }) {
     const [currentPage, setCurrentPage] = useState("dashboard");
     const [dashboardOverview, setDashboardOverview] = useState(null);
     const [dashboardLoading, setDashboardLoading] = useState(true);
+    const [isMobileActionsOpen, setIsMobileActionsOpen] = useState(false);
+    const isMobileDashboard = useMediaQuery("(max-width: 768px)");
     const staffNavStackRef = useRef(createStaffNavStack("dashboard"));
+    const dashboardNavRef = useRef(null);
+
+    function closeDashboardNav() {
+        setIsMobileActionsOpen(false);
+    }
+
+    useEffect(() => {
+        if (!isMobileDashboard) {
+            setIsMobileActionsOpen(false);
+        }
+    }, [isMobileDashboard]);
+
+    useEffect(() => {
+        if (!isMobileActionsOpen || !isMobileDashboard) {
+            return undefined;
+        }
+
+        const previousOverflow = document.body.style.overflow;
+        document.body.style.overflow = "hidden";
+
+        return () => {
+            document.body.style.overflow = previousOverflow;
+        };
+    }, [isMobileActionsOpen, isMobileDashboard]);
+
+    useEffect(() => {
+        if (!isMobileActionsOpen) {
+            return undefined;
+        }
+
+        function handlePointerDown(event) {
+            if (
+                dashboardNavRef.current &&
+                !dashboardNavRef.current.contains(event.target)
+            ) {
+                closeDashboardNav();
+            }
+        }
+
+        document.addEventListener("mousedown", handlePointerDown);
+
+        return () => {
+            document.removeEventListener("mousedown", handlePointerDown);
+        };
+    }, [isMobileActionsOpen]);
 
     useEffect(() => {
         if (currentPage !== "dashboard") {
+            setIsMobileActionsOpen(false);
             return undefined;
         }
 
@@ -326,82 +387,81 @@ function StaffDashboard({ onLogout }) {
     }
 
     return (
-        <div className="staff-page staff-page--dashboard">
+        <div
+            className={
+                currentPage === "dashboard"
+                    ? "staff-page staff-page--dashboard"
+                    : "staff-page"
+            }
+        >
             {currentPage === "dashboard" && (
-                <div className="staff-dashboard-page">
+                <div className="staff-dashboard-page staff-dashboard-page--home">
                     <header className="staff-dashboard-hero">
                         <div className="staff-dashboard-hero__bar">
                             <h1 className="staff-dashboard-title">לוח בקרה לצוות</h1>
-                            <button
-                                type="button"
-                                className="staff-dashboard-logout"
-                                onClick={handleLogout}
-                            >
-                                התנתקות
-                            </button>
-                        </div>
-
-                        <div className="staff-dashboard-hero__intro">
-                            <p className="staff-dashboard-subtitle">
-                                גישה מהירה לניהול פעילויות, משתתפים, בקשות והודעות
-                            </p>
-                        </div>
-
-                        <div className="staff-dashboard-actions">
-                            {DASHBOARD_ACTIONS.map((action) => {
-                                const ActionIcon = DASHBOARD_ACTION_ICONS[action.id];
-
-                                return (
-                                    <button
-                                        key={action.id}
-                                        type="button"
-                                        className="staff-dashboard-circle"
-                                        onClick={
-                                            action.page
-                                                ? () =>
-                                                      handleDashboardAction(
-                                                          action.page
-                                                      )
-                                                : undefined
+                            <div className="staff-dashboard-hero__controls">
+                                <div
+                                    className="staff-dashboard-hero__mobile-nav"
+                                    ref={dashboardNavRef}
+                                >
+                                    <DashboardMobileMenu
+                                        isOpen={isMobileActionsOpen}
+                                        onOpen={() =>
+                                            setIsMobileActionsOpen(true)
                                         }
-                                    >
-                                        <span
-                                            className="staff-dashboard-icon"
-                                            aria-hidden="true"
-                                        >
-                                            {ActionIcon ? (
-                                                <ActionIcon
-                                                    className="staff-dashboard-icon__svg"
-                                                    strokeWidth={2}
-                                                />
-                                            ) : null}
-                                        </span>
-                                        <span className="staff-dashboard-label">
-                                            {action.label}
-                                        </span>
-                                    </button>
-                                );
-                            })}
+                                        onClose={closeDashboardNav}
+                                        currentPage={currentPage}
+                                        actionsById={DASHBOARD_ACTIONS_BY_ID}
+                                        actionIcons={DASHBOARD_ACTION_ICONS}
+                                        onNavigate={handleDashboardAction}
+                                        onLogout={handleLogout}
+                                    />
+                                </div>
+                                <button
+                                    type="button"
+                                    className="staff-dashboard-logout staff-dashboard-logout--hero"
+                                    onClick={handleLogout}
+                                >
+                                    התנתקות
+                                </button>
+                            </div>
                         </div>
                     </header>
 
-                    <main className="staff-dashboard-content">
-                        <section className="staff-dashboard-summary">
+                    <div className="staff-dashboard-layout">
+                        <main className="staff-dashboard-main staff-dashboard-content">
+                        <section className="staff-dashboard-summary staff-dashboard-summary--primary">
                             <h2 className="staff-dashboard-section-title">סיכום מהיר</h2>
                             <div className="staff-dashboard-summary-grid">
-                                {DASHBOARD_SUMMARY_LABELS.map((item) => (
-                                    <article
-                                        key={item.id}
-                                        className="staff-dashboard-summary-card"
-                                    >
-                                        <span className="staff-dashboard-summary-card__value">
-                                            {getSummaryValue(item.id)}
-                                        </span>
-                                        <span className="staff-dashboard-summary-card__label">
-                                            {item.label}
-                                        </span>
-                                    </article>
-                                ))}
+                                {DASHBOARD_SUMMARY_LABELS.map((item) => {
+                                    const SummaryIcon =
+                                        DASHBOARD_SUMMARY_ICONS[item.id];
+
+                                    return (
+                                        <article
+                                            key={item.id}
+                                            className="staff-dashboard-summary-card"
+                                        >
+                                            {SummaryIcon ? (
+                                                <span
+                                                    className="staff-dashboard-summary-card__icon"
+                                                    aria-hidden="true"
+                                                >
+                                                    <SummaryIcon
+                                                        className="staff-dashboard-summary-card__icon-svg"
+                                                        strokeWidth={2}
+                                                    />
+                                                </span>
+                                            ) : null}
+                                            <span className="staff-dashboard-summary-card__value">
+                                                {getSummaryValue(item.id)}
+                                            </span>
+                                            <span className="staff-dashboard-summary-card__label">
+                                                {item.label}
+                                            </span>
+                                        </article>
+                                    );
+                                })}
                             </div>
                         </section>
 
@@ -410,7 +470,15 @@ function StaffDashboard({ onLogout }) {
                             loading={dashboardLoading}
                             onNavigate={handleDashboardAction}
                         />
-                    </main>
+                        </main>
+
+                        <DashboardSidebar
+                            actionsById={DASHBOARD_ACTIONS_BY_ID}
+                            actionIcons={DASHBOARD_ACTION_ICONS}
+                            currentPage={currentPage}
+                            onNavigate={handleDashboardAction}
+                        />
+                    </div>
                 </div>
             )}
 
