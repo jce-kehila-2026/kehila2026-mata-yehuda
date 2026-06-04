@@ -18,10 +18,10 @@ import {
 } from "../utils/programConstants";
 import {
     formatParticipantDisplayName,
-    hasRequiredRequestDisplayFields,
+    hasRequiredRegistrationDisplayFields,
     isPendingRegistrationRequest,
-    matchesViewRequestsActivityFilter,
-    matchesViewRequestsProgramFilter,
+    matchesViewRegistrationsActivityFilter,
+    matchesViewRegistrationsProgramFilter,
     REGISTRATION_STATUS_COMPLETED
 } from "../utils/initialRequestFilters";
 import { fetchActivities } from "./activityService";
@@ -396,11 +396,11 @@ export async function fetchInitialRegistrationRequests({
             return;
         }
 
-        if (!matchesViewRequestsProgramFilter(registration, programFilter)) {
+        if (!matchesViewRegistrationsProgramFilter(registration, programFilter)) {
             return;
         }
 
-        if (!matchesViewRequestsActivityFilter(registration, activityId)) {
+        if (!matchesViewRegistrationsActivityFilter(registration, activityId)) {
             return;
         }
 
@@ -425,7 +425,7 @@ export async function fetchInitialRegistrationRequests({
             activities
         );
 
-        if (!hasRequiredRequestDisplayFields(merged)) {
+        if (!hasRequiredRegistrationDisplayFields(merged)) {
             return;
         }
 

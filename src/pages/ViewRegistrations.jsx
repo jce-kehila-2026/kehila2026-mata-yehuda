@@ -7,21 +7,21 @@ import {
     PROGRAM_60_PLUS_MINUS_DISPLAY_NAME,
     PROGRAM_60_PLUS_MINUS_ID
 } from "../utils/programConstants";
-import RequestList from "../components/participants/lists/RequestList";
+import RegistrationList from "../components/participants/lists/RegistrationList";
 import EditParticipant from "../components/participants/forms/EditParticipant";
 import { buildStaffPage, staffNavigateBack } from "../utils/staffNavigation";
 
 const PROGRAM_FILTER_ALL = "all";
 
-function ViewRequests({ requestView, onNavigate }) {
-    const [requests, setRequests] = useState([]);
+function ViewRegistrations({ registrationView, onNavigate }) {
+    const [registrations, setRegistrations] = useState([]);
     const [activities, setActivities] = useState([]);
     const [programFilter, setProgramFilter] = useState(PROGRAM_FILTER_ALL);
     const [activityFilter, setActivityFilter] = useState("");
     const [loading, setLoading] = useState(true);
     const [error, setError] = useState("");
-    const [selectedRequest, setSelectedRequest] = useState(null);
-    const showCompleteRegistration = requestView === "complete";
+    const [selectedRegistration, setSelectedRegistration] = useState(null);
+    const showCompleteRegistration = registrationView === "complete";
 
     const loadActivities = useCallback(async () => {
         try {
@@ -32,7 +32,7 @@ function ViewRequests({ requestView, onNavigate }) {
         }
     }, []);
 
-    const loadRequests = useCallback(async () => {
+    const loadRegistrations = useCallback(async () => {
         setLoading(true);
         setError("");
 
@@ -42,7 +42,7 @@ function ViewRequests({ requestView, onNavigate }) {
                 activityId:
                     programFilter === PROGRAM_60_PLUS_MINUS_ID ? activityFilter : ""
             });
-            setRequests(data);
+            setRegistrations(data);
         } catch (err) {
             console.error(err);
             setError("שגיאה בטעינת בקשות הרישום");
@@ -56,12 +56,12 @@ function ViewRequests({ requestView, onNavigate }) {
     }, [loadActivities]);
 
     useEffect(() => {
-        loadRequests();
-    }, [loadRequests]);
+        loadRegistrations();
+    }, [loadRegistrations]);
 
     useEffect(() => {
         if (!showCompleteRegistration) {
-            setSelectedRequest(null);
+            setSelectedRegistration(null);
         }
     }, [showCompleteRegistration]);
 
@@ -73,24 +73,24 @@ function ViewRequests({ requestView, onNavigate }) {
         }
     }
 
-    function handleCompleteRegistration(request) {
-        setSelectedRequest(request);
-        onNavigate(buildStaffPage("requests", "complete"));
+    function handleCompleteRegistration(registration) {
+        setSelectedRegistration(registration);
+        onNavigate(buildStaffPage("registrations", "complete"));
     }
 
     function handleRegistrationCompleted() {
-        setSelectedRequest(null);
+        setSelectedRegistration(null);
         staffNavigateBack();
-        loadRequests();
+        loadRegistrations();
     }
 
     function handleCancelComplete() {
         staffNavigateBack();
     }
 
-    if (showCompleteRegistration && selectedRequest) {
+    if (showCompleteRegistration && selectedRegistration) {
         return (
-            <div className="staff-page staff-page--requests-edit">
+            <div className="staff-page staff-page--registrations-edit">
                 <header className="staff-header">
                     <h1>השלמת רישום</h1>
                 </header>
@@ -106,7 +106,7 @@ function ViewRequests({ requestView, onNavigate }) {
                     </div>
                     <section className="staff-section">
                         <EditParticipant
-                            participant={selectedRequest}
+                            participant={selectedRegistration}
                             completeRegistration
                             onCompleted={handleRegistrationCompleted}
                             onCancel={handleCancelComplete}
@@ -120,16 +120,16 @@ function ViewRequests({ requestView, onNavigate }) {
     const showActivityFilter = programFilter === PROGRAM_60_PLUS_MINUS_ID;
 
     return (
-        <div className="staff-page staff-page--requests">
+        <div className="staff-page staff-page--registrations">
             <header className="staff-header">
                 <h1>צפייה בבקשות</h1>
             </header>
 
             <div className="staff-container">
-                <section className="staff-section staff-section--filters staff-form view-requests-filters">
-                    <label htmlFor="requests-program-filter">תוכנית:</label>
+                <section className="staff-section staff-section--filters staff-form view-registrations-filters">
+                    <label htmlFor="registrations-program-filter">תוכנית:</label>
                     <select
-                        id="requests-program-filter"
+                        id="registrations-program-filter"
                         value={programFilter}
                         onChange={(e) => handleProgramFilterChange(e.target.value)}
                     >
@@ -142,9 +142,9 @@ function ViewRequests({ requestView, onNavigate }) {
 
                     {showActivityFilter && (
                         <>
-                            <label htmlFor="requests-activity-filter">פעילות:</label>
+                            <label htmlFor="registrations-activity-filter">פעילות:</label>
                             <select
-                                id="requests-activity-filter"
+                                id="registrations-activity-filter"
                                 value={activityFilter}
                                 onChange={(e) => setActivityFilter(e.target.value)}
                             >
@@ -164,8 +164,8 @@ function ViewRequests({ requestView, onNavigate }) {
 
                 {!loading && !error && (
                     <section className="staff-section staff-section--list">
-                        <RequestList
-                            requests={requests}
+                        <RegistrationList
+                            registrations={registrations}
                             onCompleteRegistration={handleCompleteRegistration}
                         />
                     </section>
@@ -175,4 +175,4 @@ function ViewRequests({ requestView, onNavigate }) {
     );
 }
 
-export default ViewRequests;
+export default ViewRegistrations;

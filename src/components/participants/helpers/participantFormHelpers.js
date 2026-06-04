@@ -16,7 +16,7 @@ import { formatDate } from "../../../utils/dateUtils";
 export { applyProgramSelection, applyActivitySelection };
 export { isActivityRequiredForProgram } from "../../../utils/programConstants";
 
-/** @deprecated Phase 1 — use isActivityBasedProgram; kept for RequestCard until Phase 2 */
+/** @deprecated Phase 1 — use isActivityBasedProgram; kept for RegistrationCard until Phase 2 */
 export { is60PlusProgram } from "../../../utils/programSelectionHelpers";
 
 /** Fields stored on the participants collection only. */

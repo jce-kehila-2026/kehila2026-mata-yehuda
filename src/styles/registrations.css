@@ -1,0 +1,9 @@
+/* ViewRegistrations — registration filters & RegistrationCard list */
+
+.view-registrations-filters {
+  margin-bottom: 0;
+}
+
+.staff-page--registrations-edit .staff-toolbar {
+  margin-bottom: 1.25rem;
+}

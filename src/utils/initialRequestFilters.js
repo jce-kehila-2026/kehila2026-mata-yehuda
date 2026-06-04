@@ -33,7 +33,7 @@ export function isAllowedPendingRequestProgram(programId) {
 }
 
 /**
- * ViewRequests: pending day_center or 60+- registrations only.
+ * ViewRegistrations: pending day_center or 60+- registrations only.
  */
 export function isPendingRegistrationRequest(registration) {
     if (!registration) {
@@ -55,7 +55,7 @@ export function isPendingRegistrationRequest(registration) {
     return isAllowedPendingRequestProgram(programId);
 }
 
-/** @deprecated Kept for AddParticipant / exports — not used by ViewRequests. */
+/** @deprecated Kept for AddParticipant / exports — not used by ViewRegistrations. */
 export function shouldShowParticipantAsInitialRequest(participant) {
     const programId =
         participant?.program_id?.trim() ||
@@ -73,16 +73,18 @@ export function shouldShowParticipantAsInitialRequest(participant) {
     return isAllowedPendingRequestProgram(programId);
 }
 
-export function hasRequiredRequestDisplayFields(request) {
-    const idNumber = String(request?.id_number ?? "").trim();
-    const phone = String(request?.phone ?? "").trim();
-    const programId = String(request?.program_id ?? "").trim();
-    const participantId = String(request?.participant_id ?? request?.id ?? "").trim();
+export function hasRequiredRegistrationDisplayFields(registration) {
+    const idNumber = String(registration?.id_number ?? "").trim();
+    const phone = String(registration?.phone ?? "").trim();
+    const programId = String(registration?.program_id ?? "").trim();
+    const participantId = String(
+        registration?.participant_id ?? registration?.id ?? ""
+    ).trim();
 
     return Boolean(participantId && idNumber && phone && programId);
 }
 
-export function matchesViewRequestsProgramFilter(registration, programFilter) {
+export function matchesViewRegistrationsProgramFilter(registration, programFilter) {
     if (!programFilter || programFilter === "all") {
         return true;
     }
@@ -100,7 +102,7 @@ export function matchesViewRequestsProgramFilter(registration, programFilter) {
     return true;
 }
 
-export function matchesViewRequestsActivityFilter(registration, activityId) {
+export function matchesViewRegistrationsActivityFilter(registration, activityId) {
     if (!activityId?.trim()) {
         return true;
     }

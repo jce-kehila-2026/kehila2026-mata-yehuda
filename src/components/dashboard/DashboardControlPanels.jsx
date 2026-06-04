@@ -91,7 +91,7 @@ function DashboardControlPanels({ overview, loading, onNavigate }) {
                             <button
                                 type="button"
                                 className="staff-button staff-button--small"
-                                onClick={() => onNavigate("requests")}
+                                onClick={() => onNavigate("registrations")}
                             >
                                 צפייה בכל הבקשות
                             </button>

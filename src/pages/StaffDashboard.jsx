@@ -5,7 +5,7 @@ import ManageActivities from "./ManageActivities";
 import ManageStaff from "./ManageStaff";
 import ManagePrograms from "./ManagePrograms";
 import ManageParticipants from "./ManageParticipants";
-import ViewRequests from "./ViewRequests";
+import ViewRegistrations from "./ViewRegistrations";
 import ManageCancellations from "./ManageCancellations";
 import SendMessages from "./SendMessages";
 import ViewStatistics from "./ViewStatistics";
@@ -36,7 +36,12 @@ const DASHBOARD_ACTIONS = [
     },
     { id: "messages", icon: "💬", label: "שליחת הודעות", page: "messages" },
     { id: "statistics", icon: "📊", label: "צפייה בסטטיסטיקות", page: null },
-    { id: "requests", icon: "📝", label: "צפייה בבקשות", page: "requests" },
+    {
+        id: "registrations",
+        icon: "📝",
+        label: "צפייה בבקשות",
+        page: "registrations"
+    },
     { id: "inquiries", icon: "📬", label: "צפיה בפניות", page: null },
     { id: "cancellations", icon: "↩️", label: "ניהול ביטולים", page: "cancellations" },
     { id: "attendance", icon: "✓", label: "בדיקת נוכחות", page: null },
@@ -54,7 +59,7 @@ const SUBPAGE_TITLES = {
     manageStaff: "ניהול אנשי צוות",
     programs: "ניהול תוכניות",
     manageParticipants: "ניהול משתתפים",
-    requests: "צפייה בבקשות",
+    registrations: "צפייה בבקשות",
     cancellations: "ניהול ביטולים",
     messages: "שליחת הודעות",
     statistics: "צפייה בסטטיסטיקות",
@@ -221,12 +226,12 @@ function StaffDashboard({ onLogout }) {
                         />
                     </div>
                 );
-            case "requests":
+            case "registrations":
                 return (
-                    <div data-dashboard-page="requests">
-                        {renderSubpageToolbar(SUBPAGE_TITLES.requests)}
-                        <ViewRequests
-                            requestView={getStaffView(currentPage, "list")}
+                    <div data-dashboard-page="registrations">
+                        {renderSubpageToolbar(SUBPAGE_TITLES.registrations)}
+                        <ViewRegistrations
+                            registrationView={getStaffView(currentPage, "list")}
                             onNavigate={goToPage}
                         />
                     </div>

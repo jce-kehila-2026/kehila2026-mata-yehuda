@@ -1,3 +1,8 @@
+/**
+ * Staff route keys (staffPage in history state):
+ * - registrations — צפייה בבקשות (pending registrations from Firestore)
+ * - requests — reserved for צפייה בפניות (user inquiries, future)
+ */
 export const STAFF_PAGE_STATE_KEY = "staffPage";
 
 export function parseStaffPage(state) {
