@@ -170,8 +170,17 @@
   display: flex;
   align-items: center;
   justify-content: center;
-  font-size: 1.85rem;
-  line-height: 1;
+  flex-shrink: 0;
+  line-height: 0;
+  color: var(--color-primary);
+}
+
+.staff-dashboard-icon__svg {
+  width: 42px;
+  height: 42px;
+  flex-shrink: 0;
+  color: #2d7d46;
+  stroke: #2d7d46;
 }
 
 .staff-dashboard-label {
@@ -477,9 +486,10 @@
     justify-self: center;
   }
 
-  .staff-dashboard-icon,
-  .staff-dashboard-circle-icon {
-    font-size: 2rem;
+  .staff-dashboard-icon__svg,
+  .staff-dashboard-circle-icon__svg {
+    width: 36px;
+    height: 36px;
   }
 
   .staff-dashboard-label,

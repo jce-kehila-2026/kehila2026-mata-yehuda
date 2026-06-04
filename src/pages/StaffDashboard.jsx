@@ -1,4 +1,17 @@
 import { useState, useEffect, useRef } from "react";
+import {
+    BarChart3,
+    Calendar,
+    CheckCircle2,
+    ClipboardList,
+    FileText,
+    HandHeart,
+    Mail,
+    MessageCircle,
+    Undo2,
+    UserRound,
+    Users
+} from "lucide-react";
 import { signOut } from "firebase/auth";
 import { auth } from "../config/firebase";
 import ManageActivities from "./ManageActivities";
@@ -24,28 +37,40 @@ import {
     staffNavigateToDashboard
 } from "../utils/staffNavigation";
 
+const DASHBOARD_ACTION_ICONS = {
+    activities: Calendar,
+    programs: ClipboardList,
+    manageStaff: Users,
+    manageParticipants: UserRound,
+    messages: MessageCircle,
+    statistics: BarChart3,
+    registrations: FileText,
+    inquiries: Mail,
+    cancellations: Undo2,
+    attendance: CheckCircle2,
+    volunteers: HandHeart
+};
+
 const DASHBOARD_ACTIONS = [
-    { id: "activities", icon: "📅", label: "ניהול פעילויות", page: "activities" },
-    { id: "programs", icon: "📋", label: "ניהול תוכניות", page: "programs" },
-    { id: "manageStaff", icon: "👥", label: "ניהול אנשי צוות", page: "manageStaff" },
+    { id: "activities", label: "ניהול פעילויות", page: "activities" },
+    { id: "programs", label: "ניהול תוכניות", page: "programs" },
+    { id: "manageStaff", label: "ניהול אנשי צוות", page: "manageStaff" },
     {
         id: "manageParticipants",
-        icon: "🧑",
         label: "ניהול משתתפים",
         page: "manageParticipants"
     },
-    { id: "messages", icon: "💬", label: "שליחת הודעות", page: "messages" },
-    { id: "statistics", icon: "📊", label: "צפייה בסטטיסטיקות", page: null },
+    { id: "messages", label: "שליחת הודעות", page: "messages" },
+    { id: "statistics", label: "צפייה בסטטיסטיקות", page: null },
     {
         id: "registrations",
-        icon: "📝",
         label: "צפייה בבקשות",
         page: "registrations"
     },
-    { id: "inquiries", icon: "📬", label: "צפיה בפניות", page: null },
-    { id: "cancellations", icon: "↩️", label: "ניהול ביטולים", page: "cancellations" },
-    { id: "attendance", icon: "✓", label: "בדיקת נוכחות", page: null },
-    { id: "volunteers", icon: "🤝", label: "ניהול מתנדבים", page: null }
+    { id: "inquiries", label: "צפיה בפניות", page: null },
+    { id: "cancellations", label: "ניהול ביטולים", page: "cancellations" },
+    { id: "attendance", label: "בדיקת נוכחות", page: null },
+    { id: "volunteers", label: "ניהול מתנדבים", page: null }
 ];
 
 const DASHBOARD_SUMMARY_LABELS = [
@@ -323,28 +348,40 @@ function StaffDashboard({ onLogout }) {
                         </div>
 
                         <div className="staff-dashboard-actions">
-                            {DASHBOARD_ACTIONS.map((action) => (
-                                <button
-                                    key={action.id}
-                                    type="button"
-                                    className="staff-dashboard-circle"
-                                    onClick={
-                                        action.page
-                                            ? () => handleDashboardAction(action.page)
-                                            : undefined
-                                    }
-                                >
-                                    <span
-                                        className="staff-dashboard-icon"
-                                        aria-hidden="true"
+                            {DASHBOARD_ACTIONS.map((action) => {
+                                const ActionIcon = DASHBOARD_ACTION_ICONS[action.id];
+
+                                return (
+                                    <button
+                                        key={action.id}
+                                        type="button"
+                                        className="staff-dashboard-circle"
+                                        onClick={
+                                            action.page
+                                                ? () =>
+                                                      handleDashboardAction(
+                                                          action.page
+                                                      )
+                                                : undefined
+                                        }
                                     >
-                                        {action.icon}
-                                    </span>
-                                    <span className="staff-dashboard-label">
-                                        {action.label}
-                                    </span>
-                                </button>
-                            ))}
+                                        <span
+                                            className="staff-dashboard-icon"
+                                            aria-hidden="true"
+                                        >
+                                            {ActionIcon ? (
+                                                <ActionIcon
+                                                    className="staff-dashboard-icon__svg"
+                                                    strokeWidth={2}
+                                                />
+                                            ) : null}
+                                        </span>
+                                        <span className="staff-dashboard-label">
+                                            {action.label}
+                                        </span>
+                                    </button>
+                                );
+                            })}
                         </div>
                     </header>
 
