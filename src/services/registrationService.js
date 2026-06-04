@@ -17,10 +17,12 @@ import {
     resolveCanonicalProgramId
 } from "../utils/programConstants";
 import {
-    REGISTRATION_STATUS_COMPLETED,
-    explainRegistrationRequestVisibility,
+    formatParticipantDisplayName,
     hasRequiredRequestDisplayFields,
-    shouldShowParticipantAsInitialRequest
+    isPendingRegistrationRequest,
+    matchesViewRequestsActivityFilter,
+    matchesViewRequestsProgramFilter,
+    REGISTRATION_STATUS_COMPLETED
 } from "../utils/initialRequestFilters";
 import { fetchActivities } from "./activityService";
 
@@ -323,7 +325,8 @@ function mergeRegistrationWithParticipant(
 
     return {
         ...participant,
-        id: participant?.id || registration.participant_id,
+        id: participant.id,
+        participant_id: registration.participant_id,
         registrationId: registration.id,
         registration,
         program_id: programId,
@@ -335,6 +338,7 @@ function mergeRegistrationWithParticipant(
             activities
         ),
         registration_status: registration.registration_status || "",
+        full_name: formatParticipantDisplayName(participant),
         id_number: String(participant?.id_number ?? "").trim(),
         phone: String(participant?.phone ?? "").trim(),
         registered_at: registration.registered_at ?? null
@@ -374,7 +378,10 @@ function lookupParticipantForRegistration(participantMap, participantId) {
     return participantMap.get(normalizedParticipantId) || null;
 }
 
-export async function fetchInitialRegistrationRequests() {
+export async function fetchInitialRegistrationRequests({
+    programFilter = "all",
+    activityId = ""
+} = {}) {
     const [registrations, participants, activities] = await Promise.all([
         fetchRegistrations(),
         fetchParticipantsForRequests(),
@@ -382,24 +389,34 @@ export async function fetchInitialRegistrationRequests() {
     ]);
 
     const participantMap = buildParticipantLookupMap(participants);
-    const registrationParticipantIds = new Set();
-    const fromRegistrations = [];
+    const requests = [];
 
     registrations.forEach((registration) => {
-        const { shouldShow } = explainRegistrationRequestVisibility(registration);
+        if (!isPendingRegistrationRequest(registration)) {
+            return;
+        }
 
-        if (!shouldShow) {
+        if (!matchesViewRequestsProgramFilter(registration, programFilter)) {
+            return;
+        }
+
+        if (!matchesViewRequestsActivityFilter(registration, activityId)) {
             return;
         }
 
         const participantId = normalizeFirestoreId(registration.participant_id);
+
+        if (!participantId) {
+            return;
+        }
+
         const participant = lookupParticipantForRegistration(
             participantMap,
             participantId
         );
 
-        if (participantId) {
-            registrationParticipantIds.add(participantId);
+        if (!participant) {
+            return;
         }
 
         const merged = mergeRegistrationWithParticipant(
@@ -412,19 +429,10 @@ export async function fetchInitialRegistrationRequests() {
             return;
         }
 
-        fromRegistrations.push(merged);
+        requests.push(merged);
     });
 
-    const fromParticipants = participants
-        .filter(shouldShowParticipantAsInitialRequest)
-        .filter(
-            (participant) =>
-                !registrationParticipantIds.has(normalizeFirestoreId(participant.id))
-        );
-
-    const combined = [...fromRegistrations, ...fromParticipants];
-
-    return combined.sort((a, b) => {
+    return requests.sort((a, b) => {
         const timeB =
             getRegistrationSortTime(b) ||
             (b.created_at?.toDate
@@ -522,11 +530,7 @@ export async function updateRegistration(registrationId, registrationData) {
 
 export async function completeRegistration(registrationId, registrationData) {
     const payload = buildRegistrationPayload(registrationData);
-    const programId = payload.program_id;
-
-    if (programId !== DAY_CENTER_ID) {
-        payload.registration_status = REGISTRATION_STATUS_COMPLETED;
-    }
+    payload.registration_status = REGISTRATION_STATUS_COMPLETED;
 
     if (!payload.registered_at) {
         payload.registered_at = Timestamp.now();

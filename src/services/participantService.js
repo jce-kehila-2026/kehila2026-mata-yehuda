@@ -45,7 +45,8 @@ function buildPersonalParticipantPayload(participantData) {
         address: personal.address,
         emergency_number: personal.emergency_number,
         medical_notes: personal.medical_notes,
-        mobility_limitations: personal.mobility_limitations
+        mobility_limitations: personal.mobility_limitations,
+        marketing_consent: Boolean(personal.marketing_consent)
     };
 }
 

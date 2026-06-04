@@ -248,6 +248,18 @@ function EditParticipant({
                     onChange={(e) => updateField("phone", e.target.value)}
                 />
 
+                <div className="row checkbox-row">
+                    <label htmlFor="edit-marketing-consent">
+                        אני מאשר/ת קבלת הודעות ועדכונים ב-WhatsApp
+                    </label>
+                    <input
+                        id="edit-marketing-consent"
+                        type="checkbox"
+                        checked={Boolean(form.marketing_consent)}
+                        onChange={(e) => updateField("marketing_consent", e.target.checked)}
+                    />
+                </div>
+
                 <ParticipantProgramFields
                     idPrefix="edit"
                     form={form}

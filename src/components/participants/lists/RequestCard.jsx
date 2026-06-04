@@ -1,17 +1,17 @@
-import { is60PlusProgram } from "../helpers/participantFormHelpers";
-
 function RequestCard({ request, onCompleteRegistration }) {
     const programTitle = request.program_title || "—";
-    const showActivity = is60PlusProgram(request.program_id);
+    const hasActivity = Boolean(String(request.activity_id || "").trim());
 
     return (
         <div className="staff-card">
+            <p>שם: {request.full_name || "—"}</p>
             <p>תעודת זהות: {request.id_number || "—"}</p>
             <p>טלפון: {request.phone || "—"}</p>
             <p>תוכנית: {programTitle}</p>
-            {showActivity && (
+            {hasActivity && (
                 <p>פעילות: {request.activity_name || "—"}</p>
             )}
+            <p>סטטוס הרשמה: {request.registration_status || "—"}</p>
 
             <div className="row">
                 <button type="button" onClick={() => onCompleteRegistration(request)}>

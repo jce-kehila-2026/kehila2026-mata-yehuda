@@ -9,7 +9,7 @@ function RequestList({ requests, onCompleteRegistration }) {
         <div>
             {requests.map((request) => (
                 <RequestCard
-                    key={request.id}
+                    key={request.registrationId || request.id}
                     request={request}
                     onCompleteRegistration={onCompleteRegistration}
                 />

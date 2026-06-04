@@ -30,7 +30,8 @@ export const PARTICIPANT_PERSONAL_FIELD_KEYS = [
     "address",
     "emergency_number",
     "medical_notes",
-    "mobility_limitations"
+    "mobility_limitations",
+    "marketing_consent"
 ];
 
 export const emptyParticipantPersonalFields = {
@@ -43,7 +44,8 @@ export const emptyParticipantPersonalFields = {
     address: "",
     emergency_number: "",
     medical_notes: "",
-    mobility_limitations: ""
+    mobility_limitations: "",
+    marketing_consent: false
 };
 
 export const emptyRegistrationFormFields = {
@@ -71,7 +73,8 @@ export function participantPersonalToForm(participant) {
         address: participant?.address || "",
         emergency_number: participant?.emergency_number || "",
         medical_notes: participant?.medical_notes || "",
-        mobility_limitations: participant?.mobility_limitations || ""
+        mobility_limitations: participant?.mobility_limitations || "",
+        marketing_consent: Boolean(participant?.marketing_consent)
     };
 }
 
@@ -204,7 +207,8 @@ export function extractParticipantPersonalFields(form) {
         address: form.address?.trim() || "",
         emergency_number: form.emergency_number?.trim() || "",
         medical_notes: form.medical_notes?.trim() || "",
-        mobility_limitations: form.mobility_limitations?.trim() || ""
+        mobility_limitations: form.mobility_limitations?.trim() || "",
+        marketing_consent: Boolean(form.marketing_consent)
     };
 }
 

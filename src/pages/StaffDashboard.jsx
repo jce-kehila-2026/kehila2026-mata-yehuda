@@ -7,6 +7,7 @@ import ManagePrograms from "./ManagePrograms";
 import ManageParticipants from "./ManageParticipants";
 import ViewRequests from "./ViewRequests";
 import ManageCancellations from "./ManageCancellations";
+import SendMessages from "./SendMessages";
 
 const TEAMMATE_PAGE_TOOLTIP = "העמוד יחובר לאחר מיזוג עם הצוות";
 
@@ -85,8 +86,13 @@ function StaffDashboard({ onLogout }) {
                         <ManageCancellations />
                     </div>
                 );
-            case "notifications":
-                return renderPlaceholderPage("שליחת הודעות");
+            case "messages":
+                return (
+                    <div data-dashboard-page="messages">
+                        {renderBackToDashboard()}
+                        <SendMessages />
+                    </div>
+                );
             case "statistics":
                 return renderPlaceholderPage("צפייה בסטטיסטיקות");
             case "attendance":
@@ -131,11 +137,11 @@ function StaffDashboard({ onLogout }) {
                         ניהול משתתפים
                     </button>
 
-                    <button type="button" onClick={() => goToPage("notifications")}>
+                    <button type="button" onClick={() => goToPage("messages")}>
                         שליחת הודעות
                     </button>
 
-                    <button type="button" onClick={() => goToPage("statistics")}>
+                    <button>
                         צפייה בסטטיסטיקות
                     </button>
 
@@ -143,11 +149,7 @@ function StaffDashboard({ onLogout }) {
                         צפייה בבקשות
                     </button>
 
-                    <button
-                        type="button"
-                        disabled
-                        title={TEAMMATE_PAGE_TOOLTIP}
-                    >
+                    <button>
                         צפיה בפניות
                     </button>
 
@@ -155,15 +157,11 @@ function StaffDashboard({ onLogout }) {
                         ניהול ביטולים
                     </button>
 
-                    <button type="button" onClick={() => goToPage("attendance")}>
+                    <button>
                         בדיקת נוכחות
                     </button>
 
-                    <button
-                        type="button"
-                        disabled
-                        title={TEAMMATE_PAGE_TOOLTIP}
-                    >
+                    <button>  
                         ניהול מתנדבים
                     </button>
                 </div>
