@@ -1,0 +1,190 @@
+@import url("https://fonts.googleapis.com/css2?family=Heebo:wght@400;500;600;700&display=swap");
+
+.supportive-community-page {
+  --color-bg: #ffffff;
+  --color-primary: #2d7d46;
+  --color-primary-hover: #236b38;
+  --color-accent-light: #faf4ec;
+  --color-border: #e5c29f;
+  --color-card-border: #e8e2dc;
+  --color-text: #1f1f1f;
+  --color-muted: #444444;
+  --radius: 18px;
+  --max-width: 760px;
+
+  font-family: "Heebo", system-ui, sans-serif;
+  font-size: 20px;
+  line-height: 1.7;
+  color: var(--color-text);
+  background: var(--color-bg);
+  min-height: 100vh;
+  text-align: right;
+  direction: rtl;
+}
+
+/* HERO */
+.supportive-community-page .community-hero {
+  background: var(--color-primary);
+  color: white;
+  text-align: center;
+  padding: 1.4rem 1.2rem 1.6rem;
+}
+
+.supportive-community-page .hero-icon {
+  display: block;
+  font-size: 2.6rem;
+  margin-bottom: 0.4rem;
+}
+
+.supportive-community-page .community-hero h1 {
+  font-size: 2rem;
+  margin: 0 0 0.6rem;
+  line-height: 1.25;
+}
+
+.supportive-community-page .community-hero p {
+  max-width: var(--max-width);
+  margin: 0 auto;
+  font-size: 1.15rem;
+  line-height: 1.7;
+}
+
+/* SECTIONS */
+.supportive-community-page .community-section,
+.supportive-community-page .payment-info {
+  max-width: var(--max-width);
+  margin: 0 auto;
+  padding: 1.8rem 1.2rem;
+}
+
+.supportive-community-page .community-section h2,
+.supportive-community-page .payment-info h2 {
+  font-size: 1.65rem;
+  color: var(--color-primary);
+  margin: 0 0 1.2rem;
+  padding-bottom: 0.55rem;
+  border-bottom: 3px solid var(--color-primary);
+}
+
+/* أخفي الأيقونات الكبيرة أو خليها ناعمة */
+.supportive-community-page .section-icon,
+.supportive-community-page .item-icon,
+.supportive-community-page .btn-icon {
+  display: none;
+}
+
+/* CARDS */
+.supportive-community-page .services-grid {
+  display: flex;
+  flex-direction: column;
+  gap: 1rem;
+}
+
+.supportive-community-page .service-card {
+  background: #ffffff;
+  border: 1.5px solid var(--color-card-border);
+  border-radius: var(--radius);
+  padding: 1.25rem;
+  box-shadow: 0 3px 10px rgba(0, 0, 0, 0.04);
+}
+
+.supportive-community-page .service-card h3 {
+  font-size: 1.35rem;
+  color: var(--color-primary);
+  margin: 0 0 0.55rem;
+  line-height: 1.35;
+}
+
+.supportive-community-page .service-card p {
+  margin: 0;
+  color: var(--color-text);
+  font-size: 1.1rem;
+}
+
+/* VOLUNTEER LIST */
+.supportive-community-page .section-description {
+  font-size: 1.1rem;
+  color: var(--color-muted);
+  margin-bottom: 1rem;
+}
+
+.supportive-community-page .volunteer-services-list {
+  list-style: none;
+  padding: 0;
+  margin: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 0.9rem;
+}
+
+.supportive-community-page .volunteer-services-list li {
+  background: var(--color-accent-light);
+  border: 1.5px solid var(--color-border);
+  border-radius: var(--radius);
+  padding: 1rem 1.15rem;
+  font-size: 1.15rem;
+  font-weight: 600;
+}
+
+/* PAYMENT */
+.supportive-community-page .payment-info {
+  background: var(--color-accent-light);
+  border: 1.5px solid var(--color-border);
+  border-radius: var(--radius);
+  margin: 1rem auto;
+}
+
+.supportive-community-page .payment-info p {
+  margin: 0 0 1rem;
+  font-size: 1.1rem;
+}
+
+.supportive-community-page .payment-info strong {
+  color: var(--color-primary);
+}
+
+/* BUTTONS */
+.supportive-community-page .community-actions {
+  max-width: var(--max-width);
+  margin: 0 auto;
+  padding: 1rem 1.2rem 2.5rem;
+  display: flex;
+  flex-direction: column;
+  gap: 1rem;
+}
+
+.supportive-community-page .community-actions button {
+  font-family: "Heebo", system-ui, sans-serif;
+  font-size: 1.25rem;
+  font-weight: 700;
+  color: white;
+  background: var(--color-primary);
+  border: none;
+  border-radius: var(--radius);
+  padding: 1.05rem 1.2rem;
+  min-height: 58px;
+  cursor: pointer;
+}
+
+.supportive-community-page .community-actions button:hover,
+.supportive-community-page .community-actions button:active {
+  background: var(--color-primary-hover);
+}
+
+.supportive-community-page .community-actions button:focus-visible {
+  outline: 4px solid var(--color-border);
+  outline-offset: 3px;
+}
+
+/* DESKTOP */
+@media (min-width: 900px) {
+  .supportive-community-page .services-grid {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+  }
+
+  .supportive-community-page .volunteer-services-list {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+  }
+}
