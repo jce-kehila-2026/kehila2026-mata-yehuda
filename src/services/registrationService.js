@@ -451,6 +451,25 @@ export async function fetchInitialRegistrationRequests({
     });
 }
 
+export async function fetchPendingRegistrationRequest(registrationId) {
+    const normalizedId = String(registrationId ?? "").trim();
+
+    if (!normalizedId) {
+        return null;
+    }
+
+    const requests = await fetchInitialRegistrationRequests({
+        programFilter: "all"
+    });
+
+    return (
+        requests.find(
+            (request) =>
+                String(request.registrationId ?? "").trim() === normalizedId
+        ) || null
+    );
+}
+
 function buildNewParticipantRegistrationPayload(
     participantId,
     participantData,

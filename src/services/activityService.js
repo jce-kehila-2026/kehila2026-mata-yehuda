@@ -12,6 +12,7 @@ import {
     limit
 } from "firebase/firestore";
 import { normalizeSearchQuery } from "../utils/adminListUtils";
+import { getActivityWeekdaySortValue } from "../utils/dateUtils";
 import {
     getActivityStatusSortValue,
     matchesActivityOpenFilter
@@ -66,6 +67,8 @@ export function getActivitySortValue(activity, sortField) {
     switch (sortField) {
         case "name":
             return data.name || "";
+        case "weekday":
+            return getActivityWeekdaySortValue(data.start_date);
         case "date":
             return data.start_date || null;
         case "status":

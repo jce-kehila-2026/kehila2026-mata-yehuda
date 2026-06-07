@@ -1,4 +1,4 @@
-import { useEffect, useRef, useState } from "react";
+import { useEffect, useMemo, useRef, useState } from "react";
 import { Timestamp } from "firebase/firestore";
 import { ImageUp, Pencil, Trash2 } from "lucide-react";
 import {
@@ -6,6 +6,13 @@ import {
     uploadActivityImage,
     validateActivityImageFile
 } from "../../services/activityImageService";
+import FormActionRow from "../shared/FormActionRow";
+import { getDayOfWeekFromActivityDate, parseLocalDateInput } from "../../utils/dateUtils";
+import {
+    getRegistrationAvailabilityLabel,
+    isRegistrationOpenForDeadlineInput,
+    REGISTRATION_AVAILABILITY_LABELS
+} from "../../utils/activityStatus";
 
 function ActivityForm({
     activityTypes,
@@ -25,11 +32,9 @@ function ActivityForm({
     const [registrationDeadLine, setRegistrationDeadLine] = useState("");
     const [startTime, setStartTime] = useState("");
     const [endTime, setEndTime] = useState("");
-    const [dayOfWeek, setDayOfWeek] = useState("");
     const [maxParticipants, setMaxParticipants] = useState(0);
     const [price, setPrice] = useState(0);
     const [priceNote, setPriceNote] = useState("");
-    const [isOpen, setIsOpen] = useState(false);
     const [isDragOver, setIsDragOver] = useState(false);
     const localPreviewRef = useRef("");
     const fileInputRef = useRef(null);
@@ -88,11 +93,9 @@ function ActivityForm({
         setRegistrationDeadLine("");
         setStartTime("");
         setEndTime("");
-        setDayOfWeek("");
         setMaxParticipants(0);
         setPrice(0);
         setPriceNote("");
-        setIsOpen(false);
     }
 
     useEffect(() => {
@@ -108,15 +111,27 @@ function ActivityForm({
             setStartTime(formatTime(editingActivity.data.start_date));
             setEndTime(formatTime(editingActivity.data.end_date));
 
-            setDayOfWeek(editingActivity.data.day_of_week || "");
             setMaxParticipants(editingActivity.data.max_participants || 0);
             setPrice(editingActivity.data.price || 0);
             setPriceNote(editingActivity.data.price_note || "");
-            setIsOpen(editingActivity.data.is_open || false);
         } else {
             resetFormFields();
         }
     }, [editingActivity]);
+
+    const registrationStatusLabel = useMemo(() => {
+        if (registrationDeadLine) {
+            return getRegistrationAvailabilityLabel({
+                registration_deadline: parseLocalDateInput(registrationDeadLine)
+            });
+        }
+
+        if (editingActivity?.data) {
+            return getRegistrationAvailabilityLabel(editingActivity.data);
+        }
+
+        return REGISTRATION_AVAILABILITY_LABELS.unknown;
+    }, [registrationDeadLine, editingActivity]);
 
     useEffect(() => {
         return () => {
@@ -267,14 +282,14 @@ function ActivityForm({
                     new Date(`${registrationDeadLine}T23:59`)
                 ),
 
-                day_of_week: dayOfWeek,
+                day_of_week: getDayOfWeekFromActivityDate(startDate, startTime),
                 max_participants: Number(maxParticipants),
                 current_participants: editingActivity
                     ? editingActivity.data.current_participants || 0
                     : 0,
                 price: Number(price),
                 price_note: priceNote,
-                is_open: isOpen
+                is_open: isRegistrationOpenForDeadlineInput(registrationDeadLine)
             };
 
             if (!editingActivity) {
@@ -449,6 +464,9 @@ function ActivityForm({
                 value={registrationDeadLine}
                 onChange={(e) => setRegistrationDeadLine(e.target.value)}
             />
+            <p className="activity-form-registration-status">
+                סטטוס הרשמה: {registrationStatusLabel}
+            </p>
 
             <label>שעת התחלה</label>
             <input
@@ -464,21 +482,6 @@ function ActivityForm({
                 onChange={(e) => setEndTime(e.target.value)}
             />
 
-            <label>יום בשבוע</label>
-            <select
-                value={dayOfWeek}
-                onChange={(e) => setDayOfWeek(e.target.value)}
-            >
-                <option value="">בחר יום</option>
-                <option value="sunday">יום ראשון</option>
-                <option value="monday">יום שני</option>
-                <option value="tuesday">יום שלישי</option>
-                <option value="wednesday">יום רביעי</option>
-                <option value="thursday">יום חמישי</option>
-                <option value="friday">יום שישי</option>
-                <option value="saturday">יום שבת</option>
-            </select>
-
             <label>מחיר</label>
             <input
                 type="number"
@@ -493,38 +496,18 @@ function ActivityForm({
                 onChange={(e) => setPriceNote(e.target.value)}
             />
 
-            <div className="checkbox-row">
-                <label>פתוח להרשמה</label>
-                <input
-                    type="checkbox"
-                    checked={isOpen}
-                    onChange={(e) => setIsOpen(e.target.checked)}
-                />
-            </div>
-
-            <button
-                type="button"
-                className="staff-button"
-                onClick={handleSubmit}
-                disabled={isUploading}
-            >
-                {isUploading
-                    ? "מעלה תמונה..."
-                    : editingActivity
-                      ? "עדכון פעילות"
-                      : "הוספת פעילות"}
-            </button>
-
-            {editingActivity && (
-                <button
-                    type="button"
-                    className="staff-button staff-button--secondary"
-                    onClick={handleCancel}
-                    disabled={isUploading}
-                >
-                    ביטול עריכה
-                </button>
-            )}
+            <FormActionRow
+                submitLabel={
+                    isUploading
+                        ? "מעלה תמונה..."
+                        : editingActivity
+                          ? "שמירת שינויים"
+                          : "הוספת פעילות"
+                }
+                onSubmit={handleSubmit}
+                onCancel={editingActivity ? handleCancel : undefined}
+                isSubmitting={isUploading}
+            />
         </div>
     );
 }

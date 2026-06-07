@@ -1,12 +1,12 @@
 import { useState, useEffect, useRef } from "react";
 import {
-    BarChart3,
     Calendar,
     CheckCircle2,
     ClipboardList,
     FileText,
     HandHeart,
     Mail,
+    Menu,
     MessageCircle,
     Undo2,
     UserRound,
@@ -23,11 +23,11 @@ import ManageParticipants from "./ManageParticipants";
 import ViewRegistrations from "./ViewRegistrations";
 import ManageCancellations from "./ManageCancellations";
 import SendMessages from "./SendMessages";
-import ViewStatistics from "./ViewStatistics";
 import DashboardControlPanels from "../components/dashboard/DashboardControlPanels";
 import { fetchDashboardOverview } from "../services/dashboardService";
 import {
     applyStaffPopState,
+    buildStaffPage,
     createStaffNavStack,
     getStaffSection,
     getStaffView,
@@ -36,7 +36,10 @@ import {
     pushStaffNavStack,
     pushStaffPage,
     replaceStaffPage,
-    staffNavigateToDashboard
+    staffNavigateToDashboard,
+    STAFF_PENDING_REGISTRATION_ID_KEY,
+    STAFF_CANCELLATION_ID_KEY,
+    STAFF_RETURN_PAGE_KEY
 } from "../utils/staffNavigation";
 import { useMediaQuery } from "../hooks/useMediaQuery";
 
@@ -46,7 +49,6 @@ const DASHBOARD_ACTION_ICONS = {
     manageStaff: Users,
     manageParticipants: UserRound,
     messages: MessageCircle,
-    statistics: BarChart3,
     registrations: FileText,
     inquiries: Mail,
     cancellations: Undo2,
@@ -64,7 +66,6 @@ const DASHBOARD_ACTIONS = [
         page: "manageParticipants"
     },
     { id: "messages", label: "הודעות", page: "messages" },
-    { id: "statistics", label: "סטטיסטיקות", page: null },
     {
         id: "registrations",
         label: "בקשות",
@@ -86,12 +87,6 @@ const DASHBOARD_SUMMARY_LABELS = [
     { id: "sent-messages", label: "הודעות שנשלחו" }
 ];
 
-const DASHBOARD_SUMMARY_ICONS = {
-    "pending-requests": ClipboardList,
-    "open-activities": Calendar,
-    "sent-messages": MessageCircle
-};
-
 const SUBPAGE_TITLES = {
     activities: "ניהול פעילויות",
     manageStaff: "ניהול אנשי צוות",
@@ -100,7 +95,6 @@ const SUBPAGE_TITLES = {
     registrations: "צפייה בבקשות",
     cancellations: "ניהול ביטולים",
     messages: "שליחת הודעות",
-    statistics: "צפייה בסטטיסטיקות",
     attendance: "בדיקת נוכחות"
 };
 
@@ -109,22 +103,35 @@ function StaffDashboard({ onLogout }) {
     const [dashboardOverview, setDashboardOverview] = useState(null);
     const [dashboardLoading, setDashboardLoading] = useState(true);
     const [isMobileActionsOpen, setIsMobileActionsOpen] = useState(false);
+    const [isDesktopSidebarOpen, setIsDesktopSidebarOpen] = useState(false);
+    const [dashboardSuccessMessage, setDashboardSuccessMessage] = useState("");
     const isMobileDashboard = useMediaQuery("(max-width: 768px)");
     const staffNavStackRef = useRef(createStaffNavStack("dashboard"));
     const dashboardNavRef = useRef(null);
+    const desktopNavRef = useRef(null);
 
     function closeDashboardNav() {
         setIsMobileActionsOpen(false);
     }
 
+    function closeDesktopSidebar() {
+        setIsDesktopSidebarOpen(false);
+    }
+
     useEffect(() => {
         if (!isMobileDashboard) {
             setIsMobileActionsOpen(false);
+        } else {
+            setIsDesktopSidebarOpen(false);
         }
     }, [isMobileDashboard]);
 
     useEffect(() => {
-        if (!isMobileActionsOpen || !isMobileDashboard) {
+        const shouldLockScroll =
+            (isMobileActionsOpen && isMobileDashboard) ||
+            (isDesktopSidebarOpen && !isMobileDashboard);
+
+        if (!shouldLockScroll) {
             return undefined;
         }
 
@@ -134,19 +141,31 @@ function StaffDashboard({ onLogout }) {
         return () => {
             document.body.style.overflow = previousOverflow;
         };
-    }, [isMobileActionsOpen, isMobileDashboard]);
+    }, [isMobileActionsOpen, isDesktopSidebarOpen, isMobileDashboard]);
 
     useEffect(() => {
-        if (!isMobileActionsOpen) {
+        if (!isMobileActionsOpen && !isDesktopSidebarOpen) {
             return undefined;
         }
 
         function handlePointerDown(event) {
-            if (
+            const clickedInsideMobileNav =
                 dashboardNavRef.current &&
-                !dashboardNavRef.current.contains(event.target)
-            ) {
+                dashboardNavRef.current.contains(event.target);
+            const clickedInsideDesktopNav =
+                desktopNavRef.current &&
+                desktopNavRef.current.contains(event.target);
+
+            if (isMobileActionsOpen && !clickedInsideMobileNav) {
                 closeDashboardNav();
+            }
+
+            if (
+                isDesktopSidebarOpen &&
+                !isMobileDashboard &&
+                !clickedInsideDesktopNav
+            ) {
+                closeDesktopSidebar();
             }
         }
 
@@ -155,11 +174,12 @@ function StaffDashboard({ onLogout }) {
         return () => {
             document.removeEventListener("mousedown", handlePointerDown);
         };
-    }, [isMobileActionsOpen]);
+    }, [isMobileActionsOpen, isDesktopSidebarOpen, isMobileDashboard]);
 
     useEffect(() => {
         if (currentPage !== "dashboard") {
             setIsMobileActionsOpen(false);
+            setIsDesktopSidebarOpen(false);
             return undefined;
         }
 
@@ -215,6 +235,8 @@ function StaffDashboard({ onLogout }) {
             return;
         }
 
+        setDashboardSuccessMessage("");
+
         if (page === "dashboard") {
             const stepsBack = getStepsBackToDashboard(staffNavStackRef.current);
             staffNavigateToDashboard(stepsBack);
@@ -232,6 +254,48 @@ function StaffDashboard({ onLogout }) {
     }
 
     function goToDashboard() {
+        goToPage("dashboard");
+    }
+
+    function goToCompleteRegistration(request) {
+        const registrationId = request?.registrationId;
+
+        if (!registrationId) {
+            return;
+        }
+
+        const page = buildStaffPage("registrations", "complete");
+        setCurrentPage(page);
+        pushStaffPage(page, {
+            [STAFF_PENDING_REGISTRATION_ID_KEY]: registrationId,
+            [STAFF_RETURN_PAGE_KEY]: "dashboard"
+        });
+        staffNavStackRef.current = pushStaffNavStack(
+            staffNavStackRef.current,
+            page
+        );
+    }
+
+    function goToManageCancellation(item) {
+        const cancellationId = item?.cancellation?.id;
+
+        if (!cancellationId) {
+            return;
+        }
+
+        setCurrentPage("cancellations");
+        pushStaffPage("cancellations", {
+            [STAFF_CANCELLATION_ID_KEY]: cancellationId,
+            [STAFF_RETURN_PAGE_KEY]: "dashboard"
+        });
+        staffNavStackRef.current = pushStaffNavStack(
+            staffNavStackRef.current,
+            "cancellations"
+        );
+    }
+
+    function handleReturnToDashboardAfterComplete() {
+        setDashboardSuccessMessage("הרישום הושלם בהצלחה");
         goToPage("dashboard");
     }
 
@@ -315,10 +379,13 @@ function StaffDashboard({ onLogout }) {
             case "registrations":
                 return (
                     <div data-dashboard-page="registrations">
-                        {renderSubpageToolbar(SUBPAGE_TITLES.registrations)}
+                        {getStaffView(currentPage, "list") !== "complete"
+                            ? renderSubpageToolbar(SUBPAGE_TITLES.registrations)
+                            : null}
                         <ViewRegistrations
                             registrationView={getStaffView(currentPage, "list")}
                             onNavigate={goToPage}
+                            onReturnToDashboard={handleReturnToDashboardAfterComplete}
                         />
                     </div>
                 );
@@ -334,13 +401,6 @@ function StaffDashboard({ onLogout }) {
                     <div data-dashboard-page="messages">
                         {renderSubpageToolbar(SUBPAGE_TITLES.messages)}
                         <SendMessages />
-                    </div>
-                );
-            case "statistics":
-                return (
-                    <div data-dashboard-page="statistics">
-                        {renderSubpageToolbar(SUBPAGE_TITLES.statistics)}
-                        <ViewStatistics />
                     </div>
                 );
             case "attendance":
@@ -398,8 +458,7 @@ function StaffDashboard({ onLogout }) {
                 <div className="staff-dashboard-page staff-dashboard-page--home">
                     <header className="staff-dashboard-hero">
                         <div className="staff-dashboard-hero__bar">
-                            <h1 className="staff-dashboard-title">לוח בקרה לצוות</h1>
-                            <div className="staff-dashboard-hero__controls">
+                            <div className="staff-dashboard-hero__start">
                                 <div
                                     className="staff-dashboard-hero__mobile-nav"
                                     ref={dashboardNavRef}
@@ -417,51 +476,79 @@ function StaffDashboard({ onLogout }) {
                                         onLogout={handleLogout}
                                     />
                                 </div>
-                                <button
-                                    type="button"
-                                    className="staff-dashboard-logout staff-dashboard-logout--hero"
-                                    onClick={handleLogout}
+                                <div
+                                    className="staff-dashboard-hero__desktop-nav"
+                                    ref={desktopNavRef}
                                 >
-                                    התנתקות
-                                </button>
+                                    <button
+                                        type="button"
+                                        className={
+                                            isDesktopSidebarOpen
+                                                ? "staff-dashboard-desktop-menu-toggle staff-dashboard-desktop-menu-toggle--open"
+                                                : "staff-dashboard-desktop-menu-toggle"
+                                        }
+                                        onClick={() =>
+                                            setIsDesktopSidebarOpen((open) => !open)
+                                        }
+                                        aria-label="פתיחת תפריט ניווט"
+                                        aria-expanded={isDesktopSidebarOpen}
+                                        aria-controls="staff-dashboard-sidebar-drawer"
+                                    >
+                                        <Menu
+                                            className="staff-dashboard-desktop-menu-toggle__icon"
+                                            strokeWidth={2}
+                                            aria-hidden="true"
+                                        />
+                                    </button>
+                                    <DashboardSidebar
+                                        isOpen={
+                                            isDesktopSidebarOpen &&
+                                            !isMobileDashboard
+                                        }
+                                        onClose={closeDesktopSidebar}
+                                        actionsById={DASHBOARD_ACTIONS_BY_ID}
+                                        actionIcons={DASHBOARD_ACTION_ICONS}
+                                        currentPage={currentPage}
+                                        onNavigate={handleDashboardAction}
+                                    />
+                                </div>
+                                <h1 className="staff-dashboard-title">
+                                    לוח בקרה לצוות
+                                </h1>
                             </div>
+                            <button
+                                type="button"
+                                className="staff-dashboard-logout staff-dashboard-logout--hero"
+                                onClick={handleLogout}
+                            >
+                                התנתקות
+                            </button>
                         </div>
                     </header>
 
                     <div className="staff-dashboard-layout">
                         <main className="staff-dashboard-main staff-dashboard-content">
+                        {dashboardSuccessMessage ? (
+                            <p className="staff-alert staff-alert--success staff-dashboard-success">
+                                {dashboardSuccessMessage}
+                            </p>
+                        ) : null}
                         <section className="staff-dashboard-summary staff-dashboard-summary--primary">
                             <h2 className="staff-dashboard-section-title">סיכום מהיר</h2>
                             <div className="staff-dashboard-summary-grid">
-                                {DASHBOARD_SUMMARY_LABELS.map((item) => {
-                                    const SummaryIcon =
-                                        DASHBOARD_SUMMARY_ICONS[item.id];
-
-                                    return (
-                                        <article
-                                            key={item.id}
-                                            className="staff-dashboard-summary-card"
-                                        >
-                                            {SummaryIcon ? (
-                                                <span
-                                                    className="staff-dashboard-summary-card__icon"
-                                                    aria-hidden="true"
-                                                >
-                                                    <SummaryIcon
-                                                        className="staff-dashboard-summary-card__icon-svg"
-                                                        strokeWidth={2}
-                                                    />
-                                                </span>
-                                            ) : null}
-                                            <span className="staff-dashboard-summary-card__value">
-                                                {getSummaryValue(item.id)}
-                                            </span>
-                                            <span className="staff-dashboard-summary-card__label">
-                                                {item.label}
-                                            </span>
-                                        </article>
-                                    );
-                                })}
+                                {DASHBOARD_SUMMARY_LABELS.map((item) => (
+                                    <article
+                                        key={item.id}
+                                        className="staff-dashboard-summary-card"
+                                    >
+                                        <span className="staff-dashboard-summary-card__label">
+                                            {item.label}
+                                        </span>
+                                        <span className="staff-dashboard-summary-card__value">
+                                            {getSummaryValue(item.id)}
+                                        </span>
+                                    </article>
+                                ))}
                             </div>
                         </section>
 
@@ -469,15 +556,10 @@ function StaffDashboard({ onLogout }) {
                             overview={dashboardOverview}
                             loading={dashboardLoading}
                             onNavigate={handleDashboardAction}
+                            onCompleteRegistration={goToCompleteRegistration}
+                            onManageCancellation={goToManageCancellation}
                         />
                         </main>
-
-                        <DashboardSidebar
-                            actionsById={DASHBOARD_ACTIONS_BY_ID}
-                            actionIcons={DASHBOARD_ACTION_ICONS}
-                            currentPage={currentPage}
-                            onNavigate={handleDashboardAction}
-                        />
                     </div>
                 </div>
             )}

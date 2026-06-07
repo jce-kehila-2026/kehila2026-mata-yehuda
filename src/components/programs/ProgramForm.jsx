@@ -1,5 +1,6 @@
 import { useEffect, useRef, useState } from "react";
 import FormImageUpload from "../shared/FormImageUpload";
+import FormActionRow from "../shared/FormActionRow";
 import { prepareProgramImageUrl } from "../../services/programImageService";
 import {
     formatProgramTitle,
@@ -115,29 +116,18 @@ function ProgramForm({
                 onUpload={prepareProgramImageUrl}
             />
 
-            <button
-                type="button"
-                className="staff-button"
-                onClick={handleSubmit}
-                disabled={isUploading}
-            >
-                {isUploading
-                    ? "שומר..."
-                    : editingProgram
-                      ? "עדכון תוכנית"
-                      : "הוספת תוכנית"}
-            </button>
-
-            {editingProgram ? (
-                <button
-                    type="button"
-                    className="staff-button staff-button--secondary"
-                    onClick={onCancelEdit}
-                    disabled={isUploading}
-                >
-                    ביטול עריכה
-                </button>
-            ) : null}
+            <FormActionRow
+                submitLabel={
+                    isUploading
+                        ? "שומר..."
+                        : editingProgram
+                          ? "שמירת שינויים"
+                          : "הוספת תוכנית"
+                }
+                onSubmit={handleSubmit}
+                onCancel={editingProgram ? onCancelEdit : undefined}
+                isSubmitting={isUploading}
+            />
         </div>
     );
 }

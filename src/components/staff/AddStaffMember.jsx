@@ -1,5 +1,6 @@
 import { useState } from "react";
 import { addStaffMember } from "../../services/staffService";
+import FormActionRow from "../shared/FormActionRow";
 
 function AddStaffMember({ onSuccess, onCancel }) {
     const [fullName, setFullName] = useState("");
@@ -134,26 +135,12 @@ function AddStaffMember({ onSuccess, onCancel }) {
                     />
                 </div>
 
-                <div className="staff-form__actions">
-                    {onCancel ? (
-                        <button
-                            type="button"
-                            className="staff-button staff-button--secondary"
-                            onClick={onCancel}
-                            disabled={submitting}
-                        >
-                            ביטול
-                        </button>
-                    ) : null}
-                    <button
-                        type="button"
-                        className="staff-button"
-                        onClick={handleAddStaffMember}
-                        disabled={submitting}
-                    >
-                        הוספת איש צוות
-                    </button>
-                </div>
+                <FormActionRow
+                    submitLabel="הוספת איש צוות"
+                    onSubmit={handleAddStaffMember}
+                    onCancel={onCancel}
+                    isSubmitting={submitting}
+                />
             </div>
         </div>
     );

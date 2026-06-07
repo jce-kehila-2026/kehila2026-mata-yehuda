@@ -14,7 +14,12 @@
   margin-top: 0;
 }
 
-.staff-page--staff-management .staff-section--form .staff-button,
+.staff-page--staff-management .staff-section--form .staff-button {
+  width: auto;
+  align-self: flex-start;
+}
+
+.staff-page--staff-management .staff-section--form .staff-form > .staff-button,
 .staff-page--staff-management .staff-section--form .staff-toolbar .staff-button {
   width: auto;
   align-self: flex-start;
@@ -226,14 +231,7 @@
   justify-content: flex-start;
 }
 
-.staff-form-section .staff-form__actions {
-  display: flex;
-  flex-wrap: wrap;
-  gap: 0.75rem;
-  margin-top: 0.5rem;
-}
-
-.staff-form-section .staff-form__hint {
+.staff-page--staff-management .staff-form__hint {
   margin: -0.35rem 0 0.75rem;
   font-size: 0.88rem;
   color: var(--color-muted);

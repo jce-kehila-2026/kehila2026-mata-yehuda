@@ -1,5 +1,6 @@
 import { useState } from "react";
 import { REFUND_STATUS_REFUNDED } from "../helpers/cancellationHelpers";
+import FormActionRow from "../../shared/FormActionRow";
 
 function RefundForm({ cancellationId, currentNotes, onMarkRefunded, disabled }) {
     const [notes, setNotes] = useState(currentNotes || "");
@@ -36,14 +37,12 @@ function RefundForm({ cancellationId, currentNotes, onMarkRefunded, disabled }) 
 
             {error && <p className="staff-alert staff-alert--error">{error}</p>}
 
-            <button
-                type="button"
-                className="staff-button"
-                onClick={handleMarkRefunded}
-                disabled={disabled || saving}
-            >
-                {saving ? "שומר..." : "סמן כהוחזר"}
-            </button>
+            <FormActionRow
+                submitLabel={saving ? "שומר..." : "סמן כהוחזר"}
+                onSubmit={handleMarkRefunded}
+                isSubmitting={saving}
+                submitDisabled={disabled}
+            />
         </div>
     );
 }

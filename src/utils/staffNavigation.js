@@ -4,6 +4,9 @@
  * - requests — reserved for צפייה בפניות (user inquiries, future)
  */
 export const STAFF_PAGE_STATE_KEY = "staffPage";
+export const STAFF_PENDING_REGISTRATION_ID_KEY = "pendingRegistrationId";
+export const STAFF_CANCELLATION_ID_KEY = "cancellationId";
+export const STAFF_RETURN_PAGE_KEY = "staffReturnPage";
 
 export function parseStaffPage(state) {
     if (state && typeof state[STAFF_PAGE_STATE_KEY] === "string") {

@@ -16,7 +16,6 @@ import './styles/registrations.css'
 import './styles/requests.css'
 import './styles/cancellations.css'
 import './styles/messages.css'
-import './styles/statistics.css'
 import App from './App.jsx'
 
 createRoot(document.getElementById('root')).render(

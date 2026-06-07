@@ -6,12 +6,18 @@
   line-height: 1.7;
   color: var(--staff-color-text);
   background: var(--staff-color-bg);
-  min-height: 100vh;
+  min-height: auto;
   width: 100%;
   max-width: 100%;
   overflow-x: hidden;
   text-align: right;
   direction: rtl;
+}
+
+/* Nested manage-page shells sit inside StaffDashboard — do not stack viewport min-heights */
+.staff-page .staff-page,
+.staff-subpage .staff-page {
+  min-height: 0;
 }
 
 .staff-page *,
@@ -70,14 +76,22 @@
   width: 100%;
   max-width: min(100%, 1280px);
   margin: 0 auto;
-  padding: 1.8rem 1.2rem 2.5rem;
+  padding: 1.8rem 1.2rem 1.25rem;
   box-sizing: border-box;
+}
+
+.staff-subpage .staff-container {
+  padding-bottom: 1rem;
 }
 
 .staff-section {
   width: 100%;
   margin-bottom: 1.8rem;
   box-sizing: border-box;
+}
+
+.staff-subpage .staff-section:last-child {
+  margin-bottom: 0;
 }
 
 .staff-section--list {
@@ -223,10 +237,10 @@
   width: 100%;
 }
 
-.staff-button:hover,
-.staff-button:active,
-.staff-page button.staff-button:hover,
-.staff-page button.staff-button:active {
+.staff-button:not(.staff-button--secondary):not(.staff-form__cancel):not(.btn-secondary):not(.staff-button--danger):hover,
+.staff-button:not(.staff-button--secondary):not(.staff-form__cancel):not(.btn-secondary):not(.staff-button--danger):active,
+.staff-page button.staff-button:not(.staff-button--secondary):not(.staff-form__cancel):not(.btn-secondary):not(.staff-button--danger):hover,
+.staff-page button.staff-button:not(.staff-button--secondary):not(.staff-form__cancel):not(.btn-secondary):not(.staff-button--danger):active {
   background: var(--color-primary-hover);
 }
 
@@ -242,19 +256,34 @@
   cursor: not-allowed;
 }
 
-.staff-button--secondary {
-  color: var(--color-primary);
-  background: #ffffff;
-  border: 1.5px solid var(--color-primary);
+.staff-button--secondary,
+.staff-button.staff-form__cancel,
+.staff-button.btn-secondary,
+.staff-page button.staff-button.staff-button--secondary,
+.staff-page button.staff-button.staff-form__cancel,
+.staff-page button.staff-button.btn-secondary {
+  color: #374151;
+  background: #f9fafb;
+  border: 1px solid #d1d5db;
+  box-shadow: none;
 }
 
 .staff-button--secondary:hover,
 .staff-button--secondary:active,
-.staff-page button.staff-button--secondary:hover,
-.staff-page button.staff-button--secondary:active {
-  background: var(--color-accent-light);
-  color: var(--color-primary-hover);
-  border-color: var(--color-primary-hover);
+.staff-button.staff-form__cancel:hover,
+.staff-button.staff-form__cancel:active,
+.staff-button.btn-secondary:hover,
+.staff-button.btn-secondary:active,
+.staff-page button.staff-button.staff-button--secondary:hover,
+.staff-page button.staff-button.staff-button--secondary:active,
+.staff-page button.staff-button.staff-form__cancel:hover,
+.staff-page button.staff-button.staff-form__cancel:active,
+.staff-page button.staff-button.btn-secondary:hover,
+.staff-page button.staff-button.btn-secondary:active {
+  background: #ffffff;
+  color: #111827;
+  border-color: #9ca3af;
+  transform: none;
 }
 
 .staff-button--small,
@@ -398,6 +427,7 @@
   width: 100%;
   max-width: 100%;
   overflow-x: hidden;
+  min-height: auto;
 }
 
 .staff-subpage-toolbar {
@@ -564,9 +594,9 @@
     min-height: 100px;
   }
 
-  .staff-form .staff-button,
+  .staff-form > .staff-button,
   .staff-section--form .staff-button,
-  .staff-page .staff-form button.staff-button,
+  .staff-page .staff-form > .staff-button,
   .staff-actions .staff-button {
     width: 100%;
   }

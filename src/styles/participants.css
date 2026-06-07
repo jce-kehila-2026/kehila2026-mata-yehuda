@@ -119,14 +119,26 @@
   color: var(--color-text);
 }
 
+.admin-list-section--participants .admin-data-table th,
+.admin-list-section--participants .admin-data-table td {
+  display: table-cell;
+  vertical-align: middle;
+}
+
 .admin-list-section--participants .admin-data-table__masked-id {
   direction: ltr;
   unicode-bidi: isolate;
-  display: inline-block;
+  display: inline-flex;
+  align-items: center;
+  height: 100%;
+  line-height: 1.4;
+  margin: 0;
+  padding: 0;
   font-family: ui-monospace, SFMono-Regular, Menlo, Consolas, monospace;
   letter-spacing: 0.04em;
   color: var(--color-muted);
   text-align: left;
+  vertical-align: middle;
 }
 
 .program-display-name--ltr {
@@ -252,8 +264,8 @@
   justify-content: flex-start;
 }
 
-.staff-page .staff-form button.staff-button,
-.staff-page--participants .staff-section--form .staff-button {
+.staff-page .staff-form > .staff-button,
+.staff-page--participants .staff-section--form .staff-form > .staff-button {
   width: 100%;
   align-self: stretch;
 }

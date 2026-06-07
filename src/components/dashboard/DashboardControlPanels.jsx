@@ -1,7 +1,7 @@
 import { Calendar, Check, ClipboardList, Undo2 } from "lucide-react";
 import { formatCancellationDate } from "../cancellations/helpers/cancellationHelpers";
 import { getRequestProgramLabel } from "../../services/dashboardService";
-import { formatDate } from "../../utils/dateUtils";
+import ActivityDateDisplay from "../activities/ActivityDateDisplay";
 import {
     buildRecentUpdates,
     formatRelativeTimeHebrew,
@@ -10,6 +10,7 @@ import {
 } from "../../utils/dashboardDisplayHelpers";
 
 const PANEL_PREVIEW_LIMIT = 3;
+const PENDING_REQUESTS_PREVIEW_LIMIT = 2;
 
 function DashboardPanelEmpty({ message, icon: EmptyIcon = Check }) {
     return (
@@ -40,11 +41,17 @@ function DashboardPanelLink({ label, onClick, disabled }) {
     );
 }
 
-function DashboardControlPanels({ overview, loading, onNavigate }) {
+function DashboardControlPanels({
+    overview,
+    loading,
+    onNavigate,
+    onCompleteRegistration,
+    onManageCancellation
+}) {
     const pendingCount = overview?.pendingCount ?? 0;
     const pendingRequests = (overview?.pendingRequests ?? []).slice(
         0,
-        PANEL_PREVIEW_LIMIT
+        PENDING_REQUESTS_PREVIEW_LIMIT
     );
     const upcomingActivities = (overview?.upcomingActivities ?? []).slice(
         0,
@@ -90,16 +97,29 @@ function DashboardControlPanels({ overview, loading, onNavigate }) {
                                                     request.participant_id ||
                                                     request.id
                                                 }
-                                                className="staff-dashboard-panel__item"
+                                                className="staff-dashboard-panel__item staff-dashboard-panel__item--with-action"
                                             >
-                                                <span className="staff-dashboard-panel__item-name">
-                                                    {request.full_name || "—"}
-                                                </span>
-                                                {programLabel ? (
-                                                    <span className="staff-dashboard-panel__item-meta">
-                                                        {programLabel}
+                                                <div className="staff-dashboard-panel__item-content">
+                                                    <span className="staff-dashboard-panel__item-name">
+                                                        {request.full_name || "—"}
                                                     </span>
-                                                ) : null}
+                                                    {programLabel ? (
+                                                        <span className="staff-dashboard-panel__item-meta">
+                                                            {programLabel}
+                                                        </span>
+                                                    ) : null}
+                                                </div>
+                                                <button
+                                                    type="button"
+                                                    className="staff-dashboard-panel__item-action"
+                                                    onClick={() =>
+                                                        onCompleteRegistration?.(
+                                                            request
+                                                        )
+                                                    }
+                                                >
+                                                    השלמת רישום
+                                                </button>
                                             </li>
                                         );
                                     })}
@@ -136,7 +156,9 @@ function DashboardControlPanels({ overview, loading, onNavigate }) {
                                         {activity.data?.name || "—"}
                                     </span>
                                     <span className="staff-dashboard-panel__item-meta">
-                                        {formatDate(activity.data?.start_date) || "—"}
+                                        <ActivityDateDisplay
+                                            startDate={activity.data?.start_date}
+                                        />
                                     </span>
                                 </li>
                             ))}
@@ -175,16 +197,27 @@ function DashboardControlPanels({ overview, loading, onNavigate }) {
                                 {recentCancellations.map((item) => (
                                     <li
                                         key={item.cancellation.id}
-                                        className="staff-dashboard-panel__item"
+                                        className="staff-dashboard-panel__item staff-dashboard-panel__item--with-action"
                                     >
-                                        <span className="staff-dashboard-panel__item-name">
-                                            {item.participantFullName || "—"}
-                                        </span>
-                                        <span className="staff-dashboard-panel__item-meta">
-                                            {formatCancellationDate(
-                                                item.cancellation.cancelled_at
-                                            )}
-                                        </span>
+                                        <div className="staff-dashboard-panel__item-content">
+                                            <span className="staff-dashboard-panel__item-name">
+                                                {item.participantFullName || "—"}
+                                            </span>
+                                            <span className="staff-dashboard-panel__item-meta">
+                                                {formatCancellationDate(
+                                                    item.cancellation.cancelled_at
+                                                )}
+                                            </span>
+                                        </div>
+                                        <button
+                                            type="button"
+                                            className="staff-dashboard-panel__item-action"
+                                            onClick={() =>
+                                                onManageCancellation?.(item)
+                                            }
+                                        >
+                                            ניהול ביטול
+                                        </button>
                                     </li>
                                 ))}
                             </ul>
@@ -253,7 +286,9 @@ function DashboardControlPanels({ overview, loading, onNavigate }) {
                                         {activity.data?.name || "—"}
                                     </span>
                                     <span className="staff-dashboard-week__date">
-                                        {formatDate(activity.data?.start_date) || "—"}
+                                        <ActivityDateDisplay
+                                            startDate={activity.data?.start_date}
+                                        />
                                     </span>
                                 </li>
                             ))}

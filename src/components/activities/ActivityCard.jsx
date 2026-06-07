@@ -1,4 +1,5 @@
 import { formatDate, formatTime } from "../../utils/dateUtils";
+import ActivityDateDisplay from "./ActivityDateDisplay";
 import { formatActivityOccupancy } from "../../services/activityService";
 import ActivityStatusBadge from "./ActivityStatusBadge";
 import { hasDisplayNumber, hasFormattedDisplay, hasValue } from "../../utils/hasValue";
@@ -6,7 +7,6 @@ import { hasDisplayNumber, hasFormattedDisplay, hasValue } from "../../utils/has
 function ActivityCard({ activity, onDelete, onEdit }) {
     const data = activity.data;
     const imageUrl = data.image_url?.trim();
-    const startDateLabel = formatDate(data.start_date);
     const registrationDeadlineLabel = formatDate(data.registration_deadline);
     const startTimeLabel = formatTime(data.start_date);
     const endTimeLabel = formatTime(data.end_date);
@@ -18,9 +18,10 @@ function ActivityCard({ activity, onDelete, onEdit }) {
 
                 {hasValue(data.description) && <p>תיאור: {data.description}</p>}
 
-                {hasFormattedDisplay(startDateLabel) && (
-                    <p>תאריך הפעולה: {startDateLabel}</p>
-                )}
+                <p>
+                    תאריך הפעילות:{" "}
+                    <ActivityDateDisplay startDate={data.start_date} />
+                </p>
                 {hasFormattedDisplay(registrationDeadlineLabel) && (
                     <p>תאריך אחרון להרשמה: {registrationDeadlineLabel}</p>
                 )}
@@ -32,9 +33,6 @@ function ActivityCard({ activity, onDelete, onEdit }) {
                     <p>שעת סיום: {endTimeLabel}</p>
                 )}
 
-                {hasValue(data.day_of_week) && (
-                    <p>יום בשבוע: {data.day_of_week}</p>
-                )}
                 {(hasDisplayNumber(data.max_participants) ||
                     hasDisplayNumber(data.current_participants)) && (
                     <p>משתתפים: {formatActivityOccupancy(data)}</p>

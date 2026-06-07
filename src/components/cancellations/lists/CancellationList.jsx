@@ -1,4 +1,4 @@
-import { useCallback, useEffect, useMemo, useState } from "react";
+import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import { Ban } from "lucide-react";
 import CancellationCard from "./CancellationCard";
 import CancellationListStats from "../CancellationListStats";
@@ -41,6 +41,7 @@ import {
     resolveCanonicalProgramId,
     resolveProgramDisplayTitle
 } from "../../../utils/programConstants";
+import { STAFF_CANCELLATION_ID_KEY } from "../../../utils/staffNavigation";
 
 const CANCELLATION_COLUMNS = [
     { key: "participant", label: "שם משתתף", sortKey: "participant" },
@@ -87,6 +88,8 @@ function CancellationList() {
     const [viewItem, setViewItem] = useState(null);
     const [editItem, setEditItem] = useState(null);
     const [refundItem, setRefundItem] = useState(null);
+    const [highlightedCancellationId, setHighlightedCancellationId] = useState(null);
+    const autoOpenedCancellationIdRef = useRef(null);
 
     const filterItems = useCallback(
         (items, searchQuery, filters) =>
@@ -142,6 +145,42 @@ function CancellationList() {
     useEffect(() => {
         loadCancellations();
     }, []);
+
+    useEffect(() => {
+        if (loading || sourceItems.length === 0) {
+            return;
+        }
+
+        const cancellationId = window.history.state?.[STAFF_CANCELLATION_ID_KEY];
+
+        if (
+            !cancellationId ||
+            autoOpenedCancellationIdRef.current === cancellationId
+        ) {
+            return;
+        }
+
+        const item = sourceItems.find(
+            (entry) => entry.cancellation?.id === cancellationId
+        );
+
+        if (!item) {
+            return;
+        }
+
+        autoOpenedCancellationIdRef.current = cancellationId;
+        setHighlightedCancellationId(cancellationId);
+        setEditItem(item);
+    }, [loading, sourceItems]);
+
+    function closeViewItem() {
+        setViewItem(null);
+    }
+
+    function closeEditItem() {
+        setEditItem(null);
+        setHighlightedCancellationId(null);
+    }
 
     async function handleUpdateRefund(cancellationId, payload) {
         await updateRefundStatus(cancellationId, payload);
@@ -294,7 +333,15 @@ function CancellationList() {
                                 sortDirection={list.sortDirection}
                                 onSort={list.handleSort}
                                 rows={list.pageItems.map((item) => (
-                                    <tr key={item.cancellation.id}>
+                                    <tr
+                                        key={item.cancellation.id}
+                                        className={
+                                            highlightedCancellationId ===
+                                            item.cancellation.id
+                                                ? "admin-data-table__row--highlighted"
+                                                : undefined
+                                        }
+                                    >
                                         <td className="admin-data-table__name-cell">
                                             {item.participantFullName || "—"}
                                         </td>
@@ -358,13 +405,13 @@ function CancellationList() {
             {viewItem ? (
                 <CancellationDetailModal
                     item={viewItem}
-                    onClose={() => setViewItem(null)}
+                    onClose={closeViewItem}
                 />
             ) : null}
             {editItem ? (
                 <CancellationEditModal
                     item={editItem}
-                    onClose={() => setEditItem(null)}
+                    onClose={closeEditItem}
                     onSave={handleUpdateRefund}
                 />
             ) : null}

@@ -6,6 +6,7 @@ import {
 import { fetchRegistrationByParticipantId } from "../../../services/registrationService";
 import { useParticipantForm } from "../hooks/useParticipantForm";
 import ParticipantProgramFields from "./ParticipantProgramFields";
+import FormActionRow from "../../shared/FormActionRow";
 import {
     buildEditParticipantForm,
     emptyParticipantForm,
@@ -305,24 +306,14 @@ function EditParticipant({
                     onChange={(e) => updateField("mobility_limitations", e.target.value)}
                 />
 
-                {onCancel && (
-                    <button
-                        type="button"
-                        className="staff-button staff-button--secondary"
-                        onClick={onCancel}
-                    >
-                        ביטול עריכה
-                    </button>
-                )}
-
-                <button
-                    type="button"
-                    className="staff-button"
-                    onClick={handleUpdateParticipant}
-                    disabled={loading}
-                >
-                    {completeRegistration ? "השלמת רישום" : "שמירת שינויים"}
-                </button>
+                <FormActionRow
+                    submitLabel={
+                        completeRegistration ? "השלמת רישום" : "שמירת שינויים"
+                    }
+                    onSubmit={handleUpdateParticipant}
+                    onCancel={onCancel}
+                    isSubmitting={loading}
+                />
             </div>
         </div>
     );

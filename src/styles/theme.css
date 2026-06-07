@@ -28,4 +28,8 @@
   --color-muted: #444444;
   --color-bg: #ffffff;
   --radius: 18px;
+
+  /* Admin shell layout — used for min-height calc on full-height pages */
+  --staff-dashboard-hero-height: 3.25rem;
+  --staff-subpage-toolbar-height: 3.25rem;
 }

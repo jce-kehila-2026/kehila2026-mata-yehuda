@@ -1,9 +1,278 @@
-/* ViewRegistrations — registration filters & RegistrationCard list */
+/* ViewRegistrations — admin list, filters & registration requests */
 
-.view-registrations-filters {
-  margin-bottom: 0;
+.staff-page--registrations .staff-container--registrations {
+  padding-top: 0.5rem;
 }
 
 .staff-page--registrations-edit .staff-toolbar {
   margin-bottom: 1.25rem;
+}
+
+.staff-page--registrations-edit .staff-section--form .staff-button,
+.staff-page--registrations-edit .staff-section .staff-button {
+  width: auto;
+  align-self: flex-start;
+}
+
+.staff-page--registrations .staff-section .staff-button {
+  width: auto;
+  align-self: flex-start;
+}
+
+.admin-list-section--registrations .admin-list-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 0.75rem;
+  margin-bottom: 0.5rem;
+  direction: rtl;
+}
+
+.admin-list-section--registrations .admin-list-header__title {
+  margin: 0;
+  font-size: 1.25rem;
+}
+
+.admin-list-section--registrations .admin-list-toolbar.staff-form.staff-list-filters,
+.admin-list-section--registrations .admin-list-toolbar--registrations-bar.staff-form.staff-list-filters {
+  display: grid;
+  grid-template-columns: 2fr 1fr 1fr auto;
+  gap: 16px;
+  align-items: end;
+  direction: rtl;
+  max-width: none;
+  margin: 0 0 0.5rem;
+  flex-direction: unset;
+}
+
+.admin-list-section--registrations
+  .admin-list-toolbar--registrations-bar
+  .admin-list-toolbar__filters {
+  display: contents;
+}
+
+.admin-list-section--registrations
+  .admin-list-toolbar--registrations-bar
+  .admin-list-toolbar__search,
+.admin-list-section--registrations
+  .admin-list-toolbar--registrations-bar
+  .admin-list-toolbar__filter-item,
+.admin-list-section--registrations
+  .admin-list-toolbar--registrations-bar
+  .admin-list-toolbar__filters
+  > div,
+.admin-list-section--registrations
+  .admin-list-toolbar--registrations-bar
+  .admin-list-toolbar__page-size {
+  display: flex;
+  flex-direction: column;
+  gap: 0.25rem;
+  min-width: 0;
+  margin: 0;
+}
+
+.admin-list-section--registrations .admin-list-toolbar label,
+.admin-list-section--registrations .admin-list-toolbar input,
+.admin-list-section--registrations .admin-list-toolbar select {
+  font-size: 0.88rem;
+}
+
+.admin-list-section--registrations .admin-list-toolbar label {
+  margin: 0;
+}
+
+.admin-list-section--registrations .admin-list-toolbar input,
+.admin-list-section--registrations .admin-list-toolbar select {
+  min-height: 38px;
+  width: 100%;
+  box-sizing: border-box;
+}
+
+.admin-list-section--registrations .admin-list-summary {
+  margin: 0 0 0.5rem;
+}
+
+.admin-list-section--registrations .admin-list-summary__text,
+.admin-list-section--registrations .admin-list-summary__page {
+  font-size: 0.88rem;
+}
+
+.admin-list-section--registrations .admin-list-pagination {
+  margin-top: 0.85rem;
+}
+
+.admin-list-section--registrations .admin-data-table-wrap {
+  box-shadow: 0 2px 10px rgba(0, 0, 0, 0.04);
+}
+
+.admin-list-section--registrations .admin-data-table tbody tr {
+  transition: background-color 0.15s ease;
+}
+
+.admin-list-section--registrations .admin-data-table tbody tr:hover {
+  background: rgba(232, 245, 236, 0.55);
+}
+
+.admin-list-section--registrations .admin-data-table th,
+.admin-list-section--registrations .admin-data-table td {
+  display: table-cell;
+  vertical-align: middle;
+}
+
+.admin-list-section--registrations .admin-data-table__masked-id {
+  direction: ltr;
+  unicode-bidi: isolate;
+  display: inline-flex;
+  align-items: center;
+  line-height: 1.4;
+  margin: 0;
+  padding: 0;
+  font-family: ui-monospace, SFMono-Regular, Menlo, Consolas, monospace;
+  letter-spacing: 0.04em;
+  color: var(--color-muted);
+  text-align: left;
+}
+
+.admin-list-section--registrations .admin-registrations-table__complete {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  box-sizing: border-box;
+  width: auto;
+  min-width: auto;
+  height: 36px;
+  padding: 0 16px;
+  border: none;
+  border-radius: 10px;
+  font-family: var(--staff-font-family);
+  font-size: 0.9rem;
+  font-weight: 700;
+  line-height: 1;
+  white-space: nowrap;
+  color: #ffffff;
+  background: var(--color-primary);
+  box-shadow: none;
+  cursor: pointer;
+  transition: background 0.15s ease;
+}
+
+.admin-list-section--registrations .admin-registrations-table__complete:hover:not(:disabled),
+.admin-list-section--registrations .admin-registrations-table__complete:active:not(:disabled) {
+  background: var(--color-primary-hover);
+  box-shadow: none;
+  transform: none;
+}
+
+.admin-list-section--registrations .admin-registrations-table__complete:focus-visible {
+  outline: 2px solid var(--color-border);
+  outline-offset: 2px;
+}
+
+.admin-list-section--registrations .admin-registrations-table__complete:disabled {
+  opacity: 0.55;
+  cursor: not-allowed;
+}
+
+.registration-list-stats {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.55rem;
+  margin: 0 0 0.75rem;
+  direction: rtl;
+}
+
+.registration-list-stats__item {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.45rem;
+  min-height: 2rem;
+  padding: 0.35rem 0.75rem;
+  border-radius: 999px;
+  border: 1.5px solid var(--color-card-border);
+  background: linear-gradient(
+    180deg,
+    var(--color-accent-light) 0%,
+    #fffdf9 100%
+  );
+  box-shadow: 0 1px 4px rgba(0, 0, 0, 0.04);
+}
+
+.registration-list-stats__label {
+  font-size: 0.84rem;
+  font-weight: 600;
+  color: var(--color-muted);
+}
+
+.registration-list-stats__value {
+  font-size: 0.95rem;
+  font-weight: 700;
+  color: var(--color-primary);
+  font-variant-numeric: tabular-nums;
+}
+
+.registrations-list {
+  width: 100%;
+  max-width: none;
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+  gap: 1.25rem;
+  align-items: stretch;
+}
+
+.staff-page .registration-card {
+  display: flex;
+  flex-direction: column;
+  height: 100%;
+  box-sizing: border-box;
+}
+
+.staff-page .registration-card__body {
+  flex: 1;
+  min-height: 0;
+}
+
+.staff-page .registration-card__name {
+  margin: 0 0 0.55rem;
+  font-size: 1.15rem;
+  color: var(--color-primary);
+}
+
+.staff-page .registration-card__meta {
+  margin: 0 0 0.35rem;
+  font-size: 0.96rem;
+  line-height: 1.5;
+  color: var(--color-muted);
+}
+
+.staff-page .registration-card__meta--badge {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 0.35rem;
+}
+
+.staff-page .registration-card__meta:last-child {
+  margin-bottom: 0;
+}
+
+.staff-page .registration-card__actions {
+  margin-top: auto;
+  padding-top: 0.75rem;
+}
+
+@media (max-width: 768px) {
+  .admin-list-section--registrations .admin-list-toolbar.staff-form.staff-list-filters,
+  .admin-list-section--registrations
+    .admin-list-toolbar--registrations-bar.staff-form.staff-list-filters {
+    grid-template-columns: 1fr;
+    gap: 0.75rem;
+  }
+
+  .admin-list-section--registrations
+    .admin-list-toolbar--registrations-bar
+    .admin-list-toolbar__filters {
+    display: grid;
+    grid-template-columns: 1fr;
+    gap: 0.75rem;
+  }
 }

@@ -21,11 +21,14 @@ import {
     AdminTableDeleteButton,
     AdminTableEditButton
 } from "../admin/AdminTableActions";
-import { formatDate } from "../../utils/dateUtils";
-import { hasFormattedDisplay } from "../../utils/hasValue";
+import {
+    formatActivityDateOnly,
+    formatActivityWeekday
+} from "../../utils/dateUtils";
 
 const ACTIVITY_COLUMNS = [
     { key: "name", label: "שם הפעילות", sortKey: "name" },
+    { key: "weekday", label: "יום", sortKey: "weekday" },
     { key: "date", label: "תאריך", sortKey: "date" },
     { key: "participants", label: "משתתפים", sortKey: "participants" },
     { key: "status", label: "סטטוס", sortKey: "status" },
@@ -192,13 +195,8 @@ function ActivityList({ onDelete, onEdit, refreshKey = 0, onAddActivity }) {
                                     return (
                                         <tr key={activity.id}>
                                             <td>{data.name || "—"}</td>
-                                            <td>
-                                                {hasFormattedDisplay(
-                                                    formatDate(data.start_date)
-                                                )
-                                                    ? formatDate(data.start_date)
-                                                    : "—"}
-                                            </td>
+                                            <td>{formatActivityWeekday(data.start_date)}</td>
+                                            <td>{formatActivityDateOnly(data.start_date)}</td>
                                             <td className="admin-data-table__numeric">
                                                 {formatActivityOccupancy(data)}
                                             </td>

@@ -93,6 +93,20 @@
   background: rgba(232, 245, 236, 0.55);
 }
 
+.admin-list-section--cancellations
+  .admin-data-table
+  tbody
+  tr.admin-data-table__row--highlighted {
+  background: #fef9c3;
+}
+
+.admin-list-section--cancellations
+  .admin-data-table
+  tbody
+  tr.admin-data-table__row--highlighted:hover {
+  background: #fef08a;
+}
+
 .admin-list-section--cancellations .admin-data-table__name-cell {
   font-weight: 600;
   color: var(--color-text);
@@ -287,9 +301,6 @@
 }
 
 .cancellation-modal__footer {
-  display: flex;
-  justify-content: flex-start;
-  gap: 0.65rem;
   padding: 0 1.1rem 1rem;
 }
 

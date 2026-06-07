@@ -1,5 +1,6 @@
 import { useEffect, useState } from "react";
 import RefundForm from "./forms/RefundForm";
+import FormActionRow from "../shared/FormActionRow";
 import {
     buildWhatsAppRefundUrl,
     formatCancellationDate,
@@ -199,22 +200,12 @@ function CancellationEditModal({ item, onClose, onSave }) {
                 </div>
 
                 <div className="cancellation-modal__footer">
-                    <button
-                        type="button"
-                        className="staff-button staff-button--secondary staff-button--small"
-                        onClick={onClose}
-                        disabled={saving}
-                    >
-                        ביטול
-                    </button>
-                    <button
-                        type="button"
-                        className="staff-button staff-button--small"
-                        onClick={handleSave}
-                        disabled={saving}
-                    >
-                        {saving ? "שומר..." : "שמירת שינויים"}
-                    </button>
+                    <FormActionRow
+                        submitLabel={saving ? "שומר..." : "שמירת שינויים"}
+                        onSubmit={handleSave}
+                        onCancel={onClose}
+                        isSubmitting={saving}
+                    />
                 </div>
             </div>
         </div>

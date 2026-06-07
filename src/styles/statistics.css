@@ -1,9 +1,0 @@
-/* ViewStatistics — placeholder statistics page */
-
-.staff-page--statistics .staff-header p {
-  max-width: var(--staff-max-width);
-}
-
-.staff-page--statistics .staff-section--accent {
-  text-align: right;
-}

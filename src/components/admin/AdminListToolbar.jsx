@@ -24,6 +24,7 @@ function AdminListToolbar({
                 layout === "participants" && "admin-list-toolbar--participants-bar",
                 layout === "staff" && "admin-list-toolbar--staff-bar",
                 layout === "cancellations" && "admin-list-toolbar--cancellations-bar",
+                layout === "registrations" && "admin-list-toolbar--registrations-bar",
                 layout === "inline" && "admin-list-toolbar--inline"
             ]
                 .filter(Boolean)

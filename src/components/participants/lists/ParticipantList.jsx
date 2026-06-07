@@ -357,7 +357,7 @@ function ParticipantList({
                                             <td className="admin-data-table__name-cell">
                                                 {fullName}
                                             </td>
-                                            <td className="admin-data-table__numeric admin-data-table__masked-id">
+                                            <td className="admin-data-table__numeric">
                                                 <MaskedIdDisplay
                                                     idNumber={maskIdNumber(
                                                         participant.id_number

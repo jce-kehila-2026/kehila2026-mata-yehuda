@@ -17,9 +17,5 @@ export const STAFF_NAVIGATION_GROUPS = [
             "volunteers",
             "attendance"
         ]
-    },
-    {
-        title: "דוחות ונתונים",
-        itemIds: ["statistics"]
     }
 ];

@@ -5,6 +5,7 @@ import {
 } from "../../../services/registrationService";
 import { useParticipantForm } from "../../participants/hooks/useParticipantForm";
 import RegistrationProgramFields from "./RegistrationProgramFields";
+import FormActionRow from "../../shared/FormActionRow";
 import {
     emptyRegistrationForm,
     registrationToForm,
@@ -124,15 +125,14 @@ function RegistrationForm({
                 onChange={(e) => updateField("registration_status", e.target.value)}
             />
 
-            {onCancel && (
-                <button type="button" onClick={onCancel}>
-                    ביטול
-                </button>
-            )}
-
-            <button type="button" onClick={handleSubmit} disabled={loading}>
-                {editingRegistration ? "שמירת שינויים" : "הוספת הרשמה"}
-            </button>
+            <FormActionRow
+                submitLabel={
+                    editingRegistration ? "שמירת שינויים" : "הוספת הרשמה"
+                }
+                onSubmit={handleSubmit}
+                onCancel={onCancel}
+                isSubmitting={loading}
+            />
         </div>
     );
 }

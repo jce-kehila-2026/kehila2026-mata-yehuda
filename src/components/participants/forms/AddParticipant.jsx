@@ -6,6 +6,7 @@ import {
 } from "../../../services/participantService";
 import { useParticipantForm } from "../hooks/useParticipantForm";
 import ParticipantProgramFields from "./ParticipantProgramFields";
+import FormActionRow from "../../shared/FormActionRow";
 import {
     emptyParticipantForm,
     applyProgramSelection,
@@ -195,25 +196,12 @@ function AddParticipant({ onSuccess, onCancel }) {
                     onChange={(e) => updateField("mobility_limitations", e.target.value)}
                 />
 
-                <button
-                    type="button"
-                    className="staff-button"
-                    onClick={handleAddParticipant}
-                    disabled={loading}
-                >
-                    הוספת משתתף
-                </button>
-
-                {onCancel ? (
-                    <button
-                        type="button"
-                        className="staff-button staff-button--secondary"
-                        onClick={onCancel}
-                        disabled={loading}
-                    >
-                        ביטול
-                    </button>
-                ) : null}
+                <FormActionRow
+                    submitLabel="יצירת משתתף"
+                    onSubmit={handleAddParticipant}
+                    onCancel={onCancel}
+                    isSubmitting={loading}
+                />
             </div>
         </div>
     );

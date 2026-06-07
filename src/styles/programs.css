@@ -152,8 +152,8 @@
   justify-content: flex-start;
 }
 
-.staff-page .staff-form button.staff-button,
-.staff-page--programs .staff-section--form .staff-button {
+.staff-page .staff-form > .staff-button,
+.staff-page--programs .staff-section--form .staff-form > .staff-button {
   width: 100%;
   align-self: stretch;
 }
