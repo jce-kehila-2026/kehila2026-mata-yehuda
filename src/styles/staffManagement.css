@@ -175,18 +175,6 @@
   border: 1px solid #b7dfc4;
 }
 
-.staff-status-badge--admin {
-  background: #eef2ff;
-  color: #4338ca;
-  border: 1px solid #c7d2fe;
-}
-
-.staff-status-badge--staff {
-  background: #f0fdf4;
-  color: #166534;
-  border: 1px solid #bbf7d0;
-}
-
 .staff-status-badge--muted {
   background: #f3f4f6;
   color: #6b7280;

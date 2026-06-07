@@ -34,7 +34,6 @@ const STAFF_COLUMNS = [
     { key: "name", label: "שם", sortKey: "name" },
     { key: "email", label: "אימייל", sortKey: "email" },
     { key: "phone", label: "טלפון" },
-    { key: "role", label: "תפקיד", sortKey: "role" },
     { key: "status", label: "סטטוס", sortKey: "status" },
     { key: "actions", label: "פעולות" }
 ];
@@ -266,13 +265,7 @@ function StaffList({ refreshKey = 0, onEditStaff, onAddStaff }) {
                                             {toSafeString(staff.phone) || "—"}
                                         </td>
                                         <td>
-                                            <StaffStatusBadge type="role" staff={staff} />
-                                        </td>
-                                        <td>
-                                            <StaffStatusBadge
-                                                type="status"
-                                                isActive={staff.is_active}
-                                            />
+                                            <StaffStatusBadge isActive={staff.is_active} />
                                         </td>
                                         <td>{renderStaffActions(staff)}</td>
                                     </tr>

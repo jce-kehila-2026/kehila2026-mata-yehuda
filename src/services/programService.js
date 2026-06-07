@@ -191,18 +191,34 @@ export async function updateProgram(programId, { title, description, image_url }
         image_url: normalizedImageUrl
     };
 
-    if (isFixedProgramId(programId)) {
-        return setDoc(
-            fixedProgramRef(programId),
-            buildFixedProgramPayload(programId, {
-                description,
-                image_url: normalizedImageUrl
-            }),
-            { merge: true }
-        );
-    }
+    console.info("[programService] before Firestore update", {
+        programId,
+        hasImageUrl: Boolean(normalizedImageUrl),
+        imageUrlLength: normalizedImageUrl.length
+    });
 
-    return updateDoc(doc(db, "programs", programId), updates);
+    try {
+        if (isFixedProgramId(programId)) {
+            await setDoc(
+                fixedProgramRef(programId),
+                buildFixedProgramPayload(programId, {
+                    description,
+                    image_url: normalizedImageUrl
+                }),
+                { merge: true }
+            );
+        } else {
+            await updateDoc(doc(db, "programs", programId), updates);
+        }
+
+        console.info("[programService] after Firestore update", { programId });
+    } catch (error) {
+        console.error("[programService] Firestore update failed", {
+            programId,
+            error
+        });
+        throw error;
+    }
 }
 
 export async function deleteProgram(programId) {

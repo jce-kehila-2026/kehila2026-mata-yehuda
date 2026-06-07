@@ -1,13 +1,11 @@
 import { useState } from "react";
 import { addStaffMember } from "../../services/staffService";
-import { STAFF_ROLE_FILTER_OPTIONS } from "../../utils/staffStatusLabels";
 
 function AddStaffMember({ onSuccess, onCancel }) {
     const [fullName, setFullName] = useState("");
     const [phone, setPhone] = useState("");
     const [email, setEmail] = useState("");
     const [password, setPassword] = useState("");
-    const [role, setRole] = useState("staff");
     const [isActive, setIsActive] = useState(false);
     const [error, setError] = useState("");
     const [success, setSuccess] = useState("");
@@ -55,7 +53,6 @@ function AddStaffMember({ onSuccess, onCancel }) {
                 phone,
                 email,
                 password,
-                role,
                 is_active: isActive
             });
 
@@ -126,19 +123,6 @@ function AddStaffMember({ onSuccess, onCancel }) {
                     value={password}
                     onChange={(event) => setPassword(event.target.value)}
                 />
-
-                <label htmlFor="add-staff-role">תפקיד</label>
-                <select
-                    id="add-staff-role"
-                    value={role}
-                    onChange={(event) => setRole(event.target.value)}
-                >
-                    {STAFF_ROLE_FILTER_OPTIONS.map((option) => (
-                        <option key={option.value} value={option.value}>
-                            {option.label}
-                        </option>
-                    ))}
-                </select>
 
                 <div className="row checkbox-row">
                     <label htmlFor="add-staff-active">פעיל</label>

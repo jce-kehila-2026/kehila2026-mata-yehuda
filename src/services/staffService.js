@@ -14,7 +14,6 @@ import {
 import { normalizeSearchQuery } from "../utils/adminListUtils";
 import {
     getStaffNameParts,
-    getStaffRoleLabel,
     matchesStaffStatusFilter,
     toSafeString
 } from "../utils/staffStatusLabels";
@@ -58,8 +57,6 @@ export function getStaffSortValue(staff, sortField) {
             return toSafeString(staff.full_name);
         case "email":
             return toSafeString(staff.email);
-        case "role":
-            return getStaffRoleLabel(staff);
         case "status":
             return staff.is_active ? 1 : 0;
         default:
@@ -79,8 +76,7 @@ export async function fetchStaffForAdminList() {
 
     return snapshot.docs.map((staffDoc) => ({
         id: staffDoc.id,
-        ...staffDoc.data(),
-        role: staffDoc.data().role || "staff"
+        ...staffDoc.data()
     }));
 }
 
@@ -88,8 +84,7 @@ export async function fetchStaffList() {
     const staffSnapshot = await getDocs(staffCollection);
     return staffSnapshot.docs.map((staffDoc) => ({
         id: staffDoc.id,
-        ...staffDoc.data(),
-        role: staffDoc.data().role || "staff"
+        ...staffDoc.data()
     }));
 }
 
@@ -105,7 +100,6 @@ export async function addStaffMember(staffData) {
         full_name: staffData.full_name,
         phone: staffData.phone,
         email: staffData.email,
-        role: staffData.role || "staff",
         is_active: staffData.is_active ?? false,
         password: staffData.password
     });
@@ -117,10 +111,6 @@ export async function updateStaffMember(staff) {
         phone: staff.phone,
         is_active: staff.is_active ?? false
     };
-
-    if (staff.role) {
-        updates.role = staff.role;
-    }
 
     if (staff.password?.trim()) {
         updates.password = staff.password;

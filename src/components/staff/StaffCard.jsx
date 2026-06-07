@@ -24,12 +24,8 @@ function StaffCard({ staff, onEdit, onView, onDisable }) {
                     <p className="staff-member-card__meta">טלפון: {staff.phone}</p>
                 )}
                 <p className="staff-member-card__meta staff-member-card__meta--badge">
-                    <span>תפקיד:</span>{" "}
-                    <StaffStatusBadge type="role" staff={staff} />
-                </p>
-                <p className="staff-member-card__meta staff-member-card__meta--badge">
                     <span>סטטוס:</span>{" "}
-                    <StaffStatusBadge type="status" isActive={staff.is_active} />
+                    <StaffStatusBadge isActive={staff.is_active} />
                 </p>
             </div>
 

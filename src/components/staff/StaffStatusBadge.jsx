@@ -1,23 +1,9 @@
 import {
     getStaffActiveBadgeVariant,
-    getStaffActiveStatusLabel,
-    getStaffRoleBadgeVariant,
-    getStaffRoleLabel
+    getStaffActiveStatusLabel
 } from "../../utils/staffStatusLabels";
 
-function StaffStatusBadge({ type, staff, isActive }) {
-    if (type === "role") {
-        const variant = getStaffRoleBadgeVariant(staff);
-
-        return (
-            <span
-                className={`staff-status-badge staff-status-badge--${variant}`}
-            >
-                {getStaffRoleLabel(staff)}
-            </span>
-        );
-    }
-
+function StaffStatusBadge({ isActive }) {
     const variant = getStaffActiveBadgeVariant(isActive);
 
     return (

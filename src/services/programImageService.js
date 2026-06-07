@@ -1,15 +1,16 @@
 import {
     IMAGE_ACCEPT,
     IMAGE_MAX_BYTES,
-    uploadImageFile,
+    fileToCompressedDataUrl,
     validateImageFile
-} from "./imageUploadService";
+} from "./imageDataUrlService";
 
 export const PROGRAM_IMAGE_ACCEPT = IMAGE_ACCEPT;
 export const PROGRAM_IMAGE_MAX_BYTES = IMAGE_MAX_BYTES;
 
 export const validateProgramImageFile = validateImageFile;
 
-export async function uploadProgramImage(file, programId) {
-    return uploadImageFile(file, "programs", programId);
+/** Converts a selected image file to a compressed Base64 data URL for Firestore. */
+export async function prepareProgramImageUrl(file) {
+    return fileToCompressedDataUrl(file);
 }

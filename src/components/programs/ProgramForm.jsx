@@ -1,6 +1,6 @@
 import { useEffect, useRef, useState } from "react";
 import FormImageUpload from "../shared/FormImageUpload";
-import { uploadProgramImage } from "../../services/programImageService";
+import { prepareProgramImageUrl } from "../../services/programImageService";
 import {
     formatProgramTitle,
     isFixedProgramId
@@ -52,9 +52,7 @@ function ProgramForm({
         setSubmitError("");
 
         try {
-            const imageUrl = await imageUploadRef.current.resolveImageUrl(
-                editingProgram?.id
-            );
+            const imageUrl = await imageUploadRef.current.resolveImageUrl();
 
             await onSubmit({
                 title: isFixedProgram
@@ -65,7 +63,7 @@ function ProgramForm({
             });
         } catch (error) {
             console.error("Program save failed:", error);
-            setSubmitError(error.message || "שגיאה בשמירת התוכנית");
+            setSubmitError(error?.message || "שגיאה בשמירת התוכנית");
         } finally {
             setIsUploading(false);
         }
@@ -113,7 +111,8 @@ function ProgramForm({
                 previewAlt={title || "תצוגה מקדימה של תמונת התוכנית"}
                 initialImageUrl={editingProgram?.image_url || ""}
                 disabled={isUploading}
-                onUpload={uploadProgramImage}
+                allowManualUrl
+                onUpload={prepareProgramImageUrl}
             />
 
             <button
@@ -123,7 +122,7 @@ function ProgramForm({
                 disabled={isUploading}
             >
                 {isUploading
-                    ? "מעלה תמונה..."
+                    ? "שומר..."
                     : editingProgram
                       ? "עדכון תוכנית"
                       : "הוספת תוכנית"}

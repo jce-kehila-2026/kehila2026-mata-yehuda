@@ -1,11 +1,8 @@
-import { getStaffRoleKey } from "./staffStatusLabels";
-
 export function computeStaffListStats(staffList = []) {
     const stats = {
         total: staffList.length,
         active: 0,
-        inactive: 0,
-        admins: 0
+        inactive: 0
     };
 
     staffList.forEach((staff) => {
@@ -13,10 +10,6 @@ export function computeStaffListStats(staffList = []) {
             stats.active += 1;
         } else {
             stats.inactive += 1;
-        }
-
-        if (getStaffRoleKey(staff) === "admin") {
-            stats.admins += 1;
         }
     });
 
@@ -31,7 +24,6 @@ export function buildStaffSummaryItems(stats) {
     return [
         { key: "total", label: "סה״כ אנשי צוות", value: stats.total },
         { key: "active", label: "פעילים", value: stats.active },
-        { key: "inactive", label: "לא פעילים", value: stats.inactive },
-        { key: "admins", label: "מנהלים", value: stats.admins }
+        { key: "inactive", label: "לא פעילים", value: stats.inactive }
     ];
 }

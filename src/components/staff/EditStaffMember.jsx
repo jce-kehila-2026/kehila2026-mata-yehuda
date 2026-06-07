@@ -1,15 +1,10 @@
 import { useState } from "react";
 import { updateStaffMember } from "../../services/staffService";
-import {
-    getStaffRoleKey,
-    STAFF_ROLE_FILTER_OPTIONS
-} from "../../utils/staffStatusLabels";
 
 function EditStaffMember({ staff, onCompleted, onCancel }) {
     const [fullName, setFullName] = useState(staff?.full_name || "");
     const [phone, setPhone] = useState(staff?.phone || "");
     const [password, setPassword] = useState("");
-    const [role, setRole] = useState(getStaffRoleKey(staff));
     const [isActive, setIsActive] = useState(staff?.is_active ?? false);
     const [success, setSuccess] = useState("");
     const [error, setError] = useState("");
@@ -27,7 +22,6 @@ function EditStaffMember({ staff, onCompleted, onCancel }) {
                 id: staff.id,
                 full_name: fullName,
                 phone,
-                role,
                 is_active: isActive,
                 password
             });
@@ -78,19 +72,6 @@ function EditStaffMember({ staff, onCompleted, onCancel }) {
                 <input id="edit-staff-email" type="email" value={staff.email} disabled />
 
                 <p className="staff-form__hint">לא ניתן לשנות את האימייל</p>
-
-                <label htmlFor="edit-staff-role">תפקיד</label>
-                <select
-                    id="edit-staff-role"
-                    value={role}
-                    onChange={(event) => setRole(event.target.value)}
-                >
-                    {STAFF_ROLE_FILTER_OPTIONS.map((option) => (
-                        <option key={option.value} value={option.value}>
-                            {option.label}
-                        </option>
-                    ))}
-                </select>
 
                 <label htmlFor="edit-staff-password">סיסמה חדשה (אופציונלי)</label>
                 <input

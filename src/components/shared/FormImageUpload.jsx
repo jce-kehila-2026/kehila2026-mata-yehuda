@@ -6,7 +6,7 @@ import {
     useState
 } from "react";
 import { ImageUp, Pencil, Trash2 } from "lucide-react";
-import { IMAGE_ACCEPT, validateImageFile } from "../../services/imageUploadService";
+import { IMAGE_ACCEPT, validateImageFile } from "../../utils/imageFileUtils";
 
 function FormImageUpload(
     {
@@ -15,12 +15,14 @@ function FormImageUpload(
         previewAlt = "תצוגה מקדימה",
         initialImageUrl = "",
         disabled = false,
+        allowManualUrl = false,
         onUpload
     },
     ref
 ) {
     const [savedImageUrl, setSavedImageUrl] = useState(initialImageUrl);
     const [previewUrl, setPreviewUrl] = useState(initialImageUrl);
+    const [manualUrl, setManualUrl] = useState("");
     const [selectedFile, setSelectedFile] = useState(null);
     const [imageFileName, setImageFileName] = useState(
         initialImageUrl ? "תמונה קיימת" : ""
@@ -41,6 +43,7 @@ function FormImageUpload(
         clearLocalPreview();
         setSavedImageUrl(existingUrl);
         setPreviewUrl(existingUrl);
+        setManualUrl("");
         setSelectedFile(null);
         setImageFileName(existingUrl ? "תמונה קיימת" : "");
         setImageError("");
@@ -61,6 +64,7 @@ function FormImageUpload(
         setPreviewUrl(savedImageUrl);
         setImageFileName(savedImageUrl ? "תמונה קיימת" : "");
         setSelectedFile(null);
+        setManualUrl("");
     }
 
     function processImageFile(file, inputElement = null) {
@@ -86,9 +90,37 @@ function FormImageUpload(
         localPreviewRef.current = objectUrl;
 
         setSelectedFile(file);
+        setManualUrl("");
         setImageFileName(file.name);
         setPreviewUrl(objectUrl);
         setImageError("");
+    }
+
+    function handleManualUrlChange(event) {
+        const nextUrl = event.target.value;
+        setManualUrl(nextUrl);
+        setImageError("");
+
+        if (nextUrl.trim()) {
+            clearLocalPreview();
+            setSelectedFile(null);
+            setPreviewUrl(nextUrl);
+            setImageFileName("קישור חיצוני");
+
+            if (fileInputRef.current) {
+                fileInputRef.current.value = "";
+            }
+
+            return;
+        }
+
+        if (savedImageUrl) {
+            setPreviewUrl(savedImageUrl);
+            setImageFileName("תמונה קיימת");
+        } else {
+            setPreviewUrl("");
+            setImageFileName("");
+        }
     }
 
     function handleImageFileChange(event) {
@@ -166,6 +198,7 @@ function FormImageUpload(
         clearLocalPreview();
         setSavedImageUrl("");
         setPreviewUrl("");
+        setManualUrl("");
         setSelectedFile(null);
         setImageFileName("");
         setImageError("");
@@ -176,17 +209,28 @@ function FormImageUpload(
     }
 
     useImperativeHandle(ref, () => ({
-        async resolveImageUrl(entityId) {
+        async resolveImageUrl() {
             if (imageError) {
                 throw new Error(imageError);
             }
 
             if (selectedFile) {
                 if (typeof onUpload !== "function") {
-                    throw new Error("Image upload handler is missing");
+                    throw new Error("Image conversion handler is missing");
                 }
 
-                return onUpload(selectedFile, entityId);
+                try {
+                    return await onUpload(selectedFile);
+                } catch (error) {
+                    console.error("[FormImageUpload] image conversion failed:", error);
+                    throw error;
+                }
+            }
+
+            const trimmedManualUrl = manualUrl.trim();
+
+            if (trimmedManualUrl) {
+                return trimmedManualUrl;
             }
 
             if (!previewUrl) {
@@ -206,6 +250,7 @@ function FormImageUpload(
     const labelId = `${idPrefix}-label`;
     const hintId = `${idPrefix}-hint`;
     const inputId = `${idPrefix}-input`;
+    const manualUrlId = `${idPrefix}-manual-url`;
 
     return (
         <div className="form-image-upload">
@@ -312,10 +357,25 @@ function FormImageUpload(
                     </p>
 
                     <p id={hintId} className="form-image-upload__hint">
-                        JPG, PNG, WEBP · עד 5MB
+                        JPG, PNG, WEBP · עד 5MB · יידחס ל-800px
                     </p>
                 </div>
             )}
+
+            {allowManualUrl ? (
+                <>
+                    <label htmlFor={manualUrlId}>או קישור לתמונה</label>
+                    <input
+                        id={manualUrlId}
+                        type="url"
+                        className="form-image-upload__manual-url"
+                        placeholder="https://..."
+                        value={manualUrl}
+                        onChange={handleManualUrlChange}
+                        disabled={disabled}
+                    />
+                </>
+            ) : null}
 
             {imageError ? (
                 <p className="form-image-upload__error">{imageError}</p>
