@@ -1,14 +1,17 @@
 import { useState } from "react";
 import { addStaffMember } from "../../services/staffService";
+import { STAFF_ROLE_FILTER_OPTIONS } from "../../utils/staffStatusLabels";
 
-function AddStaffMember() {
+function AddStaffMember({ onSuccess, onCancel }) {
     const [fullName, setFullName] = useState("");
     const [phone, setPhone] = useState("");
     const [email, setEmail] = useState("");
     const [password, setPassword] = useState("");
+    const [role, setRole] = useState("staff");
     const [isActive, setIsActive] = useState(false);
     const [error, setError] = useState("");
     const [success, setSuccess] = useState("");
+    const [submitting, setSubmitting] = useState(false);
 
     function validateStaff() {
         if (!fullName.trim()) {
@@ -44,91 +47,132 @@ function AddStaffMember() {
             return;
         }
 
+        setSubmitting(true);
+
         try {
             await addStaffMember({
                 full_name: fullName,
                 phone,
                 email,
                 password,
+                role,
                 is_active: isActive
             });
 
             setSuccess("איש הצוות נוסף בהצלחה");
             setError("");
+            onSuccess?.();
+        } catch (submitError) {
+            console.error(submitError);
 
-            setFullName("");
-            setPhone("");
-            setEmail("");
-            setPassword("");
-            setIsActive(false);
-
-        } catch (error) {
-            console.log(error.code);
-
-            if (error.code === "auth/email-already-in-use") {
+            if (submitError.code === "auth/email-already-in-use") {
                 setError("האימייל כבר קיים במערכת");
-            } else if (error.code === "auth/weak-password") {
+            } else if (submitError.code === "auth/weak-password") {
                 setError("הסיסמה חייבת להכיל לפחות 6 תווים");
             } else {
                 setError("שגיאה בהוספת איש צוות");
             }
 
             setSuccess("");
+        } finally {
+            setSubmitting(false);
         }
     }
 
     return (
-        <div>
+        <div className="staff-form-section">
+            <h2>הוספת איש צוות</h2>
 
-            <h1>הוספת איש צוות</h1>
             <div className="staff-form">
-                {error && <p style={{ color: "red" }}>{error}</p>}
-                {success && <p style={{ color: "green" }}>{success}</p>}
+                {error ? (
+                    <p className="staff-alert staff-alert--error">{error}</p>
+                ) : null}
+                {success ? (
+                    <p className="staff-alert staff-alert--success">{success}</p>
+                ) : null}
 
+                <label htmlFor="add-staff-full-name">שם מלא</label>
                 <input
+                    id="add-staff-full-name"
                     type="text"
                     placeholder="שם מלא"
                     value={fullName}
-                    onChange={(e) => setFullName(e.target.value)}
+                    onChange={(event) => setFullName(event.target.value)}
                 />
+
+                <label htmlFor="add-staff-phone">טלפון</label>
                 <input
+                    id="add-staff-phone"
                     type="text"
                     placeholder="טלפון"
                     value={phone}
-                    onChange={(e) => setPhone(e.target.value)}
+                    onChange={(event) => setPhone(event.target.value)}
                 />
+
+                <label htmlFor="add-staff-email">אימייל</label>
                 <input
+                    id="add-staff-email"
                     type="email"
                     placeholder="אימייל"
                     value={email}
-                    onChange={(e) => setEmail(e.target.value)}
+                    onChange={(event) => setEmail(event.target.value)}
                 />
+
+                <label htmlFor="add-staff-password">סיסמה זמנית</label>
                 <input
+                    id="add-staff-password"
                     type="password"
                     placeholder="סיסמה זמנית"
                     value={password}
-                    onChange={(e) => setPassword(e.target.value)}
+                    onChange={(event) => setPassword(event.target.value)}
                 />
+
+                <label htmlFor="add-staff-role">תפקיד</label>
+                <select
+                    id="add-staff-role"
+                    value={role}
+                    onChange={(event) => setRole(event.target.value)}
+                >
+                    {STAFF_ROLE_FILTER_OPTIONS.map((option) => (
+                        <option key={option.value} value={option.value}>
+                            {option.label}
+                        </option>
+                    ))}
+                </select>
+
                 <div className="row checkbox-row">
-                    <label>פעיל</label>
+                    <label htmlFor="add-staff-active">פעיל</label>
                     <input
+                        id="add-staff-active"
                         type="checkbox"
                         checked={isActive}
-                        onChange={(e) => setIsActive(e.target.checked)}
+                        onChange={(event) => setIsActive(event.target.checked)}
                     />
                 </div>
 
-                <button
-                    type="button"
-                    className="staff-button"
-                    onClick={handleAddStaffMember}
-                >
-                    הוספת איש צוות
-                </button>
-
+                <div className="staff-form__actions">
+                    {onCancel ? (
+                        <button
+                            type="button"
+                            className="staff-button staff-button--secondary"
+                            onClick={onCancel}
+                            disabled={submitting}
+                        >
+                            ביטול
+                        </button>
+                    ) : null}
+                    <button
+                        type="button"
+                        className="staff-button"
+                        onClick={handleAddStaffMember}
+                        disabled={submitting}
+                    >
+                        הוספת איש צוות
+                    </button>
+                </div>
             </div>
         </div>
-    )
+    );
 }
 
 export default AddStaffMember;

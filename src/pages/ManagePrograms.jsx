@@ -1,134 +1,88 @@
 import { useEffect, useState } from "react";
 import { buildStaffPage, staffNavigateBack } from "../utils/staffNavigation";
 import {
-    fetchPrograms,
     addProgram,
     updateProgram,
     deleteProgram
 } from "../services/programService";
 import {
-    isFixedProgramId,
     getProgramsPageTitle,
     getProgramUpdateSuccessMessage,
-    formatProgramTitle
+    isFixedProgramId
 } from "../utils/programConstants";
 import ProgramForm from "../components/programs/ProgramForm";
 import ProgramList from "../components/programs/ProgramList";
 
 function ManagePrograms({ programView, onNavigate }) {
-    const [programs, setPrograms] = useState([]);
-    const [title, setTitle] = useState("");
-    const [description, setDescription] = useState("");
-    const [imageUrl, setImageUrl] = useState("");
-    const [editingId, setEditingId] = useState(null);
-    const [loading, setLoading] = useState(true);
-    const [saving, setSaving] = useState(false);
+    const [editingProgram, setEditingProgram] = useState(null);
+    const [listRefreshKey, setListRefreshKey] = useState(0);
     const [error, setError] = useState("");
     const [success, setSuccess] = useState("");
+    const programPage = programView || "list";
 
-    function resetForm() {
-        setTitle("");
-        setDescription("");
-        setImageUrl("");
-        setEditingId(null);
+    function refreshProgramList() {
+        setListRefreshKey((previous) => previous + 1);
     }
 
-    function fillForm(program) {
-        setTitle(formatProgramTitle(program));
-        setDescription(program.description || "");
-        setImageUrl(program.image_url || "");
-        setEditingId(program.id);
+    function navigateToView(view) {
+        onNavigate(buildStaffPage("programs", view));
     }
 
-    async function loadPrograms() {
-        setLoading(true);
-        setError("");
-        try {
-            const data = await fetchPrograms();
-            setPrograms(data);
-        } catch (err) {
-            console.log(err);
-            setError("שגיאה בטעינת התוכניות");
-        } finally {
-            setLoading(false);
-        }
-    }
-
-    useEffect(() => {
-        loadPrograms();
-    }, []);
-
-    useEffect(() => {
-        if (programView !== "edit" && editingId) {
-            resetForm();
-            setError("");
-            setSuccess("");
-        }
-    }, [programView]);
-
-    function validateForm() {
-        if (!title.trim()) {
-            setError("יש להזין כותרת");
-            setSuccess("");
-            return false;
-        }
-        setError("");
-        return true;
-    }
-
-    async function handleSave() {
-        if (!validateForm()) {
+    function goBackToList() {
+        setEditingProgram(null);
+        if (programPage === "list") {
             return;
         }
 
-        setSaving(true);
+        staffNavigateBack();
+    }
+
+    function handleAddProgramClick() {
+        setEditingProgram(null);
+        setError("");
         setSuccess("");
+        navigateToView("add");
+    }
 
-        const programData = {
-            title,
-            description,
-            image_url: imageUrl
-        };
+    function handleEdit(program) {
+        setEditingProgram(program);
+        setError("");
+        setSuccess("");
+        navigateToView("edit");
+    }
 
+    function handleCancelEdit() {
+        setError("");
+        setSuccess("");
+        goBackToList();
+    }
+
+    useEffect(() => {
+        if (programPage !== "edit") {
+            setEditingProgram(null);
+        }
+    }, [programPage]);
+
+    async function handleSaveProgram(programData) {
         try {
-            if (editingId) {
-                await updateProgram(editingId, programData);
-                setSuccess(getProgramUpdateSuccessMessage(editingId));
+            if (editingProgram) {
+                await updateProgram(editingProgram.id, programData);
+                setSuccess(getProgramUpdateSuccessMessage(editingProgram.id));
             } else {
                 await addProgram(programData);
                 setSuccess("התוכנית נוספה בהצלחה");
             }
 
-            resetForm();
-            if (programView === "edit") {
-                staffNavigateBack();
-            } else {
-                onNavigate("programs");
-            }
-            await loadPrograms();
+            refreshProgramList();
+            setError("");
+            goBackToList();
         } catch (err) {
-            console.log(err);
-            setError(editingId ? "שגיאה בעדכון התוכנית" : "שגיאה בהוספת התוכנית");
-        } finally {
-            setSaving(false);
-        }
-    }
-
-    function handleEdit(program) {
-        fillForm(program);
-        setError("");
-        setSuccess("");
-        onNavigate(buildStaffPage("programs", "edit"));
-    }
-
-    function handleCancelEdit() {
-        resetForm();
-        setError("");
-        setSuccess("");
-        if (programView === "edit") {
-            staffNavigateBack();
-        } else {
-            onNavigate("programs");
+            console.error(err);
+            setError(
+                editingProgram ? "שגיאה בעדכון התוכנית" : "שגיאה בהוספת התוכנית"
+            );
+            setSuccess("");
+            throw err;
         }
     }
 
@@ -146,61 +100,71 @@ function ManagePrograms({ programView, onNavigate }) {
 
         try {
             await deleteProgram(programId);
-            if (editingId === programId) {
-                resetForm();
-                if (programView === "edit") {
-                    staffNavigateBack();
-                } else {
-                    onNavigate("programs");
-                }
+
+            if (editingProgram?.id === programId) {
+                setEditingProgram(null);
+                goBackToList();
             }
+
+            refreshProgramList();
             setSuccess("התוכנית נמחקה בהצלחה");
             setError("");
-            await loadPrograms();
         } catch (err) {
-            console.log(err);
+            console.error(err);
             setError("שגיאה במחיקת התוכנית");
         }
     }
 
     return (
         <div className="staff-page staff-page--programs">
-            <header className="staff-header">
-                <h1>ניהול תוכניות</h1>
-            </header>
+            <div className="staff-container staff-container--programs">
+                {error && programPage === "list" ? (
+                    <p className="staff-alert staff-alert--error">{error}</p>
+                ) : null}
+                {success && programPage === "list" ? (
+                    <p className="staff-alert staff-alert--success">{success}</p>
+                ) : null}
 
-            <div className="staff-container">
-                {editingId && (
-                    <section className="staff-section">
-                        <h2>{getProgramsPageTitle(editingId)}</h2>
+                {programPage === "list" && (
+                    <section className="staff-section staff-section--list staff-section--programs-list">
+                        <ProgramList
+                            refreshKey={listRefreshKey}
+                            onEdit={handleEdit}
+                            onDelete={handleDelete}
+                            onAddProgram={handleAddProgramClick}
+                        />
                     </section>
                 )}
 
-                <section className="staff-section">
-                    <ProgramForm
-                        title={title}
-                        description={description}
-                        imageUrl={imageUrl}
-                        editingId={editingId}
-                        saving={saving}
-                        error={error}
-                        success={success}
-                        onTitleChange={setTitle}
-                        onDescriptionChange={setDescription}
-                        onImageUrlChange={setImageUrl}
-                        onSave={handleSave}
-                        onCancelEdit={handleCancelEdit}
-                    />
-                </section>
+                {(programPage === "add" || programPage === "edit") && (
+                    <section className="staff-section staff-section--form">
+                        <div className="staff-toolbar">
+                            <button
+                                type="button"
+                                className="staff-button staff-button--secondary staff-button--small"
+                                onClick={goBackToList}
+                            >
+                                חזרה לרשימת תוכניות
+                            </button>
+                        </div>
 
-                <section className="staff-section">
-                    <ProgramList
-                        programs={programs}
-                        loading={loading}
-                        onEdit={handleEdit}
-                        onDelete={handleDelete}
-                    />
-                </section>
+                        <h2>
+                            {programPage === "edit"
+                                ? getProgramsPageTitle(editingProgram?.id)
+                                : "הוספת תוכנית חדשה"}
+                        </h2>
+
+                        <ProgramForm
+                            editingProgram={
+                                programPage === "edit" ? editingProgram : null
+                            }
+                            onSubmit={handleSaveProgram}
+                            onCancelEdit={handleCancelEdit}
+                            formError={error}
+                            formSuccess={success}
+                        />
+                    </section>
+                )}
             </div>
         </div>
     );

@@ -287,7 +287,7 @@ function StaffDashboard({ onLogout }) {
                     <div data-dashboard-page="manageStaff">
                         {renderSubpageToolbar(SUBPAGE_TITLES.manageStaff)}
                         <ManageStaff
-                            staffView={getStaffView(currentPage, "menu")}
+                            staffView={getStaffView(currentPage, "list")}
                             onNavigate={goToPage}
                         />
                     </div>
@@ -307,7 +307,7 @@ function StaffDashboard({ onLogout }) {
                     <div data-dashboard-page="manageParticipants">
                         {renderSubpageToolbar(SUBPAGE_TITLES.manageParticipants)}
                         <ManageParticipants
-                            participantView={getStaffView(currentPage, "menu")}
+                            participantView={getStaffView(currentPage, "list")}
                             onNavigate={goToPage}
                         />
                     </div>

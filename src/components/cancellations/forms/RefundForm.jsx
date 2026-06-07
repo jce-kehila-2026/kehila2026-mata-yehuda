@@ -34,7 +34,7 @@ function RefundForm({ cancellationId, currentNotes, onMarkRefunded, disabled }) 
                 disabled={disabled || saving}
             />
 
-            {error && <p style={{ color: "red" }}>{error}</p>}
+            {error && <p className="staff-alert staff-alert--error">{error}</p>}
 
             <button
                 type="button"

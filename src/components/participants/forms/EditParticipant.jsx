@@ -311,7 +311,7 @@ function EditParticipant({
                         className="staff-button staff-button--secondary"
                         onClick={onCancel}
                     >
-                        חזרה לרשימת בקשות
+                        ביטול עריכה
                     </button>
                 )}
 

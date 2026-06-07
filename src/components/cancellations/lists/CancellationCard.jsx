@@ -1,123 +1,79 @@
-import RefundForm from "../forms/RefundForm";
+import CancellationRefundStatusBadge from "../CancellationRefundStatusBadge";
 import {
-    buildWhatsAppRefundUrl,
     formatCancellationDate,
     formatPaymentAmount,
-    isBitPaymentMethod,
+    formatPaymentMethodLabel,
     REFUND_STATUS_REFUNDED
 } from "../helpers/cancellationHelpers";
 import { hasFormattedDisplay, hasValue } from "../../../utils/hasValue";
+import {
+    AdminTableActions,
+    AdminTableEditButton,
+    AdminTableProcessButton,
+    AdminTableViewButton
+} from "../../admin/AdminTableActions";
 
-function CancellationCard({ item, onMarkRefunded }) {
-    const { cancellation, phone, paymentDisplay } = item;
-    const paymentMethod = paymentDisplay?.payment_method || "";
+function CancellationCard({ item, onView, onEdit, onProcessRefund }) {
+    const { cancellation, paymentDisplay } = item;
     const isRefunded = cancellation.refund_status === REFUND_STATUS_REFUNDED;
-    const whatsAppUrl = isBitPaymentMethod(paymentMethod)
-        ? buildWhatsAppRefundUrl(phone)
-        : "";
-    const amountLabel = formatPaymentAmount(paymentDisplay);
-    const cancelledAtLabel = formatCancellationDate(cancellation.cancelled_at);
-    const paymentStatus = paymentDisplay?.payment_status;
-    const showActivity = item.showActivity && hasValue(item.activityName);
-    const showPaymentSection =
-        hasFormattedDisplay(amountLabel) ||
-        hasValue(paymentMethod) ||
-        hasValue(paymentStatus);
-    const showCancellationSection =
-        hasFormattedDisplay(cancelledAtLabel) ||
-        hasValue(cancellation.refund_status) ||
-        hasValue(cancellation.cancellation_reason) ||
-        (isRefunded && hasValue(cancellation.refund_notes));
 
     return (
-        <div className="staff-card">
-            <div className="staff-card-body">
-                {hasValue(item.participantFullName) && (
-                    <p>
-                        <strong>משתתף:</strong> {item.participantFullName}
-                    </p>
-                )}
-                {hasValue(phone) && (
-                    <p>
-                        <strong>טלפון:</strong> {phone}
-                    </p>
-                )}
+        <article className="cancellation-card staff-card">
+            <div className="cancellation-card__body staff-card-body">
+                <h3 className="cancellation-card__name">
+                    {item.participantFullName || "—"}
+                </h3>
+
                 {hasValue(item.programTitle) && (
-                    <p>
-                        <strong>תוכנית:</strong> {item.programTitle}
+                    <p className="cancellation-card__meta">
+                        תוכנית: {item.programTitle}
                     </p>
                 )}
-                {showActivity && (
-                    <p>
-                        <strong>פעילות:</strong> {item.activityName}
+                {item.showActivity && hasValue(item.activityName) && (
+                    <p className="cancellation-card__meta">
+                        פעילות: {item.activityName}
                     </p>
                 )}
-
-                {showPaymentSection && <hr />}
-
-                {hasFormattedDisplay(amountLabel) && (
-                    <p>
-                        <strong>סכום:</strong> {amountLabel}
-                    </p>
-                )}
-                {hasValue(paymentMethod) && (
-                    <p>
-                        <strong>אמצעי תשלום:</strong> {paymentMethod}
-                    </p>
-                )}
-                {hasValue(paymentStatus) && (
-                    <p>
-                        <strong>סטטוס תשלום:</strong> {paymentStatus}
-                    </p>
-                )}
-
-                {showCancellationSection && <hr />}
-
-                {hasFormattedDisplay(cancelledAtLabel) && (
-                    <p>
-                        <strong>תאריך ביטול:</strong> {cancelledAtLabel}
-                    </p>
-                )}
-                {hasValue(cancellation.refund_status) && (
-                    <p>
-                        <strong>סטטוס החזר:</strong> {cancellation.refund_status}
-                    </p>
-                )}
-                {hasValue(cancellation.cancellation_reason) && (
-                    <p>
-                        <strong>סיבת ביטול:</strong> {cancellation.cancellation_reason}
-                    </p>
-                )}
-                {isRefunded && hasValue(cancellation.refund_notes) && (
-                    <p>
-                        <strong>הערות החזר:</strong> {cancellation.refund_notes}
-                    </p>
-                )}
-            </div>
-
-            <div className="staff-card-actions">
-                {whatsAppUrl && (
-                    <div className="row">
-                        <a
-                            href={whatsAppUrl}
-                            target="_blank"
-                            rel="noopener noreferrer"
-                            className="staff-link-button"
-                        >
-                            פתיחת WhatsApp
-                        </a>
-                    </div>
-                )}
-
-                {!isRefunded && (
-                    <RefundForm
-                        cancellationId={cancellation.id}
-                        currentNotes={cancellation.refund_notes}
-                        onMarkRefunded={onMarkRefunded}
+                <p className="cancellation-card__meta">
+                    סכום: {formatPaymentAmount(paymentDisplay)}
+                </p>
+                <p className="cancellation-card__meta">
+                    אמצעי תשלום:{" "}
+                    {formatPaymentMethodLabel(
+                        paymentDisplay?.payment_method ||
+                            paymentDisplay?.payment_status
+                    )}
+                </p>
+                <p className="cancellation-card__meta">
+                    תאריך ביטול:{" "}
+                    {formatCancellationDate(cancellation.cancelled_at)}
+                </p>
+                <p className="cancellation-card__meta cancellation-card__meta--badge">
+                    <span>סטטוס החזר:</span>{" "}
+                    <CancellationRefundStatusBadge
+                        status={cancellation.refund_status}
                     />
-                )}
+                </p>
             </div>
-        </div>
+
+            <div className="cancellation-card__actions">
+                <AdminTableActions>
+                    <AdminTableViewButton
+                        onClick={() => onView(item)}
+                        label="צפייה בפרטי ביטול"
+                    />
+                    <AdminTableProcessButton
+                        onClick={() => onProcessRefund(item)}
+                        label="עיבוד החזר"
+                        disabled={isRefunded}
+                    />
+                    <AdminTableEditButton
+                        onClick={() => onEdit(item)}
+                        label="עריכת בקשת ביטול"
+                    />
+                </AdminTableActions>
+            </div>
+        </article>
     );
 }
 

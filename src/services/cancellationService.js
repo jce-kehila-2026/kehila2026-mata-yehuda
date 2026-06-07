@@ -17,6 +17,8 @@ import {
 } from "./registrationService";
 import {
     buildPaymentDisplay,
+    getCancellationAmountValue,
+    matchesRefundStatusFilter,
     normalizeCancellationRefundStatus,
     readAmount,
     readField,
@@ -24,6 +26,7 @@ import {
     resolveDisplayPhone,
     resolveParticipantDisplayName
 } from "../components/cancellations/helpers/cancellationHelpers";
+import { normalizeSearchQuery } from "../utils/adminListUtils";
 import {
     formatProgramTitle,
     getFixedProgramTitle,
@@ -33,6 +36,65 @@ import {
 const cancellationsCollection = collection(db, "cancellations");
 const registrationsCollection = collection(db, "registrations");
 const paymentsCollection = collection(db, "payments");
+
+export function filterCancellationsList(items, searchQuery, filters = {}) {
+    const queryText = normalizeSearchQuery(searchQuery);
+    const programFilter = filters.programFilter || "";
+    const refundFilter = filters.refundFilter || "";
+
+    return items.filter((item) => {
+        if (
+            programFilter &&
+            resolveCanonicalProgramId(item.programId) !==
+                resolveCanonicalProgramId(programFilter)
+        ) {
+            return false;
+        }
+
+        if (!matchesRefundStatusFilter(item, refundFilter)) {
+            return false;
+        }
+
+        if (!queryText) {
+            return true;
+        }
+
+        const participantName = normalizeSearchQuery(item.participantFullName);
+        const phone = normalizeSearchQuery(item.phone);
+
+        return (
+            participantName.includes(queryText) || phone.includes(queryText)
+        );
+    });
+}
+
+export function getCancellationSortValue(item, sortField) {
+    switch (sortField) {
+        case "participant":
+            return item.participantFullName || "";
+        case "program":
+            return item.programTitle || "";
+        case "activity":
+            return item.activityName || "";
+        case "amount":
+            return getCancellationAmountValue(item);
+        case "payment_method":
+            return item.paymentDisplay?.payment_method ||
+                item.paymentDisplay?.payment_status ||
+                "";
+        case "refund_status":
+            return item.cancellation?.refund_status || "";
+        case "cancelled_at":
+            return item.cancellation?.cancelled_at || null;
+        default:
+            return item.cancellation?.cancelled_at || null;
+    }
+}
+
+export async function countCancellationRecords() {
+    const snapshot = await getDocs(cancellationsCollection);
+    return snapshot.size;
+}
 
 function normalizeCancellation(cancellationDoc) {
     const data = cancellationDoc.data ? cancellationDoc.data() : cancellationDoc;

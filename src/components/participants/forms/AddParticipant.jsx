@@ -13,7 +13,7 @@ import {
     validateParticipantForm
 } from "../helpers/participantFormHelpers";
 
-function AddParticipant() {
+function AddParticipant({ onSuccess, onCancel }) {
     const [form, setForm] = useState(emptyParticipantForm);
     const [error, setError] = useState("");
     const [success, setSuccess] = useState("");
@@ -51,6 +51,10 @@ function AddParticipant() {
             setSuccess("המשתתף נוסף בהצלחה");
             setError("");
             setForm(emptyParticipantForm);
+
+            if (typeof onSuccess === "function") {
+                onSuccess();
+            }
         } catch (err) {
             console.log(err);
 
@@ -74,8 +78,10 @@ function AddParticipant() {
 
             <div className="staff-form">
                 {loadError && <p style={{ color: "red" }}>{loadError}</p>}
-                {error && <p style={{ color: "red" }}>{error}</p>}
-                {success && <p style={{ color: "green" }}>{success}</p>}
+                {error && <p className="staff-alert staff-alert--error">{error}</p>}
+                {success && !onSuccess && (
+                    <p className="staff-alert staff-alert--success">{success}</p>
+                )}
 
                 <label htmlFor="add-first-name">שם פרטי</label>
                 <input
@@ -197,6 +203,17 @@ function AddParticipant() {
                 >
                     הוספת משתתף
                 </button>
+
+                {onCancel ? (
+                    <button
+                        type="button"
+                        className="staff-button staff-button--secondary"
+                        onClick={onCancel}
+                        disabled={loading}
+                    >
+                        ביטול
+                    </button>
+                ) : null}
             </div>
         </div>
     );

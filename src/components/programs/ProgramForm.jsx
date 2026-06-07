@@ -1,21 +1,86 @@
+import { useEffect, useRef, useState } from "react";
+import FormImageUpload from "../shared/FormImageUpload";
+import { uploadProgramImage } from "../../services/programImageService";
+import {
+    formatProgramTitle,
+    isFixedProgramId
+} from "../../utils/programConstants";
+
 function ProgramForm({
-    title,
-    description,
-    imageUrl,
-    editingId,
-    saving,
-    error,
-    success,
-    onTitleChange,
-    onDescriptionChange,
-    onImageUrlChange,
-    onSave,
-    onCancelEdit
+    editingProgram,
+    onSubmit,
+    onCancelEdit,
+    formError = "",
+    formSuccess = ""
 }) {
+    const [title, setTitle] = useState("");
+    const [description, setDescription] = useState("");
+    const [isUploading, setIsUploading] = useState(false);
+    const [submitError, setSubmitError] = useState("");
+    const imageUploadRef = useRef(null);
+
+    const isFixedProgram = Boolean(
+        editingProgram && isFixedProgramId(editingProgram.id)
+    );
+
+    useEffect(() => {
+        if (editingProgram) {
+            setTitle(formatProgramTitle(editingProgram));
+            setDescription(editingProgram.description || "");
+        } else {
+            setTitle("");
+            setDescription("");
+        }
+
+        setSubmitError("");
+    }, [editingProgram]);
+
+    async function handleSubmit() {
+        if (!isFixedProgram && !title.trim()) {
+            setSubmitError("יש להזין כותרת");
+            return;
+        }
+
+        if (imageUploadRef.current?.hasError()) {
+            setSubmitError(
+                imageUploadRef.current.getError() || "שגיאה בבחירת התמונה"
+            );
+            return;
+        }
+
+        setIsUploading(true);
+        setSubmitError("");
+
+        try {
+            const imageUrl = await imageUploadRef.current.resolveImageUrl(
+                editingProgram?.id
+            );
+
+            await onSubmit({
+                title: isFixedProgram
+                    ? formatProgramTitle(editingProgram)
+                    : title.trim(),
+                description: description.trim(),
+                image_url: imageUrl || ""
+            });
+        } catch (error) {
+            console.error("Program save failed:", error);
+            setSubmitError(error.message || "שגיאה בשמירת התוכנית");
+        } finally {
+            setIsUploading(false);
+        }
+    }
+
+    const displayError = submitError || formError;
+
     return (
         <div className="staff-form">
-            {error && <p style={{ color: "red" }}>{error}</p>}
-            {success && <p style={{ color: "green" }}>{success}</p>}
+            {displayError ? (
+                <p className="staff-alert staff-alert--error">{displayError}</p>
+            ) : null}
+            {formSuccess ? (
+                <p className="staff-alert staff-alert--success">{formSuccess}</p>
+            ) : null}
 
             <label htmlFor="program-title">כותרת</label>
             <input
@@ -23,62 +88,57 @@ function ProgramForm({
                 type="text"
                 placeholder="שם התוכנית"
                 value={title}
-                onChange={(e) => onTitleChange(e.target.value)}
+                onChange={(event) => setTitle(event.target.value)}
+                disabled={isFixedProgram || isUploading}
             />
+            {isFixedProgram ? (
+                <p className="program-form__fixed-note">
+                    כותרת תוכנית מערכת אינה ניתנת לעריכה
+                </p>
+            ) : null}
 
             <label htmlFor="program-description">תיאור</label>
             <textarea
                 id="program-description"
                 placeholder="תיאור התוכנית"
                 value={description}
-                onChange={(e) => onDescriptionChange(e.target.value)}
+                onChange={(event) => setDescription(event.target.value)}
+                disabled={isUploading}
             />
 
-            <label htmlFor="program-image-url">קישור לתמונה</label>
-            <input
-                id="program-image-url"
-                type="url"
-                placeholder="https://..."
-                value={imageUrl}
-                onChange={(e) => onImageUrlChange(e.target.value)}
+            <FormImageUpload
+                ref={imageUploadRef}
+                idPrefix="program-image"
+                label="תמונת תוכנית"
+                previewAlt={title || "תצוגה מקדימה של תמונת התוכנית"}
+                initialImageUrl={editingProgram?.image_url || ""}
+                disabled={isUploading}
+                onUpload={uploadProgramImage}
             />
-
-            {imageUrl.trim() && (
-                <img
-                    src={imageUrl}
-                    alt="תצוגה מקדימה"
-                    className="day-center-preview"
-                    onError={(e) => {
-                        e.target.style.display = "none";
-                    }}
-                    onLoad={(e) => {
-                        e.target.style.display = "block";
-                    }}
-                />
-            )}
 
             <button
                 type="button"
                 className="staff-button"
-                onClick={onSave}
-                disabled={saving}
+                onClick={handleSubmit}
+                disabled={isUploading}
             >
-                {saving
-                    ? "שומר..."
-                    : editingId
-                        ? "עדכון תוכנית"
-                        : "הוספת תוכנית חדשה"}
+                {isUploading
+                    ? "מעלה תמונה..."
+                    : editingProgram
+                      ? "עדכון תוכנית"
+                      : "הוספת תוכנית"}
             </button>
 
-            {editingId && (
+            {editingProgram ? (
                 <button
                     type="button"
                     className="staff-button staff-button--secondary"
                     onClick={onCancelEdit}
+                    disabled={isUploading}
                 >
                     ביטול עריכה
                 </button>
-            )}
+            ) : null}
         </div>
     );
 }

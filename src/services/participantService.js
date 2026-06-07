@@ -2,11 +2,18 @@ import { db } from "../config/firebase";
 import {
     addDoc,
     collection,
+    getCountFromServer,
     getDocs,
     doc,
     updateDoc,
-    deleteDoc
+    deleteDoc,
+    query,
+    orderBy,
+    limit
 } from "firebase/firestore";
+import { normalizeSearchQuery } from "../utils/adminListUtils";
+import { resolveCanonicalProgramId } from "../utils/programConstants";
+import { toSafeString, matchesPaymentStatusFilter, matchesRegistrationStatusFilter } from "../utils/participantStatusLabels";
 import { shouldShowParticipantAsInitialRequest } from "../utils/initialRequestFilters";
 import {
     extractParticipantPersonalFields,
@@ -26,6 +33,145 @@ export const PARTICIPANT_CREATED_REGISTRATION_FAILED =
     "PARTICIPANT_CREATED_REGISTRATION_FAILED";
 
 const participantsCollection = collection(db, "participants");
+const ADMIN_QUERY_LIMIT = 1000;
+
+export function filterParticipantsList(
+    participantList,
+    searchQuery,
+    filters = {}
+) {
+    const queryText = normalizeSearchQuery(searchQuery);
+    const programFilter = filters.programFilter || "";
+    const statusFilter = filters.statusFilter || "";
+    const paymentFilter = filters.paymentFilter || "";
+
+    return participantList.filter((participant) => {
+        if (
+            programFilter &&
+            resolveCanonicalProgramId(participant.program_id) !==
+                resolveCanonicalProgramId(programFilter)
+        ) {
+            return false;
+        }
+
+        if (
+            statusFilter &&
+            !matchesRegistrationStatusFilter(
+                participant.registration_status,
+                statusFilter
+            )
+        ) {
+            return false;
+        }
+
+        if (paymentFilter === "__none__") {
+            if (toSafeString(participant.payment_status)) {
+                return false;
+            }
+        } else if (
+            paymentFilter &&
+            !matchesPaymentStatusFilter(
+                participant.payment_status,
+                paymentFilter
+            )
+        ) {
+            return false;
+        }
+
+        if (!queryText) {
+            return true;
+        }
+
+        const firstName = normalizeSearchQuery(toSafeString(participant.first_name));
+        const lastName = normalizeSearchQuery(toSafeString(participant.last_name));
+        const fullName = `${firstName} ${lastName}`.trim();
+        const idNumber = normalizeSearchQuery(toSafeString(participant.id_number));
+        const phone = normalizeSearchQuery(toSafeString(participant.phone));
+
+        return (
+            fullName.includes(queryText) ||
+            firstName.includes(queryText) ||
+            lastName.includes(queryText) ||
+            idNumber.includes(queryText) ||
+            phone.includes(queryText)
+        );
+    });
+}
+
+export function getParticipantSortValue(participant, sortField) {
+    switch (sortField) {
+        case "name":
+            return `${toSafeString(participant.first_name)} ${toSafeString(participant.last_name)}`.trim();
+        case "id_number":
+            return toSafeString(participant.id_number);
+        case "phone":
+            return toSafeString(participant.phone);
+        case "status":
+            return toSafeString(participant.registration_status);
+        case "program":
+            return toSafeString(participant.program_id);
+        case "registration_date":
+            return participant.registered_at || null;
+        case "payment_status":
+            return toSafeString(participant.payment_status);
+        default:
+            return `${toSafeString(participant.first_name)} ${toSafeString(participant.last_name)}`.trim();
+    }
+}
+
+function mergeParticipantRegistrations(participants, registrations) {
+    const registrationByParticipantId = new Map();
+
+    registrations.forEach((registration) => {
+        if (registration.participant_id) {
+            registrationByParticipantId.set(
+                registration.participant_id,
+                registration
+            );
+        }
+    });
+
+    return participants.map((participant) => {
+        const registration =
+            registrationByParticipantId.get(participant.id) || null;
+
+        return {
+            ...participant,
+            registration,
+            registrationId: registration?.id || null,
+            registration_status: registration?.registration_status || "",
+            payment_status: registration?.payment_status || "",
+            registered_at: registration?.registered_at || null,
+            program_id: registration?.program_id || "",
+            activity_id: registration?.activity_id || ""
+        };
+    });
+}
+
+export async function countParticipantRecords() {
+    const snapshot = await getCountFromServer(query(participantsCollection));
+    return snapshot.data().count;
+}
+
+export async function fetchParticipantsForAdminList() {
+    const [participantSnapshot, registrations] = await Promise.all([
+        getDocs(
+            query(
+                participantsCollection,
+                orderBy("last_name"),
+                limit(ADMIN_QUERY_LIMIT)
+            )
+        ),
+        fetchRegistrations()
+    ]);
+
+    const participants = participantSnapshot.docs.map((participantDoc) => ({
+        id: participantDoc.id,
+        ...participantDoc.data()
+    }));
+
+    return mergeParticipantRegistrations(participants, registrations);
+}
 
 export {
     REGISTRATION_STATUS_COMPLETED,
@@ -76,30 +222,7 @@ export async function fetchParticipantsWithRegistrations() {
         fetchRegistrations()
     ]);
 
-    const registrationByParticipantId = new Map();
-
-    registrations.forEach((registration) => {
-        if (registration.participant_id) {
-            registrationByParticipantId.set(
-                registration.participant_id,
-                registration
-            );
-        }
-    });
-
-    return participants.map((participant) => {
-        const registration =
-            registrationByParticipantId.get(participant.id) || null;
-
-        return {
-            ...participant,
-            registration,
-            registrationId: registration?.id || null,
-            registration_status: registration?.registration_status || "",
-            program_id: registration?.program_id || "",
-            activity_id: registration?.activity_id || ""
-        };
-    });
+    return mergeParticipantRegistrations(participants, registrations);
 }
 
 export async function completeParticipantRegistration(

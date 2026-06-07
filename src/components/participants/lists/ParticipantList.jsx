@@ -1,61 +1,138 @@
-import { useEffect, useMemo, useState } from "react";
+import { useCallback, useEffect, useMemo, useState } from "react";
+import { Plus, UserRound } from "lucide-react";
+import ParticipantCard from "./ParticipantCard";
+import ParticipantStatusBadge from "../ParticipantStatusBadge";
 import {
-    fetchParticipantsWithRegistrations,
-    deleteParticipant
+    MaskedIdDisplay,
+    ParticipantListStats,
+    ProgramDisplayName
+} from "../ParticipantListStats";
+import AdminDataTable from "../../admin/AdminDataTable";
+import AdminListEmptyState from "../../admin/AdminListEmptyState";
+import AdminListPagination from "../../admin/AdminListPagination";
+import AdminListSummary from "../../admin/AdminListSummary";
+import AdminListToolbar from "../../admin/AdminListToolbar";
+import AdminResponsiveList from "../../admin/AdminResponsiveList";
+import {
+    AdminTableActions,
+    AdminTableDeleteButton,
+    AdminTableEditButton,
+    AdminTableViewButton
+} from "../../admin/AdminTableActions";
+import { useAdminList } from "../../../hooks/useAdminList";
+import {
+    countParticipantRecords,
+    deleteParticipant,
+    fetchParticipantsForAdminList,
+    filterParticipantsList,
+    getParticipantSortValue
 } from "../../../services/participantService";
+import { fetchProgramsForAdminList } from "../../../services/programService";
 import { formatDate } from "../../../utils/dateUtils";
+import { maskIdNumber } from "../../../utils/maskIdNumber";
+import { computeParticipantListStats } from "../../../utils/participantListStats";
+import {
+    resolveCanonicalProgramId,
+    resolveProgramDisplayTitle
+} from "../../../utils/programConstants";
+import {
+    PAYMENT_STATUS_FILTER_OPTIONS,
+    REGISTRATION_STATUS_FILTER_OPTIONS,
+    toSafeString
+} from "../../../utils/participantStatusLabels";
 import { hasFormattedDisplay, hasValue } from "../../../utils/hasValue";
 
-const GENDER_LABELS = {
-    male: "זכר",
-    female: "נקבה",
-    other: "אחר"
-};
+const PARTICIPANT_COLUMNS = [
+    { key: "name", label: "שם", sortKey: "name" },
+    { key: "id_number", label: "ת.ז.", sortKey: "id_number" },
+    { key: "phone", label: "טלפון", sortKey: "phone" },
+    { key: "program", label: "תוכנית", sortKey: "program" },
+    {
+        key: "registration_date",
+        label: "תאריך הרשמה",
+        sortKey: "registration_date"
+    },
+    { key: "status", label: "סטטוס הרשמה", sortKey: "status" },
+    { key: "payment_status", label: "סטטוס תשלום", sortKey: "payment_status" },
+    { key: "actions", label: "פעולות" }
+];
 
-function filterParticipantList(participantList, searchQuery) {
-    const query = searchQuery.trim().toLowerCase();
-
-    if (!query) {
-        return participantList;
+function getParticipantFullName(participant) {
+    if (!participant) {
+        return "";
     }
 
-    return participantList.filter((participant) => {
-        const firstName = (participant.first_name || "").toLowerCase();
-        const lastName = (participant.last_name || "").toLowerCase();
-        const fullName = `${firstName} ${lastName}`.trim();
-        const idNumber = (participant.id_number || "").toLowerCase();
-        const phone = (participant.phone || "").toLowerCase();
-
-        return (
-            fullName.includes(query) ||
-            firstName.includes(query) ||
-            lastName.includes(query) ||
-            idNumber.includes(query) ||
-            phone.includes(query)
-        );
-    });
+    return [toSafeString(participant.first_name), toSafeString(participant.last_name)]
+        .filter(Boolean)
+        .join(" ");
 }
 
-function ParticipantList({ onEditParticipant }) {
-    const [participantList, setParticipantList] = useState([]);
-    const [searchQuery, setSearchQuery] = useState("");
+function getProgramLabel(participant, programs = []) {
+    const programId = resolveCanonicalProgramId(participant?.program_id);
+
+    if (!programId) {
+        return "—";
+    }
+
+    const program = programs.find((item) => item.id === programId);
+
+    return resolveProgramDisplayTitle(program, programId) || "—";
+}
+
+function ParticipantList({
+    refreshKey = 0,
+    onEditParticipant,
+    onAddParticipant
+}) {
+    const [sourceItems, setSourceItems] = useState([]);
+    const [programs, setPrograms] = useState([]);
+    const [totalCount, setTotalCount] = useState(0);
     const [loading, setLoading] = useState(true);
     const [error, setError] = useState("");
+    const [actionMessage, setActionMessage] = useState("");
+
+    const filterItems = useCallback(
+        (items, searchQuery, filters) =>
+            filterParticipantsList(items, searchQuery, filters),
+        []
+    );
+
+    const list = useAdminList({
+        sourceItems,
+        filterItems,
+        totalCount,
+        getSortValue: getParticipantSortValue,
+        initialSortField: "name"
+    });
 
     const filteredParticipants = useMemo(
-        () => filterParticipantList(participantList, searchQuery),
-        [participantList, searchQuery]
+        () => filterParticipantsList(sourceItems, list.searchQuery, list.filters),
+        [sourceItems, list.searchQuery, list.filters, filterItems]
+    );
+
+    const participantStats = useMemo(
+        () => computeParticipantListStats(filteredParticipants),
+        [filteredParticipants]
     );
 
     async function loadParticipants() {
         setLoading(true);
         setError("");
+
         try {
-            const data = await fetchParticipantsWithRegistrations();
-            setParticipantList(data);
+            const [records, count, programRecords] = await Promise.all([
+                fetchParticipantsForAdminList(),
+                countParticipantRecords(),
+                fetchProgramsForAdminList()
+            ]);
+
+            setSourceItems(records);
+            setTotalCount(count);
+            setPrograms(programRecords);
         } catch (err) {
-            console.log(err);
+            console.error(err);
             setError("שגיאה בטעינת המשתתפים");
+            setSourceItems([]);
         } finally {
             setLoading(false);
         }
@@ -63,7 +140,7 @@ function ParticipantList({ onEditParticipant }) {
 
     useEffect(() => {
         loadParticipants();
-    }, []);
+    }, [refreshKey]);
 
     async function handleDeleteParticipant(participant) {
         const confirmDelete = window.confirm(
@@ -76,103 +153,271 @@ function ParticipantList({ onEditParticipant }) {
 
         try {
             await deleteParticipant(participant.id);
-            setParticipantList((prev) =>
-                prev.filter((item) => item.id !== participant.id)
-            );
-            alert("המשתתף נמחק בהצלחה");
+            setActionMessage("המשתתף נמחק בהצלחה");
+            await loadParticipants();
         } catch (err) {
-            console.log(err);
-            alert("שגיאה במחיקת המשתתף");
+            console.error(err);
+            setError("שגיאה במחיקת המשתתף");
         }
     }
 
-    return (
-        <div className="participants-list-section">
-            <h2>רשימת משתתפים</h2>
-
-            {error && <p style={{ color: "red" }}>{error}</p>}
-
-            <div className="staff-form staff-list-filters">
-                <label htmlFor="participant-search">חיפוש</label>
-                <input
-                    id="participant-search"
-                    type="text"
-                    placeholder="שם, תעודת זהות או טלפון"
-                    value={searchQuery}
-                    onChange={(e) => setSearchQuery(e.target.value)}
+    function renderParticipantActions(participant) {
+        return (
+            <AdminTableActions>
+                {onEditParticipant ? (
+                    <>
+                        <AdminTableViewButton
+                            onClick={() => onEditParticipant(participant)}
+                            label="צפייה בפרטי משתתף"
+                        />
+                        <AdminTableEditButton
+                            onClick={() => onEditParticipant(participant)}
+                            label="עריכת משתתף"
+                        />
+                    </>
+                ) : null}
+                <AdminTableDeleteButton
+                    onClick={() => handleDeleteParticipant(participant)}
+                    label="מחיקת משתתף"
                 />
+            </AdminTableActions>
+        );
+    }
 
-                <p className="staff-list-count">
-                    נמצאו {filteredParticipants.length} מתוך {participantList.length}
-                </p>
+    const toolbarFilters = (
+        <>
+            <div className="admin-list-toolbar__filter-item">
+                <label htmlFor="participant-program-filter">תוכנית</label>
+                <select
+                    id="participant-program-filter"
+                    value={list.filters.programFilter || ""}
+                    onChange={(event) =>
+                        list.setFilter("programFilter", event.target.value)
+                    }
+                >
+                    <option value="">כל התוכניות</option>
+                    {programs.map((program) => (
+                        <option key={program.id} value={program.id}>
+                            {resolveProgramDisplayTitle(program, program.id)}
+                        </option>
+                    ))}
+                </select>
             </div>
 
-            {loading && <p>טוען...</p>}
-
-            {!loading && participantList.length === 0 && (
-                <p>אין משתתפים במערכת</p>
-            )}
-
-            {!loading && participantList.length > 0 && filteredParticipants.length === 0 && (
-                <p>לא נמצאו תוצאות לחיפוש</p>
-            )}
-
-            <div className="participants-list staff-grid staff-grid--cards">
-                {filteredParticipants.map((participant) => {
-                    const fullName = [participant.first_name, participant.last_name]
-                        .filter(hasValue)
-                        .join(" ");
-                    const birthDateLabel = formatDate(participant.birth_date);
-                    const genderLabel =
-                        GENDER_LABELS[participant.gender] || participant.gender;
-
-                    return (
-                    <div key={participant.id} className="staff-card">
-                        <div className="staff-card-body">
-                            {hasValue(fullName) && <p>שם: {fullName}</p>}
-                            {hasValue(participant.id_number) && (
-                                <p>תעודת זהות: {participant.id_number}</p>
-                            )}
-                            {hasValue(participant.phone) && (
-                                <p>טלפון: {participant.phone}</p>
-                            )}
-                            {hasFormattedDisplay(birthDateLabel) && (
-                                <p>תאריך לידה: {birthDateLabel}</p>
-                            )}
-                            {hasValue(genderLabel) && (
-                                <p>מגדר: {genderLabel}</p>
-                            )}
-                            {hasValue(participant.address) && (
-                                <p>כתובת: {participant.address}</p>
-                            )}
-                            {hasValue(participant.emergency_number) && (
-                                <p>מספר חירום: {participant.emergency_number}</p>
-                            )}
-                            {hasValue(participant.registration_status) && (
-                                <p>סטטוס הרשמה: {participant.registration_status}</p>
-                            )}
-                        </div>
-
-                        <div className="staff-card-actions">
-                            <button
-                                type="button"
-                                className="staff-button staff-button--small staff-button--secondary"
-                                onClick={() => onEditParticipant(participant)}
-                            >
-                                עריכה
-                            </button>
-                            <button
-                                type="button"
-                                className="staff-button staff-button--small staff-button--danger"
-                                onClick={() => handleDeleteParticipant(participant)}
-                            >
-                                מחיקה
-                            </button>
-                        </div>
-                    </div>
-                    );
-                })}
+            <div className="admin-list-toolbar__filter-item">
+                <label htmlFor="participant-status-filter">סטטוס הרשמה</label>
+                <select
+                    id="participant-status-filter"
+                    value={list.filters.statusFilter || ""}
+                    onChange={(event) =>
+                        list.setFilter("statusFilter", event.target.value)
+                    }
+                >
+                    <option value="">כל הסטטוסים</option>
+                    {REGISTRATION_STATUS_FILTER_OPTIONS.map((option) => (
+                        <option key={option.value} value={option.value}>
+                            {option.label}
+                        </option>
+                    ))}
+                </select>
             </div>
+
+            <div className="admin-list-toolbar__filter-item">
+                <label htmlFor="participant-payment-filter">סטטוס תשלום</label>
+                <select
+                    id="participant-payment-filter"
+                    value={list.filters.paymentFilter || ""}
+                    onChange={(event) =>
+                        list.setFilter("paymentFilter", event.target.value)
+                    }
+                >
+                    <option value="">כל הסטטוסים</option>
+                    <option value="__none__">ללא סטטוס תשלום</option>
+                    {PAYMENT_STATUS_FILTER_OPTIONS.map((option) => (
+                        <option key={option.value} value={option.value}>
+                            {option.label}
+                        </option>
+                    ))}
+                </select>
+            </div>
+        </>
+    );
+
+    const emptyState = useMemo(() => {
+        if (loading) {
+            return null;
+        }
+
+        if (sourceItems.length === 0) {
+            return (
+                <AdminListEmptyState
+                    icon={UserRound}
+                    title="אין משתתפים במערכת"
+                    message="הוסיפו את המשתתף הראשון כדי להתחיל לנהל הרשמות ונוכחות."
+                    actionLabel={onAddParticipant ? "הוספת משתתף" : undefined}
+                    onAction={onAddParticipant}
+                />
+            );
+        }
+
+        if (list.totalFiltered === 0) {
+            return (
+                <AdminListEmptyState
+                    icon={UserRound}
+                    title="לא נמצאו תוצאות"
+                    message="נסו לשנות את החיפוש או את הסינון כדי למצוא משתתפים אחרים."
+                />
+            );
+        }
+
+        return null;
+    }, [loading, sourceItems.length, list.totalFiltered, onAddParticipant]);
+
+    return (
+        <div className="staff-list-section admin-list-section admin-list-section--participants">
+            <div className="admin-list-header admin-list-header--split">
+                <h2 className="admin-list-header__title">רשימת משתתפים</h2>
+                {onAddParticipant ? (
+                    <button
+                        type="button"
+                        className="staff-button staff-button--small admin-list-header__action admin-list-header__action--compact"
+                        onClick={onAddParticipant}
+                    >
+                        <Plus
+                            className="admin-list-header__action-icon"
+                            strokeWidth={2.25}
+                            aria-hidden="true"
+                        />
+                        <span>הוספת משתתף</span>
+                    </button>
+                ) : null}
+            </div>
+
+            <AdminListToolbar
+                layout="participants"
+                searchId="participant-search"
+                searchLabel="חיפוש"
+                searchPlaceholder="שם, שם משפחה, ת.ז. או טלפון"
+                searchQuery={list.searchQuery}
+                onSearchChange={list.setSearchQuery}
+                filters={toolbarFilters}
+                pageSize={list.pageSize}
+                onPageSizeChange={list.setPageSize}
+                pageSizeLabel="הצג בעמוד"
+            />
+
+            <AdminListSummary
+                totalCount={list.totalCount}
+                totalFiltered={list.totalFiltered}
+                pageCount={list.pageCount}
+                page={list.page}
+                totalPages={list.totalPages}
+                showAll={list.showAll}
+            />
+
+            {!loading && filteredParticipants.length > 0 ? (
+                <ParticipantListStats stats={participantStats} />
+            ) : null}
+
+            {error ? (
+                <p className="staff-alert staff-alert--error">{error}</p>
+            ) : null}
+            {actionMessage ? (
+                <p className="staff-alert staff-alert--success">{actionMessage}</p>
+            ) : null}
+
+            {loading ? <p>טוען...</p> : null}
+
+            {!loading && emptyState}
+
+            {!loading && list.totalFiltered > 0 ? (
+                <>
+                    <AdminResponsiveList
+                        desktopTable={
+                            <AdminDataTable
+                                ariaLabel="טבלת משתתפים"
+                                compact
+                                columns={PARTICIPANT_COLUMNS}
+                                sortField={list.sortField}
+                                sortDirection={list.sortDirection}
+                                onSort={list.handleSort}
+                                rows={list.pageItems.map((participant) => {
+                                    const fullName =
+                                        getParticipantFullName(participant) || "—";
+                                    const programLabel = getProgramLabel(
+                                        participant,
+                                        programs
+                                    );
+                                    const registrationDate = formatDate(
+                                        participant.registered_at
+                                    );
+
+                                    return (
+                                        <tr key={participant.id}>
+                                            <td className="admin-data-table__name-cell">
+                                                {fullName}
+                                            </td>
+                                            <td className="admin-data-table__numeric admin-data-table__masked-id">
+                                                <MaskedIdDisplay
+                                                    idNumber={maskIdNumber(
+                                                        participant.id_number
+                                                    )}
+                                                />
+                                            </td>
+                                            <td className="admin-data-table__numeric">
+                                                {toSafeString(participant.phone) || "—"}
+                                            </td>
+                                            <td>
+                                                <ProgramDisplayName title={programLabel} />
+                                            </td>
+                                            <td className="admin-data-table__numeric">
+                                                {hasFormattedDisplay(registrationDate)
+                                                    ? registrationDate
+                                                    : "—"}
+                                            </td>
+                                            <td>
+                                                <ParticipantStatusBadge
+                                                    type="registration"
+                                                    status={
+                                                        participant.registration_status
+                                                    }
+                                                />
+                                            </td>
+                                            <td>
+                                                <ParticipantStatusBadge
+                                                    type="payment"
+                                                    status={participant.payment_status}
+                                                />
+                                            </td>
+                                            <td>{renderParticipantActions(participant)}</td>
+                                        </tr>
+                                    );
+                                })}
+                            />
+                        }
+                        mobileCards={
+                            <div className="participants-list staff-grid staff-grid--cards">
+                                {list.pageItems.map((participant) => (
+                                    <ParticipantCard
+                                        key={participant.id}
+                                        participant={participant}
+                                        programs={programs}
+                                        onEdit={onEditParticipant}
+                                        onView={onEditParticipant}
+                                        onDelete={handleDeleteParticipant}
+                                    />
+                                ))}
+                            </div>
+                        }
+                    />
+
+                    <AdminListPagination
+                        page={list.page}
+                        totalPages={list.totalPages}
+                        onPageChange={list.setPage}
+                    />
+                </>
+            ) : null}
         </div>
     );
 }

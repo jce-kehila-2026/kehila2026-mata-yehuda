@@ -162,24 +162,88 @@ export function getFixedProgramById(programId) {
     return FIXED_PROGRAMS.find((program) => program.id === programId);
 }
 
+const SIXTY_PLUS_TITLE_VARIANTS = new Set([
+    "60+-",
+    "60-+",
+    "-+60",
+    "+-60",
+    "60+",
+    "+60",
+    "60-",
+    "-60"
+]);
+
+export function isSixtyPlusProgramTitle(title) {
+    const normalized = String(title ?? "").trim();
+
+    if (!normalized) {
+        return false;
+    }
+
+    return (
+        SIXTY_PLUS_TITLE_VARIANTS.has(normalized) ||
+        /^[-+]?60[-+]?$/.test(normalized)
+    );
+}
+
+export function shouldDisplayProgramTitleLtr(title) {
+    return (
+        title === PROGRAM_60_PLUS_MINUS_DISPLAY_NAME ||
+        isSixtyPlusProgramTitle(title)
+    );
+}
+
 export function formatProgramTitle(program) {
     if (!program) {
         return "";
     }
 
-    if (program.id === PROGRAM_60_PLUS_MINUS_ID) {
+    const canonicalId = resolveCanonicalProgramId(program.id);
+
+    if (
+        canonicalId === PROGRAM_60_PLUS_MINUS_ID ||
+        isSixtyPlusProgramTitle(program.title)
+    ) {
         return PROGRAM_60_PLUS_MINUS_DISPLAY_NAME;
+    }
+
+    if (canonicalId === DAY_CENTER_ID) {
+        return program.title || DAY_CENTER_NAME;
+    }
+
+    if (canonicalId === SUPPORTIVE_COMMUNITY_ID) {
+        return program.title || SUPPORTIVE_COMMUNITY_NAME;
     }
 
     return program.title || "";
 }
 
 export function getFixedProgramTitle(programId) {
-    if (programId === PROGRAM_60_PLUS_MINUS_ID) {
+    const canonicalId = resolveCanonicalProgramId(programId);
+
+    if (canonicalId === PROGRAM_60_PLUS_MINUS_ID) {
         return PROGRAM_60_PLUS_MINUS_DISPLAY_NAME;
     }
 
-    return getFixedProgramById(programId)?.title || "";
+    return getFixedProgramById(canonicalId)?.title || "";
+}
+
+export function resolveProgramDisplayTitle(program, programId = "") {
+    const canonicalId = resolveCanonicalProgramId(program?.id || programId);
+
+    if (program) {
+        const formatted = formatProgramTitle(program);
+
+        if (formatted) {
+            return formatted;
+        }
+    }
+
+    if (canonicalId) {
+        return getFixedProgramTitle(canonicalId) || canonicalId;
+    }
+
+    return "";
 }
 
 export function createFixedProgramPlaceholder(programId) {

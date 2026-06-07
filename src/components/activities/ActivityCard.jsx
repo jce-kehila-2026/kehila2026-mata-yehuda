@@ -1,4 +1,6 @@
 import { formatDate, formatTime } from "../../utils/dateUtils";
+import { formatActivityOccupancy } from "../../services/activityService";
+import ActivityStatusBadge from "./ActivityStatusBadge";
 import { hasDisplayNumber, hasFormattedDisplay, hasValue } from "../../utils/hasValue";
 
 function ActivityCard({ activity, onDelete, onEdit }) {
@@ -33,13 +35,16 @@ function ActivityCard({ activity, onDelete, onEdit }) {
                 {hasValue(data.day_of_week) && (
                     <p>יום בשבוע: {data.day_of_week}</p>
                 )}
-                {hasDisplayNumber(data.max_participants) && (
-                    <p>מספר משתתפים: {data.max_participants}</p>
+                {(hasDisplayNumber(data.max_participants) ||
+                    hasDisplayNumber(data.current_participants)) && (
+                    <p>משתתפים: {formatActivityOccupancy(data)}</p>
                 )}
                 {hasDisplayNumber(data.price) && <p>מחיר: {data.price}</p>}
                 {hasValue(data.price_note) && <p>הערות מחיר: {data.price_note}</p>}
 
-                <p>סטטוס: {data.is_open ? "פתוח" : "סגור"}</p>
+                <p>
+                    סטטוס: <ActivityStatusBadge data={data} />
+                </p>
 
                 {imageUrl && (
                     <img

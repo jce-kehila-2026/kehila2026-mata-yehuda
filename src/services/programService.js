@@ -9,12 +9,14 @@ import {
     updateDoc,
     deleteDoc
 } from "firebase/firestore";
+import { normalizeSearchQuery } from "../utils/adminListUtils";
 import {
     DAY_CENTER_ID,
     DAY_CENTER_NAME,
     FIXED_PROGRAMS,
     FIXED_PROGRAM_IDS,
     createFixedProgramPlaceholder,
+    formatProgramTitle,
     getFixedProgramById,
     isDeprecatedFixedProgramId,
     isFixedProgramId
@@ -133,6 +135,43 @@ export async function fetchPrograms() {
     return sortPrograms(Array.from(programMap.values()));
 }
 
+export function filterProgramsList(programs, searchQuery) {
+    const queryText = normalizeSearchQuery(searchQuery);
+
+    return programs.filter((program) => {
+        if (!queryText) {
+            return true;
+        }
+
+        const displayTitle = formatProgramTitle(program);
+        const searchable = [displayTitle, program.title, program.description]
+            .filter(Boolean)
+            .join(" ");
+
+        return normalizeSearchQuery(searchable).includes(queryText);
+    });
+}
+
+export function getProgramSortValue(program, sortField) {
+    switch (sortField) {
+        case "title":
+            return formatProgramTitle(program) || program.title || "";
+        case "description":
+            return program.description || "";
+        default:
+            return formatProgramTitle(program) || program.title || "";
+    }
+}
+
+export async function fetchProgramsForAdminList() {
+    return fetchPrograms();
+}
+
+export async function countProgramsRecords() {
+    const programs = await fetchPrograms();
+    return programs.length;
+}
+
 export async function addProgram({ title, description, image_url }) {
     return addDoc(programsCollection, {
         title: title.trim(),
@@ -143,16 +182,22 @@ export async function addProgram({ title, description, image_url }) {
 }
 
 export async function updateProgram(programId, { title, description, image_url }) {
+    const normalizedImageUrl =
+        typeof image_url === "string" ? image_url.trim() : image_url || "";
+
     const updates = {
         title: title.trim(),
         description: description.trim(),
-        image_url: image_url.trim()
+        image_url: normalizedImageUrl
     };
 
     if (isFixedProgramId(programId)) {
         return setDoc(
             fixedProgramRef(programId),
-            buildFixedProgramPayload(programId, { description, image_url }),
+            buildFixedProgramPayload(programId, {
+                description,
+                image_url: normalizedImageUrl
+            }),
             { merge: true }
         );
     }

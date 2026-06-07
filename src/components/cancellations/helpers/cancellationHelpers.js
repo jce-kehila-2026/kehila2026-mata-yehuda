@@ -1,18 +1,24 @@
+import { getPaymentStatusLabel } from "../../../utils/participantStatusLabels";
+
 export const REFUND_STATUS_PENDING = "ממתין";
 export const REFUND_STATUS_REFUNDED = "הוחזר";
 export const REFUND_STATUS_NOT_REQUIRED = "לא נדרש";
+export const REFUND_STATUS_REJECTED = "נדחה";
 
 export const PUBLIC_REFUND_STATUS_MANUAL = "MANUAL_REFUND_REQUIRED";
 export const PUBLIC_REFUND_STATUS_AUTOMATIC = "AUTOMATIC_REFUNDED";
+export const PUBLIC_REFUND_STATUS_REJECTED = "REFUND_REJECTED";
 
 export const REFUND_FILTER_ALL = "all";
 export const REFUND_FILTER_PENDING = "pending";
 export const REFUND_FILTER_REFUNDED = "refunded";
+export const REFUND_FILTER_REJECTED = "rejected";
 
 export const REFUND_FILTERS = [
-    { id: REFUND_FILTER_ALL, label: "כל הביטולים" },
+    { id: REFUND_FILTER_ALL, label: "כל הסטטוסים" },
     { id: REFUND_FILTER_PENDING, label: "ממתין להחזר" },
-    { id: REFUND_FILTER_REFUNDED, label: "הוחזר" }
+    { id: REFUND_FILTER_REFUNDED, label: "הוחזר" },
+    { id: REFUND_FILTER_REJECTED, label: "נדחה" }
 ];
 
 export const WHATSAPP_REFUND_MESSAGE = `שלום,
@@ -77,6 +83,10 @@ export function normalizeCancellationRefundStatus(data) {
 
     if (raw === PUBLIC_REFUND_STATUS_AUTOMATIC) {
         return REFUND_STATUS_REFUNDED;
+    }
+
+    if (raw === PUBLIC_REFUND_STATUS_REJECTED || raw === REFUND_STATUS_REJECTED) {
+        return REFUND_STATUS_REJECTED;
     }
 
     return raw;
@@ -208,6 +218,12 @@ export function filterCancellationsByRefundStatus(items, filterId) {
         );
     }
 
+    if (filterId === REFUND_FILTER_REJECTED) {
+        return items.filter(
+            (item) => item.cancellation.refund_status === REFUND_STATUS_REJECTED
+        );
+    }
+
     return items;
 }
 
@@ -250,4 +266,174 @@ export function formatPaymentAmount(paymentOrDisplay) {
     }
 
     return typeof amount === "number" ? `${amount} ₪` : String(amount);
+}
+
+const PAYMENT_METHOD_LABELS = {
+    bit: "ביט",
+    cash: "מזומן",
+    מזומן: "מזומן",
+    ביט: "ביט"
+};
+
+export function getRefundStatusLabel(status) {
+    const normalized = String(status ?? "").trim();
+
+    if (normalized === REFUND_STATUS_PENDING) {
+        return "ממתין להחזר";
+    }
+
+    if (normalized === REFUND_STATUS_REFUNDED) {
+        return "הוחזר";
+    }
+
+    if (normalized === REFUND_STATUS_REJECTED) {
+        return "נדחה";
+    }
+
+    if (normalized === REFUND_STATUS_NOT_REQUIRED) {
+        return "לא נדרש";
+    }
+
+    return normalized || "—";
+}
+
+export function getRefundStatusBadgeVariant(status) {
+    const normalized = String(status ?? "").trim();
+
+    if (normalized === REFUND_STATUS_REFUNDED) {
+        return "success";
+    }
+
+    if (normalized === REFUND_STATUS_REJECTED) {
+        return "danger";
+    }
+
+    if (normalized === REFUND_STATUS_PENDING) {
+        return "pending";
+    }
+
+    return "muted";
+}
+
+export function getRefundFilterKey(status) {
+    const normalized = String(status ?? "").trim();
+
+    if (normalized === REFUND_STATUS_PENDING) {
+        return REFUND_FILTER_PENDING;
+    }
+
+    if (normalized === REFUND_STATUS_REFUNDED) {
+        return REFUND_FILTER_REFUNDED;
+    }
+
+    if (normalized === REFUND_STATUS_REJECTED) {
+        return REFUND_FILTER_REJECTED;
+    }
+
+    return "";
+}
+
+export function matchesRefundStatusFilter(item, filterValue) {
+    if (!filterValue || filterValue === REFUND_FILTER_ALL) {
+        return true;
+    }
+
+    return getRefundFilterKey(item.cancellation?.refund_status) === filterValue;
+}
+
+export function formatPaymentMethodLabel(methodOrStatus) {
+    const raw = String(methodOrStatus ?? "").trim();
+
+    if (!raw) {
+        return "—";
+    }
+
+    const lower = raw.toLowerCase();
+
+    if (PAYMENT_METHOD_LABELS[lower]) {
+        return PAYMENT_METHOD_LABELS[lower];
+    }
+
+    if (PAYMENT_METHOD_LABELS[raw]) {
+        return PAYMENT_METHOD_LABELS[raw];
+    }
+
+    const statusLabel = getPaymentStatusLabel(raw);
+
+    if (statusLabel && statusLabel !== raw) {
+        return statusLabel;
+    }
+
+    return raw;
+}
+
+export function resolvePaymentMethodDisplay(paymentDisplay) {
+    const method = paymentDisplay?.payment_method?.trim() || "";
+    const status = paymentDisplay?.payment_status?.trim() || "";
+
+    if (method) {
+        return formatPaymentMethodLabel(method);
+    }
+
+    if (status) {
+        return formatPaymentMethodLabel(status);
+    }
+
+    return "—";
+}
+
+export function getCancellationAmountValue(item) {
+    const amount = item?.paymentDisplay?.amount;
+
+    if (typeof amount === "number" && !Number.isNaN(amount)) {
+        return amount;
+    }
+
+    if (typeof amount === "string" && amount.trim()) {
+        const parsed = Number(amount.trim());
+        return Number.isNaN(parsed) ? 0 : parsed;
+    }
+
+    return 0;
+}
+
+export function computeCancellationListStats(items = []) {
+    const stats = {
+        total: items.length,
+        pending: 0,
+        refunded: 0,
+        pendingRefundAmount: 0
+    };
+
+    items.forEach((item) => {
+        const status = item.cancellation?.refund_status;
+
+        if (status === REFUND_STATUS_PENDING) {
+            stats.pending += 1;
+            stats.pendingRefundAmount += getCancellationAmountValue(item);
+        }
+
+        if (status === REFUND_STATUS_REFUNDED) {
+            stats.refunded += 1;
+        }
+    });
+
+    return stats;
+}
+
+export function buildCancellationSummaryItems(stats) {
+    if (!stats) {
+        return [];
+    }
+
+    return [
+        { key: "total", label: "סה״כ ביטולים", value: stats.total },
+        { key: "pending", label: "ממתינים להחזר", value: stats.pending },
+        { key: "refunded", label: "הוחזרו", value: stats.refunded },
+        {
+            key: "pendingRefundAmount",
+            label: "סה״כ סכום להחזר",
+            value: `${stats.pendingRefundAmount} ₪`
+        }
+    ];
 }
