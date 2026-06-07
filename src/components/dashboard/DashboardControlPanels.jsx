@@ -1,6 +1,9 @@
-import { Calendar, Check, ClipboardList, Undo2 } from "lucide-react";
+import { Check, ClipboardList, Mail, Undo2 } from "lucide-react";
 import { formatCancellationDate } from "../cancellations/helpers/cancellationHelpers";
 import { getRequestProgramLabel } from "../../services/dashboardService";
+import { formatInquiryDate } from "../../services/inquiryService";
+import { getStaffInquiriesRoute } from "../../config/staffInquiriesNavigation";
+import DashboardActivityCalendar from "./DashboardActivityCalendar";
 import ActivityDateDisplay from "../activities/ActivityDateDisplay";
 import {
     buildRecentUpdates,
@@ -11,6 +14,7 @@ import {
 
 const PANEL_PREVIEW_LIMIT = 3;
 const PENDING_REQUESTS_PREVIEW_LIMIT = 2;
+const INQUIRIES_PREVIEW_LIMIT = 2;
 
 function DashboardPanelEmpty({ message, icon: EmptyIcon = Check }) {
     return (
@@ -46,22 +50,26 @@ function DashboardControlPanels({
     loading,
     onNavigate,
     onCompleteRegistration,
-    onManageCancellation
+    onManageCancellation,
+    onHandleInquiry
 }) {
     const pendingCount = overview?.pendingCount ?? 0;
     const pendingRequests = (overview?.pendingRequests ?? []).slice(
         0,
         PENDING_REQUESTS_PREVIEW_LIMIT
     );
-    const upcomingActivities = (overview?.upcomingActivities ?? []).slice(
-        0,
-        PANEL_PREVIEW_LIMIT
-    );
+    const dashboardActivities = overview?.activities ?? [];
     const recentCancellations = (overview?.recentCancellations ?? []).slice(
         0,
         PANEL_PREVIEW_LIMIT
     );
     const cancellationCount = overview?.cancellationCount ?? recentCancellations.length;
+    const recentInquiries = (overview?.recentInquiries ?? []).slice(
+        0,
+        INQUIRIES_PREVIEW_LIMIT
+    );
+    const inquiryCount = overview?.inquiryCount ?? recentInquiries.length;
+    const inquiriesRoute = getStaffInquiriesRoute();
     const recentUpdates = buildRecentUpdates(overview).slice(0, PANEL_PREVIEW_LIMIT);
     const weekActivities = getWeekActivities(overview?.upcomingActivities ?? []).slice(
         0,
@@ -71,6 +79,7 @@ function DashboardControlPanels({
 
     return (
         <div className="staff-dashboard-panels">
+            <div className="staff-dashboard-panels__main">
             <section className="staff-dashboard-panel">
                 <h3 className="staff-dashboard-panel__title">בקשות ממתינות</h3>
                 <div className="staff-dashboard-panel__body">
@@ -136,38 +145,65 @@ function DashboardControlPanels({
             </section>
 
             <section className="staff-dashboard-panel">
-                <h3 className="staff-dashboard-panel__title">פעילויות קרובות</h3>
+                <h3 className="staff-dashboard-panel__title">פניות חדשות</h3>
                 <div className="staff-dashboard-panel__body">
                     {loading ? (
                         <p className="staff-dashboard-panel__loading">טוען…</p>
-                    ) : upcomingActivities.length === 0 ? (
-                        <DashboardPanelEmpty
-                            message="אין פעילויות קרובות"
-                            icon={Calendar}
-                        />
                     ) : (
-                        <ul className="staff-dashboard-panel__list">
-                            {upcomingActivities.map((activity) => (
-                                <li
-                                    key={activity.id}
-                                    className="staff-dashboard-panel__item"
-                                >
-                                    <span className="staff-dashboard-panel__item-name">
-                                        {activity.data?.name || "—"}
-                                    </span>
-                                    <span className="staff-dashboard-panel__item-meta">
-                                        <ActivityDateDisplay
-                                            startDate={activity.data?.start_date}
-                                        />
-                                    </span>
-                                </li>
-                            ))}
-                        </ul>
+                        <>
+                            <p className="staff-dashboard-panel__count">{inquiryCount}</p>
+                            {recentInquiries.length === 0 ? (
+                                <DashboardPanelEmpty
+                                    message="אין פניות חדשות"
+                                    icon={Mail}
+                                />
+                            ) : (
+                                <ul className="staff-dashboard-panel__list">
+                                    {recentInquiries.map((inquiry) => {
+                                        const inquiryDate = formatInquiryDate(
+                                            inquiry.createdAt
+                                        );
+
+                                        return (
+                                            <li
+                                                key={inquiry.id}
+                                                className="staff-dashboard-panel__item staff-dashboard-panel__item--with-action"
+                                            >
+                                                <div className="staff-dashboard-panel__item-content">
+                                                    <span className="staff-dashboard-panel__item-name">
+                                                        {inquiry.senderName || "—"}
+                                                    </span>
+                                                    {inquiry.subject ? (
+                                                        <span className="staff-dashboard-panel__item-meta">
+                                                            {inquiry.subject}
+                                                        </span>
+                                                    ) : null}
+                                                    {inquiryDate ? (
+                                                        <span className="staff-dashboard-panel__item-meta">
+                                                            {inquiryDate}
+                                                        </span>
+                                                    ) : null}
+                                                </div>
+                                                <button
+                                                    type="button"
+                                                    className="staff-dashboard-panel__item-action"
+                                                    onClick={() =>
+                                                        onHandleInquiry?.(inquiry)
+                                                    }
+                                                >
+                                                    טיפול בפנייה
+                                                </button>
+                                            </li>
+                                        );
+                                    })}
+                                </ul>
+                            )}
+                        </>
                     )}
                 </div>
                 <DashboardPanelLink
-                    label="צפייה בכל הפעילויות →"
-                    onClick={() => onNavigate("activities")}
+                    label="צפייה בכל הפניות →"
+                    onClick={() => onNavigate(inquiriesRoute)}
                     disabled={loading}
                 />
             </section>
@@ -231,6 +267,14 @@ function DashboardControlPanels({
                 />
             </section>
 
+            <DashboardActivityCalendar
+                activities={dashboardActivities}
+                loading={loading}
+                onNavigate={onNavigate}
+            />
+            </div>
+
+            <div className="staff-dashboard-panels__mobile">
             <section className="staff-dashboard-panel staff-dashboard-panel--updates staff-dashboard-panel--mobile-only">
                 <h3 className="staff-dashboard-panel__title">עדכונים אחרונים</h3>
                 <div className="staff-dashboard-panel__body">
@@ -301,6 +345,7 @@ function DashboardControlPanels({
                     />
                 </section>
             ) : null}
+            </div>
         </div>
     );
 }

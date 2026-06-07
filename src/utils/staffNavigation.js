@@ -1,7 +1,8 @@
 /**
  * Staff route keys (staffPage in history state):
  * - registrations — צפייה בבקשות (pending registrations from Firestore)
- * - requests — reserved for צפייה בפניות (user inquiries, future)
+ * - inquiries — פניות (placeholder until dedicated management page; see staffInquiriesNavigation.js)
+ * - requests — reserved alias for user inquiries (legacy)
  */
 export const STAFF_PAGE_STATE_KEY = "staffPage";
 export const STAFF_PENDING_REGISTRATION_ID_KEY = "pendingRegistrationId";

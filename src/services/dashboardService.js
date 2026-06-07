@@ -2,6 +2,7 @@ import { collection, getDocs } from "firebase/firestore";
 import { db } from "../config/firebase";
 import { fetchActivities } from "./activityService";
 import { getCancellationRequests } from "./cancellationService";
+import { fetchOpenInquiries } from "./inquiryService";
 import { fetchInitialRegistrationRequests } from "./registrationService";
 
 function getTimestampMillis(value) {
@@ -84,11 +85,12 @@ export function getRequestProgramLabel(request) {
 }
 
 export async function fetchDashboardOverview() {
-    const [pendingRequests, activities, cancellations, messagesSummary] =
+    const [pendingRequests, activities, cancellations, inquiries, messagesSummary] =
         await Promise.all([
             fetchInitialRegistrationRequests({ programFilter: "all" }),
             fetchActivities(),
             getCancellationRequests(),
+            fetchOpenInquiries(),
             fetchSentMessagesSummary()
         ]);
 
@@ -97,8 +99,11 @@ export async function fetchDashboardOverview() {
         pendingRequests: pendingRequests.slice(0, 5),
         upcomingActivities: getUpcomingActivities(activities),
         upcomingActivityCount: countUpcomingActivities(activities),
+        activities,
         recentCancellations: cancellations.slice(0, 5),
         cancellationCount: cancellations.length,
+        recentInquiries: inquiries.slice(0, 5),
+        inquiryCount: inquiries.length,
         sentMessageCount: messagesSummary.sentCount,
         latestMessage: messagesSummary.latest
     };

@@ -26,6 +26,10 @@ import SendMessages from "./SendMessages";
 import DashboardControlPanels from "../components/dashboard/DashboardControlPanels";
 import { fetchDashboardOverview } from "../services/dashboardService";
 import {
+    buildInquiryNavigationState,
+    getStaffInquiriesRoute
+} from "../config/staffInquiriesNavigation";
+import {
     applyStaffPopState,
     buildStaffPage,
     createStaffNavStack,
@@ -71,7 +75,7 @@ const DASHBOARD_ACTIONS = [
         label: "בקשות",
         page: "registrations"
     },
-    { id: "inquiries", label: "פניות", page: null },
+    { id: "inquiries", label: "פניות", page: "inquiries" },
     { id: "cancellations", label: "ביטולים", page: "cancellations" },
     { id: "attendance", label: "נוכחות", page: null },
     { id: "volunteers", label: "מתנדבים", page: null }
@@ -83,8 +87,9 @@ const DASHBOARD_ACTIONS_BY_ID = Object.fromEntries(
 
 const DASHBOARD_SUMMARY_LABELS = [
     { id: "pending-requests", label: "בקשות ממתינות" },
-    { id: "open-activities", label: "פעילויות פתוחות" },
-    { id: "sent-messages", label: "הודעות שנשלחו" }
+    { id: "new-cancellations", label: "ביטולים חדשים" },
+    { id: "new-inquiries", label: "פניות חדשות" },
+    { id: "open-activities", label: "פעילויות פתוחות" }
 ];
 
 const SUBPAGE_TITLES = {
@@ -93,6 +98,7 @@ const SUBPAGE_TITLES = {
     programs: "ניהול תוכניות",
     manageParticipants: "ניהול משתתפים",
     registrations: "צפייה בבקשות",
+    inquiries: "פניות",
     cancellations: "ניהול ביטולים",
     messages: "שליחת הודעות",
     attendance: "בדיקת נוכחות"
@@ -294,6 +300,17 @@ function StaffDashboard({ onLogout }) {
         );
     }
 
+    function goToInquiries(inquiry = null) {
+        const page = getStaffInquiriesRoute();
+
+        setCurrentPage(page);
+        pushStaffPage(page, buildInquiryNavigationState(inquiry?.id));
+        staffNavStackRef.current = pushStaffNavStack(
+            staffNavStackRef.current,
+            page
+        );
+    }
+
     function handleReturnToDashboardAfterComplete() {
         setDashboardSuccessMessage("הרישום הושלם בהצלחה");
         goToPage("dashboard");
@@ -396,6 +413,12 @@ function StaffDashboard({ onLogout }) {
                         <ManageCancellations />
                     </div>
                 );
+            case "inquiries":
+                return (
+                    <div data-dashboard-page="inquiries">
+                        {renderPlaceholderPage(SUBPAGE_TITLES.inquiries)}
+                    </div>
+                );
             case "messages":
                 return (
                     <div data-dashboard-page="messages">
@@ -435,12 +458,14 @@ function StaffDashboard({ onLogout }) {
         }
 
         switch (summaryId) {
-            case "open-activities":
-                return dashboardOverview.upcomingActivityCount;
             case "pending-requests":
                 return dashboardOverview.pendingCount;
-            case "sent-messages":
-                return dashboardOverview.sentMessageCount;
+            case "new-cancellations":
+                return dashboardOverview.cancellationCount;
+            case "new-inquiries":
+                return dashboardOverview.inquiryCount;
+            case "open-activities":
+                return dashboardOverview.upcomingActivityCount;
             default:
                 return "—";
         }
@@ -558,6 +583,7 @@ function StaffDashboard({ onLogout }) {
                             onNavigate={handleDashboardAction}
                             onCompleteRegistration={goToCompleteRegistration}
                             onManageCancellation={goToManageCancellation}
+                            onHandleInquiry={goToInquiries}
                         />
                         </main>
                     </div>
