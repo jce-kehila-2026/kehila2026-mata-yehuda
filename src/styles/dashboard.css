@@ -429,9 +429,9 @@
   background: var(--color-bg);
   border: 1.5px solid var(--color-card-border);
   border-radius: var(--radius);
-  padding: 0.85rem 0.9rem 0.75rem;
+  padding: 0.65rem 0.85rem 0.55rem;
   box-shadow: 0 2px 8px rgba(0, 0, 0, 0.04);
-  min-height: 168px;
+  min-height: 136px;
   height: 100%;
   transition:
     transform 0.2s ease,
@@ -448,9 +448,9 @@
   font-size: 1rem;
   font-weight: 700;
   color: var(--color-primary);
-  margin: 0 0 0.45rem;
+  margin: 0 0 0.3rem;
   line-height: 1.25;
-  padding-bottom: 0.35rem;
+  padding-bottom: 0.25rem;
   border-bottom: 1px solid var(--color-border);
   flex-shrink: 0;
 }
@@ -459,13 +459,14 @@
   display: flex;
   flex-direction: column;
   flex: 1;
-  min-height: 72px;
+  min-height: 48px;
+  gap: 0.25rem;
   justify-content: flex-start;
 }
 
 .staff-dashboard-panel__count {
-  margin: 0 0 0.4rem;
-  font-size: 1.65rem;
+  margin: 0;
+  font-size: 1.45rem;
   font-weight: 700;
   line-height: 1;
   color: var(--color-primary);
@@ -473,8 +474,7 @@
 }
 
 .staff-dashboard-panel__count--compact {
-  font-size: 1.1rem;
-  margin-bottom: 0.4rem;
+  font-size: 1rem;
 }
 
 .staff-dashboard-panel__list {
@@ -483,16 +483,16 @@
   padding: 0;
   display: flex;
   flex-direction: column;
-  gap: 0.4rem;
-  flex: 1;
+  gap: 0.28rem;
+  flex: 0 1 auto;
   min-height: 0;
 }
 
 .staff-dashboard-panel__item {
   display: flex;
   flex-direction: column;
-  gap: 0.1rem;
-  padding-bottom: 0.4rem;
+  gap: 0.08rem;
+  padding-bottom: 0.28rem;
   border-bottom: 1px solid var(--color-border);
   min-width: 0;
 }
@@ -547,7 +547,7 @@
 }
 
 .staff-dashboard-panel--calendar .staff-dashboard-panel__body {
-  gap: 0.55rem;
+  gap: 0.4rem;
 }
 
 .staff-dashboard-calendar__nav {
@@ -713,9 +713,9 @@
 .staff-dashboard-calendar__next {
   display: flex;
   flex-direction: column;
-  gap: 0.12rem;
-  margin-top: 0.35rem;
-  padding-top: 0.55rem;
+  gap: 0.08rem;
+  margin-top: 0.2rem;
+  padding-top: 0.4rem;
   border-top: 1px solid var(--color-border);
 }
 
@@ -915,23 +915,20 @@
 
 .staff-dashboard-panel__loading {
   margin: 0;
-  font-size: 0.95rem;
-  line-height: 1.5;
+  font-size: 0.9rem;
+  line-height: 1.4;
   color: var(--color-text);
-  flex: 1;
 }
 
 .staff-dashboard-panel__empty-state {
   display: flex;
-  flex-direction: column;
   align-items: center;
   justify-content: center;
   text-align: center;
-  gap: 0.35rem;
-  flex: 1;
-  margin: auto 0;
-  padding: 0.65rem 0.5rem;
-  min-height: 64px;
+  flex: 0 0 auto;
+  margin: 0;
+  padding: 0.3rem 0.5rem;
+  min-height: 2rem;
   width: 100%;
   background: var(--color-accent-light);
   border: 1px dashed var(--color-border);
@@ -939,28 +936,12 @@
 }
 
 .staff-dashboard-panel__empty-icon-wrap {
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  width: 40px;
-  height: 40px;
-  border-radius: 50%;
-  background: var(--color-bg);
-  border: 1px solid var(--color-card-border);
-}
-
-.staff-dashboard-panel__empty-icon {
-  width: 22px;
-  height: 22px;
-  color: #2d7d46;
-  stroke: #2d7d46;
-  opacity: 0.85;
-  flex-shrink: 0;
+  display: none;
 }
 
 .staff-dashboard-panel__empty-text {
   margin: 0;
-  font-size: 0.84rem;
+  font-size: 0.82rem;
   font-weight: 600;
   line-height: 1.35;
   color: var(--color-text-muted, #5c5c5c);
@@ -968,20 +949,21 @@
 
 .staff-dashboard-panel__footer {
   margin-top: auto;
-  padding-top: 0.65rem;
+  padding-top: 0.45rem;
+  flex-shrink: 0;
 }
 
 .staff-dashboard-panel__link {
   width: 100%;
   font-family: var(--staff-font-family);
-  font-size: 0.9rem;
+  font-size: 0.875rem;
   font-weight: 600;
   text-align: center;
   color: var(--color-primary);
   background: var(--color-accent-light);
   border: 1.5px solid var(--color-border);
   border-radius: calc(var(--radius) * 0.75);
-  padding: 0.5rem 0.75rem;
+  padding: 0.38rem 0.65rem;
   cursor: pointer;
   transition:
     background 0.2s ease,
@@ -1850,7 +1832,7 @@
   }
 
   .staff-dashboard-panel {
-    min-height: 158px;
+    min-height: 128px;
     height: 100%;
     overflow: visible;
   }
@@ -1923,7 +1905,7 @@
   }
 
   .staff-dashboard-panel {
-    min-height: 200px;
+    min-height: 160px;
   }
 }
 
@@ -1969,62 +1951,58 @@
   }
 
   .staff-dashboard-panel {
-    min-height: 168px;
+    min-height: 136px;
     max-height: none;
     height: 100%;
     overflow: visible;
-    padding: 0.8rem 0.85rem 0.7rem;
+    padding: 0.65rem 0.8rem 0.55rem;
   }
 
   .staff-dashboard-panel__body {
     overflow: visible;
+    min-height: 44px;
+    gap: 0.28rem;
   }
 
   .staff-dashboard-panel__title {
-    font-size: 1.15rem;
-    margin-bottom: 0.55rem;
-    padding-bottom: 0.45rem;
+    font-size: 1.05rem;
+    margin-bottom: 0.35rem;
+    padding-bottom: 0.3rem;
   }
 
   .staff-dashboard-panel__count {
-    font-size: 1.75rem;
-    margin-bottom: 0.5rem;
+    font-size: 1.5rem;
   }
 
   .staff-dashboard-panel__list {
-    gap: 0.5rem;
+    gap: 0.32rem;
     overflow: visible;
   }
 
   .staff-dashboard-panel__item-name {
-    font-size: 0.95rem;
-  }
-
-  .staff-dashboard-panel__item-meta {
-    font-size: 0.85rem;
-  }
-
-  .staff-dashboard-panel__empty-state {
-    min-height: 72px;
-    padding: 0.5rem;
-  }
-
-  .staff-dashboard-panel__empty-icon {
-    width: 26px;
-    height: 26px;
-  }
-
-  .staff-dashboard-panel__empty-text {
     font-size: 0.92rem;
   }
 
+  .staff-dashboard-panel__item-meta {
+    font-size: 0.82rem;
+  }
+
+  .staff-dashboard-panel__empty-state {
+    min-height: 2rem;
+    padding: 0.3rem 0.5rem;
+  }
+
+  .staff-dashboard-panel__empty-text {
+    font-size: 0.84rem;
+  }
+
   .staff-dashboard-panel__footer {
-    padding-top: 0.65rem;
+    padding-top: 0.45rem;
   }
 
   .staff-dashboard-panel__link {
-    font-size: 0.9rem;
-    padding: 0.5rem 0.75rem;
+    font-size: 0.875rem;
+    padding: 0.38rem 0.65rem;
   }
 }
 

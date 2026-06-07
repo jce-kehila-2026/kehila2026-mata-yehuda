@@ -1,4 +1,3 @@
-import { Check, ClipboardList, Mail, Undo2 } from "lucide-react";
 import { formatCancellationDate } from "../cancellations/helpers/cancellationHelpers";
 import { getRequestProgramLabel } from "../../services/dashboardService";
 import { formatInquiryDate } from "../../services/inquiryService";
@@ -16,15 +15,9 @@ const PANEL_PREVIEW_LIMIT = 3;
 const PENDING_REQUESTS_PREVIEW_LIMIT = 2;
 const INQUIRIES_PREVIEW_LIMIT = 2;
 
-function DashboardPanelEmpty({ message, icon: EmptyIcon = Check }) {
+function DashboardPanelEmpty({ message }) {
     return (
         <div className="staff-dashboard-panel__empty-state">
-            <span className="staff-dashboard-panel__empty-icon-wrap" aria-hidden="true">
-                <EmptyIcon
-                    className="staff-dashboard-panel__empty-icon"
-                    strokeWidth={2}
-                />
-            </span>
             <p className="staff-dashboard-panel__empty-text">{message}</p>
         </div>
     );
@@ -89,10 +82,7 @@ function DashboardControlPanels({
                         <>
                             <p className="staff-dashboard-panel__count">{pendingCount}</p>
                             {pendingRequests.length === 0 ? (
-                                <DashboardPanelEmpty
-                                    message="אין בקשות ממתינות"
-                                    icon={ClipboardList}
-                                />
+                                <DashboardPanelEmpty message="אין בקשות ממתינות" />
                             ) : (
                                 <ul className="staff-dashboard-panel__list">
                                     {pendingRequests.map((request) => {
@@ -153,10 +143,7 @@ function DashboardControlPanels({
                         <>
                             <p className="staff-dashboard-panel__count">{inquiryCount}</p>
                             {recentInquiries.length === 0 ? (
-                                <DashboardPanelEmpty
-                                    message="אין פניות חדשות"
-                                    icon={Mail}
-                                />
+                                <DashboardPanelEmpty message="אין פניות חדשות" />
                             ) : (
                                 <ul className="staff-dashboard-panel__list">
                                     {recentInquiries.map((inquiry) => {
@@ -219,10 +206,7 @@ function DashboardControlPanels({
                                 {cancellationCount} ביטולים
                             </p>
                         ) : (
-                            <DashboardPanelEmpty
-                                message="אין ביטולים חדשים"
-                                icon={Undo2}
-                            />
+                            <DashboardPanelEmpty message="אין ביטולים חדשים" />
                         )
                     ) : (
                         <>
