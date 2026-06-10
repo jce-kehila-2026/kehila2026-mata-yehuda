@@ -1,69 +1,51 @@
-import {
-  collection,
-  getDocs,
-  addDoc,
-  query,
-  where,
-  serverTimestamp,
-} from "firebase/firestore";
+export {
+  ACTIVITY_DATE_MISMATCH_WARNING,
+  formatActivityDisplayDate,
+  formatActivityNameLabel,
+  formatActivityOptionLabel,
+  getActivitiesByDate,
+  getActivityDate,
+  getActivityLocation,
+  getActivityTime,
+  filterActivities,
+} from "./attendance/attendanceHelpers";
 
-import { db } from "../config/firebase";
+export {
+  createAttendanceCaches,
+  getAllActivities,
+  getAttendanceRecords,
+  getConfirmedRegistrationsByActivity,
+  getExistingAttendanceForRegistrations,
+  loadParticipantsForActivities,
+  saveAttendanceRecords,
+} from "./attendance/attendanceQueries";
 
-export const getActivitiesBySearch = async (activityName, selectedDate) => {
-  const activitiesRef = collection(db, "activities");
-  const conditions = [];
+export {
+  buildParticipantAttendanceRecords,
+  calculateAttendancePercentage,
+  formatAttendancePercentage,
+  getActivityAttendanceStats,
+  getAttendanceSummary,
+  getGlobalAttendanceSummary,
+  hasMeaningfulAttendanceData,
+} from "./attendance/attendanceStatistics";
 
-  if (activityName !== "") {
-    conditions.push(where("name", "==", activityName));
-  }
+export {
+  TOP_REGISTERED_LIMIT_OPTIONS,
+  buildDashboardInsights,
+  getMostRegisteredActivity,
+  getTopAttendanceActivity,
+  getTopRegisteredActivities,
+  loadActivityAttendanceDetails,
+  loadActivityDetailsMode,
+  loadAttendanceDashboardData,
+  loadAttendanceRecordsPageData,
+  loadDailyAttendanceSummary,
+  loadGlobalAttendanceDashboard,
+} from "./attendance/attendanceDashboard";
 
-  if (selectedDate !== "") {
-    conditions.push(where("start_date", "==", selectedDate));
-  }
-
-  const q =
-    conditions.length > 0 ? query(activitiesRef, ...conditions) : activitiesRef;
-
-  const snapshot = await getDocs(q);
-
-  return snapshot.docs.map((doc) => ({
-    id: doc.id,
-    ...doc.data(),
-  }));
-};
-
-export const getConfirmedRegistrationsByActivity = async (activityId) => {
-  const registrationsRef = collection(db, "registrations");
-
-  const q = query(
-    registrationsRef,
-    where("activityId", "==", activityId),
-    where("registrationStatus", "==", "confirmed")
-  );
-
-  const snapshot = await getDocs(q);
-
-  return snapshot.docs.map((doc) => ({
-    registrationId: doc.id,
-    ...doc.data(),
-    status: "",
-  }));
-};
-
-export const saveAttendanceRecords = async (
-  attendanceRows,
-  selectedDate,
-  staffId
-) => {
-  for (const row of attendanceRows) {
-    await addDoc(collection(db, "attendance"), {
-      registrationId: row.registrationId,
-      participantId: row.participantId,
-      activityId: row.activityId,
-      attendanceDate: selectedDate,
-      status: row.status,
-      recordedByStaffId: staffId,
-      createdAt: serverTimestamp(),
-    });
-  }
-};
+export { getAllActivities as getActivities } from "./attendance/attendanceQueries";
+export {
+  getConfirmedRegistrationsByActivity as getRegistrationsByActivityId,
+} from "./attendance/attendanceQueries";
+export { saveAttendanceRecords as saveAttendance } from "./attendance/attendanceQueries";
