@@ -3,15 +3,16 @@ import ProgramCard from "../components/ProgramCard";
 import { getAllPrograms } from "../services/programService";
 import RequestBox from "../components/RequestBox";
 import { useNavigate } from "react-router-dom";
-import ActivityCalendar from "../components/ActivityCalendar";
-import { getAllActivities } from "../services/activitiesService";
+import DayCenterRegisterForm from "../components/DayCenterRegisterForm";
+import VolunteerForm from "../components/VolunteerForm";
 
 function Home() {
   const [programs, setPrograms] = useState([]);
   const [showLoginOptions ,setShowLoginOptions]=useState(false);
   const [loading, setLoading] = useState(true);
   const navigate = useNavigate();
-  const [activities, setActivities] = useState([]);
+  const [showDayCenterForm, setShowDayCenterForm] = useState(false);
+  const [showVolunteerForm, setShowVolunteerForm] = useState(false);
 
   useEffect(() => {
     async function loadPrograms() {
@@ -28,9 +29,6 @@ function Home() {
       });
 
       setPrograms(sortedData);
-
-      const activitiesData = await getAllActivities();
-      setActivities(activitiesData);
       
       setLoading(false);
 
@@ -40,24 +38,40 @@ function Home() {
   }, []);
 
   return (
-   
-    <div className="home-page">
-       <div className="login-area"> 
-       
-        <button onClick={()=> setShowLoginOptions(!showLoginOptions)}>התחברות</button>
-        {
-          showLoginOptions &&(
+      <div className="home-page">
+      <div className="home-header">
+        <div className="brand-area">
+          <img src="/images/logo.png" alt="לוגו העמותה" className="brand-logo" />
+        </div>
+
+        <div className="login-area">
+          <button onClick={() => setShowLoginOptions(!showLoginOptions)}>
+            התחברות
+          </button>
+
+          {showLoginOptions && (
             <div className="login-box">
               <button>מנהל</button>
               <button>מתנדב</button>
             </div>
-          )
-        }
+          )}
+        </div>
       </div>
-      <h1>פעילויות</h1>
-      
-      {loading && <p>טוען פעילויות...</p>}
+      <div className="hero-section">
+          <h1 className="hero-title">
+            עמותת ותיקי מטה יהודה
+          </h1>
 
+          <p className="hero-description">
+            קהילה, תמיכה ואיכות חיים לוותיקי המועצה
+          </p>
+
+      </div> 
+      <h1 className="page-title">השירותים שלנו</h1>
+
+      {loading && <p>טוען תוכניות...</p>}
+      
+      <div className="programs-grid">
       {programs.map((program) => {
         let buttons;
 
@@ -71,8 +85,8 @@ function Home() {
         else if (program.id === "day_center" ) {
           buttons = (
             <>
-              <button>הרשמה</button>
-              <button>התנדב</button>
+              <button onClick={() => setShowDayCenterForm(true)}>הרשמה</button>
+              <button onClick={()=> setShowVolunteerForm(true)}>התנדב</button>
             </>
           );
         } else {
@@ -87,11 +101,25 @@ function Home() {
           />
         );
       })}
-
+      </div>
       <RequestBox />
-      <ActivityCalendar activities={activities} />
+      {/* <ActivityCalendar activities={activities} /> */}
 
+      {showDayCenterForm && (
+         <DayCenterRegisterForm
+          onClose={() => setShowDayCenterForm(false)}
+         />
+      )}
+      {showVolunteerForm && (
+         <VolunteerForm
+          onClose={() => setShowVolunteerForm(false)}
+        />
+      )}
+      <footer className="footer">
+        <p>📞 04-1234567 | ✉️ info@shalva.org.il</p>
+      </footer>
     </div>
+    
   );
 }
 

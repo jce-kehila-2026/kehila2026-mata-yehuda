@@ -1,19 +1,23 @@
 @import url("https://fonts.googleapis.com/css2?family=Heebo:wght@400;500;600;700&display=swap");
+
 @import url("./style/Home.css");
-@import url("./style/RequestBox.css");
 @import url("./style/Plus60Page.css");
+@import url("./style/RequestBox.css");
+@import url("./style/ProgramCard.css");
+@import url("./style/ActivityCard.css");
+@import url("./style/Form.css");
 
 :root {
   --color-bg: #ffffff;
   --color-primary: #2d7d46;
   --color-primary-hover: #236b38;
-  --color-accent-light: #faf4ec;
+  --color-accent-light: #f4f1ed;
   --color-border: #e5c29f;
   --color-card-border: #e8e2dc;
   --color-text: #1f1f1f;
   --color-muted: #444444;
   --radius: 18px;
-  --max-width: 760px;
+  --max-width: 1200px;
 }
 
 body {
@@ -42,4 +46,10 @@ button {
 button:hover,
 button:active {
   background: var(--color-primary-hover);
+}
+#root {
+  width: 100%;
+  min-height: 100vh;
+  margin: 0;
+  padding: 0;
 }
