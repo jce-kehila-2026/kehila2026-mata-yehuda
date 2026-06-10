@@ -1000,6 +1000,47 @@ app.post("/save-bit-payment", async (req, res) => {
 });
 
 // =========================
+// Check participant by ID (registration start)
+// =========================
+
+app.post("/check-participant", async (req, res) => {
+  try {
+    const idNumber = String(req.body.idNumber || "").trim();
+
+    if (!idNumber) {
+      return res.status(400).json({
+        success: false,
+        message: "חסר מספר תעודת זהות",
+      });
+    }
+
+    const participant = await findParticipantByIdNumber(idNumber);
+
+    if (!participant) {
+      return res.json({
+        success: true,
+        exists: false,
+      });
+    }
+
+    res.json({
+      success: true,
+      exists: true,
+      participant: {
+        firstName: participant.data.first_name || "",
+        phone: participant.data.phone || "",
+      },
+    });
+  } catch (error) {
+    console.error(error);
+    res.status(500).json({
+      success: false,
+      message: serverErrorMessage(error, "שגיאה בבדיקת תעודת זהות"),
+    });
+  }
+});
+
+// =========================
 // Find active registration (for cancel button recovery)
 // =========================
 

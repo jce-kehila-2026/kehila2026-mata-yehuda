@@ -620,6 +620,17 @@
   font-weight: 600;
 }
 
+.supportive-community-page .id-readonly {
+  margin: 0;
+  padding: 0.85rem 1rem;
+  border-radius: var(--radius);
+  background: var(--color-accent-light);
+  border: 1.5px solid var(--color-border);
+  font-weight: 700;
+  font-size: 1.15rem;
+  letter-spacing: 0.05em;
+}
+
 .supportive-community-page .payment-success-message {
   margin: 0 0 1rem;
 }

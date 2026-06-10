@@ -11,6 +11,7 @@ import {
 import { apiPost } from "../services/api";
 import { formatDisplayPrice } from "../services/formatPrice";
 import { notifyRegistrationBlock } from "../services/registrationErrors";
+import { checkParticipantByIdNumber } from "../services/participantService";
 
 const EMPTY_FORM_DATA = {
   firstName: "",
@@ -52,6 +53,8 @@ function PaymentForm({
   const [lookupLoading, setLookupLoading] = useState(false);
   const [formError, setFormError] = useState("");
   const [isSubmitting, setIsSubmitting] = useState(false);
+  const [isCheckingId, setIsCheckingId] = useState(false);
+  const [idCheckMessage, setIdCheckMessage] = useState("");
   const [formData, setFormData] = useState(EMPTY_FORM_DATA);
 
   const successStep = REGISTRATION_STEPS.length;
@@ -105,9 +108,51 @@ function PaymentForm({
     });
   };
 
+  const goToIdCheckStep = () => {
+    setFormError("");
+    setIdCheckMessage("");
+    setCurrentStep(1);
+  };
+
   const goToDetailsStep = () => {
     setFormError("");
-    setCurrentStep(1);
+    setCurrentStep(2);
+  };
+
+  const verifyIdAndContinue = async () => {
+    setFormError("");
+    setIdCheckMessage("");
+
+    const idValidation = validateIsraeliId(formData.idNumber);
+    if (!idValidation.valid) {
+      setFormError(idValidation.message);
+      return;
+    }
+
+    setIsCheckingId(true);
+
+    try {
+      const data = await checkParticipantByIdNumber(idValidation.idNumber);
+
+      setFormData((prev) => ({
+        ...prev,
+        idNumber: idValidation.idNumber,
+        firstName: data.exists ? data.participant?.firstName || "" : "",
+        phone: data.exists ? data.participant?.phone || "" : "",
+      }));
+
+      setIdCheckMessage(
+        data.exists
+          ? "נמצאתם במערכת! אפשר לעדכן את הפרטים בשלב הבא."
+          : "מספר הת.ז. לא נמצא במערכת — נשלים פרטים אישיים.",
+      );
+      setCurrentStep(2);
+    } catch (error) {
+      console.error(error);
+      setFormError(error.message || "שגיאה בבדיקת תעודת זהות");
+    } finally {
+      setIsCheckingId(false);
+    }
   };
 
   const goToPaymentMethodStep = () => {
@@ -117,7 +162,7 @@ function PaymentForm({
       setFormError(validation.message);
       return;
     }
-    setCurrentStep(2);
+    setCurrentStep(3);
   };
 
   const goToPaymentStep = () => {
@@ -126,7 +171,7 @@ function PaymentForm({
       setFormError("אנא בחרו שיטת תשלום");
       return;
     }
-    setCurrentStep(3);
+    setCurrentStep(4);
   };
 
   const handlePayment = async (e) => {
@@ -317,6 +362,8 @@ function PaymentForm({
     setLookupRegistrations([]);
     setLookupCancelMessage("");
     setFormError("");
+    setIdCheckMessage("");
+    setIsCheckingId(false);
     localStorage.removeItem("firstName");
     localStorage.removeItem("idNumber");
     localStorage.removeItem("phone");
@@ -495,22 +542,10 @@ function PaymentForm({
 
         {currentStep === 1 && (
           <>
-            <h2 className="step-panel-title">פרטים אישיים</h2>
-            <p className="step-panel-hint">הזינו את הפרטים של המשתתף/ת</p>
-
-            <div className="form-field">
-              <label className="form-label" htmlFor="firstName">
-                שם פרטי
-              </label>
-              <input
-                id="firstName"
-                type="text"
-                name="firstName"
-                placeholder="לדוגמה: יוסי"
-                value={formData.firstName}
-                onChange={handleChange}
-              />
-            </div>
+            <h2 className="step-panel-title">זיהוי לפי ת.ז.</h2>
+            <p className="step-panel-hint">
+              הזינו את מספר תעודת הזהות — נבדוק אם אתם כבר רשומים במערכת
+            </p>
 
             <div className="form-field">
               <label className="form-label" htmlFor="idNumber">
@@ -525,6 +560,52 @@ function PaymentForm({
                 onChange={handleChange}
                 maxLength={9}
                 inputMode="numeric"
+                disabled={isCheckingId}
+              />
+            </div>
+
+            {idCheckMessage && (
+              <p className="lookup-success" role="status">
+                {idCheckMessage}
+              </p>
+            )}
+
+            <div className="community-actions form-actions">
+              <button
+                type="button"
+                className="primary-btn"
+                onClick={verifyIdAndContinue}
+                disabled={isCheckingId}
+              >
+                {isCheckingId ? "בודק..." : "המשך"}
+              </button>
+            </div>
+          </>
+        )}
+
+        {currentStep === 2 && (
+          <>
+            <h2 className="step-panel-title">פרטים אישיים</h2>
+            <p className="step-panel-hint">השלימו או עדכנו את הפרטים של המשתתף/ת</p>
+
+            <div className="form-field">
+              <label className="form-label">מספר תעודת זהות</label>
+              <p className="id-readonly" dir="ltr">
+                {formData.idNumber}
+              </p>
+            </div>
+
+            <div className="form-field">
+              <label className="form-label" htmlFor="firstName">
+                שם פרטי
+              </label>
+              <input
+                id="firstName"
+                type="text"
+                name="firstName"
+                placeholder="לדוגמה: יוסי"
+                value={formData.firstName}
+                onChange={handleChange}
               />
             </div>
 
@@ -544,7 +625,10 @@ function PaymentForm({
               />
             </div>
 
-            <div className="community-actions form-actions">
+            <div className="community-actions form-actions form-actions--split">
+              <button type="button" className="secondary-btn" onClick={goToIdCheckStep}>
+                חזרה
+              </button>
               <button type="button" className="primary-btn" onClick={goToPaymentMethodStep}>
                 המשך
               </button>
@@ -552,7 +636,7 @@ function PaymentForm({
           </>
         )}
 
-        {currentStep === 2 && (
+        {currentStep === 3 && (
           <>
             <h2 className="step-panel-title">אמצעי תשלום</h2>
             <p className="step-panel-hint">בחרו כיצד תשלמו</p>
@@ -591,12 +675,16 @@ function PaymentForm({
           </>
         )}
 
-        {currentStep === 3 && (
+        {currentStep === 4 && (
           <>
             <h2 className="step-panel-title">אישור ותשלום</h2>
             <p className="step-panel-hint">בדקו את הפרטים ולחצו להשלמה</p>
 
             <dl className="payment-summary">
+              <div className="payment-summary__row">
+                <dt>ת.ז.</dt>
+                <dd dir="ltr">{formData.idNumber}</dd>
+              </div>
               <div className="payment-summary__row">
                 <dt>שם</dt>
                 <dd>{formData.firstName}</dd>
@@ -626,7 +714,7 @@ function PaymentForm({
                 className="secondary-btn"
                 onClick={() => {
                   setFormError("");
-                  setCurrentStep(2);
+                  setCurrentStep(3);
                 }}
               >
                 חזרה

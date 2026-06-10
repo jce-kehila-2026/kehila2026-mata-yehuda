@@ -1,4 +1,5 @@
 export const REGISTRATION_STEPS = [
+  { id: "id-check", label: "ת.ז." },
   { id: "details", label: "פרטים אישיים" },
   { id: "payment-method", label: "אמצעי תשלום" },
   { id: "payment", label: "תשלום" },
