@@ -4,9 +4,9 @@ import PaymentSuccessMessage from "../components/PaymentSuccessMessage";
 import RegistrationStepper, {
   REGISTRATION_STEPS,
 } from "../components/RegistrationStepper";
-import { API_BASE } from "../services/api";
-import { getStoredRegistrationPaymentPath } from "../services/paymentLink";
-import { notifyRegistrationBlock } from "../services/registrationErrors";
+import { API_BASE } from "../../services/Payment/api";
+import { getStoredRegistrationPaymentPath } from "../../services/Payment/paymentLink";
+import { notifyRegistrationBlock } from "../../services/Payment/registrationErrors";
 
 function PaymentSuccess() {
   const navigate = useNavigate();

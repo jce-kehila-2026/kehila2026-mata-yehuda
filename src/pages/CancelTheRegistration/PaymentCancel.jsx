@@ -1,5 +1,5 @@
 import { useNavigate } from "react-router-dom";
-import { getStoredRegistrationPaymentPath } from "../services/paymentLink";
+import { getStoredRegistrationPaymentPath } from "../../services/Payment/paymentLink";
 
 function PaymentCancel() {
   const navigate = useNavigate();

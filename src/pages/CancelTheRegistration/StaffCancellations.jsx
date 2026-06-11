@@ -1,5 +1,5 @@
 import { useState } from "react";
-import { API_BASE } from "../services/api";
+import { API_BASE } from "../../services/Payment/api";
 const STAFF_PIN_KEY = "staffPin";
 
 function StaffCancellations() {

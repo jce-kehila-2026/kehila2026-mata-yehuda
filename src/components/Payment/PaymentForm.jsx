@@ -1,17 +1,17 @@
 import { useState } from "react";
 import { useNavigate } from "react-router-dom";
-import CancelRegistrationButton from "./CancelRegistrationButton";
+import CancelRegistrationButton from "../CancelTheRegistration/CancelRegistrationButton";
 import PaymentSuccessMessage from "./PaymentSuccessMessage";
 import RegistrationStepper, { REGISTRATION_STEPS } from "./RegistrationStepper";
 import {
   validateIsraeliId,
   validateRegistrationDetails,
   validateRegistrationForm,
-} from "../services/validation";
-import { apiPost } from "../services/api";
-import { formatDisplayPrice } from "../services/formatPrice";
-import { notifyRegistrationBlock } from "../services/registrationErrors";
-import { checkParticipantByIdNumber } from "../services/participantService";
+} from "../../services/validation";
+import { apiPost } from "../../services/Payment/api";
+import { formatDisplayPrice } from "../../services/Payment/formatPrice";
+import { notifyRegistrationBlock } from "../../services/Payment/registrationErrors";
+import { checkParticipantByIdNumber } from "../../services/Payment/participantService";
 
 const EMPTY_FORM_DATA = {
   firstName: "",

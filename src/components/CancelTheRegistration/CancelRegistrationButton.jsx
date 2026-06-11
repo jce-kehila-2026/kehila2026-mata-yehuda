@@ -1,5 +1,5 @@
 import { useState } from "react";
-import { apiPost } from "../services/api";
+import { apiPost } from "../../services/Payment/api";
 
 function CancelRegistrationButton({
   paymentId,

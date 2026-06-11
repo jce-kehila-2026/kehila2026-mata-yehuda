@@ -1,10 +1,10 @@
 import { useEffect, useState } from "react";
 import { useNavigate, useSearchParams } from "react-router-dom";
 import PaymentForm from "../components/PaymentForm";
-import { apiGet } from "../services/api";
-import { formatDisplayPrice } from "../services/formatPrice";
-import { buildActivityPaymentPath } from "../services/paymentLink";
-import { notifyRegistrationBlock } from "../services/registrationErrors";
+import { apiGet } from "../../services/Payment/api";
+import { formatDisplayPrice } from "../../services/Payment/formatPrice";
+import { buildActivityPaymentPath } from "../../services/Payment/paymentLink";
+import { notifyRegistrationBlock } from "../../services/Payment/registrationErrors";
 
 function PaymentPage() {
   const navigate = useNavigate();
