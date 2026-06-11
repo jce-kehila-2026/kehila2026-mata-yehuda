@@ -1,11 +1,12 @@
 @import url("https://fonts.googleapis.com/css2?family=Heebo:wght@400;500;600;700&display=swap");
-
 @import url("./style/Home.css");
 @import url("./style/Plus60Page.css");
 @import url("./style/RequestBox.css");
 @import url("./style/ProgramCard.css");
 @import url("./style/ActivityCard.css");
 @import url("./style/Form.css");
+@import url("./style/Calendar.css");
+@import url("./style/Calendar.css");
 
 :root {
   --color-bg: #ffffff;

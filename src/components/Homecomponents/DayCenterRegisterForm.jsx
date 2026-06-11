@@ -1,5 +1,5 @@
 import { useState } from "react";
-import { registerToDayCenter } from "../services/dayCenterService";
+import { registerToDayCenter } from "../../services/HomeServices/dayCenterService";
 
 function DayCenterRegisterForm({ onClose }) {
   const [firstName, setFirstName] = useState("");

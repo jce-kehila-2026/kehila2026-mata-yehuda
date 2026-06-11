@@ -1,5 +1,5 @@
 import { useState } from "react";
-import { addRequest } from "../services/requestsService";
+import { addRequest } from "../../services/HomeServices/requestsService";
 
 function RequestBox() {
   const [phone, setPhone] = useState("");

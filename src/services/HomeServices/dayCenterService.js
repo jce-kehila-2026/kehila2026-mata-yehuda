@@ -1,5 +1,5 @@
 import { collection, addDoc, serverTimestamp } from "firebase/firestore";
-import { db } from "../config/firebase";
+import { db } from "../../config/firebase";
 
 export async function registerToDayCenter(formData) {
   const participantDoc = await addDoc(collection(db, "participants"), {

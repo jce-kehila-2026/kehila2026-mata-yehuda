@@ -1,5 +1,5 @@
 import { collection, getDocs } from "firebase/firestore";
-import { db } from "../config/firebase";
+import { db } from "../../config/firebase";
 
 export async function getAllActivities() {
   const snapshot = await getDocs(collection(db, "activities"));

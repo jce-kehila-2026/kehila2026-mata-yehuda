@@ -1,7 +1,9 @@
-import Home from "./pages/Home";
+import Home from "./pages/HomePages/Home.jsx";
 import "./App.css";
 import { BrowserRouter, Routes, Route } from "react-router-dom";
-import Plus60Page from "./pages/Plus60Page.jsx";
+import Plus60Page from "./pages/HomePages/Plus60Page.jsx";
+import AboutPage from "./pages/HomePages/AboutPage.jsx";
+import ServicesPage from "./pages/ServicesPage";
 
 function App() {
    return (
@@ -9,6 +11,8 @@ function App() {
       <Routes>
         <Route path="/" element={<Home />} />
         <Route path="/plus60" element={<Plus60Page />} />
+        <Route path="/about" element={<AboutPage />} />
+        <Route path="/services" element={<ServicesPage />} /> 
       </Routes>
     </BrowserRouter>
   );

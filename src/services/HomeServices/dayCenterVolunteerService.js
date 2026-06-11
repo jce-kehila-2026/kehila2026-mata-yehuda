@@ -1,5 +1,5 @@
 import { collection, addDoc } from "firebase/firestore";
-import { db } from "../config/firebase";
+import { db } from "../../config/firebase";
 
 export async function registerVolunteer(formData) {
   await addDoc(collection(db, "daycenterVolunteers"), {

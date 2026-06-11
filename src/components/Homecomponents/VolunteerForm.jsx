@@ -1,5 +1,5 @@
 import { useState } from "react";
-import { registerVolunteer } from "../services/dayCenterVolunteerService";
+import { registerVolunteer } from "../../services/HomeServices/dayCenterVolunteerService";
 
 function VolunteerForm({ onClose }) {
   const [firstName, setFirstName] = useState("");

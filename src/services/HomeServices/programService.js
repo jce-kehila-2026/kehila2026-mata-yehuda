@@ -5,7 +5,7 @@ import {
   getDocs
 } from "firebase/firestore";
 
-import {db} from "../config/firebase"
+import {db} from "../../config/firebase"
 // programId = daycenter community
 export async function getProgramBYId(programId){
 // db--> programs-->programId="day_center"

@@ -28,7 +28,26 @@
 
 .program-buttons {
   display: flex;
-  justify-content: center;
+  flex-direction: column;
   gap: 10px;
   margin-top: 1rem;
+}
+
+.top-buttons {
+  display: flex;
+  gap: 10px;
+  margin-bottom: 10px;
+}
+
+.top-buttons button {
+  flex: 1;
+}
+
+.volunteer-btn {
+  width: 100%;
+  background: #6c757d;
+}
+
+.volunteer-btn:hover {
+  background: #5c636a;
 }
