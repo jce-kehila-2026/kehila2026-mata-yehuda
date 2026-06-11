@@ -3,7 +3,7 @@ import "./App.css";
 import { BrowserRouter, Routes, Route } from "react-router-dom";
 import Plus60Page from "./pages/HomePages/Plus60Page.jsx";
 import AboutPage from "./pages/HomePages/AboutPage.jsx";
-import ServicesPage from "./pages/ServicesPage";
+import ServicesPage from "./pages/HomePages/ServicesPage.jsx";
 
 function App() {
    return (
