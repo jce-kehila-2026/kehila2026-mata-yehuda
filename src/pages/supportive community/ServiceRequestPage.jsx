@@ -1,7 +1,7 @@
 import { useState } from "react";
-import CommunityMembershipCheck from "../components/supportiveCommunity/CommunityMembershipCheck";
-import ServiceRequestForm from "../components/supportiveCommunity/ServiceRequestForm";
-import "../styles/CommunityJoinForm.css";
+import CommunityMembershipCheck from "../../components/supportiveCommunity/CommunityMembershipCheck";
+import ServiceRequestForm from "../../components/supportiveCommunity/ServiceRequestForm";
+import "../../styles/supportive community/CommunityJoinForm.css";
 
 function ServiceRequestPage() {
   const [verifiedParticipantId, setVerifiedParticipantId] = useState(null);

@@ -1,6 +1,6 @@
-import VolunteerRegistrationForm from "../components/volunteer/VolunteerRegistrationForm";
-import "../styles/SupportiveCommunityPage.css";
-import "../styles/CommunityJoinForm.css";
+import VolunteerRegistrationForm from "../../components/volunteer supportive community/VolunteerRegistrationForm";
+import "../../styles/supportive community/SupportiveCommunityPage.css";
+import "../../styles/supportive community/CommunityJoinForm.css";
 
 function VolunteerRegistrationPage() {
   return (

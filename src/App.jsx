@@ -1,5 +1,5 @@
 import { BrowserRouter, Routes, Route } from "react-router-dom";
-import supportiveCommunityRoutes from "./routes/supportiveCommunityRoutes";
+import supportiveCommunityRoutes from "./routes/supportive community/supportiveCommunityRoutes";
 
 function App() {
   return (

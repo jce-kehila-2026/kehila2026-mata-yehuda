@@ -1,5 +1,5 @@
 import { doc, setDoc, getDoc, serverTimestamp } from "firebase/firestore";
-import { db } from "../config/firebase.js";
+import { db } from "../../config/firebase.js";
 
 export const checkIfVolunteerExists = async (id) => {
   const volunteerRef = doc(db, "volunteers", id);

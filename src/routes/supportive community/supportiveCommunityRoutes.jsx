@@ -1,9 +1,9 @@
 // routes/supportiveCommunityRoutes.jsx
 
-import SupportiveCommunityPage from "../pages/SupportiveCommunityPage";
-import CommunityJoinPage from "../pages/CommunityJoinPage";
-import ServiceRequestPage from "../pages/ServiceRequestPage";
-import VolunteerRegistrationPage from "../pages/VolunteerRegistrationPage";
+import SupportiveCommunityPage from "../../pages/supportive community/SupportiveCommunityPage";
+import CommunityJoinPage from "../../pages/supportive community/CommunityJoinPage";
+import ServiceRequestPage from "../../pages/supportive community/ServiceRequestPage";
+import VolunteerRegistrationPage from "../../pages/supportive community/VolunteerRegistrationPage";
 
 const supportiveCommunityRoutes = [
   {
