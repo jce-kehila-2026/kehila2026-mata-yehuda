@@ -1,5 +1,6 @@
 import { useState } from "react";
-import { checkCommunityMembership } from "../../services/staffManegmentServices/supportiveCommunityService";
+import { checkCommunityMembership } from "../../services/supportive community/supportiveCommunityService";
+
 
 function CommunityMembershipCheck({ onVerified }) {
   const [participantId, setParticipantId] = useState("");

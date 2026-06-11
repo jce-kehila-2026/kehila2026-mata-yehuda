@@ -1,5 +1,6 @@
 import { useEffect, useState } from "react";
-import { getActiveHelpTypes } from "../../services/staffManegmentServices/supportiveCommunityService";
+import { getActiveHelpTypes } from "../../services/supportive community/supportiveCommunityService";
+
 
 function HelpServicesSelector({
   selectedServices = [],
