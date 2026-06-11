@@ -1,3 +1,49 @@
+:root {
+  --color-bg: #ffffff;
+  --color-primary: #2d7d46;
+  --color-primary-hover: #236b38;
+  --color-accent-light: #f4f1ed;
+  --color-border: #e5c29f;
+  --color-card-border: #e8e2dc;
+  --color-text: #1f1f1f;
+  --color-muted: #444444;
+  --radius: 18px;
+  --max-width: 1200px;
+}
+
+body {
+  direction: rtl;
+  text-align: right;
+  font-family: "Heebo", system-ui, sans-serif;
+  background-color: #fcfbfa;
+  color: var(--color-text);
+  margin: 0;
+  padding: 0;
+}
+
+button {
+  font-family: "Heebo", system-ui, sans-serif;
+  font-size: 1.1rem;
+  font-weight: 700;
+  color: white;
+  background: var(--color-primary);
+  border: none;
+  border-radius: var(--radius);
+  padding: 0.75rem 1.2rem;
+  cursor: pointer;
+  transition: background 0.2s ease;
+}
+
+button:hover,
+button:active {
+  background: var(--color-primary-hover);
+}
+#root {
+  width: 100%;
+  min-height: 100vh;
+  margin: 0;
+  padding: 0;
+}
 .activities-container:not(.staff-grid):not(.activity-list) {
     display: grid;
     grid-template-columns: repeat(2, 1fr);
@@ -215,4 +261,5 @@
     .program-card__actions {
         justify-content: flex-start;
     }
+
 }
