@@ -5,14 +5,14 @@ import RequestCard from "../components/RequestCard";
 import {
   getAllRequests,
   markRequestAsAnswered,
-} from "../services/requestsService";
+} from "../services/ RespOneonRequest/requestsService";
 import "../styles/requests.css";
 import {
   buildWhatsAppUrl,
   isWhatsAppCapablePhone,
   sortAnsweredRequests,
   sortWaitingRequests,
-} from "../utils/formatters";
+} from "../utils/RespOneonRequest/formatters";
 
 const TAB = {
   waiting: "waiting",

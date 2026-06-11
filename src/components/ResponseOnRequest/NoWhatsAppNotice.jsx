@@ -1,4 +1,4 @@
-import { buildTelUrl, formatPhoneForDisplay } from "../utils/formatters";
+import { buildTelUrl, formatPhoneForDisplay } from "../../utils/RespOneonRequest/formatters";
 
 function NoWhatsAppNotice({ phone }) {
   const telUrl = buildTelUrl(phone);

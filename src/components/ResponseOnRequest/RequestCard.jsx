@@ -2,7 +2,7 @@ import NoWhatsAppNotice from "./NoWhatsAppNotice";
 import {
   formatDisplayDate,
   isWhatsAppCapablePhone,
-} from "../utils/formatters";
+} from "../../utils/RespOneonRequest/formatters";
 
 function RequestCard({
   request,
