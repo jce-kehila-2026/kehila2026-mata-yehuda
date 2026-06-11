@@ -1,4 +1,5 @@
 import { useNavigate } from "react-router-dom";
+import PublicParticipantLayout from "../layouts/PublicParticipantLayout";
 import "../styles/SupportiveCommunityPage.css";
 
 const FIXED_SERVICES = [
@@ -46,6 +47,7 @@ function SupportiveCommunityPage() {
   const navigate = useNavigate();
 
   return (
+    <PublicParticipantLayout>
     <div className="supportive-community-page" dir="rtl">
       <header className="community-hero">
         <div className="hero-inner">
@@ -171,6 +173,7 @@ function SupportiveCommunityPage() {
         </section>
       </main>
     </div>
+    </PublicParticipantLayout>
   );
 }
 

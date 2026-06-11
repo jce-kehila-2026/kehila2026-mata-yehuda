@@ -263,6 +263,20 @@ function shouldLogRegistrationLookup(participantId) {
     );
 }
 
+export async function fetchRegistrationsByParticipantId(participantId) {
+    const normalizedParticipantId = normalizeFirestoreId(participantId);
+
+    if (!normalizedParticipantId) {
+        return [];
+    }
+
+    const registrations = await fetchRegistrations();
+
+    return registrations.filter((registration) =>
+        registrationMatchesParticipantId(registration, normalizedParticipantId)
+    );
+}
+
 export async function getRegistrationByParticipantId(participantId) {
     const normalizedParticipantId = normalizeFirestoreId(participantId);
 

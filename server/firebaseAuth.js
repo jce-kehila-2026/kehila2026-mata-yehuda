@@ -2,7 +2,7 @@ import admin from "firebase-admin";
 
 let initialized = false;
 
-function initializeFirebaseAdmin() {
+export function initializeFirebaseAdmin() {
     if (initialized) {
         return;
     }
@@ -42,4 +42,36 @@ export async function verifyStaffIdToken(authorizationHeader) {
     }
 
     return admin.auth().verifyIdToken(idToken);
+}
+
+/**
+ * Verifies Firebase ID token and active staff document in Firestore.
+ */
+export async function verifyActiveStaffUser(authorizationHeader) {
+    const decoded = await verifyStaffIdToken(authorizationHeader);
+    const staffSnap = await admin
+        .firestore()
+        .collection("staff")
+        .doc(decoded.uid)
+        .get();
+
+    if (!staffSnap.exists() || staffSnap.data()?.is_active !== true) {
+        throw new Error("UNAUTHORIZED");
+    }
+
+    return {
+        uid: decoded.uid,
+        email: decoded.email || staffSnap.data()?.email || "",
+        staff: staffSnap.data()
+    };
+}
+
+export function getAdminFirestore() {
+    initializeFirebaseAdmin();
+    return admin.firestore();
+}
+
+export function getAdminMessaging() {
+    initializeFirebaseAdmin();
+    return admin.messaging();
 }

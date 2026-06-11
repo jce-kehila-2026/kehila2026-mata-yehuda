@@ -51,21 +51,20 @@ function countUpcomingActivities(activities) {
     ).length;
 }
 
-async function fetchSentMessagesSummary() {
-    const snapshot = await getDocs(collection(db, "messages"));
-    const messages = snapshot.docs
-        .map((messageDoc) => ({
-            id: messageDoc.id,
-            ...messageDoc.data()
+async function fetchSentNotificationsSummary() {
+    const snapshot = await getDocs(collection(db, "notifications_log"));
+    const notifications = snapshot.docs
+        .map((logDoc) => ({
+            id: logDoc.id,
+            ...logDoc.data()
         }))
-        .filter((message) => message.status === "sent")
         .sort(
-            (a, b) => getTimestampMillis(b.created_at) - getTimestampMillis(a.created_at)
+            (a, b) => getTimestampMillis(b.sentAt) - getTimestampMillis(a.sentAt)
         );
 
     return {
-        sentCount: messages.length,
-        latest: messages[0] || null
+        sentCount: notifications.length,
+        latest: notifications[0] || null
     };
 }
 
@@ -85,13 +84,13 @@ export function getRequestProgramLabel(request) {
 }
 
 export async function fetchDashboardOverview() {
-    const [pendingRequests, activities, cancellations, inquiries, messagesSummary] =
+    const [pendingRequests, activities, cancellations, inquiries, notificationsSummary] =
         await Promise.all([
             fetchInitialRegistrationRequests({ programFilter: "all" }),
             fetchActivities(),
             getCancellationRequests(),
             fetchOpenInquiries(),
-            fetchSentMessagesSummary()
+            fetchSentNotificationsSummary()
         ]);
 
     return {
@@ -104,7 +103,7 @@ export async function fetchDashboardOverview() {
         cancellationCount: cancellations.length,
         recentInquiries: inquiries.slice(0, 5),
         inquiryCount: inquiries.length,
-        sentMessageCount: messagesSummary.sentCount,
-        latestMessage: messagesSummary.latest
+        sentNotificationCount: notificationsSummary.sentCount,
+        latestNotification: notificationsSummary.latest
     };
 }

@@ -1,5 +1,5 @@
 {
-  "name": "matayehuda-whatsapp-server",
+  "name": "matayehuda-notification-server",
   "private": true,
   "type": "module",
   "scripts": {

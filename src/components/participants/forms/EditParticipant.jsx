@@ -251,7 +251,7 @@ function EditParticipant({
 
                 <div className="row checkbox-row">
                     <label htmlFor="edit-marketing-consent">
-                        אני מאשר/ת קבלת הודעות ועדכונים ב-WhatsApp
+                        אני מאשר/ת קבלת התראות ועדכונים
                     </label>
                     <input
                         id="edit-marketing-consent"

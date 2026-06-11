@@ -69,7 +69,7 @@ const DASHBOARD_ACTIONS = [
         label: "משתתפים",
         page: "manageParticipants"
     },
-    { id: "messages", label: "הודעות", page: "messages" },
+    { id: "messages", label: "התראות", page: "messages" },
     {
         id: "registrations",
         label: "בקשות",
@@ -100,7 +100,7 @@ const SUBPAGE_TITLES = {
     registrations: "צפייה בבקשות",
     inquiries: "פניות",
     cancellations: "ניהול ביטולים",
-    messages: "שליחת הודעות",
+    messages: "שליחת התראות",
     attendance: "בדיקת נוכחות"
 };
 

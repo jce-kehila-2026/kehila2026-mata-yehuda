@@ -21,7 +21,7 @@ export const REFUND_FILTERS = [
     { id: REFUND_FILTER_REJECTED, label: "נדחה" }
 ];
 
-export const WHATSAPP_REFUND_MESSAGE = `שלום,
+export const REFUND_CONTACT_MESSAGE = `שלום,
 אנו מטפלים בהחזר הכספי עבור ההרשמה שלך.
 ניצור איתך קשר להשלמת ההחזר.`;
 
@@ -165,7 +165,7 @@ export function buildPaymentDisplay(cancellation, payment) {
     };
 }
 
-export function normalizePhoneForWhatsApp(phone) {
+export function normalizePhoneForSms(phone) {
     const digits = String(phone || "").replace(/\D/g, "");
 
     if (!digits) {
@@ -173,26 +173,26 @@ export function normalizePhoneForWhatsApp(phone) {
     }
 
     if (digits.startsWith("972")) {
-        return digits;
+        return `+${digits}`;
     }
 
     if (digits.startsWith("0")) {
-        return `972${digits.slice(1)}`;
+        return `+972${digits.slice(1)}`;
     }
 
-    return digits;
+    return `+${digits}`;
 }
 
-export function buildWhatsAppRefundUrl(phone) {
-    const normalizedPhone = normalizePhoneForWhatsApp(phone);
+export function buildSmsRefundUrl(phone) {
+    const normalizedPhone = normalizePhoneForSms(phone);
 
     if (!normalizedPhone) {
         return "";
     }
 
-    const text = encodeURIComponent(WHATSAPP_REFUND_MESSAGE);
+    const text = encodeURIComponent(REFUND_CONTACT_MESSAGE);
 
-    return `https://wa.me/${normalizedPhone}?text=${text}`;
+    return `sms:${normalizedPhone}?body=${text}`;
 }
 
 export function isBitPaymentMethod(paymentMethod) {

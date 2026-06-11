@@ -81,11 +81,11 @@ export function buildRecentUpdates(overview) {
 
     const items = [];
 
-    if (overview.latestMessage) {
+    if (overview.latestNotification) {
         items.push({
-            id: `message-${overview.latestMessage.id ?? "latest"}`,
-            title: "נשלחה הודעה למשתתפים",
-            timestamp: overview.latestMessage.created_at,
+            id: `notification-${overview.latestNotification.id ?? "latest"}`,
+            title: "נשלחה התראה למשתתפים",
+            timestamp: overview.latestNotification.sentAt,
             page: "messages"
         });
     }

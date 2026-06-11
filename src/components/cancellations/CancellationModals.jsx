@@ -2,7 +2,7 @@ import { useEffect, useState } from "react";
 import RefundForm from "./forms/RefundForm";
 import FormActionRow from "../shared/FormActionRow";
 import {
-    buildWhatsAppRefundUrl,
+    buildSmsRefundUrl,
     formatCancellationDate,
     formatPaymentAmount,
     formatPaymentMethodLabel,
@@ -20,8 +20,8 @@ function CancellationDetailModal({ item, onClose }) {
 
     const { cancellation, paymentDisplay, phone } = item;
     const paymentMethod = paymentDisplay?.payment_method || "";
-    const whatsAppUrl = isBitPaymentMethod(paymentMethod)
-        ? buildWhatsAppRefundUrl(phone)
+    const smsUrl = isBitPaymentMethod(paymentMethod)
+        ? buildSmsRefundUrl(phone)
         : "";
 
     return (
@@ -88,15 +88,13 @@ function CancellationDetailModal({ item, onClose }) {
                             <strong>הערות החזר:</strong> {cancellation.refund_notes}
                         </p>
                     )}
-                    {whatsAppUrl ? (
+                    {smsUrl ? (
                         <p>
                             <a
-                                href={whatsAppUrl}
-                                target="_blank"
-                                rel="noopener noreferrer"
+                                href={smsUrl}
                                 className="staff-link-button"
                             >
-                                פתיחת WhatsApp
+                                שליחת הודעת החזר
                             </a>
                         </p>
                     ) : null}

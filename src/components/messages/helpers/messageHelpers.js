@@ -1,151 +1,37 @@
-import { getFixedProgramTitle, resolveCanonicalProgramId } from "../../../utils/programConstants";
+export const NOTIFICATION_COMPLIANCE_NOTE =
+    "התראות נשלחות רק למשתתפים שנרשמו לקבלת עדכונים.";
 
-export const CONSENT_FIELD_PAIRS = [
-    ["is_subscribed", "isSubscribed"],
-    ["subscribed", "subscribed"],
-    ["wants_messages", "wantsMessages"],
-    ["marketing_consent", "marketingConsent"]
+export const NOTIFICATION_BACKEND_REQUIRED_MESSAGE =
+    "שליחת התראות דורשת חיבור לשרת ההתראות";
+
+export const NOTIFICATION_TARGET_GROUPS = [
+    { value: "all", label: "כל המשתתפים" },
+    { value: "day_center", label: "מוקד יום" },
+    { value: "60_plus", label: "60+ / 60-" },
+    { value: "supportive_community", label: "קהילה תומכת" }
 ];
 
-export const WHATSAPP_COMPLIANCE_NOTE =
-    "שליחת הודעות WhatsApp מתבצעת רק למשתתפים שאישרו קבלת הודעות.";
-
-export const WHATSAPP_BACKEND_REQUIRED_MESSAGE =
-    "שליחת WhatsApp אמיתית דורשת חיבור לשרת WhatsApp Business API";
-
-export function formatParticipantDisplayName(participant) {
-    const firstName = participant?.first_name || "";
-    const lastName = participant?.last_name || "";
-    const fullName = `${firstName} ${lastName}`.trim();
-
-    return fullName || "—";
+export function getNotificationTargetGroupLabel(value) {
+    const group = NOTIFICATION_TARGET_GROUPS.find((item) => item.value === value);
+    return group?.label || value || "—";
 }
 
-export function resolveProgramTitle(programId, programs = []) {
-    const canonicalId = resolveCanonicalProgramId(programId);
-
-    if (!canonicalId) {
-        return "";
-    }
-
-    const program = programs.find((item) => item.id === canonicalId);
-
-    if (program?.title) {
-        return program.title;
-    }
-
-    return getFixedProgramTitle(canonicalId) || "";
-}
-
-export function normalizePhoneForWhatsApp(phone) {
-    const digits = String(phone || "").replace(/\D/g, "");
-
-    if (!digits) {
-        return "";
-    }
-
-    if (digits.startsWith("972")) {
-        return digits;
-    }
-
-    if (digits.startsWith("0")) {
-        return `972${digits.slice(1)}`;
-    }
-
-    return digits;
-}
-
-export function isValidWhatsAppPhone(phone) {
-    const normalized = normalizePhoneForWhatsApp(phone);
-
-    return normalized.length >= 10;
-}
-
-export function buildMessageText(title, body) {
-    const trimmedTitle = title?.trim() || "";
-    const trimmedBody = body?.trim() || "";
-
-    if (trimmedTitle && trimmedBody) {
-        return `${trimmedTitle}\n\n${trimmedBody}`;
-    }
-
-    return trimmedTitle || trimmedBody;
-}
-
-export function getParticipantConsentValue(participant) {
-    if (!participant) {
-        return null;
-    }
-
-    for (const [snakeKey, camelKey] of CONSENT_FIELD_PAIRS) {
-        if (participant[snakeKey] !== undefined && participant[snakeKey] !== null) {
-            return Boolean(participant[snakeKey]);
-        }
-
-        if (participant[camelKey] !== undefined && participant[camelKey] !== null) {
-            return Boolean(participant[camelKey]);
-        }
-    }
-
-    return null;
-}
-
-export function participantHasMarketingConsent(participant) {
-    const consent = getParticipantConsentValue(participant);
-
-    return consent === true;
-}
-
-export function buildMessageRecipient(participant, programs = []) {
-    const programId = participant.program_id || "";
-    const recipient = {
-        id: participant.id,
-        fullName: formatParticipantDisplayName(participant),
-        phone: String(participant.phone || "").trim(),
-        programId,
-        programTitle: resolveProgramTitle(programId, programs)
-    };
-
-    for (const [snakeKey, camelKey] of CONSENT_FIELD_PAIRS) {
-        if (participant[snakeKey] !== undefined) {
-            recipient[snakeKey] = participant[snakeKey];
-        }
-
-        if (participant[camelKey] !== undefined) {
-            recipient[camelKey] = participant[camelKey];
-        }
-    }
-
-    return recipient;
-}
-
-export function filterBroadcastRecipients(recipients) {
-    return recipients.filter(
-        (recipient) =>
-            isValidWhatsAppPhone(recipient.phone) &&
-            participantHasMarketingConsent(recipient)
-    );
-}
-
-export function validateBroadcastMessage({ body, recipients }) {
+export function validateNotificationMessage({ title, body }) {
     if (!body?.trim()) {
-        return "יש להזין תוכן הודעה";
+        return "יש להזין תוכן התראה";
     }
 
-    if (!recipients.length) {
-        return "לא נמצאו נמענים עם טלפון תקין והסכמה לשליחה";
+    if (!title?.trim()) {
+        return "יש להזין כותרת התראה";
     }
 
     return "";
 }
 
-export function formatBroadcastSummary({ sent, failed, total }) {
-    return `נשלחו ${sent} מתוך ${total}\nנכשלו ${failed}`;
-}
-
-export function toBroadcastRecipientPayload(recipients) {
-    return recipients.map((recipient) => ({
-        participant_id: recipient.id,
-        phone: recipient.phone
-    }));
+export function formatNotificationSummary({
+    successCount,
+    failureCount,
+    totalTokens
+}) {
+    return `נשלחו ${successCount} מתוך ${totalTokens}\nנכשלו ${failureCount}`;
 }

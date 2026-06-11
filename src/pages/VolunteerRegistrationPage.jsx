@@ -1,9 +1,11 @@
 import VolunteerRegistrationForm from "../components/volunteer/VolunteerRegistrationForm";
+import PublicParticipantLayout from "../layouts/PublicParticipantLayout";
 import "../styles/SupportiveCommunityPage.css";
 import "../styles/CommunityJoinForm.css";
 
 function VolunteerRegistrationPage() {
   return (
+    <PublicParticipantLayout>
     <div className="supportive-community-page" dir="rtl">
       <section className="community-hero">
         <h1>התנדבות בקהילה תומכת</h1>
@@ -12,6 +14,7 @@ function VolunteerRegistrationPage() {
 
       <VolunteerRegistrationForm />
     </div>
+    </PublicParticipantLayout>
   );
 }
 

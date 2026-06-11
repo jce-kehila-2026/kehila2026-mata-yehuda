@@ -3,8 +3,8 @@ import dotenv from "dotenv";
 import express from "express";
 import path from "path";
 import { fileURLToPath } from "url";
-import { verifyStaffIdToken } from "./firebaseAuth.js";
-import { getWhatsAppEnvStatus, sendBroadcastMessages } from "./whatsappCloudApi.js";
+import { sendFcmNotification } from "./fcmNotifications.js";
+import { initializeFirebaseAdmin, verifyActiveStaffUser } from "./firebaseAuth.js";
 
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
@@ -13,24 +13,6 @@ dotenv.config({ path: path.resolve(__dirname, ".env") });
 const app = express();
 const port = Number(process.env.PORT) || 3001;
 const clientOrigin = process.env.CLIENT_ORIGIN?.trim() || "http://localhost:5173";
-
-function buildFailedBroadcastPayload(recipients, errorMessage) {
-    const results = recipients.map((recipient) => ({
-        participant_id: recipient.participant_id || recipient.id || "",
-        phone: recipient.phone || "",
-        status: "failed",
-        error_message: errorMessage
-    }));
-
-    return {
-        results,
-        summary: {
-            total: results.length,
-            sent: 0,
-            failed: results.length
-        }
-    };
-}
 
 app.use(
     cors({
@@ -42,95 +24,78 @@ app.use(
 app.use(express.json({ limit: "1mb" }));
 
 app.get("/health", (_req, res) => {
-    res.json({ ok: true, service: "whatsapp-broadcast" });
+    let firebaseConfigured = false;
+
+    try {
+        initializeFirebaseAdmin();
+        firebaseConfigured = true;
+    } catch {
+        // leave firebaseConfigured false
+    }
+
+    res.json({
+        ok: true,
+        service: "fcm-notifications",
+        firebaseConfigured
+    });
 });
 
-app.post("/send-whatsapp-broadcast", async (req, res) => {
-    const { title = "", body = "", recipients = [] } = req.body || {};
-    const recipientCount = Array.isArray(recipients) ? recipients.length : 0;
+app.post("/api/notifications/send", async (req, res) => {
+    const { targetGroup = "all", title = "", body = "" } = req.body || {};
 
-    console.log("[send-whatsapp-broadcast] request received", {
-        recipientCount,
+    console.log("[notifications/send] request received", {
+        targetGroup,
         hasTitle: Boolean(String(title).trim()),
         hasBody: Boolean(String(body).trim())
     });
 
-    console.log("[send-whatsapp-broadcast] env status", getWhatsAppEnvStatus());
-
     try {
-        await verifyStaffIdToken(req.headers.authorization);
+        const staffUser = await verifyActiveStaffUser(req.headers.authorization);
 
-        if (!body?.trim()) {
-            console.log("[send-whatsapp-broadcast] rejected: MESSAGE_BODY_REQUIRED");
-            return res.status(400).json({ error: "MESSAGE_BODY_REQUIRED" });
-        }
-
-        if (!Array.isArray(recipients) || recipients.length === 0) {
-            console.log("[send-whatsapp-broadcast] rejected: RECIPIENTS_REQUIRED");
-            return res.status(400).json({ error: "RECIPIENTS_REQUIRED" });
-        }
-
-        const payload = await sendBroadcastMessages({
-            title: String(title),
-            body: String(body),
-            recipients
+        const result = await sendFcmNotification({
+            targetGroup,
+            title,
+            body,
+            sentBy: staffUser.email || staffUser.uid
         });
 
-        for (const result of payload.results) {
-            console.log("[send-whatsapp-broadcast] recipient result", {
-                participant_id: result.participant_id,
-                phone: result.phone,
-                status: result.status,
-                error_message: result.error_message || ""
-            });
-        }
+        console.log("[notifications/send] summary", result);
 
-        console.log("[send-whatsapp-broadcast] summary", payload.summary);
-
-        return res.json(payload);
+        return res.json({
+            ok: true,
+            ...result
+        });
     } catch (error) {
-        console.error("[send-whatsapp-broadcast] error", {
-            message: error.message,
-            recipientCount
+        console.error("[notifications/send] error", {
+            message: error.message
         });
-
-        const failedPayload = buildFailedBroadcastPayload(
-            Array.isArray(recipients) ? recipients : [],
-            error.message || "Broadcast failed"
-        );
 
         if (
             error.message === "MISSING_AUTH_TOKEN" ||
+            error.message === "UNAUTHORIZED" ||
             error.message?.includes("auth")
         ) {
             return res.status(401).json({ error: "UNAUTHORIZED" });
         }
 
-        if (
-            error.message === "WHATSAPP_CONFIG_MISSING" ||
-            error.message === "WHATSAPP_TEMPLATE_NAME_REQUIRED" ||
-            error.message === "FIREBASE_ADMIN_NOT_CONFIGURED"
-        ) {
-            console.log("[send-whatsapp-broadcast] summary", failedPayload.summary);
+        if (error.message === "MESSAGE_BODY_REQUIRED") {
+            return res.status(400).json({ error: "MESSAGE_BODY_REQUIRED" });
+        }
 
+        if (error.message === "FIREBASE_ADMIN_NOT_CONFIGURED") {
             return res.status(503).json({
-                error: error.message,
-                message: "WhatsApp or Firebase Admin is not configured on the server",
-                ...failedPayload
+                error: "FIREBASE_ADMIN_NOT_CONFIGURED",
+                message: "Firebase Admin is not configured on the server"
             });
         }
 
-        console.log("[send-whatsapp-broadcast] summary", failedPayload.summary);
-
         return res.status(500).json({
-            error: "BROADCAST_FAILED",
-            message: error.message || "Broadcast failed",
-            ...failedPayload
+            error: "NOTIFICATION_SEND_FAILED",
+            message: error.message || "Notification send failed"
         });
     }
 });
 
 app.listen(port, () => {
-    console.log(`WhatsApp broadcast server listening on http://localhost:${port}`);
-    console.log("[startup] env status", getWhatsAppEnvStatus());
+    console.log(`FCM notification server listening on http://localhost:${port}`);
 });

@@ -1,67 +1,56 @@
-import { useCallback, useEffect, useMemo, useState } from "react";
+import { useCallback, useEffect, useState } from "react";
 import MessageForm from "../components/messages/forms/MessageForm";
+import NotificationRecentActivity from "../components/messages/NotificationRecentActivity";
+import NotificationStatsCards from "../components/messages/NotificationStatsCards";
 import {
-    filterBroadcastRecipients,
-    formatBroadcastSummary,
-    participantHasMarketingConsent,
-    validateBroadcastMessage,
-    WHATSAPP_BACKEND_REQUIRED_MESSAGE,
-    WHATSAPP_COMPLIANCE_NOTE
+    formatNotificationSummary,
+    NOTIFICATION_BACKEND_REQUIRED_MESSAGE,
+    NOTIFICATION_COMPLIANCE_NOTE,
+    validateNotificationMessage
 } from "../components/messages/helpers/messageHelpers";
-import {
-    fetchMessageRecipientSource,
-    sendWhatsAppBroadcast
-} from "../services/messageService";
+import { fetchNotificationDashboardData } from "../services/notificationDashboardService";
+import { sendPushNotification } from "../services/notificationService";
 
 function SendMessages() {
-    const [allRecipients, setAllRecipients] = useState([]);
-    const [title, setTitle] = useState("");
+    const [title, setTitle] = useState("מטה יהודה");
     const [body, setBody] = useState("");
-    const [loading, setLoading] = useState(true);
+    const [targetGroup, setTargetGroup] = useState("all");
     const [sending, setSending] = useState(false);
+    const [dashboardLoading, setDashboardLoading] = useState(true);
+    const [stats, setStats] = useState(null);
+    const [recentNotifications, setRecentNotifications] = useState([]);
     const [error, setError] = useState("");
     const [success, setSuccess] = useState("");
 
-    const loadRecipients = useCallback(async () => {
-        setLoading(true);
-        setError("");
+    const loadDashboardData = useCallback(async () => {
+        setDashboardLoading(true);
 
         try {
-            const data = await fetchMessageRecipientSource();
-            setAllRecipients(data.recipients);
-        } catch (err) {
-            console.error(err);
-            setError("שגיאה בטעינת נמענים");
+            const data = await fetchNotificationDashboardData();
+            setStats(data.stats);
+            setRecentNotifications(data.recentNotifications);
+        } catch (loadError) {
+            console.error(loadError);
+            setStats({
+                registeredParticipants: 0,
+                activeDevices: 0,
+                sentThisWeek: 0
+            });
+            setRecentNotifications([]);
         } finally {
-            setLoading(false);
+            setDashboardLoading(false);
         }
     }, []);
 
     useEffect(() => {
-        loadRecipients();
-    }, [loadRecipients]);
+        loadDashboardData();
+    }, [loadDashboardData]);
 
-    const recipients = useMemo(
-        () => filterBroadcastRecipients(allRecipients),
-        [allRecipients]
-    );
-
-    const consentedCount = useMemo(
-        () =>
-            allRecipients.filter((recipient) =>
-                participantHasMarketingConsent(recipient)
-            ).length,
-        [allRecipients]
-    );
-
-    async function handleSendToAll() {
+    async function handleSendNotification() {
         setError("");
         setSuccess("");
 
-        const validationError = validateBroadcastMessage({
-            body,
-            recipients
-        });
+        const validationError = validateNotificationMessage({ title, body });
 
         if (validationError) {
             setError(validationError);
@@ -71,28 +60,35 @@ function SendMessages() {
         setSending(true);
 
         try {
-            const result = await sendWhatsAppBroadcast({
+            const result = await sendPushNotification({
                 title,
                 body,
-                recipients
+                targetGroup
             });
 
-            const { sent, failed, total } = result.summary;
-            setSuccess(formatBroadcastSummary({ sent, failed, total }));
+            setSuccess(
+                formatNotificationSummary({
+                    successCount: result.successCount,
+                    failureCount: result.failureCount,
+                    totalTokens: result.totalTokens
+                })
+            );
+
+            await loadDashboardData();
         } catch (err) {
             console.error(err);
 
             if (err.message === "NOT_AUTHENTICATED") {
-                setError("יש להתחבר מחדש כדי לשלוח הודעות");
-            } else if (err.message === WHATSAPP_BACKEND_REQUIRED_MESSAGE) {
+                setError("יש להתחבר מחדש כדי לשלוח התראות");
+            } else if (err.message === NOTIFICATION_BACKEND_REQUIRED_MESSAGE) {
                 setError(err.message);
             } else if (err.status === 503) {
                 setError(
                     err.message ||
-                        "שרת WhatsApp לא מוגדר. הפעל את שרת השליחה והגדר משתני סביבה."
+                        "שרת ההתראות לא מוגדר. הפעל את שרת השליחה והגדר משתני סביבה."
                 );
             } else {
-                setError(err.message || "שגיאה בשליחת ההודעות");
+                setError(err.message || "שגיאה בשליחת ההתראה");
             }
         } finally {
             setSending(false);
@@ -101,43 +97,58 @@ function SendMessages() {
 
     return (
         <div className="staff-page staff-page--messages">
-            <header className="staff-header">
-                <h1>שליחת הודעות</h1>
+            <header className="notifications-page-header staff-header">
+                <div className="notifications-page-header__inner">
+                    <h1>שליחת התראות</h1>
+                    <p>
+                        שליחת הודעות push למשתתפים שנרשמו לקבלת עדכונים בדפדפן
+                    </p>
+                </div>
             </header>
 
-            <div className="staff-container">
-                {error && <p className="staff-alert staff-alert--error">{error}</p>}
-                {success && (
-                    <p className="staff-alert staff-alert--success" style={{ whiteSpace: "pre-line" }}>
-                        {success}
-                    </p>
-                )}
-                {loading && <p className="staff-meta">טוען נמענים...</p>}
+            <div className="notifications-page">
+                <NotificationStatsCards stats={stats} loading={dashboardLoading} />
 
-                {!loading && (
-                    <section className="staff-section">
-                        <MessageForm
-                            title={title}
-                            body={body}
-                            complianceNote={WHATSAPP_COMPLIANCE_NOTE}
-                            recipientCount={recipients.length}
-                            consentedCount={consentedCount}
-                            onTitleChange={setTitle}
-                            onBodyChange={setBody}
-                        />
-
-                        <div className="staff-actions staff-actions--inline message-actions">
-                            <button
-                                type="button"
-                                className="staff-button"
-                                onClick={handleSendToAll}
-                                disabled={sending || recipients.length === 0}
+                <div className="notifications-page__layout">
+                    <section className="notifications-page__form-section">
+                        {error ? (
+                            <div
+                                className="notifications-alert notifications-alert--error"
+                                role="alert"
                             >
-                                {sending ? "שולח..." : "שליחה לכל המשתתפים"}
-                            </button>
+                                {error}
+                            </div>
+                        ) : null}
+                        {success ? (
+                            <div
+                                className="notifications-alert notifications-alert--success"
+                                role="status"
+                                style={{ whiteSpace: "pre-line" }}
+                            >
+                                {success}
+                            </div>
+                        ) : null}
+
+                        <div className="notifications-card">
+                            <MessageForm
+                                title={title}
+                                body={body}
+                                targetGroup={targetGroup}
+                                complianceNote={NOTIFICATION_COMPLIANCE_NOTE}
+                                sending={sending}
+                                onTitleChange={setTitle}
+                                onBodyChange={setBody}
+                                onTargetGroupChange={setTargetGroup}
+                                onSubmit={handleSendNotification}
+                            />
                         </div>
                     </section>
-                )}
+
+                    <NotificationRecentActivity
+                        items={recentNotifications}
+                        loading={dashboardLoading}
+                    />
+                </div>
             </div>
         </div>
     );
