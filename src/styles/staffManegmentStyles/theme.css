@@ -1,0 +1,35 @@
+/* Design tokens — staff & community UI */
+@import url("https://fonts.googleapis.com/css2?family=Heebo:wght@400;500;600;700&display=swap");
+
+:root {
+  --staff-color-bg: #ffffff;
+  --staff-color-primary: #2d7d46;
+  --staff-color-primary-hover: #236b38;
+  --staff-color-accent-light: #faf4ec;
+  --staff-color-border: #e5c29f;
+  --staff-color-card-border: #e8e2dc;
+  --staff-color-text: #1f1f1f;
+  --staff-color-muted: #444444;
+  --staff-color-error: #b42318;
+  --staff-color-success: #2d7d46;
+  --staff-radius: 18px;
+  --staff-max-width: 760px;
+  --staff-font-family: "Heebo", system-ui, sans-serif;
+
+  /* Supportive community design system (canonical) */
+  --color-primary: #2d7d46;
+  --color-primary-hover: #236b38;
+  --color-primary-mid: #3d9b5a;
+  --color-primary-light: #5ba96b;
+  --color-accent-light: #faf4ec;
+  --color-border: #e5c29f;
+  --color-card-border: #e8e2dc;
+  --color-text: #1f1f1f;
+  --color-muted: #444444;
+  --color-bg: #ffffff;
+  --radius: 18px;
+
+  /* Admin shell layout — used for min-height calc on full-height pages */
+  --staff-dashboard-hero-height: 3.25rem;
+  --staff-subpage-toolbar-height: 3.25rem;
+}
