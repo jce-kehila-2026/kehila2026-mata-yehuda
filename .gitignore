@@ -12,6 +12,20 @@ dist
 dist-ssr
 *.local
 
+.env
+.env.*
+!.env.example
+
+server/.env
+server/node_modules
+server/*.json
+
+# Firebase credentials
+server/*-firebase-adminsdk*.json
+credentials.json
+serviceAccountKey.json
+secrets/
+
 # Editor directories and files
 .vscode/*
 !.vscode/extensions.json
@@ -22,10 +36,3 @@ dist-ssr
 *.njsproj
 *.sln
 *.sw?
-.env
-.env.*
-!.env.example
-*.local
-credentials.json
-serviceAccountKey.json
-secrets/

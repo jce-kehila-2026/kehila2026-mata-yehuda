@@ -1,0 +1,101 @@
+/* ===== Attendance menu page ===== */
+
+.attendance-page {
+  direction: rtl;
+  min-height: 100vh;
+  background: #f0f2f1;
+  color: #243029;
+  font-family: "Heebo", system-ui, sans-serif;
+  padding: 1.25rem 1rem 2rem;
+}
+
+.attendance-page__header {
+  max-width: 720px;
+  margin: 0 auto 0.65rem;
+  background: #ffffff;
+  border: 1px solid #d5ddd8;
+  border-right: 4px solid #2d7d46;
+  border-radius: 6px;
+  padding: 0.75rem 0.9rem;
+}
+
+.attendance-page__title {
+  margin: 0;
+  font-size: 1.5rem;
+  font-weight: 700;
+  color: #2d7d46;
+  line-height: 1.35;
+}
+
+.attendance-page__content {
+  max-width: 720px;
+  margin: 0 auto;
+}
+
+.attendance-page__cards {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 0.65rem;
+}
+
+.attendance-page__card-link {
+  display: flex;
+  flex-direction: column;
+  gap: 0.3rem;
+  text-align: right;
+  text-decoration: none;
+  color: inherit;
+  background: #ffffff;
+  border: 1px solid #d5ddd8;
+  border-right: 4px solid #2d7d46;
+  border-radius: 6px;
+  padding: 0.75rem 0.9rem;
+  min-height: 0;
+  cursor: pointer;
+  transition: background 0.15s ease, border-color 0.15s ease;
+}
+
+.attendance-page__card-link:hover {
+  background: #f4f8f5;
+  border-color: #b8cfc0;
+}
+
+.attendance-page__card-link:focus-visible {
+  outline: 3px solid rgba(45, 125, 70, 0.35);
+  outline-offset: 2px;
+}
+
+.attendance-page__card-title {
+  margin: 0;
+  font-size: 1.05rem;
+  font-weight: 700;
+  color: #2d7d46;
+  line-height: 1.35;
+}
+
+.attendance-page__card-text {
+  margin: 0;
+  font-size: 0.875rem;
+  color: #5a6660;
+  line-height: 1.45;
+}
+
+@media (min-width: 768px) {
+  .attendance-page__title {
+    font-size: 1.6rem;
+  }
+}
+
+@media (max-width: 768px) {
+  .attendance-page {
+    padding: 1rem 0.85rem 1.75rem;
+  }
+
+  .attendance-page__title {
+    font-size: 1.4rem;
+  }
+
+  .attendance-page__cards {
+    grid-template-columns: 1fr;
+  }
+}

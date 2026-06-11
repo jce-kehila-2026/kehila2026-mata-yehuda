@@ -1,0 +1,81 @@
+.form-popup {
+  position: fixed;
+  inset: 0;
+  background: rgba(0, 0, 0, 0.5);
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  z-index: 999999;
+}
+
+.form-box {
+  background: white;
+  width: 85%;
+  max-width: 360px;
+  padding: 25px 20px 20px;
+  border-radius: 18px;
+  display: flex;
+  flex-direction: column;
+  gap: 14px;
+  direction: rtl;
+  position: relative;
+  box-shadow: 0 10px 25px rgba(0, 0, 0, 0.15);
+}
+
+.form-box h2 {
+  font-size: 1.5rem;
+  color: var(--color-primary);
+  margin: 0 0 5px;
+  text-align: center;
+}
+
+.form-box > button:first-of-type {
+  position: absolute;
+  top: 12px;
+  left: 15px;
+  background: none;
+  border: none;
+  font-size: 24px;
+  color: #666;
+  cursor: pointer;
+  padding: 0;
+  width: auto;
+}
+
+.form-box > button:first-of-type:hover {
+  color: #000;
+}
+
+.form-box input {
+  padding: 11px 14px;
+  font-size: 16px;
+  border: 1.5px solid var(--color-card-border);
+  border-radius: var(--radius);
+  outline: none;
+  font-family: inherit;
+}
+
+.form-box input:focus {
+  border-color: var(--color-primary);
+}
+
+.form-box > button:last-of-type {
+  padding: 12px;
+  font-size: 16px;
+  font-weight: bold;
+  background: var(--color-primary);
+  color: white;
+  border: none;
+  border-radius: var(--radius);
+  cursor: pointer;
+  margin-top: 5px;
+}
+
+.form-box > button:last-of-type:hover {
+  background: var(--color-primary-hover);
+}
+
+.form-box > button:last-of-type:disabled {
+  background: #ccc;
+  cursor: not-allowed;
+}

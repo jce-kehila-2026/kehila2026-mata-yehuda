@@ -1,0 +1,553 @@
+/* ===== Take attendance page ===== */
+
+.take-attendance-page {
+  direction: rtl;
+  min-height: 100vh;
+  background: #f0f2f1;
+  color: #243029;
+  font-family: "Heebo", system-ui, sans-serif;
+  padding: 1.25rem 1rem 2rem;
+}
+
+.take-attendance-page__header {
+  max-width: 840px;
+  margin: 0 auto 0.75rem;
+  background: #ffffff;
+  border: 1px solid #d5ddd8;
+  border-right: 4px solid #2d7d46;
+  border-radius: 6px;
+  padding: 0.85rem 1rem;
+}
+
+.take-attendance-page__header-row {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: 1rem;
+}
+
+.take-attendance-page__title {
+  margin: 0;
+  font-size: 1.65rem;
+  font-weight: 700;
+  color: #2d7d46;
+  line-height: 1.35;
+}
+
+.take-attendance-page__header-row .attendance-btn--secondary {
+  flex-shrink: 0;
+}
+
+.take-attendance-page__content {
+  max-width: 840px;
+  margin: 0 auto;
+}
+
+.take-attendance-page__search-wrap {
+  max-width: 720px;
+  margin: 0 auto 0.65rem;
+}
+
+.take-attendance-page__hint-card {
+  max-width: 720px;
+  margin: 0 auto 0.65rem;
+  background: #ffffff;
+  border: 1px dashed #d5ddd8;
+  border-radius: 6px;
+  padding: 0.75rem 0.85rem;
+  text-align: center;
+}
+
+.take-attendance-page__hint {
+  margin: 0;
+  font-size: 0.95rem;
+  font-weight: 600;
+  color: #5a6660;
+  line-height: 1.45;
+}
+
+.take-attendance-page__section-title {
+  margin: 0 0 0.55rem;
+  font-size: 1rem;
+  font-weight: 700;
+  color: #2d7d46;
+  line-height: 1.35;
+}
+
+.take-attendance-page__toolbar {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) 10.5rem max-content;
+  align-items: end;
+  gap: 0.65rem;
+  margin-bottom: 0;
+  background: #ffffff;
+  border: 1px solid #d5ddd8;
+  border-radius: 6px;
+  padding: 0.65rem 0.85rem;
+}
+
+.take-attendance-page__toolbar-title {
+  grid-column: 1 / -1;
+  margin: 0 0 0.15rem;
+  font-size: 1.05rem;
+  font-weight: 700;
+  color: #2d7d46;
+  line-height: 1.35;
+}
+
+.take-attendance-page__field {
+  display: flex;
+  flex-direction: column;
+  gap: 0.35rem;
+  min-width: 0;
+}
+
+.take-attendance-page__toolbar > .take-attendance-page__field:nth-of-type(2) {
+  max-width: 10.5rem;
+}
+
+.take-attendance-page__field label {
+  font-size: 0.9rem;
+  font-weight: 700;
+  color: #5f6b76;
+}
+
+.take-attendance-page__field input,
+.take-attendance-page__field select {
+  width: 100%;
+  min-width: 0;
+  font-family: inherit;
+  font-size: 0.95rem;
+  color: #1f2933;
+  background: #fbfdfc;
+  border: 1.5px solid #d9e2dc;
+  border-radius: 10px;
+  padding: 0.65rem 0.85rem;
+}
+
+.take-attendance-page__field input[type="date"] {
+  padding: 0.65rem 0.75rem;
+}
+
+.take-attendance-page__field select {
+  cursor: pointer;
+}
+
+.take-attendance-page__field select:disabled {
+  opacity: 0.7;
+  cursor: not-allowed;
+}
+
+.take-attendance-page__field input:focus,
+.take-attendance-page__field select:focus {
+  outline: none;
+  border-color: #2d7d46;
+  background: #ffffff;
+  box-shadow: 0 0 0 3px rgba(45, 125, 70, 0.15);
+}
+
+.take-attendance-page__search-btn {
+  align-self: end;
+  width: auto;
+  min-width: 5.5rem;
+  padding: 0.65rem 1rem;
+  white-space: nowrap;
+}
+
+.take-attendance-page__message {
+  margin: 0;
+  padding: 0;
+  font-size: 0.95rem;
+  font-weight: 700;
+  line-height: 1.5;
+}
+
+.take-attendance-page__message-block {
+  max-width: 720px;
+  margin: 0 auto 0.65rem;
+  padding: 0.65rem 0.85rem;
+  border-radius: 6px;
+}
+
+.take-attendance-page__message-block--error {
+  background: #fff1f0;
+  border: 1px solid #f3c6c1;
+}
+
+.take-attendance-page__message-block--warning {
+  background: #fff7df;
+  border: 1px solid #f2df9f;
+}
+
+.take-attendance-page__message-block--success {
+  background: #eaf6ee;
+  border: 1px solid #cfe7d5;
+}
+
+.take-attendance-page__message--error {
+  color: #b42318;
+}
+
+.take-attendance-page__message--warning {
+  color: #8a6200;
+}
+
+.take-attendance-page__message--success {
+  color: #2d7d46;
+}
+
+.take-attendance-page__message-block .attendance-btn {
+  margin-top: 0.65rem;
+}
+
+/* Attendance table layout */
+.attendance-table {
+  table-layout: fixed;
+}
+
+.attendance-table__col-name {
+  width: 30%;
+}
+
+.attendance-table__col-phone {
+  width: 16%;
+}
+
+.attendance-table__col-status {
+  width: 22%;
+}
+
+.attendance-table__col-notes {
+  width: 32%;
+}
+
+.attendance-table__col-activity {
+  width: 18%;
+}
+
+.attendance-table th,
+.attendance-table td {
+  padding: 0.6rem 0.75rem;
+}
+
+.attendance-table__status-actions {
+  display: inline-flex;
+  flex-direction: row;
+  align-items: center;
+  gap: 0.4rem;
+  flex-wrap: nowrap;
+}
+
+.attendance-table__notes-input {
+  width: 100%;
+  max-width: 180px;
+  font-family: inherit;
+  font-size: 0.85rem;
+  color: #1f2933;
+  background: #fbfdfc;
+  border: 1px solid #d9e2dc;
+  border-radius: 6px;
+  padding: 0.35rem 0.55rem;
+}
+
+.attendance-table__notes-input:focus {
+  outline: none;
+  border-color: #2d7d46;
+  background: #ffffff;
+  box-shadow: 0 0 0 3px rgba(45, 125, 70, 0.12);
+}
+
+.attendance-table__notes-input::placeholder {
+  color: #8a9490;
+}
+
+.take-attendance-page__section {
+  margin-bottom: 0.75rem;
+}
+
+.take-attendance-page__card {
+  background: #ffffff;
+  border: 1px solid #d5ddd8;
+  border-radius: 6px;
+  overflow: hidden;
+}
+
+.take-attendance-page__table-wrapper {
+  overflow-x: auto;
+}
+
+@media (min-width: 769px) {
+  .take-attendance-page__table-wrapper {
+    overflow-x: visible;
+  }
+}
+
+.take-attendance-page__table {
+  width: 100%;
+  border-collapse: collapse;
+  font-size: 1rem;
+}
+
+.take-attendance-page__table thead {
+  background: #f2f7f4;
+}
+
+.take-attendance-page__table th {
+  padding: 0.65rem 0.75rem;
+  text-align: right;
+  font-size: 0.875rem;
+  font-weight: 800;
+  color: #26352b;
+  border-bottom: 1px solid #d9e7dd;
+  white-space: nowrap;
+}
+
+.take-attendance-page__table td {
+  padding: 0.65rem 0.75rem;
+  text-align: right;
+  color: #1f2933;
+  border-bottom: 1px solid #edf2ef;
+  vertical-align: middle;
+  font-size: 0.925rem;
+}
+
+.take-attendance-page__row:hover {
+  background: #fbfdfc;
+}
+
+.take-attendance-page__row:last-child td {
+  border-bottom: none;
+}
+
+.take-attendance-page__activity-list {
+  display: flex;
+  flex-direction: column;
+  gap: 0.55rem;
+  padding: 0.65rem;
+}
+
+.take-attendance-page__activity-item {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: 0.65rem;
+  background: #fafbfa;
+  border: 1px solid #d5ddd8;
+  border-radius: 6px;
+  padding: 0.65rem 0.75rem;
+}
+
+.take-attendance-page__activity-item--selected {
+  background: #eaf6ee;
+  border-color: #2d7d46;
+}
+
+.take-attendance-page__activity-details {
+  display: flex;
+  flex-direction: column;
+  gap: 0.35rem;
+  flex: 1;
+}
+
+.take-attendance-page__activity-name {
+  font-size: 1.05rem;
+  font-weight: 700;
+  color: #2d7d46;
+}
+
+.take-attendance-page__activity-meta {
+  font-size: 0.95rem;
+  color: #5f6b76;
+}
+
+.take-attendance-page__activity-select-btn {
+  flex-shrink: 0;
+}
+
+.take-attendance-page__attendance-context {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: space-between;
+  align-items: center;
+  gap: 0.75rem;
+  margin-bottom: 0.65rem;
+  background: #ffffff;
+  border: 1px solid #d5ddd8;
+  border-right: 4px solid #2d7d46;
+  border-radius: 6px;
+  padding: 0.65rem 0.85rem;
+}
+
+.take-attendance-page__context-summary {
+  display: flex;
+  flex-direction: column;
+  gap: 0.15rem;
+}
+
+.take-attendance-page__context-label {
+  margin: 0;
+  font-size: 0.85rem;
+  font-weight: 700;
+  color: #5f6b76;
+  line-height: 1.35;
+}
+
+.take-attendance-page__context-activity {
+  margin: 0;
+  font-size: 1.05rem;
+  font-weight: 700;
+  color: #2d7d46;
+  line-height: 1.35;
+}
+
+.take-attendance-page__context-date {
+  margin: 0;
+  font-size: 0.95rem;
+  font-weight: 600;
+  color: #243029;
+  line-height: 1.35;
+}
+
+.take-attendance-page__actions {
+  display: flex;
+  justify-content: flex-start;
+  padding: 0.65rem 0.85rem;
+  border-top: 1px solid #edf2ef;
+  background: #fafbfa;
+}
+
+.take-attendance-page__loading {
+  max-width: 720px;
+  margin: 0 auto 0.65rem;
+  padding: 0.75rem 0.85rem;
+  text-align: center;
+  font-size: 0.95rem;
+  color: #5a6660;
+}
+.take-attendance-page__empty,
+.take-attendance-page__error {
+  margin: 0;
+  padding: 1rem 0.85rem;
+  text-align: center;
+  font-size: 0.95rem;
+}
+
+.take-attendance-page__empty {
+  color: #5a6660;
+}
+
+.take-attendance-page__error {
+  color: #b42318;
+}
+
+@media (min-width: 768px) {
+  .take-attendance-page__title {
+    font-size: 1.75rem;
+  }
+}
+
+@media (max-width: 900px) {
+  .take-attendance-page__toolbar {
+    grid-template-columns: 1fr;
+  }
+
+  .take-attendance-page__toolbar > .take-attendance-page__field:nth-of-type(2) {
+    max-width: none;
+  }
+
+  .take-attendance-page__field input,
+  .take-attendance-page__field select {
+    min-width: 0;
+  }
+
+  .take-attendance-page__search-btn {
+    width: 100%;
+    min-width: 0;
+  }
+}
+
+@media (max-width: 768px) {
+  .take-attendance-page {
+    padding: 1.25rem 1rem 2rem;
+  }
+
+  .take-attendance-page__title {
+    font-size: 1.5rem;
+  }
+
+  .take-attendance-page__header-row {
+    flex-wrap: wrap;
+    gap: 0.5rem;
+  }
+
+  .take-attendance-page__table thead {
+    display: none;
+  }
+
+  .take-attendance-page__table,
+  .take-attendance-page__table tbody,
+  .take-attendance-page__table tr,
+  .take-attendance-page__table td {
+    display: block;
+    width: 100%;
+  }
+
+  .take-attendance-page__row {
+    padding: 1rem;
+    border-bottom: 1px solid #eef2ef;
+  }
+
+  .take-attendance-page__table td {
+    display: flex;
+    justify-content: space-between;
+    gap: 1rem;
+    padding: 0.6rem 0;
+    border-bottom: none;
+  }
+
+  .take-attendance-page__table td::before {
+    content: attr(data-label);
+    font-weight: 800;
+    color: #5f6b76;
+    flex-shrink: 0;
+  }
+
+  .attendance-table__status-actions {
+    justify-content: flex-end;
+    width: 100%;
+  }
+
+  .attendance-status-btn {
+    flex: 1;
+    min-width: 4.5rem;
+  }
+
+  .attendance-table__notes-input {
+    max-width: none;
+    min-width: 0;
+  }
+
+  .take-attendance-page__activity-item {
+    flex-direction: column;
+    align-items: stretch;
+  }
+
+  .take-attendance-page__activity-select-btn {
+    width: 100%;
+  }
+
+  .take-attendance-page__attendance-context {
+    flex-direction: column;
+    align-items: stretch;
+  }
+
+  .take-attendance-page__attendance-context .attendance-btn,
+  .take-attendance-page__message-block .attendance-btn,
+  .take-attendance-page__actions .attendance-btn {
+    width: 100%;
+  }
+
+  .take-attendance-page__actions {
+    padding: 1rem;
+  }
+}
