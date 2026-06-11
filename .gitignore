@@ -11,12 +11,20 @@ node_modules
 dist
 dist-ssr
 *.local
+
 .env
+.env.*
+!.env.example
+
 server/.env
 server/node_modules
+server/*.json
 
 # Firebase credentials
 server/*-firebase-adminsdk*.json
+credentials.json
+serviceAccountKey.json
+secrets/
 
 # Editor directories and files
 .vscode/*
@@ -28,5 +36,3 @@ server/*-firebase-adminsdk*.json
 *.njsproj
 *.sln
 *.sw?
-server/*.json
-server/.env

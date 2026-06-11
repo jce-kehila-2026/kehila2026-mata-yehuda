@@ -38,6 +38,12 @@
   font-weight: 600;
 }
 
+.supportive-community-page .form-error {
+  color: #c0392b;
+  font-weight: 600;
+  margin: 0.5rem 0 1rem;
+}
+
 .supportive-community-page input,
 .supportive-community-page select,
 .supportive-community-page textarea {

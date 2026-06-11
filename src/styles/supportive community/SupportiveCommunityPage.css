@@ -39,7 +39,6 @@
   box-sizing: border-box;
 }
 
-/* ─── ICONS ─── */
 .supportive-community-page .sc-icon {
   display: inline-flex;
   align-items: center;
@@ -55,7 +54,6 @@
   fill: currentColor;
 }
 
-/* ─── ACCESSIBILITY ─── */
 .supportive-community-page .skip-link {
   position: absolute;
   top: -100%;
@@ -74,7 +72,6 @@
   top: 1rem;
 }
 
-/* ─── HEADER ─── */
 .supportive-community-page .site-header {
   background: #ffffff;
   border-bottom: 1px solid var(--color-card-border);
@@ -107,7 +104,6 @@
   color: var(--color-muted);
 }
 
-/* ─── HERO BANNER ─── */
 .supportive-community-page .community-hero {
   width: 100%;
   background: var(--color-surface);
@@ -205,7 +201,6 @@
   max-width: 20rem;
 }
 
-/* ─── PAGE SECTIONS ─── */
 .supportive-community-page .page-main {
   width: 100%;
 }
@@ -243,7 +238,6 @@
   border-bottom: 1px solid var(--color-card-border);
 }
 
-/* ─── SECTION HEADERS ─── */
 .supportive-community-page .section-header {
   margin-bottom: 1rem;
 }
@@ -280,7 +274,6 @@
   margin-inline: auto;
 }
 
-/* ─── SERVICES GRID ─── */
 .supportive-community-page .services-grid {
   display: grid;
   grid-template-columns: 1fr;
@@ -388,7 +381,6 @@
   line-height: 1.65;
 }
 
-/* ─── PRICING ─── */
 .supportive-community-page .pricing-block {
   max-width: 40rem;
 }
@@ -452,7 +444,6 @@
   line-height: 1.6;
 }
 
-/* ─── STEPS ─── */
 .supportive-community-page .steps-timeline {
   list-style: none;
   margin: 0;
@@ -500,7 +491,6 @@
   line-height: 1.55;
 }
 
-/* ─── ACTIONS ─── */
 .supportive-community-page .actions-panel {
   text-align: center;
 }
@@ -520,7 +510,6 @@
   margin: 0 auto;
 }
 
-/* ─── BUTTONS ─── */
 .supportive-community-page .btn {
   font-family: "Heebo", system-ui, sans-serif;
   font-size: 1.15rem;
@@ -580,7 +569,6 @@
   text-underline-offset: 3px;
 }
 
-/* ─── VOLUNTEER GRID ─── */
 .supportive-community-page .volunteer-card-grid {
   list-style: none;
   margin: 0;
@@ -619,7 +607,6 @@
   line-height: 1.3;
 }
 
-/* ─── FAQ ─── */
 .supportive-community-page .faq-list {
   display: flex;
   flex-direction: column;
@@ -669,7 +656,6 @@
   line-height: 1.6;
 }
 
-/* ─── FLOATING CONTACT ─── */
 .supportive-community-page .floating-contact {
   position: fixed;
   bottom: 1.25rem;
@@ -751,7 +737,6 @@
   text-align: right;
 }
 
-/* ─── FOOTER ─── */
 .supportive-community-page .community-footer {
   background: var(--color-primary-dark);
   color: #ffffff;
@@ -780,7 +765,6 @@
   opacity: 0.92;
 }
 
-/* ─── RESPONSIVE ─── */
 @media (min-width: 640px) {
   .supportive-community-page .hero-banner {
     min-height: 360px;

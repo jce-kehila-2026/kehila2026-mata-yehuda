@@ -13,6 +13,7 @@ import ServicesPage from "./pages/HomePages/ServicesPage.jsx";
 import StaffLogin from "./pages/staffManegmentPages/StaffLogin";
 
 import supportiveCommunityRoutes from "./routes/supportive community/supportiveCommunityRoutes";
+import communityStaffRoutes from "./routes/communityStaff/communityStaffRoutes";
 
 function AttendanceFlow() {
   const [currentPage, setCurrentPage] = useState("menu");
@@ -42,7 +43,14 @@ function App() {
 
         {supportiveCommunityRoutes.map((route) => (
           <Route
-            key={route.path}
+            key={`sc-${route.path}`}
+            path={route.path}
+            element={route.element}
+          />
+        ))}
+        {communityStaffRoutes.map((route) => (
+          <Route
+            key={`cs-${route.path}`}
             path={route.path}
             element={route.element}
           />

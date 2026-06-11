@@ -7,7 +7,7 @@ import VolunteerRegistrationPage from "../../pages/supportive community/Voluntee
 
 const supportiveCommunityRoutes = [
   {
-     path: "/",
+    path: "/",
     element: <SupportiveCommunityPage />,
   },
   {

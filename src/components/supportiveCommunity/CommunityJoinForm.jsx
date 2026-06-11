@@ -63,23 +63,23 @@ function CommunityJoinForm() {
     }
 
     try {
-  await saveCommunityJoinRequest(communityJoinForm);
+      await saveCommunityJoinRequest(communityJoinForm);
 
-  alert("הבקשה נשלחה לטיפול");
+      alert("הבקשה נשלחה לטיפול");
 
-  setCommunityJoinForm({
-    participantId: "",
-    participantName: "",
-    phone: "",
-    address: "",
-    services: [],
-    otherService: "",
-    languages: [],
-  });
-} catch (error) {
-  console.error("Error saving community join request:", error);
-  alert("אירעה שגיאה בשמירת הבקשה");
-}
+      setCommunityJoinForm({
+        participantId: "",
+        participantName: "",
+        phone: "",
+        address: "",
+        services: [],
+        otherService: "",
+        languages: [],
+      });
+    } catch (error) {
+      console.error("Error saving community join request:", error);
+      alert("אירעה שגיאה בשמירת הבקשה");
+    }
   };
 
   return (

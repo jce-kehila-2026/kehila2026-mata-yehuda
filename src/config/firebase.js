@@ -4,7 +4,6 @@ import { getAuth } from "firebase/auth";
 import { getStorage } from "firebase/storage";
 export const STORAGE_BUCKET = "matayehuda.firebasestorage.app";
 
-
 const firebaseConfig = {
   apiKey: "AIzaSyDXSKuacUxiGkEraG772OCAivOdoftCE6I",
   authDomain: "matayehuda.firebaseapp.com",
@@ -14,8 +13,6 @@ const firebaseConfig = {
   appId: "1:264845791661:web:bac32332d00b6323671124",
   measurementId: "G-81XHVPCSNV",
 };
-
-
 const app = initializeApp(firebaseConfig);
 export const db = getFirestore(app);
 export const auth = getAuth(app);

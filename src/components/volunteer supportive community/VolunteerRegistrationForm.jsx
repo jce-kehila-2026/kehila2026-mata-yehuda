@@ -133,7 +133,7 @@ function VolunteerRegistrationForm() {
   };
 
   return (
-   <form className="community-join-form" onSubmit={handleSubmit}>
+    <form className="community-join-form" onSubmit={handleSubmit}>
       <section className="form-section">
         <h2>פרטים אישיים</h2>
         <p className="form-hint">כל השדות המסומנים ב-* הם שדות חובה</p>

@@ -1,6 +1,7 @@
 import { useState } from "react";
 import CommunityMembershipCheck from "../../components/supportiveCommunity/CommunityMembershipCheck";
 import ServiceRequestForm from "../../components/supportiveCommunity/ServiceRequestForm";
+import "../../styles/supportive community/SupportiveCommunityPage.css";
 import "../../styles/supportive community/CommunityJoinForm.css";
 
 function ServiceRequestPage() {

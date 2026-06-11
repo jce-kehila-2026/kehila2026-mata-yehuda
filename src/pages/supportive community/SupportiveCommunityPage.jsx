@@ -271,35 +271,35 @@ function SupportiveCommunityPage() {
 
       <header className="community-hero">
         <div className="hero-shell">
-        <div className="hero-banner">
-          <img
-            className="hero-image"
-            src={HERO_IMAGE}
-            alt="מתנדבים מסייעים לאזרחים ותיקים — תמיכה קהילתית וליווי"
-            width={1000}
-            height={560}
-            decoding="async"
-            referrerPolicy="no-referrer"
-          />
-          <div className="hero-panel">
-            <p className="hero-org">עמותת ותיקי מטה יהודה</p>
-            <h1>קהילה תומכת</h1>
-            <p className="hero-lead">
-              שירותי תמיכה, ליווי וסיוע לבני 62+ בבית ובקהילה.
-            </p>
-            <p className="hero-price">
-              <span className="hero-price-value">160 ₪</span>
-              <span className="hero-price-label">לחודש</span>
-            </p>
-            <button
-              type="button"
-              className="btn btn-primary btn-hero"
-              onClick={() => navigate("/community-join")}
-            >
-              בקשת הצטרפות לקהילה תומכת
-            </button>
+          <div className="hero-banner">
+            <img
+              className="hero-image"
+              src={HERO_IMAGE}
+              alt="מתנדבים מסייעים לאזרחים ותיקים — תמיכה קהילתית וליווי"
+              width={1000}
+              height={560}
+              decoding="async"
+              referrerPolicy="no-referrer"
+            />
+            <div className="hero-panel">
+              <p className="hero-org">עמותת ותיקי מטה יהודה</p>
+              <h1>קהילה תומכת</h1>
+              <p className="hero-lead">
+                שירותי תמיכה, ליווי וסיוע לבני 62+ בבית ובקהילה.
+              </p>
+              <p className="hero-price">
+                <span className="hero-price-value">160 ₪</span>
+                <span className="hero-price-label">לחודש</span>
+              </p>
+              <button
+                type="button"
+                className="btn btn-primary btn-hero"
+                onClick={() => navigate("/community-join")}
+              >
+                בקשת הצטרפות לקהילה תומכת
+              </button>
+            </div>
           </div>
-        </div>
         </div>
       </header>
 
@@ -496,7 +496,10 @@ function SupportiveCommunityPage() {
               {FAQ_ITEMS.map((item, index) => {
                 const isOpen = openFaq === index;
                 return (
-                  <div className={`faq-item${isOpen ? " is-open" : ""}`} key={item.question}>
+                  <div
+                    className={`faq-item${isOpen ? " is-open" : ""}`}
+                    key={item.question}
+                  >
                     <button
                       type="button"
                       className="faq-trigger"
@@ -528,7 +531,11 @@ function SupportiveCommunityPage() {
 
       <div className="floating-contact">
         {contactOpen && (
-          <div className="floating-contact-panel" role="dialog" aria-label="יצירת קשר">
+          <div
+            className="floating-contact-panel"
+            role="dialog"
+            aria-label="יצירת קשר"
+          >
             <p className="floating-contact-title">יש לכם שאלה? דברו איתנו</p>
             <div className="floating-contact-list">
               {CONTACTS.map((contact) => (

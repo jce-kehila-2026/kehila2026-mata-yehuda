@@ -81,6 +81,7 @@ export const saveCommunityJoinRequest = async (formData) => {
     createdAt: serverTimestamp(),
   });
 };
+
 export const checkCommunityMembership = async (participantId, phone) => {
   const participantsQuery = query(
     collection(db, "participants"),
