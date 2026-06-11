@@ -1,4 +1,4 @@
-import { auth, db } from "../config/firebase";
+import { auth, db } from "../../config/firebase";
 import { createUserWithEmailAndPassword } from "firebase/auth";
 import {
     collection,
@@ -11,13 +11,13 @@ import {
     orderBy,
     limit
 } from "firebase/firestore";
-import { DEFAULT_STAFF_ROLE, normalizeStaffRole } from "../config/staffRoles";
-import { normalizeSearchQuery } from "../utils/adminListUtils";
+import { DEFAULT_STAFF_ROLE, normalizeStaffRole } from "../../config/staffRoles";
+import { normalizeSearchQuery } from "../../utils/staffManegmentUtils/adminListUtils";
 import {
     getStaffNameParts,
     matchesStaffStatusFilter,
     toSafeString
-} from "../utils/staffStatusLabels";
+} from "../../utils/staffManegmentUtils/staffStatusLabels";
 
 const staffCollection = collection(db, "staff");
 const ADMIN_QUERY_LIMIT = 1000;

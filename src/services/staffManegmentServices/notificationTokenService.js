@@ -1,4 +1,4 @@
-import { db } from "../config/firebase";
+import { db } from "../../config/firebase";
 import {
     collection,
     doc,
@@ -10,7 +10,7 @@ import {
     where
 } from "firebase/firestore";
 import { getParticipantNotificationGroups } from "./notificationGroupService";
-import { NOTIFICATION_GROUP_ALL } from "../utils/notificationGroupMapping";
+import { NOTIFICATION_GROUP_ALL } from "../../utils/staffManegmentUtils/notificationGroupMapping";
 
 export async function verifyParticipantForNotifications({ idNumber, phone }) {
     const normalizedId = String(idNumber || "").trim();

@@ -1,7 +1,7 @@
-import { auth } from "../config/firebase";
+import { auth } from "../../config/firebase";
 import {
     NOTIFICATION_BACKEND_REQUIRED_MESSAGE
-} from "../components/messages/helpers/messageHelpers";
+} from "../../components/messages/helpers/messageHelpers";
 
 function getNotificationsApiBase() {
     return import.meta.env.VITE_NOTIFICATIONS_API_URL?.trim().replace(/\/$/, "") || "";

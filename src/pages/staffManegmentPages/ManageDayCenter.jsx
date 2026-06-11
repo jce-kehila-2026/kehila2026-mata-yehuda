@@ -2,7 +2,7 @@ import { useEffect, useState } from "react";
 import {
     fetchDayCenter,
     saveDayCenter
-} from "../../staffManegmentServices/services/programService";
+} from "../../services/staffManegmentServices/programService";
 
 function ManageDayCenter() {
     const [description, setDescription] = useState("");

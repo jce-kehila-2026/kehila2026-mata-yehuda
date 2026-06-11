@@ -7,7 +7,7 @@ import {
     Lock,
     Mail
 } from "lucide-react";
-import { auth, db } from "../config/firebase";
+import { auth, db } from "../../config/firebase";
 import { signInWithEmailAndPassword, signOut } from "firebase/auth";
 import { doc, getDoc } from "firebase/firestore";
 import StaffDashboard from "./StaffDashboard";

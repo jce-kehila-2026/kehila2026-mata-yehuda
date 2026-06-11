@@ -1,6 +1,6 @@
-import { validateImageFile } from "../utils/imageFileUtils";
+import { validateImageFile } from "../../utils/staffManegmentUtils/imageFileUtils";
 
-export { IMAGE_ACCEPT, IMAGE_MAX_BYTES, validateImageFile } from "../utils/imageFileUtils";
+export { IMAGE_ACCEPT, IMAGE_MAX_BYTES, validateImageFile } from "../../utils/staffManegmentUtils/imageFileUtils";
 
 /** Max width after resize before JPEG compression. */
 export const IMAGE_MAX_WIDTH = 800;

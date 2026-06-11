@@ -1,5 +1,5 @@
 import { useNavigate } from "react-router-dom";
-import PublicParticipantLayout from "../layouts/PublicParticipantLayout";
+import PublicParticipantLayout from "../../layouts/PublicParticipantLayout";
 import "../styles/SupportiveCommunityPage.css";
 
 const FIXED_SERVICES = [

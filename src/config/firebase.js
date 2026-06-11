@@ -12,7 +12,7 @@ const firebaseConfig = {
   storageBucket: STORAGE_BUCKET,
   messagingSenderId: "264845791661",
   appId: "1:264845791661:web:bac32332d00b6323671124",
-  measurementId: "G-81XHVPCSNV"
+  measurementId: "G-81XHVPCSNV",
 };
 
 const app = initializeApp(firebaseConfig);

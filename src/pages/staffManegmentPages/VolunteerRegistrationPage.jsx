@@ -1,5 +1,5 @@
-import VolunteerRegistrationForm from "../components/volunteer/VolunteerRegistrationForm";
-import PublicParticipantLayout from "../layouts/PublicParticipantLayout";
+import VolunteerRegistrationForm from "../../components/volunteer/VolunteerRegistrationForm";
+import PublicParticipantLayout from "../../layouts/PublicParticipantLayout";
 import "../styles/SupportiveCommunityPage.css";
 import "../styles/CommunityJoinForm.css";
 

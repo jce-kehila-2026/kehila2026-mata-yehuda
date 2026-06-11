@@ -1,4 +1,4 @@
-import StaffLogin from "./pages/StaffLogin";
+import StaffLogin from "./pages/staffManegmentPages/StaffLogin";
 import "./App.css";
 
 function App() {

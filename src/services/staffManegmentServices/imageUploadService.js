@@ -1,10 +1,10 @@
 import { getDownloadURL, ref, uploadBytes } from "firebase/storage";
-import { auth, storage, STORAGE_BUCKET } from "../config/firebase";
+import { auth, storage, STORAGE_BUCKET } from "../../config/firebase";
 import {
     IMAGE_ACCEPT,
     IMAGE_MAX_BYTES,
     validateImageFile
-} from "../utils/imageFileUtils";
+} from "../../utils/staffManegmentUtils/imageFileUtils";
 
 export { IMAGE_ACCEPT, IMAGE_MAX_BYTES, validateImageFile };
 

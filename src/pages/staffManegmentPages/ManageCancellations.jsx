@@ -1,4 +1,4 @@
-import CancellationList from "../components/cancellations/lists/CancellationList";
+import CancellationList from "../../components/cancellations/lists/CancellationList";
 
 function ManageCancellations() {
     return (

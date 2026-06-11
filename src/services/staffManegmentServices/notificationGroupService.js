@@ -6,7 +6,7 @@ import {
 import {
     NOTIFICATION_GROUP_ALL,
     deriveNotificationGroupsFromRegistrations
-} from "../utils/notificationGroupMapping";
+} from "../../utils/staffManegmentUtils/notificationGroupMapping";
 
 /**
  * Resolves notification token groups for a verified participant.

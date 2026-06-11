@@ -13,7 +13,7 @@ import { getRegistrationFilterKey } from "./participantStatusLabels";
 import {
     getRegistrationActivityId,
     resolveRegistrationProgramId
-} from "../services/registrationService";
+} from "../../services/staffManegmentServices/registrationService";
 import { REGISTRATION_STATUS_PENDING } from "./initialRequestFilters";
 
 /** Must match Staff UI targetGroup values and backend `array-contains` queries. */
