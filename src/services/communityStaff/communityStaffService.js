@@ -9,7 +9,7 @@ import {
   updateDoc,
   where,
 } from "firebase/firestore";
-import { db } from "../config/firebase";
+import { db } from "../../config/firebase";
 
 async function loadLanguageLookup() {
   const snapshot = await getDocs(collection(db, "languages"));

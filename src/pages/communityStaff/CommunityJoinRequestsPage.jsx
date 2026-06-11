@@ -1,4 +1,4 @@
-import CommunityJoinRequestsTable from "../components/communityStaff/CommunityJoinRequestsTable";
+import CommunityJoinRequestsTable from "../../components/communityStaff/CommunityJoinRequestsTable";
 import "../styles/CommunityStaffDashboard.css";
 
 function CommunityJoinRequestsPage() {

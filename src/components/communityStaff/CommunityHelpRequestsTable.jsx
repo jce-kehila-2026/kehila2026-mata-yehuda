@@ -3,7 +3,7 @@ import {
   approveHelpRequestMatch,
   getPendingHomeHelpRequests,
   getSuggestedVolunteersForRequest,
-} from "../../services/communityStaffService";
+} from "../../services/communityStaff/communityStaffService";
 
 function formatStringArray(value) {
   if (!Array.isArray(value) || value.length === 0) {

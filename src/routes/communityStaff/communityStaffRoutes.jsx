@@ -1,13 +1,9 @@
-import CommunityStaffDashboardPage from "../pages/CommunityStaffDashboardPage";
-import CommunityHelpRequestsPage from "../pages/CommunityHelpRequestsPage";
-import CommunityJoinRequestsPage from "../pages/CommunityJoinRequestsPage";
-import VolunteerRequestsPage from "../pages/VolunteerRequestsPage";
+import CommunityStaffDashboardPage from "../../pages/communityStaff/CommunityStaffDashboardPage";
+import CommunityHelpRequestsPage from "../../pages/communityStaff/CommunityHelpRequestsPage";
+import CommunityJoinRequestsPage from "../../pages/communityStaff/CommunityJoinRequestsPage";
+import VolunteerRequestsPage from "../../pages/communityStaff/VolunteerRequestsPage";
 
 const communityStaffRoutes = [
-  {
-    path: "/",
-    element: <CommunityStaffDashboardPage />,
-  },
   {
     path: "/community-staff",
     element: <CommunityStaffDashboardPage />,

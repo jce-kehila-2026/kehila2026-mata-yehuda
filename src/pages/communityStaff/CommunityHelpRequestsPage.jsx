@@ -1,4 +1,4 @@
-import CommunityHelpRequestsTable from "../components/communityStaff/CommunityHelpRequestsTable";
+import CommunityHelpRequestsTable from "../../components/communityStaff/CommunityHelpRequestsTable";
 import "../styles/CommunityStaffDashboard.css";
 
 function CommunityHelpRequestsPage() {
