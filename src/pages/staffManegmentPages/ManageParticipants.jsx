@@ -1,8 +1,8 @@
 import { useEffect, useState } from "react";
-import AddParticipant from "../components/participants/forms/AddParticipant";
-import ParticipantList from "../components/participants/lists/ParticipantList";
-import EditParticipant from "../components/participants/forms/EditParticipant";
-import { buildStaffPage, staffNavigateBack } from "../utils/staffNavigation";
+import AddParticipant from "../../components/participants/forms/AddParticipant";
+import ParticipantList from "../../components/participants/lists/ParticipantList";
+import EditParticipant from "../../components/participants/forms/EditParticipant";
+import { buildStaffPage, staffNavigateBack } from "../../utils/staffManegmentUtils/staffNavigation";
 
 function ManageParticipants({ participantView, onNavigate }) {
     const [selectedParticipant, setSelectedParticipant] = useState(null);

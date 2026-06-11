@@ -1,11 +1,11 @@
 import { useEffect, useRef, useState } from "react";
 import FormImageUpload from "../shared/FormImageUpload";
 import FormActionRow from "../shared/FormActionRow";
-import { prepareProgramImageUrl } from "../../services/programImageService";
+import { prepareProgramImageUrl } from "../../services/staffManegmentServices/programImageService";
 import {
     formatProgramTitle,
     isFixedProgramId
-} from "../../utils/programConstants";
+} from "../../utils/staffManegmentUtils/programConstants";
 
 function ProgramForm({
     editingProgram,

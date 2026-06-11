@@ -1,5 +1,5 @@
-import { formatProgramTitle } from "../../utils/programConstants";
-import { hasValue } from "../../utils/hasValue";
+import { formatProgramTitle } from "../../utils/staffManegmentUtils/programConstants";
+import { hasValue } from "../../utils/staffManegmentUtils/hasValue";
 import {
     AdminTableActions,
     AdminTableDeleteButton,

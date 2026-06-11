@@ -6,7 +6,7 @@ import {
     useState
 } from "react";
 import { ImageUp, Pencil, Trash2 } from "lucide-react";
-import { IMAGE_ACCEPT, validateImageFile } from "../../utils/imageFileUtils";
+import { IMAGE_ACCEPT, validateImageFile } from "../../utils/staffManegmentUtils/imageFileUtils";
 
 function FormImageUpload(
     {

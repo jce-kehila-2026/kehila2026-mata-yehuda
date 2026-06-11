@@ -1,7 +1,7 @@
 import {
     getStaffActiveBadgeVariant,
     getStaffActiveStatusLabel
-} from "../../utils/staffStatusLabels";
+} from "../../utils/staffManegmentUtils/staffStatusLabels";
 
 function StaffStatusBadge({ isActive }) {
     const variant = getStaffActiveBadgeVariant(isActive);

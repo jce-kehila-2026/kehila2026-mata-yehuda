@@ -1,6 +1,6 @@
-import { maskIdNumber } from "../../../utils/maskIdNumber";
-import { toSafeString } from "../../../utils/participantStatusLabels";
-import { hasValue } from "../../../utils/hasValue";
+import { maskIdNumber } from "../../../utils/staffManegmentUtils/maskIdNumber";
+import { toSafeString } from "../../../utils/staffManegmentUtils/participantStatusLabels";
+import { hasValue } from "../../../utils/staffManegmentUtils/hasValue";
 import ParticipantStatusBadge from "../ParticipantStatusBadge";
 import { MaskedIdDisplay, ProgramDisplayName } from "../ParticipantListStats";
 

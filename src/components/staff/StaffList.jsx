@@ -22,13 +22,13 @@ import {
     fetchStaffForAdminList,
     filterStaffList,
     getStaffSortValue
-} from "../../services/staffService";
-import { computeStaffListStats } from "../../utils/staffListStats";
+} from "../../services/staffManegmentServices/staffService";
+import { computeStaffListStats } from "../../utils/staffManegmentUtils/staffListStats";
 import {
     getStaffFullName,
     STAFF_STATUS_FILTER_OPTIONS,
     toSafeString
-} from "../../utils/staffStatusLabels";
+} from "../../utils/staffManegmentUtils/staffStatusLabels";
 
 const STAFF_COLUMNS = [
     { key: "name", label: "שם", sortKey: "name" },

@@ -26,21 +26,21 @@ import {
     fetchParticipantsForAdminList,
     filterParticipantsList,
     getParticipantSortValue
-} from "../../../services/participantService";
-import { fetchProgramsForAdminList } from "../../../services/programService";
-import { formatDate } from "../../../utils/dateUtils";
-import { maskIdNumber } from "../../../utils/maskIdNumber";
-import { computeParticipantListStats } from "../../../utils/participantListStats";
+} from "../../../services/staffManegmentServices/participantService";
+import { fetchProgramsForAdminList } from "../../../services/staffManegmentServices/programService";
+import { formatDate } from "../../../utils/staffManegmentUtils/dateUtils";
+import { maskIdNumber } from "../../../utils/staffManegmentUtils/maskIdNumber";
+import { computeParticipantListStats } from "../../../utils/staffManegmentUtils/participantListStats";
 import {
     resolveCanonicalProgramId,
     resolveProgramDisplayTitle
-} from "../../../utils/programConstants";
+} from "../../../utils/staffManegmentUtils/programConstants";
 import {
     PAYMENT_STATUS_FILTER_OPTIONS,
     REGISTRATION_STATUS_FILTER_OPTIONS,
     toSafeString
-} from "../../../utils/participantStatusLabels";
-import { hasFormattedDisplay, hasValue } from "../../../utils/hasValue";
+} from "../../../utils/staffManegmentUtils/participantStatusLabels";
+import { hasFormattedDisplay, hasValue } from "../../../utils/staffManegmentUtils/hasValue";
 
 const PARTICIPANT_COLUMNS = [
     { key: "name", label: "שם", sortKey: "name" },

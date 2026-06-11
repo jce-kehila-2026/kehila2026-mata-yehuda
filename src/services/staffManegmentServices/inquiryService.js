@@ -1,6 +1,6 @@
 import { collection, getDocs } from "firebase/firestore";
-import { db } from "../config/firebase";
-import { formatIsraeliDate, toActivityDate } from "../utils/dateUtils";
+import { db } from "../../config/firebase";
+import { formatIsraeliDate, toActivityDate } from "../../utils/dateUtils";
 
 const inquiriesCollection = collection(db, "inquiries");
 

@@ -5,14 +5,14 @@ import {
     ACTIVITY_IMAGE_ACCEPT,
     uploadActivityImage,
     validateActivityImageFile
-} from "../../services/activityImageService";
+} from "../../services/staffManegmentServices/activityImageService";
 import FormActionRow from "../shared/FormActionRow";
-import { getDayOfWeekFromActivityDate, parseLocalDateInput } from "../../utils/dateUtils";
+import { getDayOfWeekFromActivityDate, parseLocalDateInput } from "../../utils/staffManegmentUtils/dateUtils";
 import {
     getRegistrationAvailabilityLabel,
     isRegistrationOpenForDeadlineInput,
     REGISTRATION_AVAILABILITY_LABELS
-} from "../../utils/activityStatus";
+} from "../../utils/staffManegmentUtils/activityStatus";
 
 function ActivityForm({
     activityTypes,

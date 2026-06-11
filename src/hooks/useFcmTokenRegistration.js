@@ -7,7 +7,7 @@ import {
     saveNotificationToken,
     storeFcmTokenLocally,
     touchNotificationToken
-} from "../services/notificationTokenService";
+} from "../services/staffManegmentServices/notificationTokenService";
 
 async function registerServiceWorker() {
     if (!("serviceWorker" in navigator)) {

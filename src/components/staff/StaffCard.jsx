@@ -1,5 +1,5 @@
-import { hasValue } from "../../utils/hasValue";
-import { getStaffFullName } from "../../utils/staffStatusLabels";
+import { hasValue } from "../../utils/staffManegmentUtils/hasValue";
+import { getStaffFullName } from "../../utils/staffManegmentUtils/staffStatusLabels";
 import StaffStatusBadge from "./StaffStatusBadge";
 import {
     AdminTableActions,

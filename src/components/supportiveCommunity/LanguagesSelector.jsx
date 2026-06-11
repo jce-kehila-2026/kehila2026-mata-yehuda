@@ -1,5 +1,5 @@
 import { useEffect, useState } from "react";
-import { getActiveLanguages } from "../../services/supportiveCommunityService";
+import { getActiveLanguages } from "../../services/staffManegmentServices/supportiveCommunityService";
 
 function LanguagesSelector({
   selectedLanguages = [],

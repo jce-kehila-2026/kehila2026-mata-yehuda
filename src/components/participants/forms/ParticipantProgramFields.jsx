@@ -2,7 +2,7 @@ import { useEffect } from "react";
 import {
     formatProgramTitle,
     isActivityBasedProgram
-} from "../../../utils/programConstants";
+} from "../../../utils/staffManegmentUtils/programConstants";
 
 const EDIT_PARTICIPANT_DEBUG_PARTICIPANT_ID = "a6SqVwA9kZHOVcc2lyam";
 

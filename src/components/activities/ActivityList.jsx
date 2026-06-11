@@ -15,7 +15,7 @@ import {
     filterActivitiesList,
     formatActivityOccupancy,
     getActivitySortValue
-} from "../../services/activityService";
+} from "../../services/staffManegmentServices/activityService";
 import {
     AdminTableActions,
     AdminTableDeleteButton,
@@ -24,7 +24,7 @@ import {
 import {
     formatActivityDateOnly,
     formatActivityWeekday
-} from "../../utils/dateUtils";
+} from "../../utils/staffManegmentUtils/dateUtils";
 
 const ACTIVITY_COLUMNS = [
     { key: "name", label: "שם הפעילות", sortKey: "name" },

@@ -1,13 +1,13 @@
 import { useState, useEffect } from "react";
-import { buildStaffPage, staffNavigateBack } from "../utils/staffNavigation";
+import { buildStaffPage, staffNavigateBack } from "../../utils/staffManegmentUtils/staffNavigation";
 import {
     addActivity,
     updateActivity,
     deleteActivity
-} from "../services/activityService";
+} from "../../services/staffManegmentServices/activityService";
 
-import ActivityForm from "../components/activities/ActivityForm";
-import ActivityList from "../components/activities/ActivityList";
+import ActivityForm from "../../components/activities/ActivityForm";
+import ActivityList from "../../components/activities/ActivityList";
 
 function ManageActivities({ activityView, onNavigate }) {
     const [error, setError] = useState("");

@@ -1,6 +1,6 @@
-import { formatDate } from "../../utils/dateUtils";
+import { formatDate } from "../../utils/staffManegmentUtils/dateUtils";
 import { getNotificationTargetGroupLabel } from "./helpers/messageHelpers";
-import { hasFormattedDisplay } from "../../utils/hasValue";
+import { hasFormattedDisplay } from "../../utils/staffManegmentUtils/hasValue";
 
 function NotificationRecentActivity({ items = [], loading }) {
     return (

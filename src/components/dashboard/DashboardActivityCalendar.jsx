@@ -9,8 +9,8 @@ import {
     getUpcomingActivities,
     groupActivitiesByLocalDay,
     HEBREW_WEEKDAY_HEADERS
-} from "../../utils/dashboardActivityCalendar";
-import { startOfLocalDay } from "../../utils/dateUtils";
+} from "../../utils/staffManegmentUtils/dashboardActivityCalendar";
+import { startOfLocalDay } from "../../utils/staffManegmentUtils/dateUtils";
 
 function DashboardPanelLink({ label, onClick, disabled }) {
     return (

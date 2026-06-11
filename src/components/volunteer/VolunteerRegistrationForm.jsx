@@ -2,7 +2,7 @@ import { useState } from "react";
 import {
   saveVolunteerData,
   checkIfVolunteerExists,
-} from "../../services/volunteerService";
+} from "../../services/staffManegmentServices/volunteerService";
 
 import HelpServicesSelector from "../supportiveCommunity/HelpServicesSelector";
 import LanguagesSelector from "../supportiveCommunity/LanguagesSelector";

@@ -1,5 +1,5 @@
 import { STAFF_NAVIGATION_GROUPS } from "../../config/staffNavigationGroups";
-import { getStaffSection } from "../../utils/staffNavigation";
+import { getStaffSection } from "../../utils/staffManegmentUtils/staffNavigation";
 
 function isStaffNavItemActive(currentPage, actionPage) {
     if (!actionPage) {

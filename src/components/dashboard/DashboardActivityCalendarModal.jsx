@@ -1,11 +1,11 @@
 import ActivityStatusBadge from "../activities/ActivityStatusBadge";
-import { formatActivityOccupancy } from "../../services/activityService";
+import { formatActivityOccupancy } from "../../services/staffManegmentServices/activityService";
 import {
     formatActivityDateOnly,
     formatActivityWeekday,
     formatTime
-} from "../../utils/dateUtils";
-import { hasDisplayNumber, hasValue } from "../../utils/hasValue";
+} from "../../utils/staffManegmentUtils/dateUtils";
+import { hasDisplayNumber, hasValue } from "../../utils/staffManegmentUtils/hasValue";
 
 function DashboardActivityDetailCard({ activity }) {
     const data = activity.data || {};

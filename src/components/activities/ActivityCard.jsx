@@ -1,8 +1,8 @@
-import { formatDate, formatTime } from "../../utils/dateUtils";
+import { formatDate, formatTime } from "../../utils/staffManegmentUtils/dateUtils";
 import ActivityDateDisplay from "./ActivityDateDisplay";
-import { formatActivityOccupancy } from "../../services/activityService";
+import { formatActivityOccupancy } from "../../services/staffManegmentServices/activityService";
 import ActivityStatusBadge from "./ActivityStatusBadge";
-import { hasDisplayNumber, hasFormattedDisplay, hasValue } from "../../utils/hasValue";
+import { hasDisplayNumber, hasFormattedDisplay, hasValue } from "../../utils/staffManegmentUtils/hasValue";
 
 function ActivityCard({ activity, onDelete, onEdit }) {
     const data = activity.data;

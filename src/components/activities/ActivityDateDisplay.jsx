@@ -1,7 +1,7 @@
 import {
     formatActivityDateOnly,
     formatActivityWeekday
-} from "../../utils/dateUtils";
+} from "../../utils/staffManegmentUtils/dateUtils";
 
 function ActivityDateDisplay({ startDate, className = "" }) {
     const weekday = formatActivityWeekday(startDate);

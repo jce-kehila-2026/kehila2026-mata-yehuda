@@ -1,4 +1,4 @@
-import { getPaymentStatusLabel } from "../../../utils/participantStatusLabels";
+import { getPaymentStatusLabel } from "../../../utils/staffManegmentUtils/participantStatusLabels";
 
 export const REFUND_STATUS_PENDING = "ממתין";
 export const REFUND_STATUS_REFUNDED = "הוחזר";

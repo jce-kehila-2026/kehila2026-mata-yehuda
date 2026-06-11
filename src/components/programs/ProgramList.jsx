@@ -18,11 +18,11 @@ import {
     fetchProgramsForAdminList,
     filterProgramsList,
     getProgramSortValue
-} from "../../services/programService";
+} from "../../services/staffManegmentServices/programService";
 import {
     formatProgramTitle,
     isFixedProgram
-} from "../../utils/programConstants";
+} from "../../utils/staffManegmentUtils/programConstants";
 
 const PROGRAM_COLUMNS = [
     { key: "image", label: "תמונה" },

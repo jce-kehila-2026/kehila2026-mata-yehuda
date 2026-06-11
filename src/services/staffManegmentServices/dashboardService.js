@@ -1,5 +1,5 @@
 import { collection, getDocs } from "firebase/firestore";
-import { db } from "../config/firebase";
+import { db } from "../../config/firebase";
 import { fetchActivities } from "./activityService";
 import { getCancellationRequests } from "./cancellationService";
 import { fetchOpenInquiries } from "./inquiryService";

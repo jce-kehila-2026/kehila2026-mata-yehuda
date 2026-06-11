@@ -1,4 +1,4 @@
-import { db } from "../config/firebase";
+import { db } from "../../config/firebase";
 import {
     addDoc,
     collection,
@@ -11,12 +11,12 @@ import {
     orderBy,
     limit
 } from "firebase/firestore";
-import { normalizeSearchQuery } from "../utils/adminListUtils";
-import { getActivityWeekdaySortValue } from "../utils/dateUtils";
+import { normalizeSearchQuery } from "../../utils/staffManegmentUtils/adminListUtils";
+import { getActivityWeekdaySortValue } from "../../utils/staffManegmentUtils/dateUtils";
 import {
     getActivityStatusSortValue,
     matchesActivityOpenFilter
-} from "../utils/activityStatus";
+} from "../../utils/staffManegmentUtils/activityStatus";
 
 const activitiesCollection = collection(db, "activities");
 const ADMIN_QUERY_LIMIT = 1000;

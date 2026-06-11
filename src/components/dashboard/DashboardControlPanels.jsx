@@ -1,6 +1,6 @@
 import { formatCancellationDate } from "../cancellations/helpers/cancellationHelpers";
-import { getRequestProgramLabel } from "../../services/dashboardService";
-import { formatInquiryDate } from "../../services/inquiryService";
+import { getRequestProgramLabel } from "../../services/staffManegmentServices/dashboardService";
+import { formatInquiryDate } from "../../services/staffManegmentServices/inquiryService";
 import { getStaffInquiriesRoute } from "../../config/staffInquiriesNavigation";
 import DashboardActivityCalendar from "./DashboardActivityCalendar";
 import ActivityDateDisplay from "../activities/ActivityDateDisplay";
@@ -9,7 +9,7 @@ import {
     formatRelativeTimeHebrew,
     getWeekActivities,
     RECENT_UPDATES_PLACEHOLDERS
-} from "../../utils/dashboardDisplayHelpers";
+} from "../../utils/staffManegmentUtils/dashboardDisplayHelpers";
 
 const PANEL_PREVIEW_LIMIT = 3;
 const PENDING_REQUESTS_PREVIEW_LIMIT = 2;

@@ -1,6 +1,6 @@
 import { useEffect, useState } from "react";
-import { fetchPrograms } from "../../../services/programService";
-import { fetchActivities } from "../../../services/activityService";
+import { fetchPrograms } from "../../../services/staffManegmentServices/programService";
+import { fetchActivities } from "../../../services/staffManegmentServices/activityService";
 
 export function useParticipantForm() {
     const [programs, setPrograms] = useState([]);

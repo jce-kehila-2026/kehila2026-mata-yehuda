@@ -3,7 +3,7 @@ import {
     DEFAULT_STAFF_ROLE,
     STAFF_ROLE_OPTIONS
 } from "../../config/staffRoles";
-import { addStaffMember } from "../../services/staffService";
+import { addStaffMember } from "../../services/staffManegmentServices/staffService";
 import FormActionRow from "../shared/FormActionRow";
 
 function AddStaffMember({ onSuccess, onCancel }) {

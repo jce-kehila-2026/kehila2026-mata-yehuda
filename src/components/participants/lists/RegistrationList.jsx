@@ -18,10 +18,10 @@ import {
     DAY_CENTER_NAME,
     PROGRAM_60_PLUS_MINUS_DISPLAY_NAME,
     PROGRAM_60_PLUS_MINUS_ID
-} from "../../../utils/programConstants";
-import { maskIdNumber } from "../../../utils/maskIdNumber";
-import { toSafeString } from "../../../utils/participantStatusLabels";
-import { hasValue } from "../../../utils/hasValue";
+} from "../../../utils/staffManegmentUtils/programConstants";
+import { maskIdNumber } from "../../../utils/staffManegmentUtils/maskIdNumber";
+import { toSafeString } from "../../../utils/staffManegmentUtils/participantStatusLabels";
+import { hasValue } from "../../../utils/staffManegmentUtils/hasValue";
 
 const PROGRAM_FILTER_ALL = "all";
 

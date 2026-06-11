@@ -1,17 +1,17 @@
 import { useEffect, useState } from "react";
-import { buildStaffPage, staffNavigateBack } from "../utils/staffNavigation";
+import { buildStaffPage, staffNavigateBack } from "../../utils/staffManegmentUtils/staffNavigation";
 import {
     addProgram,
     updateProgram,
     deleteProgram
-} from "../services/programService";
+} from "../../services/staffManegmentServices/programService";
 import {
     getProgramsPageTitle,
     getProgramUpdateSuccessMessage,
     isFixedProgramId
-} from "../utils/programConstants";
-import ProgramForm from "../components/programs/ProgramForm";
-import ProgramList from "../components/programs/ProgramList";
+} from "../../utils/staffManegmentUtils/programConstants";
+import ProgramForm from "../../components/programs/ProgramForm";
+import ProgramList from "../../components/programs/ProgramList";
 
 function ManagePrograms({ programView, onNavigate }) {
     const [editingProgram, setEditingProgram] = useState(null);

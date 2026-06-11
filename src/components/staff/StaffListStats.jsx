@@ -1,4 +1,4 @@
-import { buildStaffSummaryItems } from "../../utils/staffListStats";
+import { buildStaffSummaryItems } from "../../utils/staffManegmentUtils/staffListStats";
 
 function StaffListStats({ stats }) {
     const items = buildStaffSummaryItems(stats);

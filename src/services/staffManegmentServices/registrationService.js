@@ -1,4 +1,4 @@
-import { db } from "../config/firebase";
+import { db } from "../../config/firebase";
 import {
     addDoc,
     collection,
@@ -15,7 +15,7 @@ import {
     getFixedProgramTitle,
     getProgramTypeById,
     resolveCanonicalProgramId
-} from "../utils/programConstants";
+} from "../../utils/staffManegmentUtils/programConstants";
 import {
     formatParticipantDisplayName,
     hasRequiredRegistrationDisplayFields,
@@ -23,7 +23,7 @@ import {
     matchesViewRegistrationsActivityFilter,
     matchesViewRegistrationsProgramFilter,
     REGISTRATION_STATUS_COMPLETED
-} from "../utils/initialRequestFilters";
+} from "../../utils/staffManegmentUtils/initialRequestFilters";
 import { fetchActivities } from "./activityService";
 
 const registrationsCollection = collection(db, "registrations");

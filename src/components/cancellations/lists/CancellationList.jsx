@@ -36,12 +36,12 @@ import {
     getCancellationRequests,
     getCancellationSortValue,
     updateRefundStatus
-} from "../../../services/cancellationService";
+} from "../../../services/staffManegmentServices/cancellationService";
 import {
     resolveCanonicalProgramId,
     resolveProgramDisplayTitle
-} from "../../../utils/programConstants";
-import { STAFF_CANCELLATION_ID_KEY } from "../../../utils/staffNavigation";
+} from "../../../utils/staffManegmentUtils/programConstants";
+import { STAFF_CANCELLATION_ID_KEY } from "../../../utils/staffManegmentUtils/staffNavigation";
 
 const CANCELLATION_COLUMNS = [
     { key: "participant", label: "שם משתתף", sortKey: "participant" },

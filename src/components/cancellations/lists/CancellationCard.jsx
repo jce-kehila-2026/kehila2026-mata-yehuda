@@ -5,7 +5,7 @@ import {
     formatPaymentMethodLabel,
     REFUND_STATUS_REFUNDED
 } from "../helpers/cancellationHelpers";
-import { hasFormattedDisplay, hasValue } from "../../../utils/hasValue";
+import { hasFormattedDisplay, hasValue } from "../../../utils/staffManegmentUtils/hasValue";
 import {
     AdminTableActions,
     AdminTableEditButton,

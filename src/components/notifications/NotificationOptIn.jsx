@@ -1,6 +1,6 @@
 import { useState } from "react";
 import { useFcmTokenRegistration } from "../../hooks/useFcmTokenRegistration";
-import { verifyParticipantForNotifications } from "../../services/notificationTokenService";
+import { verifyParticipantForNotifications } from "../../services/staffManegmentServices/notificationTokenService";
 
 function NotificationOptIn() {
     const [idNumber, setIdNumber] = useState("");

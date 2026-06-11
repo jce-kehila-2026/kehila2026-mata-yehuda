@@ -1,4 +1,4 @@
-import { db } from "../config/firebase";
+import { db } from "../../config/firebase";
 import {
     addDoc,
     collection,
@@ -9,7 +9,7 @@ import {
     updateDoc,
     deleteDoc
 } from "firebase/firestore";
-import { normalizeSearchQuery } from "../utils/adminListUtils";
+import { normalizeSearchQuery } from "../../utils/staffManegmentUtils/adminListUtils";
 import {
     DAY_CENTER_ID,
     DAY_CENTER_NAME,
@@ -20,7 +20,7 @@ import {
     getFixedProgramById,
     isDeprecatedFixedProgramId,
     isFixedProgramId
-} from "../utils/programConstants";
+} from "../../utils/staffManegmentUtils/programConstants";
 
 export {
     DAY_CENTER_ID,
@@ -34,7 +34,7 @@ export {
     isFixedProgram,
     isFixedProgramId,
     isDayCenterEntry
-} from "../utils/programConstants";
+} from "../../utils/staffManegmentUtils/programConstants";
 
 const programsCollection = collection(db, "programs");
 const dayCenterRef = doc(db, "programs", DAY_CENTER_ID);

@@ -3,7 +3,7 @@ import HelpServicesSelector from "./HelpServicesSelector";
 import LanguagesSelector from "./LanguagesSelector";
 import "../../styles/SupportiveCommunityPage.css";
 import "../../styles/CommunityJoinForm.css";
-import { saveCommunityJoinRequest } from "../../services/supportiveCommunityService";
+import { saveCommunityJoinRequest } from "../../services/staffManegmentServices/supportiveCommunityService";
 
 function CommunityJoinForm() {
   const [communityJoinForm, setCommunityJoinForm] = useState({

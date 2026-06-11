@@ -1,5 +1,5 @@
-import { buildParticipantSummaryItems } from "../../utils/participantListStats";
-import { shouldDisplayProgramTitleLtr } from "../../utils/programConstants";
+import { buildParticipantSummaryItems } from "../../utils/staffManegmentUtils/participantListStats";
+import { shouldDisplayProgramTitleLtr } from "../../utils/staffManegmentUtils/programConstants";
 
 function ProgramDisplayName({ title }) {
     if (!title || title === "—") {

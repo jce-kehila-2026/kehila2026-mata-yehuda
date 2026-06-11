@@ -1,4 +1,4 @@
-import { getActivityDisplayStatus } from "../../utils/activityStatus";
+import { getActivityDisplayStatus } from "../../utils/staffManegmentUtils/activityStatus";
 
 function ActivityStatusBadge({ data, className = "" }) {
     const { label, badgeClass } = getActivityDisplayStatus(data);

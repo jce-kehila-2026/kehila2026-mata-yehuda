@@ -4,7 +4,7 @@ import {
     STAFF_ROLE_OPTIONS,
     normalizeStaffRole
 } from "../../config/staffRoles";
-import { updateStaffMember } from "../../services/staffService";
+import { updateStaffMember } from "../../services/staffManegmentServices/staffService";
 import FormActionRow from "../shared/FormActionRow";
 
 function EditStaffMember({ staff, onCompleted, onCancel }) {

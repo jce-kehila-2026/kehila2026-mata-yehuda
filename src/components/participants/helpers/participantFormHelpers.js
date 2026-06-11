@@ -1,23 +1,23 @@
 import {
     getRegistrationActivityId,
     getRegistrationProgramId
-} from "../../../services/registrationService";
+} from "../../../services/staffManegmentServices/registrationService";
 import {
     getFixedProgramTitle,
     isActivityRequiredForProgram,
     resolveCanonicalProgramId
-} from "../../../utils/programConstants";
+} from "../../../utils/staffManegmentUtils/programConstants";
 import {
     applyProgramSelection,
     applyActivitySelection
-} from "../../../utils/programSelectionHelpers";
-import { formatDate } from "../../../utils/dateUtils";
+} from "../../../utils/staffManegmentUtils/programSelectionHelpers";
+import { formatDate } from "../../../utils/staffManegmentUtils/dateUtils";
 
 export { applyProgramSelection, applyActivitySelection };
-export { isActivityRequiredForProgram } from "../../../utils/programConstants";
+export { isActivityRequiredForProgram } from "../../../utils/staffManegmentUtils/programConstants";
 
 /** @deprecated Phase 1 — use isActivityBasedProgram; kept for RegistrationCard until Phase 2 */
-export { is60PlusProgram } from "../../../utils/programSelectionHelpers";
+export { is60PlusProgram } from "../../../utils/staffManegmentUtils/programSelectionHelpers";
 
 /** Fields stored on the participants collection only. */
 export const PARTICIPANT_PERSONAL_FIELD_KEYS = [

@@ -1,4 +1,4 @@
-import { db } from "../config/firebase";
+import { db } from "../../config/firebase";
 import {
     addDoc,
     collection,
@@ -11,15 +11,15 @@ import {
     orderBy,
     limit
 } from "firebase/firestore";
-import { normalizeSearchQuery } from "../utils/adminListUtils";
-import { resolveCanonicalProgramId } from "../utils/programConstants";
-import { toSafeString, matchesPaymentStatusFilter, matchesRegistrationStatusFilter } from "../utils/participantStatusLabels";
-import { shouldShowParticipantAsInitialRequest } from "../utils/initialRequestFilters";
+import { normalizeSearchQuery } from "../../utils/staffManegmentUtils/adminListUtils";
+import { resolveCanonicalProgramId } from "../../utils/staffManegmentUtils/programConstants";
+import { toSafeString, matchesPaymentStatusFilter, matchesRegistrationStatusFilter } from "../../utils/staffManegmentUtils/participantStatusLabels";
+import { shouldShowParticipantAsInitialRequest } from "../../utils/staffManegmentUtils/initialRequestFilters";
 import {
     extractParticipantPersonalFields,
     validateParticipantForm
-} from "../components/participants/helpers/participantFormHelpers";
-import { parseBirthDateToTimestamp } from "../utils/dateUtils";
+} from "../../components/participants/helpers/participantFormHelpers";
+import { parseBirthDateToTimestamp } from "../../utils/staffManegmentUtils/dateUtils";
 import {
     createInitialRegistration,
     completeRegistration,
@@ -176,7 +176,7 @@ export async function fetchParticipantsForAdminList() {
 export {
     REGISTRATION_STATUS_COMPLETED,
     shouldShowParticipantAsInitialRequest as shouldShowAsInitialRequest
-} from "../utils/initialRequestFilters";
+} from "../../utils/staffManegmentUtils/initialRequestFilters";
 
 function buildPersonalParticipantPayload(participantData) {
     const personal = extractParticipantPersonalFields(participantData);

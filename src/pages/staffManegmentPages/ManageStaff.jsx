@@ -1,8 +1,8 @@
 import { useEffect, useState } from "react";
-import AddStaffMember from "../components/staff/AddStaffMember";
-import StaffList from "../components/staff/StaffList";
-import EditStaffMember from "../components/staff/EditStaffMember";
-import { buildStaffPage, staffNavigateBack } from "../utils/staffNavigation";
+import AddStaffMember from "../../components/staff/AddStaffMember";
+import StaffList from "../../components/staff/StaffList";
+import EditStaffMember from "../../components/staff/EditStaffMember";
+import { buildStaffPage, staffNavigateBack } from "../../utils/staffManegmentUtils/staffNavigation";
 
 function ManageStaff({ staffView, onNavigate }) {
     const [selectedStaff, setSelectedStaff] = useState(null);

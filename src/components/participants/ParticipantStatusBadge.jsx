@@ -4,7 +4,7 @@ import {
     getRegistrationStatusBadgeVariant,
     getRegistrationStatusLabel,
     UNKNOWN_STATUS_LABEL
-} from "../../utils/participantStatusLabels";
+} from "../../utils/staffManegmentUtils/participantStatusLabels";
 
 function ParticipantStatusBadge({ type, status }) {
     const label =

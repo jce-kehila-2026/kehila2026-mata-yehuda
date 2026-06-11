@@ -2,8 +2,8 @@ import { useEffect, useState } from "react";
 import {
     completeParticipantRegistration,
     updateParticipant
-} from "../../../services/participantService";
-import { fetchRegistrationByParticipantId } from "../../../services/registrationService";
+} from "../../../services/staffManegmentServices/participantService";
+import { fetchRegistrationByParticipantId } from "../../../services/staffManegmentServices/registrationService";
 import { useParticipantForm } from "../hooks/useParticipantForm";
 import ParticipantProgramFields from "./ParticipantProgramFields";
 import FormActionRow from "../../shared/FormActionRow";

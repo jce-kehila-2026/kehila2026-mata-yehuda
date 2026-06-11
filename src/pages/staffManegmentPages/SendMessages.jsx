@@ -1,15 +1,15 @@
 import { useCallback, useEffect, useState } from "react";
-import MessageForm from "../components/messages/forms/MessageForm";
-import NotificationRecentActivity from "../components/messages/NotificationRecentActivity";
-import NotificationStatsCards from "../components/messages/NotificationStatsCards";
+import MessageForm from "../../components/messages/forms/MessageForm";
+import NotificationRecentActivity from "../../components/messages/NotificationRecentActivity";
+import NotificationStatsCards from "../../components/messages/NotificationStatsCards";
 import {
     formatNotificationSummary,
     NOTIFICATION_BACKEND_REQUIRED_MESSAGE,
     NOTIFICATION_COMPLIANCE_NOTE,
     validateNotificationMessage
-} from "../components/messages/helpers/messageHelpers";
-import { fetchNotificationDashboardData } from "../services/notificationDashboardService";
-import { sendPushNotification } from "../services/notificationService";
+} from "../../components/messages/helpers/messageHelpers";
+import { fetchNotificationDashboardData } from "../../services/staffManegmentServices/notificationDashboardService";
+import { sendPushNotification } from "../../services/staffManegmentServices/notificationService";
 
 function SendMessages() {
     const [title, setTitle] = useState("מטה יהודה");

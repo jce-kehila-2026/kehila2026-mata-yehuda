@@ -13,9 +13,9 @@ import {
     Users
 } from "lucide-react";
 import { signOut } from "firebase/auth";
-import { auth } from "../config/firebase";
-import DashboardMobileMenu from "../components/dashboard/DashboardMobileMenu";
-import DashboardSidebar from "../components/dashboard/DashboardSidebar";
+import { auth } from "../../config/firebase";
+import DashboardMobileMenu from "../../components/dashboard/DashboardMobileMenu";
+import DashboardSidebar from "../../components/dashboard/DashboardSidebar";
 import ManageActivities from "./ManageActivities";
 import ManageStaff from "./ManageStaff";
 import ManagePrograms from "./ManagePrograms";
@@ -23,12 +23,12 @@ import ManageParticipants from "./ManageParticipants";
 import ViewRegistrations from "./ViewRegistrations";
 import ManageCancellations from "./ManageCancellations";
 import SendMessages from "./SendMessages";
-import DashboardControlPanels from "../components/dashboard/DashboardControlPanels";
-import { fetchDashboardOverview } from "../services/dashboardService";
+import DashboardControlPanels from "../../components/dashboard/DashboardControlPanels";
+import { fetchDashboardOverview } from "../../services/staffManegmentServices/dashboardService";
 import {
     buildInquiryNavigationState,
     getStaffInquiriesRoute
-} from "../config/staffInquiriesNavigation";
+} from "../../config/staffInquiriesNavigation";
 import {
     applyStaffPopState,
     buildStaffPage,
@@ -44,8 +44,8 @@ import {
     STAFF_PENDING_REGISTRATION_ID_KEY,
     STAFF_CANCELLATION_ID_KEY,
     STAFF_RETURN_PAGE_KEY
-} from "../utils/staffNavigation";
-import { useMediaQuery } from "../hooks/useMediaQuery";
+} from "../../utils/staffManegmentUtils/staffNavigation";
+import { useMediaQuery } from "../../hooks/useMediaQuery";
 
 const DASHBOARD_ACTION_ICONS = {
     activities: Calendar,

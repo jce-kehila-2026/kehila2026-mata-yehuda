@@ -2,17 +2,17 @@ import { useCallback, useEffect, useState } from "react";
 import {
     fetchInitialRegistrationRequests,
     fetchPendingRegistrationRequest
-} from "../services/registrationService";
-import { fetchActivities } from "../services/activityService";
-import { PROGRAM_60_PLUS_MINUS_ID } from "../utils/programConstants";
-import RegistrationList from "../components/participants/lists/RegistrationList";
-import EditParticipant from "../components/participants/forms/EditParticipant";
+} from "../../services/staffManegmentServices/registrationService";
+import { fetchActivities } from "../../services/staffManegmentServices/activityService";
+import { PROGRAM_60_PLUS_MINUS_ID } from "../../utils/staffManegmentUtils/programConstants";
+import RegistrationList from "../../components/participants/lists/RegistrationList";
+import EditParticipant from "../../components/participants/forms/EditParticipant";
 import {
     buildStaffPage,
     staffNavigateBack,
     STAFF_PENDING_REGISTRATION_ID_KEY,
     STAFF_RETURN_PAGE_KEY
-} from "../utils/staffNavigation";
+} from "../../utils/staffManegmentUtils/staffNavigation";
 
 const PROGRAM_FILTER_ALL = "all";
 

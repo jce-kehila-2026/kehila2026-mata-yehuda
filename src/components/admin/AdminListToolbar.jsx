@@ -1,7 +1,7 @@
 import {
     ADMIN_PAGE_SIZE_ALL,
     ADMIN_PAGE_SIZE_OPTIONS
-} from "../../utils/adminListUtils";
+} from "../../utils/staffManegmentUtils/adminListUtils";
 
 function AdminListToolbar({
     searchId,

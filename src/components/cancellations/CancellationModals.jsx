@@ -11,7 +11,7 @@ import {
     REFUND_STATUS_REFUNDED
 } from "./helpers/cancellationHelpers";
 import CancellationRefundStatusBadge from "./CancellationRefundStatusBadge";
-import { hasValue } from "../../utils/hasValue";
+import { hasValue } from "../../utils/staffManegmentUtils/hasValue";
 
 function CancellationDetailModal({ item, onClose }) {
     if (!item) {

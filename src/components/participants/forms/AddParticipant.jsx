@@ -3,7 +3,7 @@ import {
     addParticipant,
     PARTICIPANT_CREATED_REGISTRATION_FAILED,
     PARTICIPANT_VALIDATION_FAILED
-} from "../../../services/participantService";
+} from "../../../services/staffManegmentServices/participantService";
 import { useParticipantForm } from "../hooks/useParticipantForm";
 import ParticipantProgramFields from "./ParticipantProgramFields";
 import FormActionRow from "../../shared/FormActionRow";

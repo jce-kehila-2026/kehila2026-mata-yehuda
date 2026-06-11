@@ -1,11 +1,11 @@
-import { formatDate } from "../../../utils/dateUtils";
-import { maskIdNumber } from "../../../utils/maskIdNumber";
+import { formatDate } from "../../../utils/staffManegmentUtils/dateUtils";
+import { maskIdNumber } from "../../../utils/staffManegmentUtils/maskIdNumber";
 import {
     resolveCanonicalProgramId,
     resolveProgramDisplayTitle
-} from "../../../utils/programConstants";
-import { toSafeString } from "../../../utils/participantStatusLabels";
-import { hasFormattedDisplay, hasValue } from "../../../utils/hasValue";
+} from "../../../utils/staffManegmentUtils/programConstants";
+import { toSafeString } from "../../../utils/staffManegmentUtils/participantStatusLabels";
+import { hasFormattedDisplay, hasValue } from "../../../utils/staffManegmentUtils/hasValue";
 import ParticipantStatusBadge from "../ParticipantStatusBadge";
 import { MaskedIdDisplay, ProgramDisplayName } from "../ParticipantListStats";
 import {

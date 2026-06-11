@@ -6,7 +6,7 @@ import {
     paginateItems,
     sortItems,
     toggleSortDirection
-} from "../utils/adminListUtils";
+} from "../utils/staffManegmentUtils/adminListUtils";
 
 export function useAdminList({
     sourceItems = [],

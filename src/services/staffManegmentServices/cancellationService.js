@@ -1,4 +1,4 @@
-import { db } from "../config/firebase";
+import { db } from "../../config/firebase";
 import {
     addDoc,
     collection,
@@ -25,13 +25,13 @@ import {
     REFUND_STATUS_PENDING,
     resolveDisplayPhone,
     resolveParticipantDisplayName
-} from "../components/cancellations/helpers/cancellationHelpers";
-import { normalizeSearchQuery } from "../utils/adminListUtils";
+} from "../../components/cancellations/helpers/cancellationHelpers";
+import { normalizeSearchQuery } from "../../utils/staffManegmentUtils/adminListUtils";
 import {
     formatProgramTitle,
     getFixedProgramTitle,
     resolveCanonicalProgramId
-} from "../utils/programConstants";
+} from "../../utils/staffManegmentUtils/programConstants";
 
 const cancellationsCollection = collection(db, "cancellations");
 const registrationsCollection = collection(db, "registrations");
