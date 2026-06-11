@@ -1,0 +1,152 @@
+import { db } from "../../config/firebase";
+import {
+    collection,
+    doc,
+    getDoc,
+    getDocs,
+    query,
+    serverTimestamp,
+    setDoc,
+    where
+} from "firebase/firestore";
+import { getParticipantNotificationGroups } from "./notificationGroupService";
+import { NOTIFICATION_GROUP_ALL } from "../../utils/staffManegmentUtils/notificationGroupMapping";
+
+export async function verifyParticipantForNotifications({ idNumber, phone }) {
+    const normalizedId = String(idNumber || "").trim();
+    const normalizedPhone = String(phone || "").trim();
+
+    if (!normalizedId) {
+        return {
+            ok: false,
+            message: "יש להזין מספר תעודת זהות"
+        };
+    }
+
+    const participantsQuery = query(
+        collection(db, "participants"),
+        where("id_number", "==", normalizedId)
+    );
+    const snapshot = await getDocs(participantsQuery);
+
+    if (snapshot.empty) {
+        return {
+            ok: false,
+            message: "לא נמצא משתתף עם מספר תעודת זהות זה"
+        };
+    }
+
+    const participantDoc = snapshot.docs[0];
+    const participant = participantDoc.data();
+    const storedPhone = String(participant.phone || "").trim();
+
+    if (normalizedPhone && storedPhone && storedPhone !== normalizedPhone) {
+        return {
+            ok: false,
+            message: "מספר הטלפון אינו תואם לפרטי המשתתף"
+        };
+    }
+
+    return {
+        ok: true,
+        participantId: participantDoc.id
+    };
+}
+
+/**
+ * Resolves groups for token persistence.
+ * Verified participants get segments from registrations; others receive only "all".
+ */
+export async function resolveNotificationGroupsForParticipant(participantId) {
+    const normalizedParticipantId = String(participantId || "").trim();
+
+    if (!normalizedParticipantId) {
+        return [NOTIFICATION_GROUP_ALL];
+    }
+
+    return getParticipantNotificationGroups(normalizedParticipantId);
+}
+
+export async function saveNotificationToken({
+    token,
+    participantId = "",
+    groups
+}) {
+    const normalizedToken = String(token || "").trim();
+
+    if (!normalizedToken) {
+        throw new Error("TOKEN_REQUIRED");
+    }
+
+    if (!Array.isArray(groups) || groups.length === 0) {
+        throw new Error("GROUPS_REQUIRED");
+    }
+
+    const tokenRef = doc(db, "notification_tokens", normalizedToken);
+    const existingSnap = await getDoc(tokenRef);
+
+    await setDoc(
+        tokenRef,
+        {
+            token: normalizedToken,
+            groups,
+            participantId: participantId || "",
+            lastActive: serverTimestamp(),
+            createdAt: existingSnap.exists()
+                ? existingSnap.data().createdAt || serverTimestamp()
+                : serverTimestamp(),
+            isActive: true
+        },
+        { merge: true }
+    );
+}
+
+/**
+ * Refreshes lastActive and re-derives groups when a returning user already has a token.
+ * Groups stay ["all"] when the stored token has no linked participantId.
+ */
+export async function touchNotificationToken(token) {
+    const normalizedToken = String(token || "").trim();
+
+    if (!normalizedToken) {
+        return;
+    }
+
+    const tokenRef = doc(db, "notification_tokens", normalizedToken);
+    const existingSnap = await getDoc(tokenRef);
+    const existingData = existingSnap.exists() ? existingSnap.data() : {};
+    const participantId = String(existingData.participantId || "").trim();
+    const groups = await resolveNotificationGroupsForParticipant(participantId);
+
+    await setDoc(
+        tokenRef,
+        {
+            token: normalizedToken,
+            groups,
+            lastActive: serverTimestamp(),
+            isActive: true,
+            ...(participantId ? { participantId } : {})
+        },
+        { merge: true }
+    );
+}
+
+export function getStoredFcmToken() {
+    try {
+        return localStorage.getItem("fcm_token") || "";
+    } catch {
+        return "";
+    }
+}
+
+export function storeFcmTokenLocally(token) {
+    try {
+        if (token) {
+            localStorage.setItem("fcm_token", token);
+        } else {
+            localStorage.removeItem("fcm_token");
+        }
+    } catch {
+        // ignore storage errors
+    }
+}

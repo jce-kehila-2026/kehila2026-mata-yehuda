@@ -1,8 +1,11 @@
 import { useState } from "react";
 import HelpServicesSelector from "./HelpServicesSelector";
 import LanguagesSelector from "./LanguagesSelector";
+
 import "../../styles/supportive community/CommunityJoinForm.css";
-import { saveCommunityJoinRequest } from "../../services/supportive community/supportiveCommunityService";
+import "../../styles/SupportiveCommunityPage.css";
+import "../../styles/CommunityJoinForm.css";
+import { saveCommunityJoinRequest } from "../../services/staffManegmentServices/supportiveCommunityService";
 
 function CommunityJoinForm() {
   const [communityJoinForm, setCommunityJoinForm] = useState({

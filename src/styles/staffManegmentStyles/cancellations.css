@@ -1,0 +1,319 @@
+/* ManageCancellations — admin table, filters, stats & modals */
+
+.staff-page--cancellations .staff-container--cancellations {
+  padding-top: 0.5rem;
+}
+
+.staff-page--cancellations .staff-section--cancellations-list {
+  margin-top: 0;
+  margin-bottom: 0;
+  padding-top: 0;
+}
+
+.cancellations-list {
+  width: 100%;
+  max-width: none;
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+  gap: 1.25rem;
+  align-items: stretch;
+}
+
+.admin-list-section--cancellations .admin-list-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 0.75rem;
+  margin-bottom: 0.5rem;
+  direction: rtl;
+}
+
+.admin-list-section--cancellations .admin-list-header__title {
+  margin: 0;
+  font-size: 1.25rem;
+}
+
+.admin-list-section--cancellations .admin-list-toolbar.staff-form.staff-list-filters,
+.admin-list-section--cancellations .admin-list-toolbar--cancellations-bar.staff-form.staff-list-filters {
+  display: grid;
+  grid-template-columns: 2fr 1fr 1fr auto;
+  gap: 16px;
+  align-items: end;
+  direction: rtl;
+  max-width: none;
+  margin: 0 0 0.5rem;
+  flex-direction: unset;
+}
+
+.admin-list-section--cancellations .admin-list-toolbar--cancellations-bar .admin-list-toolbar__filters {
+  display: contents;
+}
+
+.admin-list-section--cancellations .admin-list-toolbar--cancellations-bar .admin-list-toolbar__search,
+.admin-list-section--cancellations .admin-list-toolbar--cancellations-bar .admin-list-toolbar__filter-item,
+.admin-list-section--cancellations .admin-list-toolbar--cancellations-bar .admin-list-toolbar__filters > div,
+.admin-list-section--cancellations .admin-list-toolbar--cancellations-bar .admin-list-toolbar__page-size {
+  display: flex;
+  flex-direction: column;
+  gap: 0.25rem;
+  min-width: 0;
+  margin: 0;
+}
+
+.admin-list-section--cancellations .admin-list-toolbar label,
+.admin-list-section--cancellations .admin-list-toolbar input,
+.admin-list-section--cancellations .admin-list-toolbar select {
+  font-size: 0.88rem;
+}
+
+.admin-list-section--cancellations .admin-list-toolbar label {
+  margin: 0;
+}
+
+.admin-list-section--cancellations .admin-list-toolbar input,
+.admin-list-section--cancellations .admin-list-toolbar select {
+  min-height: 38px;
+  width: 100%;
+  box-sizing: border-box;
+}
+
+.admin-list-section--cancellations .admin-list-summary {
+  margin: 0 0 0.5rem;
+}
+
+.admin-list-section--cancellations .admin-list-pagination {
+  margin-top: 0.85rem;
+}
+
+.admin-list-section--cancellations .admin-data-table-wrap {
+  box-shadow: 0 2px 10px rgba(0, 0, 0, 0.04);
+}
+
+.admin-list-section--cancellations .admin-data-table tbody tr:hover {
+  background: rgba(232, 245, 236, 0.55);
+}
+
+.admin-list-section--cancellations
+  .admin-data-table
+  tbody
+  tr.admin-data-table__row--highlighted {
+  background: #fef9c3;
+}
+
+.admin-list-section--cancellations
+  .admin-data-table
+  tbody
+  tr.admin-data-table__row--highlighted:hover {
+  background: #fef08a;
+}
+
+.admin-list-section--cancellations .admin-data-table__name-cell {
+  font-weight: 600;
+  color: var(--color-text);
+}
+
+.cancellation-list-stats {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.55rem;
+  margin: 0 0 0.75rem;
+  direction: rtl;
+}
+
+.cancellation-list-stats__item {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.45rem;
+  min-height: 2rem;
+  padding: 0.35rem 0.75rem;
+  border-radius: 999px;
+  border: 1.5px solid var(--color-card-border);
+  background: linear-gradient(
+    180deg,
+    var(--color-accent-light) 0%,
+    #fffdf9 100%
+  );
+  box-shadow: 0 1px 4px rgba(0, 0, 0, 0.04);
+}
+
+.cancellation-list-stats__label {
+  font-size: 0.84rem;
+  font-weight: 600;
+  color: var(--color-muted);
+}
+
+.cancellation-list-stats__value {
+  font-size: 0.95rem;
+  font-weight: 700;
+  color: var(--color-primary);
+  font-variant-numeric: tabular-nums;
+}
+
+.cancellation-refund-badge {
+  display: inline-flex;
+  align-items: center;
+  padding: 0.2rem 0.55rem;
+  border-radius: 999px;
+  font-size: 0.8rem;
+  font-weight: 700;
+  line-height: 1.2;
+  white-space: nowrap;
+}
+
+.cancellation-refund-badge--success {
+  background: #e8f5ec;
+  color: #2d7d46;
+  border: 1px solid #b7dfc4;
+}
+
+.cancellation-refund-badge--pending {
+  background: #fff4e5;
+  color: #c2410c;
+  border: 1px solid #fdba74;
+}
+
+.cancellation-refund-badge--danger {
+  background: #fef2f2;
+  color: #b42318;
+  border: 1px solid #fecaca;
+}
+
+.cancellation-refund-badge--muted {
+  background: #f3f4f6;
+  color: #6b7280;
+  border: 1px solid #d1d5db;
+}
+
+.admin-table-action--process:hover:not(:disabled),
+.admin-table-action--process:active:not(:disabled) {
+  background: #fff4e5;
+  border-color: #fdba74;
+  color: #c2410c;
+}
+
+.staff-page .cancellation-card {
+  display: flex;
+  flex-direction: column;
+  height: 100%;
+  box-sizing: border-box;
+}
+
+.staff-page .cancellation-card__body {
+  flex: 1;
+  min-height: 0;
+}
+
+.staff-page .cancellation-card__name {
+  margin: 0 0 0.55rem;
+  font-size: 1.15rem;
+  color: var(--color-primary);
+}
+
+.staff-page .cancellation-card__meta {
+  margin: 0 0 0.35rem;
+  font-size: 0.96rem;
+  line-height: 1.5;
+  color: var(--color-muted);
+}
+
+.staff-page .cancellation-card__meta--badge {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 0.35rem;
+}
+
+.staff-page .cancellation-card__actions {
+  margin-top: auto;
+  padding-top: 0.75rem;
+}
+
+.cancellation-refund-form {
+  margin-top: 0.75rem;
+  width: 100%;
+}
+
+.cancellation-modal {
+  position: fixed;
+  inset: 0;
+  z-index: 120;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 1rem;
+}
+
+.cancellation-modal__backdrop {
+  position: absolute;
+  inset: 0;
+  background: rgba(17, 24, 39, 0.45);
+}
+
+.cancellation-modal__panel {
+  position: relative;
+  width: min(100%, 560px);
+  max-height: min(90vh, 720px);
+  overflow: auto;
+  border-radius: 16px;
+  border: 1.5px solid var(--color-card-border);
+  background: #fffdf9;
+  box-shadow: 0 18px 40px rgba(0, 0, 0, 0.18);
+  direction: rtl;
+}
+
+.cancellation-modal__header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 0.75rem;
+  padding: 1rem 1.1rem 0.5rem;
+}
+
+.cancellation-modal__header h3 {
+  margin: 0;
+  font-size: 1.15rem;
+  color: var(--color-primary);
+}
+
+.cancellation-modal__close {
+  border: none;
+  background: transparent;
+  font-size: 1.5rem;
+  line-height: 1;
+  cursor: pointer;
+  color: var(--color-muted);
+}
+
+.cancellation-modal__body {
+  padding: 0.5rem 1.1rem 1rem;
+}
+
+.cancellation-modal__body p {
+  margin: 0 0 0.55rem;
+  line-height: 1.5;
+}
+
+.cancellation-modal__badge-row {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 0.35rem;
+}
+
+.cancellation-modal__footer {
+  padding: 0 1.1rem 1rem;
+}
+
+@media (max-width: 768px) {
+  .admin-list-section--cancellations .admin-list-toolbar.staff-form.staff-list-filters,
+  .admin-list-section--cancellations .admin-list-toolbar--cancellations-bar.staff-form.staff-list-filters {
+    grid-template-columns: 1fr;
+    gap: 0.75rem;
+  }
+
+  .admin-list-section--cancellations .admin-list-toolbar--cancellations-bar .admin-list-toolbar__filters {
+    display: grid;
+    grid-template-columns: 1fr;
+    gap: 0.75rem;
+  }
+}

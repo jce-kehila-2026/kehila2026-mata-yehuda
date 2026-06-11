@@ -1,0 +1,256 @@
+/* ManageStaff — staff lists, cards & admin table */
+
+.staff-page--staff-management .staff-container--staff-management {
+  padding-top: 0.5rem;
+}
+
+.staff-page--staff-management .staff-section--staff-list {
+  margin-top: 0;
+  margin-bottom: 0;
+  padding-top: 0;
+}
+
+.staff-page--staff-management .staff-section--form {
+  margin-top: 0;
+}
+
+.staff-page--staff-management .staff-section--form .staff-button {
+  width: auto;
+  align-self: flex-start;
+}
+
+.staff-page--staff-management .staff-section--form .staff-form > .staff-button,
+.staff-page--staff-management .staff-section--form .staff-toolbar .staff-button {
+  width: auto;
+  align-self: flex-start;
+}
+
+.staff-members-list {
+  width: 100%;
+  max-width: none;
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+  gap: 1.25rem;
+  align-items: stretch;
+}
+
+.admin-list-section--staff .admin-list-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 0.75rem;
+  margin-bottom: 0.5rem;
+  direction: rtl;
+}
+
+.admin-list-section--staff .admin-list-header__title {
+  margin: 0;
+  font-size: 1.25rem;
+}
+
+.admin-list-section--staff .admin-list-header__action {
+  flex-shrink: 0;
+}
+
+.admin-list-section--staff .admin-list-toolbar.staff-form.staff-list-filters,
+.admin-list-section--staff .admin-list-toolbar--staff-bar.staff-form.staff-list-filters {
+  display: grid;
+  grid-template-columns: 2fr 1fr auto;
+  gap: 16px;
+  align-items: end;
+  direction: rtl;
+  max-width: none;
+  margin: 0 0 0.5rem;
+  flex-direction: unset;
+}
+
+.admin-list-section--staff .admin-list-toolbar--staff-bar .admin-list-toolbar__filters {
+  display: contents;
+}
+
+.admin-list-section--staff .admin-list-toolbar--staff-bar .admin-list-toolbar__search,
+.admin-list-section--staff .admin-list-toolbar--staff-bar .admin-list-toolbar__filter-item,
+.admin-list-section--staff .admin-list-toolbar--staff-bar .admin-list-toolbar__filters > div,
+.admin-list-section--staff .admin-list-toolbar--staff-bar .admin-list-toolbar__page-size {
+  display: flex;
+  flex-direction: column;
+  gap: 0.25rem;
+  min-width: 0;
+  margin: 0;
+}
+
+.admin-list-section--staff .admin-list-toolbar label,
+.admin-list-section--staff .admin-list-toolbar input,
+.admin-list-section--staff .admin-list-toolbar select {
+  font-size: 0.88rem;
+}
+
+.admin-list-section--staff .admin-list-toolbar label {
+  margin: 0;
+}
+
+.admin-list-section--staff .admin-list-toolbar input,
+.admin-list-section--staff .admin-list-toolbar select {
+  min-height: 38px;
+  width: 100%;
+  box-sizing: border-box;
+}
+
+.admin-list-section--staff .admin-list-summary {
+  margin: 0 0 0.5rem;
+}
+
+.admin-list-section--staff .admin-list-summary__text,
+.admin-list-section--staff .admin-list-summary__page {
+  font-size: 0.88rem;
+}
+
+.admin-list-section--staff .admin-list-pagination {
+  margin-top: 0.85rem;
+}
+
+.admin-list-section--staff .admin-data-table-wrap {
+  box-shadow: 0 2px 10px rgba(0, 0, 0, 0.04);
+}
+
+.admin-list-section--staff .admin-data-table tbody tr {
+  transition: background-color 0.15s ease;
+}
+
+.admin-list-section--staff .admin-data-table tbody tr:hover {
+  background: rgba(232, 245, 236, 0.55);
+}
+
+.admin-list-section--staff .admin-data-table__name-cell {
+  font-weight: 600;
+  color: var(--color-text);
+}
+
+.staff-list-stats {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.55rem;
+  margin: 0 0 0.75rem;
+  direction: rtl;
+}
+
+.staff-list-stats__item {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.45rem;
+  min-height: 2rem;
+  padding: 0.35rem 0.75rem;
+  border-radius: 999px;
+  border: 1.5px solid var(--color-card-border);
+  background: linear-gradient(
+    180deg,
+    var(--color-accent-light) 0%,
+    #fffdf9 100%
+  );
+  box-shadow: 0 1px 4px rgba(0, 0, 0, 0.04);
+}
+
+.staff-list-stats__label {
+  font-size: 0.84rem;
+  font-weight: 600;
+  color: var(--color-muted);
+}
+
+.staff-list-stats__value {
+  font-size: 0.95rem;
+  font-weight: 700;
+  color: var(--color-primary);
+  font-variant-numeric: tabular-nums;
+}
+
+.staff-status-badge {
+  display: inline-flex;
+  align-items: center;
+  padding: 0.2rem 0.55rem;
+  border-radius: 999px;
+  font-size: 0.8rem;
+  font-weight: 700;
+  line-height: 1.2;
+  white-space: nowrap;
+}
+
+.staff-status-badge--success {
+  background: #e8f5ec;
+  color: #2d7d46;
+  border: 1px solid #b7dfc4;
+}
+
+.staff-status-badge--muted {
+  background: #f3f4f6;
+  color: #6b7280;
+  border: 1px solid #d1d5db;
+}
+
+.staff-page .staff-member-card {
+  display: flex;
+  flex-direction: column;
+  height: 100%;
+  box-sizing: border-box;
+}
+
+.staff-page .staff-member-card__body {
+  flex: 1;
+  min-height: 0;
+}
+
+.staff-page .staff-member-card__name {
+  margin: 0 0 0.55rem;
+  font-size: 1.15rem;
+  color: var(--color-primary);
+}
+
+.staff-page .staff-member-card__meta {
+  margin: 0 0 0.35rem;
+  font-size: 0.96rem;
+  line-height: 1.5;
+  color: var(--color-muted);
+}
+
+.staff-page .staff-member-card__meta--badge {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 0.35rem;
+}
+
+.staff-page .staff-member-card__meta:last-child {
+  margin-bottom: 0;
+}
+
+.staff-page .staff-member-card__actions {
+  margin-top: auto;
+  padding-top: 0.75rem;
+}
+
+.staff-page .staff-member-card__actions .admin-data-table__actions {
+  justify-content: flex-start;
+}
+
+.staff-page--staff-management .staff-form__hint {
+  margin: -0.35rem 0 0.75rem;
+  font-size: 0.88rem;
+  color: var(--color-muted);
+}
+
+@media (max-width: 768px) {
+  .staff-page .staff-member-card__actions .admin-data-table__actions {
+    flex-wrap: wrap;
+  }
+
+  .admin-list-section--staff .admin-list-toolbar.staff-form.staff-list-filters,
+  .admin-list-section--staff .admin-list-toolbar--staff-bar.staff-form.staff-list-filters {
+    grid-template-columns: 1fr;
+    gap: 0.75rem;
+  }
+
+  .admin-list-section--staff .admin-list-toolbar--staff-bar .admin-list-toolbar__filters {
+    display: grid;
+    grid-template-columns: 1fr;
+    gap: 0.75rem;
+  }
+}

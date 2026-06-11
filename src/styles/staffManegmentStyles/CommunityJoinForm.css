@@ -1,0 +1,95 @@
+.supportive-community-page .community-join-form,
+.supportive-community-page .volunteer-registration-form {
+  max-width: 900px;
+  margin: 0 auto;
+  padding: 2rem 1.2rem;
+  width: 100%;
+}
+
+.supportive-community-page .form-section {
+  margin-bottom: 2rem;
+}
+
+.supportive-community-page .form-section h2,
+.supportive-community-page .form-section h3 {
+  color: #2d7d46;
+  margin-bottom: 1rem;
+}
+
+.supportive-community-page .form-hint {
+  color: #666;
+  margin-bottom: 1rem;
+}
+
+.supportive-community-page .form-fields {
+  display: flex;
+  flex-direction: column;
+  gap: 1rem;
+}
+
+.supportive-community-page .form-field {
+  display: flex;
+  flex-direction: column;
+  gap: 0.5rem;
+  margin-bottom: 1rem;
+}
+
+.supportive-community-page .form-field label {
+  font-weight: 600;
+}
+
+.supportive-community-page input,
+.supportive-community-page select,
+.supportive-community-page textarea {
+  width: 100%;
+  font-size: 1.1rem;
+  padding: 0.9rem 1rem;
+  border: 2px solid #e0c3a0;
+  border-radius: 14px;
+  font-family: inherit;
+}
+
+.supportive-community-page textarea {
+  min-height: 110px;
+}
+
+.supportive-community-page .options-container {
+  display: flex;
+  flex-direction: column;
+  gap: 0.9rem;
+}
+
+.supportive-community-page .option-label {
+  display: flex;
+  align-items: center;
+  gap: 1rem;
+  background: #fff8ef;
+  border: 2px solid #e0c3a0;
+  border-radius: 14px;
+  padding: 1rem;
+  font-size: 1.1rem;
+  font-weight: 600;
+}
+
+.supportive-community-page .option-label input[type="checkbox"] {
+  width: 22px;
+  height: 22px;
+}
+
+.supportive-community-page .form-submit button {
+  width: 100%;
+  background: #2d7d46;
+  color: white;
+  border: none;
+  border-radius: 14px;
+  padding: 1rem;
+  font-size: 1.2rem;
+  font-weight: 700;
+}
+
+@media (min-width: 900px) {
+  .supportive-community-page .options-container {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+  }
+}
