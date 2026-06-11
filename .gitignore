@@ -25,3 +25,5 @@ server/*-firebase-adminsdk*.json
 *.njsproj
 *.sln
 *.sw?
+server/*.json
+server/.env
