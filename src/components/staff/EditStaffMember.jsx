@@ -1,4 +1,9 @@
 import { useState } from "react";
+import {
+    DEFAULT_STAFF_ROLE,
+    STAFF_ROLE_OPTIONS,
+    normalizeStaffRole
+} from "../../config/staffRoles";
 import { updateStaffMember } from "../../services/staffService";
 import FormActionRow from "../shared/FormActionRow";
 
@@ -7,6 +12,9 @@ function EditStaffMember({ staff, onCompleted, onCancel }) {
     const [phone, setPhone] = useState(staff?.phone || "");
     const [password, setPassword] = useState("");
     const [isActive, setIsActive] = useState(staff?.is_active ?? false);
+    const [role, setRole] = useState(
+        normalizeStaffRole(staff?.role ?? DEFAULT_STAFF_ROLE)
+    );
     const [success, setSuccess] = useState("");
     const [error, setError] = useState("");
     const [submitting, setSubmitting] = useState(false);
@@ -24,6 +32,7 @@ function EditStaffMember({ staff, onCompleted, onCancel }) {
                 full_name: fullName,
                 phone,
                 is_active: isActive,
+                role,
                 password
             });
 
@@ -79,6 +88,19 @@ function EditStaffMember({ staff, onCompleted, onCancel }) {
                 value={password}
                 onChange={(event) => setPassword(event.target.value)}
             />
+
+            <label htmlFor="edit-staff-role">תפקיד</label>
+            <select
+                id="edit-staff-role"
+                value={role}
+                onChange={(event) => setRole(event.target.value)}
+            >
+                {STAFF_ROLE_OPTIONS.map((option) => (
+                    <option key={option.value} value={option.value}>
+                        {option.label}
+                    </option>
+                ))}
+            </select>
 
             <div className="row checkbox-row">
                 <label htmlFor="edit-staff-active">פעיל</label>

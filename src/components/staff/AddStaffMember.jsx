@@ -1,4 +1,8 @@
 import { useState } from "react";
+import {
+    DEFAULT_STAFF_ROLE,
+    STAFF_ROLE_OPTIONS
+} from "../../config/staffRoles";
 import { addStaffMember } from "../../services/staffService";
 import FormActionRow from "../shared/FormActionRow";
 
@@ -8,6 +12,7 @@ function AddStaffMember({ onSuccess, onCancel }) {
     const [email, setEmail] = useState("");
     const [password, setPassword] = useState("");
     const [isActive, setIsActive] = useState(false);
+    const [role, setRole] = useState(DEFAULT_STAFF_ROLE);
     const [error, setError] = useState("");
     const [success, setSuccess] = useState("");
     const [submitting, setSubmitting] = useState(false);
@@ -54,7 +59,8 @@ function AddStaffMember({ onSuccess, onCancel }) {
                 phone,
                 email,
                 password,
-                is_active: isActive
+                is_active: isActive,
+                role
             });
 
             setSuccess("איש הצוות נוסף בהצלחה");
@@ -124,6 +130,19 @@ function AddStaffMember({ onSuccess, onCancel }) {
                     value={password}
                     onChange={(event) => setPassword(event.target.value)}
                 />
+
+                <label htmlFor="add-staff-role">תפקיד</label>
+                <select
+                    id="add-staff-role"
+                    value={role}
+                    onChange={(event) => setRole(event.target.value)}
+                >
+                    {STAFF_ROLE_OPTIONS.map((option) => (
+                        <option key={option.value} value={option.value}>
+                            {option.label}
+                        </option>
+                    ))}
+                </select>
 
                 <div className="row checkbox-row">
                     <label htmlFor="add-staff-active">פעיל</label>

@@ -11,6 +11,7 @@ import {
     orderBy,
     limit
 } from "firebase/firestore";
+import { DEFAULT_STAFF_ROLE, normalizeStaffRole } from "../config/staffRoles";
 import { normalizeSearchQuery } from "../utils/adminListUtils";
 import {
     getStaffNameParts,
@@ -101,6 +102,7 @@ export async function addStaffMember(staffData) {
         phone: staffData.phone,
         email: staffData.email,
         is_active: staffData.is_active ?? false,
+        role: normalizeStaffRole(staffData.role ?? DEFAULT_STAFF_ROLE),
         password: staffData.password
     });
 }
@@ -109,7 +111,8 @@ export async function updateStaffMember(staff) {
     const updates = {
         full_name: staff.full_name,
         phone: staff.phone,
-        is_active: staff.is_active ?? false
+        is_active: staff.is_active ?? false,
+        role: normalizeStaffRole(staff.role ?? DEFAULT_STAFF_ROLE)
     };
 
     if (staff.password?.trim()) {
