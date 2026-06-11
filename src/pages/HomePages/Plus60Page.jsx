@@ -3,9 +3,9 @@ import ActivityCard from "../../components/Homecomponents/ActivityCard";
 import { getAllActivities } from "../../services/HomeServices/activitiesService";
 import ActivityCalendar from "../../components/Homecomponents/ActivityCalendar"; 
 
-import "../../style/HomeStyle/Plus60Page.css";
-import "../../style/HomeStyle/ActivityCard.css";
-import "../../style/HomeStyle/Calendar.css";
+import "../../styles/HomeStyle/Plus60Page.css";
+import "../../styles/HomeStyle/ActivityCard.css";
+import "../../styles/HomeStyle/Calendar.css";
 function Plus60Page() {
     const [activities, setActivities] = useState([]);
 

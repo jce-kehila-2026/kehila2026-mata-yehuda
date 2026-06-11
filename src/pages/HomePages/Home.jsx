@@ -6,10 +6,10 @@ import { useNavigate } from "react-router-dom";
 import DayCenterRegisterForm from "../../components/Homecomponents/DayCenterRegisterForm";
 import VolunteerForm from "../../components/Homecomponents/VolunteerForm";
 
-import "../../style/HomeStyle/Home.css";
-import "../../style/HomeStyle/ProgramCard.css";
-import "../../style/HomeStyle/RequestBox.css";
-import "../../style//HomeStyle/Form.css";
+import "../../styles/HomeStyle/Home.css";
+import "../../styles/HomeStyle/ProgramCard.css";
+import "../../styles/HomeStyle/RequestBox.css";
+import "../../styles/HomeStyle/Form.css";
 
 function Home() {
   const [programs, setPrograms] = useState([]);
