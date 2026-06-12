@@ -1,6 +1,5 @@
-import CommunityJoinRequestsTable from "../../components/communityStaff/CommunityJoinRequestsTable";
-import "../styles/CommunityStaffDashboard.css";
-
+import CommunityJoinRequestsTable from "../../components/communityStaff/CommunityJoinRequestsTable.jsx";
+import "../../styles/communityStaff/CommunityStaffDashboard.css";
 function CommunityJoinRequestsPage() {
   const handleCompleteRegistration = (request) => {
     console.log("Complete registration for:", request);

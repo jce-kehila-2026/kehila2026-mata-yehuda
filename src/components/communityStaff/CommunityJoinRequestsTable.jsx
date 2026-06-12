@@ -1,5 +1,5 @@
 import { useEffect, useMemo, useState } from "react";
-import { getPendingCommunityJoinRequests } from "../../services/communityStaffService";
+import { getPendingCommunityJoinRequests } from "../../services/communityStaff/communityStaffService";
 
 const PAGE_SIZE_OPTIONS = [5, 10, 25];
 

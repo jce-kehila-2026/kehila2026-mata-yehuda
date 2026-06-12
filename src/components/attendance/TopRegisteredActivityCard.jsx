@@ -1,4 +1,4 @@
-import { formatActivityDisplayDate } from "../../services/attendanceService";
+import { formatActivityDisplayDate } from "../../services/attendance/attendanceService";
 
 function TopRegisteredActivityCard({ activityStat, onSelect }) {
   const displayDate =

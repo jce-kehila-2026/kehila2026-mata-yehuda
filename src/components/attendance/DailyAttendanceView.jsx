@@ -1,4 +1,4 @@
-import { formatActivityDisplayDate } from "../../services/attendanceService";
+import { formatActivityDisplayDate } from "../../services/attendance/attendanceService";
 import DailySummaryCards from "./DailySummaryCards";
 import DailyActivitySummaryList from "./DailyActivitySummaryList";
 

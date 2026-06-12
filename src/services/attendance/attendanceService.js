@@ -8,7 +8,7 @@ export {
   getActivityLocation,
   getActivityTime,
   filterActivities,
-} from "./attendance/attendanceHelpers";
+} from "./attendanceHelpers";
 
 export {
   createAttendanceCaches,
@@ -18,7 +18,7 @@ export {
   getExistingAttendanceForRegistrations,
   loadParticipantsForActivities,
   saveAttendanceRecords,
-} from "./attendance/attendanceQueries";
+} from "./attendanceQueries";
 
 export {
   buildParticipantAttendanceRecords,
@@ -28,7 +28,7 @@ export {
   getAttendanceSummary,
   getGlobalAttendanceSummary,
   hasMeaningfulAttendanceData,
-} from "./attendance/attendanceStatistics";
+} from "./attendanceStatistics";
 
 export {
   TOP_REGISTERED_LIMIT_OPTIONS,
@@ -42,10 +42,10 @@ export {
   loadAttendanceRecordsPageData,
   loadDailyAttendanceSummary,
   loadGlobalAttendanceDashboard,
-} from "./attendance/attendanceDashboard";
+} from "./attendanceDashboard";
 
-export { getAllActivities as getActivities } from "./attendance/attendanceQueries";
+export { getAllActivities as getActivities } from "./attendanceQueries";
 export {
   getConfirmedRegistrationsByActivity as getRegistrationsByActivityId,
-} from "./attendance/attendanceQueries";
-export { saveAttendanceRecords as saveAttendance } from "./attendance/attendanceQueries";
+} from "./attendanceQueries";
+export { saveAttendanceRecords as saveAttendance } from "./attendanceQueries";

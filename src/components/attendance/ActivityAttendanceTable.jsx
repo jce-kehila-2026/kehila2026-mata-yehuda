@@ -1,7 +1,7 @@
 import {
   formatActivityDisplayDate,
   formatAttendancePercentage,
-} from "../../services/attendanceService";
+} from "../../services/attendance/attendanceService";
 
 function ActivityAttendanceTable({ activityStats, onActivitySelect }) {
   if (!activityStats.length) {

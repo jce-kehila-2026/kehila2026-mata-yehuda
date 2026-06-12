@@ -1,5 +1,5 @@
-import VolunteerRequestsTable from "../components/communityStaff/VolunteerRequestsTable";
-import "../styles/CommunityStaffDashboard.css";
+import VolunteerRequestsTable from "../../components/communityStaff/VolunteerRequestsTable.jsx";
+import "../../styles/CommunityStaff/communityStaffDashboard.css";
 
 function VolunteerRequestsPage() {
   return (

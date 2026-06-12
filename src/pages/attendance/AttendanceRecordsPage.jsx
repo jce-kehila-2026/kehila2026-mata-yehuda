@@ -15,7 +15,7 @@ import {
   getActivities,
   loadActivityDetailsMode,
   loadGlobalAttendanceDashboard,
-} from "../../services/attendanceService";
+} from "../../services/attendance/attendanceService";
 
 const LOADING_MESSAGES = {
   dashboard: "טוען נתונים...",

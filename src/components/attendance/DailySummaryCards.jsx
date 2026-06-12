@@ -1,4 +1,4 @@
-import { formatAttendancePercentage } from "../../services/attendanceService";
+import { formatAttendancePercentage } from "../../services/attendance/attendanceService";
 
 const DAILY_SUMMARY_CARDS = [
   { key: "totalActivities", label: "מספר פעילויות" },
