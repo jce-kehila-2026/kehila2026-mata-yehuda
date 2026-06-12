@@ -1,1 +1,31 @@
 @import "./formCommon.css";
+@import "./CommunityJoinForm.css";
+
+.supportive-community-page .duplicate-prompt {
+  margin-bottom: 1rem;
+}
+
+.supportive-community-page .duplicate-prompt-actions {
+  display: flex;
+  flex-direction: column;
+  gap: 0.75rem;
+}
+
+.supportive-community-page .duplicate-prompt-actions button {
+  width: 100%;
+  font-family: inherit;
+  font-size: 1.1rem;
+  font-weight: 700;
+  border-radius: 14px;
+  padding: 1rem;
+  cursor: pointer;
+  background: #2d7d46;
+  color: #ffffff;
+  border: none;
+}
+
+.supportive-community-page .form-message--prompt {
+  color: #5d4037;
+  background: #fff8e1;
+  border: 2px solid #e0c3a0;
+}

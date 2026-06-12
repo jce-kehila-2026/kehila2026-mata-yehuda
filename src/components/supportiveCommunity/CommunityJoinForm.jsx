@@ -2,9 +2,49 @@ import { useState } from "react";
 import HelpServicesSelector from "./HelpServicesSelector";
 import LanguagesSelector from "./LanguagesSelector";
 
-import "../../styles/supportive community/SupportiveCommunityPage.css";
+import "../../styles/supportive community/CommunityJoinPage.css";
 import "../../styles/supportive community/CommunityJoinForm.css";
-import { saveCommunityJoinRequest } from "../../services/staffManegmentServices/supportiveCommunityService";
+import { saveCommunityJoinRequest } from "../../services/supportive community/supportiveCommunityService";
+
+const VALIDATION_SUMMARY = "יש לתקן את השדות המסומנים באדום";
+
+function validateJoinForm(form) {
+  const errors = {};
+
+  if (!form.participantName.trim()) {
+    errors.participantName = "שגיאה: נא למלא את כל שדות החובה";
+  }
+
+  if (!form.participantId.trim()) {
+    errors.participantId = "שגיאה: נא למלא את כל שדות החובה";
+  } else if (!/^\d{9}$/.test(form.participantId)) {
+    errors.participantId = "מספר תעודת זהות חייב להיות מספר בן 9 ספרות";
+  }
+
+  if (!form.phone.trim()) {
+    errors.phone = "שגיאה: נא למלא את כל שדות החובה";
+  } else if (!/^05\d{8}$/.test(form.phone)) {
+    errors.phone = "מספר טלפון חייב להיות מספר תקין בן 10 ספרות";
+  }
+
+  if (!form.address.trim()) {
+    errors.address = "שגיאה: נא למלא את כל שדות החובה";
+  }
+
+  if (form.services.length === 0) {
+    errors.services = "שגיאה: נא לבחור לפחות סוג עזרה אחד";
+  }
+
+  if (form.services.includes("other") && !form.otherService.trim()) {
+    errors.otherService = "שגיאה: נא לתאר את סוג העזרה המבוקש";
+  }
+
+  if (form.languages.length === 0) {
+    errors.languages = "שגיאה: נא לבחור לפחות שפה אחת";
+  }
+
+  return errors;
+}
 
 function CommunityJoinForm() {
   const [communityJoinForm, setCommunityJoinForm] = useState({
@@ -16,56 +56,42 @@ function CommunityJoinForm() {
     otherService: "",
     languages: [],
   });
+  const [fieldErrors, setFieldErrors] = useState({});
+  const [message, setMessage] = useState({ type: "", text: "" });
 
-  const updateField = (field, value) => {
-    setCommunityJoinForm((prev) => ({ ...prev, [field]: value }));
+  const handleFieldUpdate = (field, value) => {
+    const nextForm = { ...communityJoinForm, [field]: value };
+    setCommunityJoinForm(nextForm);
+
+    if (Object.keys(fieldErrors).length > 0) {
+      const nextErrors = validateJoinForm(nextForm);
+      setFieldErrors(nextErrors);
+
+      if (
+        message.text === VALIDATION_SUMMARY &&
+        Object.keys(nextErrors).length === 0
+      ) {
+        setMessage({ type: "", text: "" });
+      }
+    }
   };
 
   const handleSubmit = async (e) => {
     e.preventDefault();
 
-    if (
-      !communityJoinForm.participantName.trim() ||
-      !communityJoinForm.participantId.trim() ||
-      !communityJoinForm.phone.trim() ||
-      !communityJoinForm.address.trim()
-    ) {
-      alert("נא למלא את כל שדות החובה");
+    const errors = validateJoinForm(communityJoinForm);
+
+    if (Object.keys(errors).length > 0) {
+      setFieldErrors(errors);
+      setMessage({ type: "error", text: VALIDATION_SUMMARY });
       return;
     }
 
-    if (!/^\d{9}$/.test(communityJoinForm.participantId)) {
-      alert("מספר תעודת זהות חייב להיות מספר בן 9 ספרות");
-      return;
-    }
-
-    if (!/^05\d{8}$/.test(communityJoinForm.phone)) {
-      alert("מספר טלפון חייב להיות מספר תקין בן 10 ספרות");
-      return;
-    }
-
-    if (communityJoinForm.services.length === 0) {
-      alert("נא לבחור לפחות סוג עזרה אחד");
-      return;
-    }
-
-    if (
-      communityJoinForm.services.includes("other") &&
-      !communityJoinForm.otherService.trim()
-    ) {
-      alert("נא לתאר את סוג העזרה המבוקש");
-      return;
-    }
-
-    if (communityJoinForm.languages.length === 0) {
-      alert("נא לבחור לפחות שפה אחת");
-      return;
-    }
+    setFieldErrors({});
+    setMessage({ type: "", text: "" });
 
     try {
       await saveCommunityJoinRequest(communityJoinForm);
-
-      alert("הבקשה נשלחה לטיפול");
 
       setCommunityJoinForm({
         participantId: "",
@@ -76,9 +102,19 @@ function CommunityJoinForm() {
         otherService: "",
         languages: [],
       });
+
+      setMessage({
+        type: "success",
+        text:
+          "הבקשה נשלחה בהצלחה.\n" +
+          "נציג מטעם הקהילה התומכת ייצור עמכם קשר בהקדם לצורך השלמת הפרטים וההרשמה הסופית.",
+      });
     } catch (error) {
       console.error("Error saving community join request:", error);
-      alert("אירעה שגיאה בשמירת הבקשה");
+      setMessage({
+        type: "error",
+        text: "אירעה שגיאה בשמירת הפרטים, נסו שוב",
+      });
     }
   };
 
@@ -89,7 +125,7 @@ function CommunityJoinForm() {
         <p>מלאו את הפרטים ונחזור אליכם בהקדם</p>
       </section>
 
-      <form className="community-join-form" onSubmit={handleSubmit}>
+      <form className="community-join-form" onSubmit={handleSubmit} noValidate>
         <section className="form-section">
           <h2>פרטים אישיים</h2>
           <p className="form-hint">כל השדות בשלב זה הם שדות חובה</p>
@@ -103,9 +139,25 @@ function CommunityJoinForm() {
                 id="participantName"
                 type="text"
                 autoComplete="name"
+                className={fieldErrors.participantName ? "field-invalid" : ""}
+                aria-invalid={Boolean(fieldErrors.participantName)}
+                aria-describedby={
+                  fieldErrors.participantName ? "participantName-error" : undefined
+                }
                 value={communityJoinForm.participantName}
-                onChange={(e) => updateField("participantName", e.target.value)}
+                onChange={(e) =>
+                  handleFieldUpdate("participantName", e.target.value)
+                }
               />
+              {fieldErrors.participantName && (
+                <span
+                  id="participantName-error"
+                  className="field-error"
+                  role="alert"
+                >
+                  {fieldErrors.participantName}
+                </span>
+              )}
             </div>
 
             <div className="form-field">
@@ -117,9 +169,25 @@ function CommunityJoinForm() {
                 type="text"
                 inputMode="numeric"
                 maxLength={9}
+                className={fieldErrors.participantId ? "field-invalid" : ""}
+                aria-invalid={Boolean(fieldErrors.participantId)}
+                aria-describedby={
+                  fieldErrors.participantId ? "participantId-error" : undefined
+                }
                 value={communityJoinForm.participantId}
-                onChange={(e) => updateField("participantId", e.target.value)}
+                onChange={(e) =>
+                  handleFieldUpdate("participantId", e.target.value)
+                }
               />
+              {fieldErrors.participantId && (
+                <span
+                  id="participantId-error"
+                  className="field-error"
+                  role="alert"
+                >
+                  {fieldErrors.participantId}
+                </span>
+              )}
             </div>
 
             <div className="form-field">
@@ -132,9 +200,17 @@ function CommunityJoinForm() {
                 inputMode="tel"
                 maxLength={10}
                 placeholder="05XXXXXXXX"
+                className={fieldErrors.phone ? "field-invalid" : ""}
+                aria-invalid={Boolean(fieldErrors.phone)}
+                aria-describedby={fieldErrors.phone ? "phone-error" : undefined}
                 value={communityJoinForm.phone}
-                onChange={(e) => updateField("phone", e.target.value)}
+                onChange={(e) => handleFieldUpdate("phone", e.target.value)}
               />
+              {fieldErrors.phone && (
+                <span id="phone-error" className="field-error" role="alert">
+                  {fieldErrors.phone}
+                </span>
+              )}
             </div>
 
             <div className="form-field">
@@ -145,18 +221,41 @@ function CommunityJoinForm() {
                 id="address"
                 type="text"
                 autoComplete="street-address"
+                className={fieldErrors.address ? "field-invalid" : ""}
+                aria-invalid={Boolean(fieldErrors.address)}
+                aria-describedby={
+                  fieldErrors.address ? "address-error" : undefined
+                }
                 value={communityJoinForm.address}
-                onChange={(e) => updateField("address", e.target.value)}
+                onChange={(e) => handleFieldUpdate("address", e.target.value)}
               />
+              {fieldErrors.address && (
+                <span id="address-error" className="field-error" role="alert">
+                  {fieldErrors.address}
+                </span>
+              )}
             </div>
           </div>
         </section>
 
         <section className="form-section">
-          <HelpServicesSelector
-            selectedServices={communityJoinForm.services}
-            setSelectedServices={(services) => updateField("services", services)}
-          />
+          <div
+            className={
+              fieldErrors.services ? "form-selector-wrapper form-selector--invalid" : "form-selector-wrapper"
+            }
+          >
+            <HelpServicesSelector
+              selectedServices={communityJoinForm.services}
+              setSelectedServices={(services) =>
+                handleFieldUpdate("services", services)
+              }
+            />
+            {fieldErrors.services && (
+              <span className="field-error" role="alert">
+                {fieldErrors.services}
+              </span>
+            )}
+          </div>
 
           {communityJoinForm.services.includes("other") && (
             <div className="form-field">
@@ -165,21 +264,60 @@ function CommunityJoinForm() {
               </label>
               <textarea
                 id="otherService"
+                className={fieldErrors.otherService ? "field-invalid" : ""}
+                aria-invalid={Boolean(fieldErrors.otherService)}
+                aria-describedby={
+                  fieldErrors.otherService ? "otherService-error" : undefined
+                }
                 value={communityJoinForm.otherService}
-                onChange={(e) => updateField("otherService", e.target.value)}
+                onChange={(e) =>
+                  handleFieldUpdate("otherService", e.target.value)
+                }
               />
+              {fieldErrors.otherService && (
+                <span
+                  id="otherService-error"
+                  className="field-error"
+                  role="alert"
+                >
+                  {fieldErrors.otherService}
+                </span>
+              )}
             </div>
           )}
         </section>
 
         <section className="form-section">
-          <LanguagesSelector
-            selectedLanguages={communityJoinForm.languages}
-            setSelectedLanguages={(languages) => updateField("languages", languages)}
-          />
+          <div
+            className={
+              fieldErrors.languages
+                ? "form-selector-wrapper form-selector--invalid"
+                : "form-selector-wrapper"
+            }
+          >
+            <LanguagesSelector
+              selectedLanguages={communityJoinForm.languages}
+              setSelectedLanguages={(languages) =>
+                handleFieldUpdate("languages", languages)
+              }
+            />
+            {fieldErrors.languages && (
+              <span className="field-error" role="alert">
+                {fieldErrors.languages}
+              </span>
+            )}
+          </div>
         </section>
 
         <div className="form-submit">
+          {message.text && (
+            <div
+              className={`form-message form-message--${message.type}`}
+              role={message.type === "error" ? "alert" : "status"}
+            >
+              {message.text}
+            </div>
+          )}
           <button type="submit">שליחת בקשה</button>
         </div>
       </form>

@@ -1,14 +1,32 @@
 import { useState } from "react";
 import HelpServicesSelector from "./HelpServicesSelector";
+import LanguagesSelector from "./LanguagesSelector";
 import { saveHomeHelpRequest } from "../../services/supportive community/supportiveCommunityService";
 
+function validateServiceRequest(form) {
+  if (form.services.length === 0) {
+    return "נא לבחור לפחות סוג עזרה אחד";
+  }
 
-function ServiceRequestForm({ participantDocId }) {
+  if (form.services.includes("other") && !form.otherService.trim()) {
+    return "נא לתאר את סוג העזרה המבוקש";
+  }
+
+  if (form.languages.length === 0) {
+    return "נא לבחור לפחות שפה אחת";
+  }
+
+  return "";
+}
+
+function ServiceRequestForm({ participantDocId, subscriptionDocId }) {
   const [serviceRequest, setServiceRequest] = useState({
     services: [],
     otherService: "",
+    languages: [],
     notes: "",
   });
+  const [message, setMessage] = useState({ type: "", text: "" });
 
   const updateField = (field, value) => {
     setServiceRequest((prev) => ({
@@ -19,41 +37,59 @@ function ServiceRequestForm({ participantDocId }) {
 
   const handleSubmit = async (e) => {
     e.preventDefault();
+    setMessage({ type: "", text: "" });
 
-    if (serviceRequest.services.length === 0) {
-      alert("נא לבחור לפחות סוג עזרה אחד");
-      return;
-    }
+    const validationError = validateServiceRequest(serviceRequest);
 
-    if (
-      serviceRequest.services.includes("other") &&
-      !serviceRequest.otherService.trim()
-    ) {
-      alert("נא לתאר את סוג העזרה המבוקש");
+    if (validationError) {
+      setMessage({ type: "error", text: validationError });
       return;
     }
 
     try {
+      const descriptionParts = [];
+
+      if (
+        serviceRequest.services.includes("other") &&
+        serviceRequest.otherService.trim()
+      ) {
+        descriptionParts.push(serviceRequest.otherService.trim());
+      }
+
+      if (serviceRequest.notes.trim()) {
+        descriptionParts.push(serviceRequest.notes.trim());
+      }
+
       await saveHomeHelpRequest({
         participantDocId,
-        ...serviceRequest,
+        subscriptionDocId,
+        services: serviceRequest.services,
+        languages: serviceRequest.languages,
+        description: descriptionParts.join("\n"),
       });
-
-      alert("בקשת השירות נשלחה לטיפול");
 
       setServiceRequest({
         services: [],
         otherService: "",
+        languages: [],
         notes: "",
+      });
+
+      setMessage({
+        type: "success",
+        text: "בקשת השירות נשלחה לטיפול",
       });
     } catch (error) {
       console.error("Error saving service request:", error);
-      alert("אירעה שגיאה בשמירת הבקשה");
+      setMessage({
+        type: "error",
+        text: "אירעה שגיאה בשמירת הבקשה",
+      });
     }
   };
 
   return (
-    <form className="community-join-form" onSubmit={handleSubmit}>
+    <form className="community-join-form" onSubmit={handleSubmit} noValidate>
       <section className="form-section">
         <h2>בקשת שירות נוסף</h2>
         <p className="form-hint">
@@ -62,9 +98,7 @@ function ServiceRequestForm({ participantDocId }) {
 
         <HelpServicesSelector
           selectedServices={serviceRequest.services}
-          setSelectedServices={(services) =>
-            updateField("services", services)
-          }
+          setSelectedServices={(services) => updateField("services", services)}
         />
 
         {serviceRequest.services.includes("other") && (
@@ -72,12 +106,17 @@ function ServiceRequestForm({ participantDocId }) {
             <label>תאר את סוג העזרה</label>
             <textarea
               value={serviceRequest.otherService}
-              onChange={(e) =>
-                updateField("otherService", e.target.value)
-              }
+              onChange={(e) => updateField("otherService", e.target.value)}
             />
           </div>
         )}
+
+        <LanguagesSelector
+          selectedLanguages={serviceRequest.languages}
+          setSelectedLanguages={(languages) =>
+            updateField("languages", languages)
+          }
+        />
 
         <div className="form-field">
           <label>הערות נוספות</label>
@@ -88,6 +127,14 @@ function ServiceRequestForm({ participantDocId }) {
         </div>
 
         <div className="form-submit">
+          {message.text && (
+            <div
+              className={`form-message form-message--${message.type}`}
+              role={message.type === "error" ? "alert" : "status"}
+            >
+              {message.text}
+            </div>
+          )}
           <button type="submit">שליחת בקשה</button>
         </div>
       </section>

@@ -38,6 +38,36 @@
   font-weight: 600;
 }
 
+.supportive-community-page .community-join-form .required {
+  color: #c0392b;
+  font-weight: 700;
+}
+
+.supportive-community-page .community-join-form .form-selector h3::after {
+  content: " *";
+  color: #c0392b;
+  font-weight: 700;
+}
+
+.supportive-community-page .community-join-form .field-error {
+  color: #c0392b;
+  font-size: 1rem;
+  font-weight: 600;
+  line-height: 1.4;
+  margin: 0;
+}
+
+.supportive-community-page .community-join-form input.field-invalid,
+.supportive-community-page .community-join-form textarea.field-invalid {
+  border-color: #c0392b;
+}
+
+.supportive-community-page .community-join-form .form-selector--invalid .options-container {
+  outline: 2px solid #c0392b;
+  outline-offset: 2px;
+  border-radius: 14px;
+}
+
 .supportive-community-page .form-error {
   color: #c0392b;
   font-weight: 600;
@@ -80,6 +110,28 @@
 .supportive-community-page .option-label input[type="checkbox"] {
   width: 22px;
   height: 22px;
+}
+
+.supportive-community-page .form-message {
+  margin-bottom: 1rem;
+  padding: 1rem 1.1rem;
+  border-radius: 14px;
+  font-size: 1.1rem;
+  font-weight: 600;
+  line-height: 1.6;
+  white-space: pre-line;
+}
+
+.supportive-community-page .form-message--error {
+  color: #8b1e1e;
+  background: #fdecea;
+  border: 2px solid #e8b4b0;
+}
+
+.supportive-community-page .form-message--success {
+  color: #1b5e20;
+  background: #e8f5e9;
+  border: 2px solid #a5d6a7;
 }
 
 .supportive-community-page .form-submit button {
