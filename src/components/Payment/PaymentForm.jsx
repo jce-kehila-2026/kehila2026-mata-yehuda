@@ -35,6 +35,8 @@ function PaymentForm({
   registrationOnly = false,
   showLookupScreen: showLookupScreenProp = false,
   onLookupScreenChange,
+  onLookupBack,
+  lookupBackLabel: lookupBackLabelOverride,
 }) {
   const navigate = useNavigate();
   const [currentStep, setCurrentStep] = useState(1);
@@ -50,6 +52,7 @@ function PaymentForm({
   const [lookupStatus, setLookupStatus] = useState(null);
   const [lookupRegistrations, setLookupRegistrations] = useState([]);
   const [lookupCancelMessage, setLookupCancelMessage] = useState("");
+  const [lookupError, setLookupError] = useState("");
   const [lookupLoading, setLookupLoading] = useState(false);
   const [formError, setFormError] = useState("");
   const [isSubmitting, setIsSubmitting] = useState(false);
@@ -59,7 +62,8 @@ function PaymentForm({
 
   const successStep = REGISTRATION_STEPS.length;
   const lookupBackLabel =
-    registrationOnly || !paymentInfo ? "חזרה" : "חזרה להרשמה";
+    lookupBackLabelOverride ??
+    (registrationOnly || !paymentInfo ? "חזרה" : "חזרה להרשמה");
 
   const saveCompletedRegistration = (paymentId, paymentMethod) => {
     localStorage.setItem("registrationPaymentId", paymentId);
@@ -191,13 +195,15 @@ function PaymentForm({
       return;
     }
 
+    const resolvedProgramId =
+      programId || paymentInfo.programId || "";
+
     const paymentPayload = {
       firstName,
       idNumber,
       phone,
-      amount: paymentInfo.price,
       activityId: paymentInfo.activityId,
-      programId: programId || undefined,
+      programId: resolvedProgramId || undefined,
     };
 
     const persistPaymentContext = () => {
@@ -207,8 +213,8 @@ function PaymentForm({
       if (activityId) {
         localStorage.setItem("activityId", activityId);
       }
-      if (programId) {
-        localStorage.setItem("programId", programId);
+      if (resolvedProgramId) {
+        localStorage.setItem("programId", resolvedProgramId);
       }
     };
 
@@ -294,19 +300,31 @@ function PaymentForm({
     }
   };
 
-  const closeLookupScreen = () => {
-    setShowLookupScreen(false);
+  const resetLookupFormState = () => {
     setLookupIdNumber("");
     setLookupStatus(null);
     setLookupRegistrations([]);
     setLookupCancelMessage("");
+    setLookupError("");
     setLookupLoading(false);
+  };
+
+  const closeLookupScreen = () => {
+    resetLookupFormState();
+
+    if (onLookupBack) {
+      onLookupBack();
+      return;
+    }
+
+    setShowLookupScreen(false);
   };
 
   const resetLookupSearch = () => {
     setLookupStatus(null);
     setLookupRegistrations([]);
     setLookupCancelMessage("");
+    setLookupError("");
     setLookupIdNumber("");
   };
 
@@ -322,7 +340,7 @@ function PaymentForm({
   const searchRegistrationsByIdNumber = async () => {
     const idValidation = validateIsraeliId(lookupIdNumber);
     if (!idValidation.valid) {
-      alert(idValidation.message);
+      setLookupError(idValidation.message);
       return;
     }
 
@@ -330,21 +348,34 @@ function PaymentForm({
     setLookupStatus(null);
     setLookupRegistrations([]);
     setLookupCancelMessage("");
+    setLookupError("");
 
     try {
-      const { data } = await apiPost("/find-active-registration", {
+      const { response, data } = await apiPost("/find-active-registration", {
         idNumber: idValidation.idNumber,
       });
 
-      if (data.success && Array.isArray(data.registrations) && data.registrations.length > 0) {
+      if (!response.ok) {
+        setLookupError(data?.message || "שגיאה בחיפוש הרשמות");
+        return;
+      }
+
+      if (
+        data.success &&
+        Array.isArray(data.registrations) &&
+        data.registrations.length > 0
+      ) {
         setLookupRegistrations(data.registrations);
         setLookupStatus("found");
       } else {
         setLookupStatus("not_found");
+        if (data?.message) {
+          setLookupError(data.message);
+        }
       }
     } catch (error) {
       console.error(error);
-      alert(error.message || "שגיאה בחיבור לשרת");
+      setLookupError(error.message || "שגיאה בחיבור לשרת");
     } finally {
       setLookupLoading(false);
     }
@@ -391,14 +422,56 @@ function PaymentForm({
   }
 
   if (showLookupScreen) {
-    return (
-      <section className="community-section lookup-screen">
-        <h2>ביטול הרשמה לפי ת.ז.</h2>
-        <p className="lookup-screen-intro">
-          הזינו את מספר תעודת הזהות שבו בוצעה ההרשמה. יוצגו כל ההרשמות הפעילות שלכם,
-          וליד כל אחת ניתן להגיש בקשת ביטול.
-        </p>
+    const showSuccessScreen =
+      lookupStatus === "found" &&
+      lookupRegistrations.length === 0 &&
+      lookupCancelMessage;
 
+    const cancelSubtitle =
+      lookupStatus === "found"
+        ? "בחרו את ההרשמה שברצונכם לבטל."
+        : "הזינו מספר תעודת זהות כדי למצוא הרשמות פעילות ולבטל אותן.";
+
+    return (
+      <section
+        className="cancel-registration-flow"
+        aria-labelledby="cancel-registration-title"
+      >
+        <div className="cancel-registration-page">
+          <div className="cancel-registration-shell">
+            {showSuccessScreen ? (
+              <div className="cancel-registration-success" role="status">
+                <h2 className="cancel-registration-success__title">
+                  הבקשה התקבלה
+                </h2>
+                <p className="cancel-registration-success__text">
+                  {lookupCancelMessage}
+                </p>
+                <div className="cancel-registration-actions">
+                  <button
+                    type="button"
+                    className="cancel-registration-primary-btn"
+                    onClick={resetLookupSearch}
+                  >
+                    חיפוש עם ת.ז. אחרת
+                  </button>
+                  <button
+                    type="button"
+                    className="cancel-registration-link-btn"
+                    onClick={closeLookupScreen}
+                  >
+                    {lookupBackLabel}
+                  </button>
+                </div>
+              </div>
+            ) : (
+              <>
+                <div className="cancel-registration-header">
+                  <h1 id="cancel-registration-title">ביטול הרשמה</h1>
+                  <p className="cancel-registration-subtitle">{cancelSubtitle}</p>
+                </div>
+
+                <div className="cancel-registration-body">
         {lookupStatus === "found" && lookupRegistrations.length > 0 && (
           <>
             <p className="lookup-success">
@@ -447,27 +520,41 @@ function PaymentForm({
                 </li>
               ))}
             </ul>
-            <div className="community-actions">
-              <button type="button" className="secondary-btn" onClick={resetLookupSearch}>
+            <div className="cancel-registration-actions">
+              <button
+                type="button"
+                className="cancel-registration-link-btn"
+                onClick={resetLookupSearch}
+              >
                 חיפוש עם ת.ז. אחרת
               </button>
-              <button type="button" className="secondary-btn" onClick={closeLookupScreen}>
+              <button
+                type="button"
+                className="cancel-registration-link-btn"
+                onClick={closeLookupScreen}
+              >
                 {lookupBackLabel}
               </button>
             </div>
           </>
         )}
 
-        {lookupStatus === "found" && lookupRegistrations.length === 0 && (
+        {lookupStatus === "found" && lookupRegistrations.length === 0 && !lookupCancelMessage && (
           <>
-            <p className="lookup-success">
-              {lookupCancelMessage || "כל ההרשמות הפעילות בוטלו."}
-            </p>
-            <div className="community-actions">
-              <button type="button" className="secondary-btn" onClick={resetLookupSearch}>
+            <p className="lookup-success">כל ההרשמות הפעילות בוטלו.</p>
+            <div className="cancel-registration-actions">
+              <button
+                type="button"
+                className="cancel-registration-primary-btn"
+                onClick={resetLookupSearch}
+              >
                 חיפוש עם ת.ז. אחרת
               </button>
-              <button type="button" className="secondary-btn" onClick={closeLookupScreen}>
+              <button
+                type="button"
+                className="cancel-registration-link-btn"
+                onClick={closeLookupScreen}
+              >
                 {lookupBackLabel}
               </button>
             </div>
@@ -476,35 +563,55 @@ function PaymentForm({
 
         {lookupStatus === "not_found" && (
           <>
-            <p className="lookup-error">לא נמצאו הרשמות פעילות למספר תעודת זהות זה.</p>
-            <div className="community-actions">
-              <button type="button" className="secondary-btn" onClick={resetLookupSearch}>
+            <p className="lookup-error">
+              {lookupError || "לא נמצאו הרשמות פעילות למספר תעודת זהות זה."}
+            </p>
+            <div className="cancel-registration-actions">
+              <button
+                type="button"
+                className="cancel-registration-primary-btn"
+                onClick={resetLookupSearch}
+              >
                 חיפוש עם מספר אחר
               </button>
-              <button type="button" className="secondary-btn" onClick={closeLookupScreen}>
+              <button
+                type="button"
+                className="cancel-registration-link-btn"
+                onClick={closeLookupScreen}
+              >
                 {lookupBackLabel}
               </button>
             </div>
           </>
         )}
 
+        {lookupError && lookupStatus !== "found" && lookupStatus !== "not_found" && (
+          <p className="lookup-error" role="alert">{lookupError}</p>
+        )}
+
         {lookupStatus !== "found" && lookupStatus !== "not_found" && (
           <>
-            <p className="section-description">מספר תעודת זהות</p>
-            <input
-              type="text"
-              className="lookup-id-input"
-              placeholder="9 ספרות"
-              value={lookupIdNumber}
-              onChange={handleLookupIdNumberChange}
-              disabled={lookupLoading}
-              maxLength={9}
-              inputMode="numeric"
-            />
-            <div className="community-actions">
+            <div className="cancel-registration-field">
+              <label className="cancel-registration-label" htmlFor="lookup-id-number">
+                מספר תעודת זהות
+              </label>
+              <input
+                id="lookup-id-number"
+                type="text"
+                className="cancel-registration-input"
+                placeholder="אנא הזן 9 ספרות"
+                value={lookupIdNumber}
+                onChange={handleLookupIdNumberChange}
+                disabled={lookupLoading}
+                maxLength={9}
+                inputMode="numeric"
+                autoComplete="off"
+              />
+            </div>
+            <div className="cancel-registration-actions">
               <button
                 type="button"
-                className="primary-btn"
+                className="cancel-registration-primary-btn"
                 onClick={searchRegistrationsByIdNumber}
                 disabled={lookupLoading}
               >
@@ -512,7 +619,7 @@ function PaymentForm({
               </button>
               <button
                 type="button"
-                className="secondary-btn"
+                className="cancel-registration-link-btn"
                 onClick={closeLookupScreen}
                 disabled={lookupLoading}
               >
@@ -521,6 +628,11 @@ function PaymentForm({
             </div>
           </>
         )}
+                </div>
+              </>
+            )}
+          </div>
+        </div>
       </section>
     );
   }

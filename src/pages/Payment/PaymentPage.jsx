@@ -4,25 +4,31 @@ import PaymentForm from "../../components/Payment/PaymentForm";
 import { apiGet } from "../../services/Payment/api";
 import { formatDisplayPrice } from "../../services/Payment/formatPrice";
 import { buildActivityPaymentPath } from "../../services/Payment/paymentLink";
-import { notifyRegistrationBlock } from "../../services/Payment/registrationErrors";
-
 function PaymentPage() {
   const navigate = useNavigate();
   const [searchParams] = useSearchParams();
   const activityId = searchParams.get("activityId");
   const programId = searchParams.get("programId") || "";
+  const wantsCancelRegistration =
+    searchParams.get("cancelRegistration") === "1" ||
+    searchParams.get("cancel") === "1";
+  const returnTo = searchParams.get("returnTo") || "";
 
   const [loading, setLoading] = useState(Boolean(activityId));
   const [loadError, setLoadError] = useState("");
   const [paymentInfo, setPaymentInfo] = useState(null);
-  const [showCancelLookup, setShowCancelLookup] = useState(false);
+  const [showCancelLookup, setShowCancelLookup] = useState(
+    wantsCancelRegistration
+  );
 
-  const [activitiesLoading, setActivitiesLoading] = useState(!activityId);
+  const [activitiesLoading, setActivitiesLoading] = useState(
+    !activityId && !wantsCancelRegistration
+  );
   const [activitiesError, setActivitiesError] = useState("");
   const [activities, setActivities] = useState([]);
 
   useEffect(() => {
-    if (activityId) {
+    if (activityId || wantsCancelRegistration) {
       return;
     }
 
@@ -99,6 +105,7 @@ function PaymentPage() {
           price: data.price,
           currency: data.currency,
           description: data.description || "",
+          programId: data.programId || programId || "",
         });
       } catch (error) {
         if (!cancelled) {
@@ -116,49 +123,47 @@ function PaymentPage() {
     return () => {
       cancelled = true;
     };
-  }, [activityId]);
+  }, [activityId, wantsCancelRegistration]);
 
-  useEffect(() => {
-    if (loadError) {
-      notifyRegistrationBlock(loadError);
+  const handleLookupBack = () => {
+    if (returnTo === "plus60") {
+      navigate("/plus60");
+      return;
     }
-  }, [loadError]);
 
-  const startRegistration = (id) => {
+    if (wantsCancelRegistration) {
+      navigate("/");
+      return;
+    }
+
     setShowCancelLookup(false);
-    navigate(buildActivityPaymentPath(id, { programId }));
+  };
+
+  const resolvedProgramId = programId || paymentInfo?.programId || "";
+
+  const startRegistration = (id, activityProgramId = "") => {
+    setShowCancelLookup(false);
+    navigate(
+      buildActivityPaymentPath(id, {
+        programId: activityProgramId || resolvedProgramId,
+      })
+    );
   };
 
   const openActivities = activities.filter((a) => a.openForRegistration);
-  const heroTitle =
-    showCancelLookup && !paymentInfo ? "ביטול הרשמה" : "הרשמה לפעילות";
+  const showActivityPicker = !activityId && !showCancelLookup;
 
   return (
     <>
-      <header className="community-hero">
-        <span className="hero-icon" aria-hidden="true">
-          {showCancelLookup && !paymentInfo ? "🔍" : "📋"}
-        </span>
-        <h1>{heroTitle}</h1>
-        {!showCancelLookup && (
-          <>
-            <p>
-              {activityId
-                ? "נרשמתם כבר? ניתן לבטל הרשמה קיימת."
-                : "אין קישור? בחרו פעילות מהרשימה או בטלו הרשמה לפי ת.ז."}
-            </p>
-            <button
-              type="button"
-              className="hero-secondary-btn"
-              onClick={() => setShowCancelLookup(true)}
-            >
-              ביטול הרשמה קיימת
-            </button>
-          </>
-        )}
-      </header>
+      {showActivityPicker && (
+        <header className="community-hero">
+          <span className="hero-icon" aria-hidden="true">📋</span>
+          <h1>הרשמה לפעילות</h1>
+          <p>בחרו פעילות מהרשימה להרשמה ותשלום.</p>
+        </header>
+      )}
 
-      {!activityId && !showCancelLookup && (
+      {showActivityPicker && (
         <section
           className="community-section"
           aria-labelledby="activity-picker-title"
@@ -187,7 +192,9 @@ function PaymentPage() {
                   <button
                     type="button"
                     className="primary-btn"
-                    onClick={() => startRegistration(activity.activityId)}
+                    onClick={() =>
+                      startRegistration(activity.activityId, activity.programId)
+                    }
                   >
                     הרשמה ותשלום
                   </button>
@@ -226,39 +233,18 @@ function PaymentPage() {
         </section>
       )}
 
-      {paymentInfo && !showCancelLookup && (
-        <section className="payment-info" aria-label="פרטי פעילות">
-          <h2>פרטי הפעילות</h2>
-          <p>
-            <strong>{paymentInfo.title}</strong>
-          </p>
-          {paymentInfo.description && <p>{paymentInfo.description}</p>}
-          <p>
-            <strong>
-              לתשלום:{" "}
-              {formatDisplayPrice(paymentInfo.price, paymentInfo.currency)}
-            </strong>
-          </p>
-          <div className="community-actions community-actions--inline">
-            <button
-              type="button"
-              className="secondary-btn"
-              onClick={() => navigate("/")}
-            >
-              בחירת פעילות אחרת
-            </button>
-          </div>
-        </section>
-      )}
-
       {(paymentInfo || showCancelLookup) && (
         <PaymentForm
           activityId={activityId || ""}
-          programId={programId}
+          programId={resolvedProgramId}
           paymentInfo={paymentInfo}
           registrationOnly={!paymentInfo}
           showLookupScreen={showCancelLookup}
           onLookupScreenChange={setShowCancelLookup}
+          onLookupBack={showCancelLookup ? handleLookupBack : undefined}
+          lookupBackLabel={
+            returnTo === "plus60" ? "חזרה לפעילויות" : undefined
+          }
         />
       )}
     </>

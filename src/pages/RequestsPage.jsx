@@ -1,12 +1,13 @@
 import { useEffect, useMemo, useState } from "react";
 
-import AnsweredRequests from "../components/AnsweredRequests";
-import RequestCard from "../components/RequestCard";
+import AnsweredRequests from "../components/ResponseOnRequest/AnsweredRequests";
+import RequestCard from "../components/ResponseOnRequest/RequestCard";
 import {
   getAllRequests,
   markRequestAsAnswered,
 } from "../services/ RespOneonRequest/requestsService";
-import "../styles/requests.css";
+import "../styles/RespOneonRequest/community-theme.css";
+import "../styles/RespOneonRequest/requests.css";
 import {
   buildWhatsAppUrl,
   isWhatsAppCapablePhone,

@@ -1,0 +1,110 @@
+/* Global responsive — zoom, resize, mobile */
+
+:root {
+  --app-padding-x: clamp(0.85rem, 3vw, 2rem);
+  --app-padding-y: clamp(0.75rem, 2vw, 1.8rem);
+  --app-section-gap: clamp(0.75rem, 2vw, 1.5rem);
+  --app-content-max: min(100%, 1280px);
+}
+
+html {
+  -webkit-text-size-adjust: 100%;
+  text-size-adjust: 100%;
+}
+
+img,
+video,
+picture,
+svg:not(:root) {
+  max-width: 100%;
+  height: auto;
+}
+
+/* Fluid type for public + staff shells */
+.staff-page,
+.supportive-community-page {
+  font-size: clamp(16px, 0.95rem + 0.35vw, 20px);
+}
+
+/* Tables scroll horizontally on narrow viewports */
+.staff-table-wrap,
+.staff-scroll-table,
+.admin-list-table-wrap {
+  overflow-x: auto;
+  -webkit-overflow-scrolling: touch;
+  max-width: 100%;
+}
+
+/* Dashboard panel rows — stack on narrow / zoomed */
+@media (max-width: 640px) {
+  .staff-dashboard-panel__item--with-action {
+    flex-direction: column;
+    align-items: stretch;
+    gap: 0.45rem;
+  }
+
+  .staff-dashboard-panel__item-action {
+    width: 100%;
+    text-align: center;
+    white-space: normal;
+  }
+
+  .staff-dashboard-hero__bar {
+    flex-wrap: wrap;
+    gap: 0.5rem;
+  }
+
+  .staff-dashboard-title {
+    white-space: normal;
+    text-overflow: unset;
+  }
+}
+
+/* Requests / payment cards */
+@media (max-width: 600px) {
+  .supportive-community-page .service-card,
+  .supportive-community-page .answered-card__header {
+    padding: 1rem;
+  }
+
+  .supportive-community-page .requests-tabs-wrap {
+    padding-inline: var(--app-padding-x);
+  }
+}
+
+/* Home header */
+@media (max-width: 768px) {
+  .home-header {
+    flex-wrap: wrap;
+    justify-content: center;
+    gap: 0.75rem;
+    padding-bottom: 0.5rem;
+  }
+
+  .top-nav {
+    flex-wrap: wrap;
+    justify-content: center;
+    gap: 0.75rem 1.25rem;
+  }
+
+  .home-page .page-title {
+    font-size: clamp(1.35rem, 5vw, 2rem);
+    gap: 0.75rem;
+  }
+
+  .home-page .page-title::before,
+  .home-page .page-title::after {
+    max-width: 80px;
+  }
+}
+
+/* Very narrow / high zoom */
+@media (max-width: 380px) {
+  .staff-dashboard-summary-grid {
+    grid-template-columns: 1fr;
+  }
+
+  .staff-subpage-toolbar {
+    padding-inline: 0.75rem;
+  }
+}

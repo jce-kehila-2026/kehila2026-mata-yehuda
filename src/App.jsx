@@ -11,8 +11,11 @@ import Plus60Page from "./pages/HomePages/Plus60Page.jsx";
 import AboutPage from "./pages/HomePages/AboutPage.jsx";
 import ServicesPage from "./pages/HomePages/ServicesPage.jsx";
 import StaffLogin from "./pages/staffManegmentPages/StaffLogin";
+import RegistrationLayout from "./components/Payment/RegistrationLayout";
 import PaymentPage from "./pages/Payment/PaymentPage";
+import PaymentSuccess from "./pages/Payment/PaymentSuccess";
 import PaymentCancel from "./pages/CancelTheRegistration/PaymentCancel";
+import RequestsPage from "./pages/RequestsPage";
 
 import supportiveCommunityRoutes from "./routes/supportive community/supportiveCommunityRoutes";
 import communityStaffRoutes from "./routes/communityStaff/communityStaffRoutes";
@@ -40,8 +43,31 @@ function App() {
         <Route path="/about" element={<AboutPage />} />
         <Route path="/services" element={<ServicesPage />} />
         <Route path="/staff-login" element={<StaffLogin />} />
-        <Route path="/pay" element={<PaymentPage />} />
-        <Route path="/payment-cancel" element={<PaymentCancel />} />
+        <Route path="/requests" element={<RequestsPage />} />
+        <Route
+          path="/pay"
+          element={
+            <RegistrationLayout>
+              <PaymentPage />
+            </RegistrationLayout>
+          }
+        />
+        <Route
+          path="/payment-success"
+          element={
+            <RegistrationLayout>
+              <PaymentSuccess />
+            </RegistrationLayout>
+          }
+        />
+        <Route
+          path="/payment-cancel"
+          element={
+            <RegistrationLayout>
+              <PaymentCancel />
+            </RegistrationLayout>
+          }
+        />
 
         <Route path="/attendance" element={<AttendanceFlow />} />
 

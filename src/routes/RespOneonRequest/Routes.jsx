@@ -1,6 +1,6 @@
 import { Navigate, Route, Routes as RouterRoutes } from "react-router-dom";
 
-import RequestsPage from "../pages/RequestsPage";
+import RequestsPage from "../../pages/RequestsPage";
 
 function Routes() {
   return (

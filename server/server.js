@@ -1,12 +1,93 @@
 import express from "express";
 import cors from "cors";
 import dotenv from "dotenv";
+import fs from "fs";
+import path from "path";
+import { fileURLToPath } from "url";
 import process from "process";
 import { Buffer } from "buffer";
 import admin from "firebase-admin";
 
+const __filename = fileURLToPath(import.meta.url);
+const __dirname = path.dirname(__filename);
 
-dotenv.config();
+// Root .env then server/.env (server overrides)
+dotenv.config({ path: path.resolve(__dirname, "../.env") });
+dotenv.config({ path: path.resolve(__dirname, ".env") });
+
+function resolveGoogleApplicationCredentialsPath() {
+  const configured = process.env.GOOGLE_APPLICATION_CREDENTIALS?.trim();
+  const candidates = [];
+
+  if (configured) {
+    candidates.push(path.resolve(process.cwd(), configured));
+    candidates.push(path.resolve(__dirname, configured));
+    candidates.push(
+      path.resolve(__dirname, configured.replace(/^\.\//, ""))
+    );
+  }
+
+  candidates.push(path.resolve(__dirname, "serviceAccountKey.json"));
+
+  for (const candidate of candidates) {
+    try {
+      if (fs.existsSync(candidate) && fs.statSync(candidate).isFile()) {
+        return candidate;
+      }
+    } catch {
+      // ignore invalid paths
+    }
+  }
+
+  return null;
+}
+
+function initializePaymentFirebase() {
+  if (admin.apps.length) {
+    return;
+  }
+
+  const projectId =
+    process.env.FIREBASE_PROJECT_ID?.trim() || "matayehuda";
+  const clientEmail = process.env.FIREBASE_CLIENT_EMAIL?.trim();
+  const privateKeyRaw = process.env.FIREBASE_PRIVATE_KEY;
+
+  const credentialsPath = resolveGoogleApplicationCredentialsPath();
+
+  if (credentialsPath) {
+    process.env.GOOGLE_APPLICATION_CREDENTIALS = credentialsPath;
+    admin.initializeApp({
+      credential: admin.credential.applicationDefault(),
+      projectId,
+    });
+    return;
+  }
+
+  if (clientEmail && privateKeyRaw) {
+    admin.initializeApp({
+      credential: admin.credential.cert({
+        projectId,
+        clientEmail,
+        privateKey: privateKeyRaw.replace(/\\n/g, "\n"),
+      }),
+    });
+    return;
+  }
+
+  console.error(
+    "\n❌ Firebase Admin לא מוגדר — שרת התשלום לא יכול להתחיל.\n\n" +
+      "צרו קובץ server/.env (או .env בשורש הפרויקט) עם:\n" +
+      "  FIREBASE_PROJECT_ID=matayehuda\n" +
+      "  FIREBASE_CLIENT_EMAIL=...\n" +
+      "  FIREBASE_PRIVATE_KEY=\"-----BEGIN PRIVATE KEY-----\\n...\\n-----END PRIVATE KEY-----\\n\"\n\n" +
+      "או הגדירו:\n" +
+      "  GOOGLE_APPLICATION_CREDENTIALS=./server/serviceAccountKey.json\n\n" +
+      "תבנית מלאה: server/.env.payment.example\n"
+  );
+  process.exit(1);
+}
+
+initializePaymentFirebase();
 
 const app = express();
 
@@ -15,14 +96,6 @@ app.use(cors());
 app.use(express.json());
 
 const PORT = 5001;
-
-admin.initializeApp({
-  credential: admin.credential.cert({
-    projectId: process.env.FIREBASE_PROJECT_ID,
-    clientEmail: process.env.FIREBASE_CLIENT_EMAIL,
-    privateKey: process.env.FIREBASE_PRIVATE_KEY.replace(/\\n/g, "\n"),
-  }),
-});
 
 const db = admin.firestore();
 
@@ -69,16 +142,42 @@ function serverErrorMessage(error, fallback) {
 // Participants & registrations
 // =========================
 
+function normalizeIdNumberInput(idNumber) {
+  return String(idNumber || "").replace(/\D/g, "");
+}
+
+function parseIdNumberFromRequest(body, res) {
+  const normalized = normalizeIdNumberInput(body?.idNumber);
+
+  if (!normalized) {
+    res.status(400).json({
+      success: false,
+      message: "חסר מספר תעודת זהות",
+    });
+    return null;
+  }
+
+  if (normalized.length !== 9) {
+    res.status(400).json({
+      success: false,
+      message: "מספר תעודת זהות חייב להיות בן 9 ספרות",
+    });
+    return null;
+  }
+
+  return normalized;
+}
+
 async function findParticipantByIdNumber(idNumber) {
-  const trimmed = String(idNumber || "").trim();
-  if (!trimmed) {
+  const normalized = normalizeIdNumberInput(idNumber);
+  if (!normalized) {
     return null;
   }
 
   const snapshot = await withTimeout(
     db
       .collection("participants")
-      .where("id_number", "==", trimmed)
+      .where("id_number", "==", normalized)
       .limit(1)
       .get(),
     FIRESTORE_TIMEOUT_MS,
@@ -94,7 +193,7 @@ async function findParticipantByIdNumber(idNumber) {
 }
 
 async function findOrCreateParticipant({ firstName, idNumber, phone }) {
-  const trimmedId = String(idNumber || "").trim();
+  const trimmedId = normalizeIdNumberInput(idNumber);
   const existing = await findParticipantByIdNumber(trimmedId);
 
   if (existing) {
@@ -204,6 +303,7 @@ async function savePaymentWithRegistration({
     activityId: activityId || null,
     activityTitle: activityTitle || null,
     programId: programId || null,
+    program_id: programId || "",
     paymentMethod,
     amount,
     currency: currency || "ILS",
@@ -312,16 +412,52 @@ function pickAllActivePayments(docs) {
   return active;
 }
 
+async function findPaymentsByIdNumber(idNumber) {
+  const normalizedId = normalizeIdNumberInput(idNumber);
+  if (!normalizedId) {
+    return [];
+  }
+
+  const byIdNumberSnapshot = await withTimeout(
+    db.collection("payments").where("idNumber", "==", normalizedId).get(),
+    FIRESTORE_TIMEOUT_MS,
+    "Firestore payments lookup by idNumber timeout"
+  );
+
+  const docsMap = new Map();
+  for (const doc of byIdNumberSnapshot.docs) {
+    docsMap.set(doc.id, doc);
+  }
+
+  const participant = await findParticipantByIdNumber(normalizedId);
+  if (participant) {
+    const byParticipantSnapshot = await withTimeout(
+      db
+        .collection("payments")
+        .where("participantId", "==", participant.id)
+        .get(),
+      FIRESTORE_TIMEOUT_MS,
+      "Firestore payments lookup by participantId timeout"
+    );
+
+    for (const doc of byParticipantSnapshot.docs) {
+      docsMap.set(doc.id, doc);
+    }
+  }
+
+  return [...docsMap.values()];
+}
+
 async function findActivePaymentForActivity(idNumber, activityId) {
-  const trimmedId = String(idNumber || "").trim();
+  const normalizedId = normalizeIdNumberInput(idNumber);
   const trimmedActivityId = String(activityId || "").trim();
 
-  if (!trimmedId || !trimmedActivityId) {
+  if (!normalizedId || !trimmedActivityId) {
     return null;
   }
 
   const snapshot = await withTimeout(
-    db.collection("payments").where("idNumber", "==", trimmedId).get(),
+    db.collection("payments").where("idNumber", "==", normalizedId).get(),
     FIRESTORE_TIMEOUT_MS,
     "Firestore duplicate registration check timeout"
   );
@@ -497,6 +633,26 @@ function isActivityRegistrationError(error) {
   );
 }
 
+function readProgramIdFromActivityData(data) {
+  if (!data) {
+    return "";
+  }
+  const raw = data.program_id ?? data.programId ?? "";
+  return typeof raw === "string" ? raw.trim() : String(raw || "").trim();
+}
+
+function resolveProgramId(clientProgramId, activityProgramIdOrData) {
+  const fromClient =
+    typeof clientProgramId === "string" ? clientProgramId.trim() : "";
+  if (fromClient) {
+    return fromClient;
+  }
+  if (typeof activityProgramIdOrData === "string") {
+    return activityProgramIdOrData.trim();
+  }
+  return readProgramIdFromActivityData(activityProgramIdOrData);
+}
+
 function parseActivityPricing(data) {
   const price = data.price ?? data.amount;
   if (price == null || Number(price) <= 0) {
@@ -540,6 +696,7 @@ async function getActivityForPayment(activityDocId) {
 
   return {
     activityId: activityDoc.id,
+    programId: readProgramIdFromActivityData(data),
     ...pricing,
   };
 }
@@ -592,6 +749,7 @@ app.get("/activities", async (req, res) => {
           price: pricing.price,
           currency: pricing.currency,
           description: pricing.description,
+          programId: readProgramIdFromActivityData(data),
           openForRegistration: !block,
           registrationBlockMessage: block?.message || null,
         };
@@ -851,6 +1009,8 @@ app.post("/capture-paypal-order", async (req, res) => {
       const transactionId =
         data.purchase_units?.[0]?.payments?.captures?.[0]?.id;
 
+      const resolvedProgramId = resolveProgramId(programId, activity?.programId);
+
       const paymentId = await savePayPalPayment({
         orderID,
         firstName,
@@ -861,7 +1021,7 @@ app.post("/capture-paypal-order", async (req, res) => {
         transactionId,
         status: data.status,
         activityId: activity?.activityId ?? activityId,
-        programId,
+        programId: resolvedProgramId,
         currency: activity?.currency,
         activityTitle: activity?.title,
       });
@@ -881,6 +1041,8 @@ app.post("/capture-paypal-order", async (req, res) => {
         const transactionId =
           order.purchase_units?.[0]?.payments?.captures?.[0]?.id;
 
+        const resolvedProgramId = resolveProgramId(programId, activity?.programId);
+
         const paymentId = await savePayPalPayment({
           orderID,
           firstName,
@@ -891,7 +1053,7 @@ app.post("/capture-paypal-order", async (req, res) => {
           transactionId,
           status: order.status,
           activityId: activity?.activityId ?? activityId,
-          programId,
+          programId: resolvedProgramId,
           currency: activity?.currency,
           activityTitle: activity?.title,
         });
@@ -928,6 +1090,7 @@ app.post("/save-cash-payment", async (req, res) => {
     } = req.body;
 
     const activity = await getActivityForPayment(activityId);
+    const resolvedProgramId = resolveProgramId(programId, activity.programId);
 
     const result = await savePaymentWithRegistration({
       firstName,
@@ -936,7 +1099,7 @@ app.post("/save-cash-payment", async (req, res) => {
       paymentMethod: paymentMethod || "cash",
       amount: activity.price,
       activityId: activity.activityId,
-      programId,
+      programId: resolvedProgramId,
       currency: activity.currency,
       activityTitle: activity.title,
       status: "PENDING_CASH_PAYMENT",
@@ -972,6 +1135,7 @@ app.post("/save-bit-payment", async (req, res) => {
     } = req.body;
 
     const activity = await getActivityForPayment(activityId);
+    const resolvedProgramId = resolveProgramId(programId, activity.programId);
 
     const result = await savePaymentWithRegistration({
       firstName,
@@ -980,7 +1144,7 @@ app.post("/save-bit-payment", async (req, res) => {
       paymentMethod: paymentMethod || "bit",
       amount: activity.price,
       activityId: activity.activityId,
-      programId,
+      programId: resolvedProgramId,
       currency: activity.currency,
       activityTitle: activity.title,
       status: "WAITING_FOR_BIT_PAYMENT",
@@ -1005,13 +1169,9 @@ app.post("/save-bit-payment", async (req, res) => {
 
 app.post("/check-participant", async (req, res) => {
   try {
-    const idNumber = String(req.body.idNumber || "").trim();
-
+    const idNumber = parseIdNumberFromRequest(req.body, res);
     if (!idNumber) {
-      return res.status(400).json({
-        success: false,
-        message: "חסר מספר תעודת זהות",
-      });
+      return;
     }
 
     const participant = await findParticipantByIdNumber(idNumber);
@@ -1046,29 +1206,21 @@ app.post("/check-participant", async (req, res) => {
 
 app.post("/find-active-registration", async (req, res) => {
   try {
-    const idNumber = String(req.body.idNumber || "").trim();
-
+    const idNumber = parseIdNumberFromRequest(req.body, res);
     if (!idNumber) {
-      return res.status(400).json({
-        success: false,
-        message: "חסר מספר תעודת זהות",
-      });
+      return;
     }
 
-    const snapshot = await withTimeout(
-      db.collection("payments").where("idNumber", "==", idNumber).get(),
-      FIRESTORE_TIMEOUT_MS,
-      "Firestore search timeout"
-    );
+    const paymentDocs = await findPaymentsByIdNumber(idNumber);
 
-    if (snapshot.empty) {
+    if (paymentDocs.length === 0) {
       return res.json({
         success: false,
-        message: "לא נמצאו הרשמות פעילות",
+        message: "לא נמצאו הרשמות פעילות למספר תעודת זהות זה",
       });
     }
 
-    const activeDocs = pickAllActivePayments(snapshot.docs);
+    const activeDocs = pickAllActivePayments(paymentDocs);
 
     if (activeDocs.length === 0) {
       return res.json({
@@ -1166,6 +1318,8 @@ function buildCancellationRecord(paymentData, paymentId, refundStatus, refundRes
     currency: paymentData.currency || "ILS",
     activityId: paymentData.activityId || null,
     activityTitle: paymentData.activityTitle || null,
+    programId: paymentData.programId || paymentData.program_id || null,
+    program_id: paymentData.program_id || paymentData.programId || "",
     paymentMethod: paymentData.paymentMethod || "",
     paymentMethodLabel: paymentMethodLabel(paymentData.paymentMethod),
     paymentStatus: paymentData.status || "",

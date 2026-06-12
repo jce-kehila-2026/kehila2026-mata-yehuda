@@ -1,9 +1,9 @@
 import { useEffect, useRef, useState } from "react";
 import { useNavigate } from "react-router-dom";
-import PaymentSuccessMessage from "../components/PaymentSuccessMessage";
+import PaymentSuccessMessage from "../../components/Payment/PaymentSuccessMessage";
 import RegistrationStepper, {
   REGISTRATION_STEPS,
-} from "../components/RegistrationStepper";
+} from "../../components/Payment/RegistrationStepper";
 import { API_BASE } from "../../services/Payment/api";
 import { getStoredRegistrationPaymentPath } from "../../services/Payment/paymentLink";
 import { notifyRegistrationBlock } from "../../services/Payment/registrationErrors";

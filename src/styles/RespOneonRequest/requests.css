@@ -1,7 +1,9 @@
 .supportive-community-page .requests-toolbar {
-  max-width: var(--max-width);
+  width: 100%;
+  max-width: min(var(--max-width), 100%);
   margin: 0 auto;
-  padding: 0 1.2rem 1rem;
+  padding: 0 var(--app-padding-x, 1.2rem) 1rem;
+  box-sizing: border-box;
   display: flex;
   justify-content: flex-end;
 }
@@ -23,9 +25,11 @@
 }
 
 .supportive-community-page .requests-tabs-wrap {
-  max-width: var(--max-width);
+  width: 100%;
+  max-width: min(var(--max-width), 100%);
   margin: 0 auto;
-  padding: 0 1.2rem 1rem;
+  padding: 0 var(--app-padding-x, 1.2rem) 1rem;
+  box-sizing: border-box;
   position: sticky;
   top: 0;
   z-index: 10;

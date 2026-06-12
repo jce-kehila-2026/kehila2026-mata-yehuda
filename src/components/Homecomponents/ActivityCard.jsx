@@ -1,7 +1,24 @@
 import { useNavigate } from "react-router-dom";
 
-function ActivityCard({ activity }) {
+function ActivityCard({ activity, programId = "" }) {
   const navigate = useNavigate();
+
+  const resolvedProgramId =
+    activity?.program_id || activity?.programId || programId || "";
+  const isOpenForRegistration = Boolean(activity?.is_open);
+  const hasPrice = Number(activity?.price) > 0;
+
+  const goToPayment = () => {
+    if (!isOpenForRegistration || !hasPrice) {
+      return;
+    }
+
+    const params = new URLSearchParams({ activityId: activity.id });
+    if (resolvedProgramId) {
+      params.set("programId", resolvedProgramId);
+    }
+    navigate(`/pay?${params.toString()}`);
+  };
 
   if (!activity) return null;
 
@@ -54,7 +71,13 @@ function ActivityCard({ activity }) {
 
         </div>
         <div className="activity-divider"></div>
-        <button onClick={() => navigate(`/pay?activityId=${activity.id}`)}>השתתף</button>
+        <button
+          type="button"
+          onClick={goToPayment}
+          disabled={!isOpenForRegistration || !hasPrice}
+        >
+          {isOpenForRegistration && hasPrice ? "השתתף" : "סגור להרשמה"}
+        </button>
       </div>
     </div>
   );

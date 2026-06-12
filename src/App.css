@@ -46,9 +46,10 @@ button:active {
 }
 .activities-container:not(.staff-grid):not(.activity-list) {
     display: grid;
-    grid-template-columns: repeat(2, 1fr);
-    gap: 30px;
-    padding: 20px;
+    grid-template-columns: repeat(auto-fit, minmax(min(100%, 280px), 1fr));
+    gap: clamp(1rem, 3vw, 30px);
+    padding: var(--app-padding-x, 20px);
+    box-sizing: border-box;
 }
 
 .activity-card:not(.staff-card) {

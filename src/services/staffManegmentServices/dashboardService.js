@@ -2,7 +2,8 @@ import { collection, getDocs } from "firebase/firestore";
 import { db } from "../../config/firebase";
 import { fetchActivities } from "./activityService";
 import { getCancellationRequests } from "./cancellationService";
-import { fetchOpenInquiries } from "./inquiryService";
+import { fetchWaitingRequests } from "../ RespOneonRequest/requestsService";
+import { sortWaitingRequests } from "../../utils/RespOneonRequest/formatters";
 import { fetchInitialRegistrationRequests } from "./registrationService";
 
 function getTimestampMillis(value) {
@@ -83,15 +84,32 @@ export function getRequestProgramLabel(request) {
     return "";
 }
 
+function mapRequestToDashboardInquiry(request) {
+    const content = String(request?.content ?? "").trim();
+
+    return {
+        id: request.id,
+        senderName: String(request?.phone ?? "").trim(),
+        subject:
+            content.length > 72 ? `${content.slice(0, 72).trim()}…` : content,
+        createdAt: request?.date ?? request?.createdAt ?? null,
+        status: request?.status ?? "waiting"
+    };
+}
+
 export async function fetchDashboardOverview() {
-    const [pendingRequests, activities, cancellations, inquiries, notificationsSummary] =
+    const [pendingRequests, activities, cancellations, waitingInquiries, notificationsSummary] =
         await Promise.all([
             fetchInitialRegistrationRequests({ programFilter: "all" }),
             fetchActivities(),
             getCancellationRequests(),
-            fetchOpenInquiries(),
+            fetchWaitingRequests(),
             fetchSentNotificationsSummary()
         ]);
+
+    const dashboardInquiries = sortWaitingRequests(waitingInquiries).map(
+        mapRequestToDashboardInquiry
+    );
 
     return {
         pendingCount: pendingRequests.length,
@@ -101,8 +119,8 @@ export async function fetchDashboardOverview() {
         activities,
         recentCancellations: cancellations.slice(0, 5),
         cancellationCount: cancellations.length,
-        recentInquiries: inquiries.slice(0, 5),
-        inquiryCount: inquiries.length,
+        recentInquiries: dashboardInquiries.slice(0, 5),
+        inquiryCount: dashboardInquiries.length,
         sentNotificationCount: notificationsSummary.sentCount,
         latestNotification: notificationsSummary.latest
     };

@@ -13,7 +13,7 @@
   --max-width: 760px;
 
   font-family: "Heebo", system-ui, sans-serif;
-  font-size: 20px;
+  font-size: clamp(16px, 0.95rem + 0.35vw, 20px);
   line-height: 1.7;
   color: var(--color-text);
   background: var(--color-bg);

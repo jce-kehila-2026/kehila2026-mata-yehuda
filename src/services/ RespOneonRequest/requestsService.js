@@ -18,6 +18,12 @@ export async function getAllRequests() {
   }));
 }
 
+export async function fetchWaitingRequests() {
+  const requests = await getAllRequests();
+
+  return requests.filter((request) => request.status === "waiting");
+}
+
 export async function markRequestAsAnswered(requestId, answer) {
   await updateDoc(doc(db, REQUESTS_COLLECTION, requestId), {
     status: "answered",

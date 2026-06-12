@@ -2,7 +2,7 @@
 
 .staff-page {
   font-family: var(--staff-font-family);
-  font-size: 20px;
+  font-size: clamp(16px, 0.95rem + 0.35vw, 20px);
   line-height: 1.7;
   color: var(--staff-color-text);
   background: var(--staff-color-bg);
@@ -76,7 +76,7 @@
   width: 100%;
   max-width: min(100%, 1280px);
   margin: 0 auto;
-  padding: 1.8rem 1.2rem 1.25rem;
+  padding: var(--app-padding-y, 1.8rem) var(--app-padding-x, 1.2rem) 1.25rem;
   box-sizing: border-box;
 }
 

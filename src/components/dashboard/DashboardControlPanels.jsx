@@ -73,7 +73,7 @@ function DashboardControlPanels({
     return (
         <div className="staff-dashboard-panels">
             <div className="staff-dashboard-panels__main">
-            <section className="staff-dashboard-panel">
+            <section className="staff-dashboard-panel staff-dashboard-panel--summary">
                 <h3 className="staff-dashboard-panel__title">בקשות ממתינות</h3>
                 <div className="staff-dashboard-panel__body">
                     {loading ? (
@@ -134,7 +134,7 @@ function DashboardControlPanels({
                 />
             </section>
 
-            <section className="staff-dashboard-panel">
+            <section className="staff-dashboard-panel staff-dashboard-panel--summary">
                 <h3 className="staff-dashboard-panel__title">פניות חדשות</h3>
                 <div className="staff-dashboard-panel__body">
                     {loading ? (
@@ -195,7 +195,7 @@ function DashboardControlPanels({
                 />
             </section>
 
-            <section className="staff-dashboard-panel">
+            <section className="staff-dashboard-panel staff-dashboard-panel--summary">
                 <h3 className="staff-dashboard-panel__title">ביטולים חדשים</h3>
                 <div className="staff-dashboard-panel__body">
                     {loading ? (

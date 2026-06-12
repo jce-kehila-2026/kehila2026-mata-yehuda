@@ -24,6 +24,7 @@ import ViewRegistrations from "./ViewRegistrations";
 import ManageCancellations from "./ManageCancellations";
 import SendMessages from "./SendMessages";
 import AttendancePage from "../attendance/AttendancePage";
+import RequestsPage from "../RequestsPage";
 import DashboardControlPanels from "../../components/dashboard/DashboardControlPanels";
 import { fetchDashboardOverview } from "../../services/staffManegmentServices/dashboardService";
 import {
@@ -99,7 +100,7 @@ const SUBPAGE_TITLES = {
     programs: "ניהול תוכניות",
     manageParticipants: "ניהול משתתפים",
     registrations: "צפייה בבקשות",
-    inquiries: "פניות",
+    inquiries: "ניהול פניות",
     cancellations: "ניהול ביטולים",
     messages: "שליחת התראות",
     attendance: "בדיקת נוכחות"
@@ -417,7 +418,8 @@ function StaffDashboard({ onLogout }) {
             case "inquiries":
                 return (
                     <div data-dashboard-page="inquiries">
-                        {renderPlaceholderPage(SUBPAGE_TITLES.inquiries)}
+                        {renderSubpageToolbar(SUBPAGE_TITLES.inquiries)}
+                        <RequestsPage />
                     </div>
                 );
             case "messages":
