@@ -1,4 +1,8 @@
+import { useNavigate } from "react-router-dom";
+
 function ActivityCard({ activity }) {
+  const navigate = useNavigate();
+
   if (!activity) return null;
 
   const startDate = activity.start_date?.toDate();
@@ -50,7 +54,7 @@ function ActivityCard({ activity }) {
 
         </div>
         <div className="activity-divider"></div>
-        <button>השתתף</button>
+        <button onClick={() => navigate(`/pay?activityId=${activity.id}`)}>השתתף</button>
       </div>
     </div>
   );

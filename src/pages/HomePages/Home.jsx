@@ -63,7 +63,7 @@ function Home() {
 
         {showLoginOptions && (
           <div className="login-box">
-            <button>מנהל</button>
+            <button onClick={() => navigate("/staff-login")}>מנהל</button>
             <button>מתנדב</button>
           </div>
         )}
@@ -87,7 +87,7 @@ function Home() {
 
          
         if (program.id === "supportive_community") {
-          buttons = <button> מידע נוסף והרשמה</button>;
+          buttons = <button onClick={() => navigate("/supportive-community")}> מידע נוסף והרשמה</button>;
         }
         else if  (program.id === "60_plus_minus") {
           buttons = <button onClick={()=> navigate("/plus60")}>הצג פעילויות</button>;

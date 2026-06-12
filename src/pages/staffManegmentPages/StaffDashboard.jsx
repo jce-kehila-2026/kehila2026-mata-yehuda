@@ -23,6 +23,7 @@ import ManageParticipants from "./ManageParticipants";
 import ViewRegistrations from "./ViewRegistrations";
 import ManageCancellations from "./ManageCancellations";
 import SendMessages from "./SendMessages";
+import AttendancePage from "../attendance/AttendancePage";
 import DashboardControlPanels from "../../components/dashboard/DashboardControlPanels";
 import { fetchDashboardOverview } from "../../services/staffManegmentServices/dashboardService";
 import {
@@ -77,7 +78,7 @@ const DASHBOARD_ACTIONS = [
     },
     { id: "inquiries", label: "פניות", page: "inquiries" },
     { id: "cancellations", label: "ביטולים", page: "cancellations" },
-    { id: "attendance", label: "נוכחות", page: null },
+    { id: "attendance", label: "נוכחות", page: "attendance" },
     { id: "volunteers", label: "מתנדבים", page: null }
 ];
 
@@ -427,7 +428,16 @@ function StaffDashboard({ onLogout }) {
                     </div>
                 );
             case "attendance":
-                return renderPlaceholderPage("בדיקת נוכחות");
+                return (
+                    <div data-dashboard-page="attendance">
+                        {renderSubpageToolbar(SUBPAGE_TITLES.attendance)}
+                        <AttendancePage
+                            onNavigate={(view) =>
+                                goToPage(buildStaffPage("attendance", view))
+                            }
+                        />
+                    </div>
+                );
             case "dashboard":
                 return null;
             default:

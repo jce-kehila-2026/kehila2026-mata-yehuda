@@ -7,8 +7,8 @@ import {
   validateIsraeliId,
   validateRegistrationDetails,
   validateRegistrationForm,
-} from "../../services/validation";
-import { apiPost } from "../../services/Payment/api";
+} from "../../services/Payment/validation";
+import { apiPost } from "../../services/Payment/api.js";
 import { formatDisplayPrice } from "../../services/Payment/formatPrice";
 import { notifyRegistrationBlock } from "../../services/Payment/registrationErrors";
 import { checkParticipantByIdNumber } from "../../services/Payment/participantService";

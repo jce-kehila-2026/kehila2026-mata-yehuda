@@ -1,4 +1,5 @@
 import { useState } from "react";
+import { useNavigate } from "react-router-dom";
 import {
     CircleUserRound,
     Eye,
@@ -11,8 +12,13 @@ import { auth, db } from "../../config/firebase";
 import { signInWithEmailAndPassword, signOut } from "firebase/auth";
 import { doc, getDoc } from "firebase/firestore";
 import StaffDashboard from "./StaffDashboard";
+import {
+    STAFF_ROLE_SUPPORTIVE_COMMUNITY,
+    normalizeStaffRole
+} from "../../config/staffRoles";
 
 function StaffLogin() {
+    const navigate = useNavigate();
     const [email, setEmail] = useState("");
     const [password, setPassword] = useState("");
     const [showPassword, setShowPassword] = useState(false);
@@ -47,6 +53,14 @@ function StaffLogin() {
             if (!staffData.is_active) {
                 setError("איש צוות זה אינו פעיל");
                 await signOut(auth);
+                return;
+            }
+
+            if (
+                normalizeStaffRole(staffData.role) ===
+                STAFF_ROLE_SUPPORTIVE_COMMUNITY
+            ) {
+                navigate("/community-staff");
                 return;
             }
 

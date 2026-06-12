@@ -1,6 +1,6 @@
 import { useEffect, useState } from "react";
 import { useNavigate, useSearchParams } from "react-router-dom";
-import PaymentForm from "../components/PaymentForm";
+import PaymentForm from "../../components/Payment/PaymentForm";
 import { apiGet } from "../../services/Payment/api";
 import { formatDisplayPrice } from "../../services/Payment/formatPrice";
 import { buildActivityPaymentPath } from "../../services/Payment/paymentLink";
