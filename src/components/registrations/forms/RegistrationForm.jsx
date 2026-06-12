@@ -2,7 +2,7 @@ import { useState } from "react";
 import {
     addRegistration,
     updateRegistration
-} from "../../../services/registrationService";
+} from "../../../services/staffManegmentServices/registrationService";
 import { useParticipantForm } from "../../participants/hooks/useParticipantForm";
 import RegistrationProgramFields from "./RegistrationProgramFields";
 import FormActionRow from "../../shared/FormActionRow";

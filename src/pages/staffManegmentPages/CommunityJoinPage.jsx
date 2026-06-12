@@ -1,6 +1,6 @@
 import CommunityJoinForm from "../../components/supportiveCommunity/CommunityJoinForm";
 import PublicParticipantLayout from "../../layouts/PublicParticipantLayout";
-import "../styles/CommunityJoinForm.css";
+import "../../styles/staffManegmentStyles/CommunityJoinForm.css";
 
 function CommunityJoinPage() {
   return (

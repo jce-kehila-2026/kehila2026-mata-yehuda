@@ -1,4 +1,4 @@
-import { formatAttendancePercentage } from "../../services/attendanceService";
+import { formatAttendancePercentage } from "../../services/attendance/attendanceService";
 
 function AttendanceInsights({ insights }) {
   if (!insights) {

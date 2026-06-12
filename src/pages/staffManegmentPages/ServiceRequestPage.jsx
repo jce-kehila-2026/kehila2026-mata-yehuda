@@ -2,7 +2,7 @@ import { useState } from "react";
 import CommunityMembershipCheck from "../../components/supportiveCommunity/CommunityMembershipCheck";
 import ServiceRequestForm from "../../components/supportiveCommunity/ServiceRequestForm";
 import PublicParticipantLayout from "../../layouts/PublicParticipantLayout";
-import "../styles/CommunityJoinForm.css";
+import "../../styles/staffManegmentStyles/CommunityJoinForm.css";
 
 function ServiceRequestPage() {
   const [verifiedParticipantId, setVerifiedParticipantId] = useState(null);

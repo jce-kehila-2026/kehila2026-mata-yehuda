@@ -1,17 +1,18 @@
 import { useEffect, useRef, useState } from "react";
 import { useNavigate } from "react-router-dom";
-import PaymentSuccessMessage from "../components/PaymentSuccessMessage";
+import PaymentSuccessMessage from "../../components/Payment/PaymentSuccessMessage";
+import PaymentFailureScreen from "../../components/Payment/PaymentFailureScreen";
 import RegistrationStepper, {
   REGISTRATION_STEPS,
-} from "../components/RegistrationStepper";
+} from "../../components/Payment/RegistrationStepper";
 import { API_BASE } from "../../services/Payment/api";
 import { getStoredRegistrationPaymentPath } from "../../services/Payment/paymentLink";
-import { notifyRegistrationBlock } from "../../services/Payment/registrationErrors";
+import { PAYMENT_ERROR_REASONS } from "../../services/Payment/paymentErrorMessages";
 
 function PaymentSuccess() {
   const navigate = useNavigate();
   const [status, setStatus] = useState("loading");
-  const [errorMessage, setErrorMessage] = useState("");
+  const [errorInfo, setErrorInfo] = useState({ message: "", code: "", reason: "" });
   const [paymentMethod, setPaymentMethod] = useState(
     () => localStorage.getItem("registrationPaymentMethod") || "paypal"
   );
@@ -36,7 +37,21 @@ function PaymentSuccess() {
       const token = params.get("token");
 
       if (!token) {
-        setErrorMessage("לא התקבל אישור תשלום מ-PayPal. ניתן לנסות שוב.");
+        setErrorInfo({
+          message: "לא התקבל אישור תשלום מ-PayPal. ניתן לנסות שוב.",
+          reason: PAYMENT_ERROR_REASONS.NO_PAYPAL_TOKEN,
+        });
+        setStatus("error");
+        return;
+      }
+
+      const storedActivityId = localStorage.getItem("activityId");
+      if (!storedActivityId) {
+        setErrorInfo({
+          message:
+            "לא נמצאו פרטי הפעילות. חזרו לדף ההרשמה ונסו שוב את התשלום.",
+          reason: PAYMENT_ERROR_REASONS.MISSING_ACTIVITY,
+        });
         setStatus("error");
         return;
       }
@@ -61,7 +76,7 @@ function PaymentSuccess() {
 
             paymentMethod:
               method === "credit card" ? "PayPal/Credit Card" : "PayPal",
-            activityId: localStorage.getItem("activityId") || undefined,
+            activityId: storedActivityId,
             programId: localStorage.getItem("programId") || undefined,
           }),
         });
@@ -76,15 +91,19 @@ function PaymentSuccess() {
           const message =
             data.message ||
             "לא הצלחנו לאשר את התשלום. ניתן לנסות שוב או לחזור למסך הראשי.";
-          notifyRegistrationBlock(message);
-          setErrorMessage(message);
+          setErrorInfo({
+            message,
+            code: data.code || "",
+            reason: PAYMENT_ERROR_REASONS.CAPTURE_FAILED,
+          });
           setStatus("error");
         }
       } catch (error) {
         console.error(error);
-        setErrorMessage(
-          "שגיאה בחיבור לשרת. ניתן לנסות שוב או לחזור למסך הראשי."
-        );
+        setErrorInfo({
+          message: error.message || "שגיאה בחיבור לשרת",
+          reason: PAYMENT_ERROR_REASONS.CONNECTION_ERROR,
+        });
         setStatus("error");
       }
     };
@@ -92,60 +111,45 @@ function PaymentSuccess() {
     capturePayment();
   }, []);
 
+  if (status === "loading") {
+    return (
+      <>
+        <header className="community-hero">
+          <span className="hero-icon" aria-hidden="true">⏳</span>
+          <h1>מאשרים תשלום</h1>
+          <p>אנא המתינו, התשלום נבדק כעת...</p>
+        </header>
+      </>
+    );
+  }
+
+  if (status === "error") {
+    return (
+      <PaymentFailureScreen
+        message={errorInfo.message}
+        code={errorInfo.code}
+        reason={errorInfo.reason}
+        onRetry={retryPayment}
+        onGoHome={goHome}
+      />
+    );
+  }
+
   return (
     <>
       <header className="community-hero">
-        <span className="hero-icon" aria-hidden="true">
-          {status === "success" ? "✓" : status === "error" ? "!" : "⏳"}
-        </span>
-        <h1>
-          {status === "loading"
-            ? "מאשרים תשלום"
-            : status === "success"
-              ? "ההרשמה הושלמה"
-              : "התשלום לא הושלם"}
-        </h1>
-        {status === "loading" && (
-          <p>אנא המתינו, התשלום נבדק כעת...</p>
-        )}
-        {status === "error" && (
-          <p>ניתן לנסות שוב את התשלום או לחזור למסך הראשי.</p>
-        )}
+        <span className="hero-icon" aria-hidden="true">✓</span>
+        <h1>ההרשמה הושלמה</h1>
       </header>
 
       <section className="community-section registration-flow">
-        {status === "success" && (
-          <RegistrationStepper currentStep={REGISTRATION_STEPS.length} />
-        )}
-
-        {status === "success" && (
-          <PaymentSuccessMessage paymentMethod={paymentMethod} />
-        )}
-
-        {status === "error" && (
-          <p className="lookup-error" role="alert">
-            {errorMessage}
-          </p>
-        )}
-
-        {status === "success" && (
-          <div className="community-actions">
-            <button type="button" className="primary-btn" onClick={goHome}>
-              חזרה למסך הראשי
-            </button>
-          </div>
-        )}
-
-        {status === "error" && (
-          <div className="community-actions">
-            <button type="button" className="primary-btn" onClick={retryPayment}>
-              נסו שוב את התשלום
-            </button>
-            <button type="button" className="secondary-btn" onClick={goHome}>
-              חזרה למסך הראשי
-            </button>
-          </div>
-        )}
+        <RegistrationStepper currentStep={REGISTRATION_STEPS.length} />
+        <PaymentSuccessMessage paymentMethod={paymentMethod} />
+        <div className="community-actions">
+          <button type="button" className="primary-btn" onClick={goHome}>
+            חזרה למסך הראשי
+          </button>
+        </div>
       </section>
     </>
   );

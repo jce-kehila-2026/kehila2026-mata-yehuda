@@ -14,6 +14,7 @@ import StaffLogin from "./pages/staffManegmentPages/StaffLogin";
 
 import supportiveCommunityRoutes from "./routes/supportive community/supportiveCommunityRoutes";
 import communityStaffRoutes from "./routes/communityStaff/communityStaffRoutes";
+import paymentRoutes from "./routes/Payment/paymentRoutes";
 
 function AttendanceFlow() {
   const [currentPage, setCurrentPage] = useState("menu");
@@ -51,6 +52,13 @@ function App() {
         {communityStaffRoutes.map((route) => (
           <Route
             key={`cs-${route.path}`}
+            path={route.path}
+            element={route.element}
+          />
+        ))}
+        {paymentRoutes.map((route) => (
+          <Route
+            key={`pay-${route.path}`}
             path={route.path}
             element={route.element}
           />

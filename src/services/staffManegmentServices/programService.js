@@ -13,7 +13,6 @@ import { normalizeSearchQuery } from "../../utils/staffManegmentUtils/adminListU
 import {
     DAY_CENTER_ID,
     DAY_CENTER_NAME,
-    FIXED_PROGRAMS,
     FIXED_PROGRAM_IDS,
     createFixedProgramPlaceholder,
     formatProgramTitle,

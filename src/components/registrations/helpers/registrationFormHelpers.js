@@ -2,7 +2,7 @@ import {
     is60PlusProgram,
     applyProgramSelection,
     applyActivitySelection
-} from "../../../utils/programSelectionHelpers";
+} from "../../../utils/staffManegmentUtils/programSelectionHelpers";
 
 export { is60PlusProgram, applyProgramSelection, applyActivitySelection };
 

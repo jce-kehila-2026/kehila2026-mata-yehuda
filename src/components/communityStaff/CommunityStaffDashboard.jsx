@@ -1,5 +1,5 @@
 import { useNavigate } from "react-router-dom";
-import "../styles/CommunityStaffDashboard.css";
+import "../../styles/communityStaff/CommunityStaffDashboard.css";
 
 const DASHBOARD_CARDS = [
   {

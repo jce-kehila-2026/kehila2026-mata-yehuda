@@ -40,7 +40,7 @@ import {
     REGISTRATION_STATUS_FILTER_OPTIONS,
     toSafeString
 } from "../../../utils/staffManegmentUtils/participantStatusLabels";
-import { hasFormattedDisplay, hasValue } from "../../../utils/staffManegmentUtils/hasValue";
+import { hasFormattedDisplay } from "../../../utils/staffManegmentUtils/hasValue";
 
 const PARTICIPANT_COLUMNS = [
     { key: "name", label: "שם", sortKey: "name" },

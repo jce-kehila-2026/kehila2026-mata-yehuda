@@ -373,6 +373,70 @@ function formatPayPalAmount(amount) {
   return Number(amount).toFixed(2);
 }
 
+function normalizeIdNumber(idNumber) {
+  return String(idNumber || "").replace(/\D/g, "");
+}
+
+function normalizePhone(phone) {
+  return String(phone || "").replace(/\D/g, "");
+}
+
+function validateParticipantPayload({ firstName, idNumber, phone }) {
+  const trimmedName = String(firstName || "").trim();
+  if (!trimmedName || trimmedName.length < 2) {
+    return { valid: false, message: "אנא הזינו שם פרטי תקין" };
+  }
+
+  const digits = normalizeIdNumber(idNumber);
+  if (!digits || digits.length !== 9) {
+    return { valid: false, message: "מספר תעודת זהות חייב להיות בן 9 ספרות" };
+  }
+
+  const phoneDigits = normalizePhone(phone);
+  if (!phoneDigits || phoneDigits.length !== 10 || !phoneDigits.startsWith("05")) {
+    return { valid: false, message: "מספר הטלפון חייב להיות בן 10 ספרות ולהתחיל ב-05" };
+  }
+
+  return {
+    valid: true,
+    firstName: trimmedName,
+    idNumber: digits,
+    phone: phoneDigits,
+  };
+}
+
+function getPayPalOrderAmount(orderData) {
+  const unit = orderData?.purchase_units?.[0];
+  const capture = unit?.payments?.captures?.[0];
+  const rawValue = capture?.amount?.value ?? unit?.amount?.value;
+  const rawCurrency = capture?.amount?.currency_code ?? unit?.amount?.currency_code;
+
+  return {
+    value: Number(rawValue),
+    currency: String(rawCurrency || "").toUpperCase(),
+  };
+}
+
+function assertPayPalAmountMatchesActivity(activity, paypalAmount) {
+  const expected = Number(activity.price);
+  const received = Number(paypalAmount.value);
+
+  if (!Number.isFinite(received) || Math.abs(received - expected) > 0.01) {
+    const error = new Error("סכום התשלום לא תואם למחיר הפעילות");
+    error.code = "PAYMENT_AMOUNT_MISMATCH";
+    throw error;
+  }
+
+  const activityCurrency = String(activity.currency || "ILS").toUpperCase();
+  const paidCurrency = String(paypalAmount.currency || activityCurrency).toUpperCase();
+
+  if (paidCurrency !== activityCurrency) {
+    const error = new Error("מטבע התשלום לא תואם לפעילות");
+    error.code = "PAYMENT_CURRENCY_MISMATCH";
+    throw error;
+  }
+}
+
 const REGISTRATION_NOT_OPEN_MESSAGE = "עדיין לא נפתחה ההרשמה";
 const REGISTRATION_CLOSED_MESSAGE = "תאריך ההרשמה לפעילות זו הסתיים";
 const ACTIVITY_FULL_MESSAGE = "אין מקומות פנויים בפעילות זו";
@@ -624,31 +688,38 @@ app.get("/activities/:activityId/payment-info", async (req, res) => {
 // =========================
 
 async function generateAccessToken() {
-  try {
-    const auth = Buffer.from(
-      process.env.PAYPAL_CLIENT_ID +
-        ":" +
-        process.env.PAYPAL_CLIENT_SECRET
-    ).toString("base64");
-
-    const response = await fetch(
-      `${process.env.PAYPAL_BASE_URL}/v1/oauth2/token`,
-      {
-        method: "POST",
-        headers: {
-          Authorization: `Basic ${auth}`,
-          "Content-Type": "application/x-www-form-urlencoded",
-        },
-        body: "grant_type=client_credentials",
-      }
-    );
-
-    const data = await response.json();
-
-    return data.access_token;
-  } catch (error) {
-    console.error(error);
+  if (!process.env.PAYPAL_CLIENT_ID || !process.env.PAYPAL_CLIENT_SECRET) {
+    throw new Error("PayPal credentials are not configured");
   }
+
+  if (!process.env.PAYPAL_BASE_URL) {
+    throw new Error("PAYPAL_BASE_URL is not configured");
+  }
+
+  const auth = Buffer.from(
+    `${process.env.PAYPAL_CLIENT_ID}:${process.env.PAYPAL_CLIENT_SECRET}`
+  ).toString("base64");
+
+  const response = await fetchWithTimeout(
+    `${process.env.PAYPAL_BASE_URL}/v1/oauth2/token`,
+    {
+      method: "POST",
+      headers: {
+        Authorization: `Basic ${auth}`,
+        "Content-Type": "application/x-www-form-urlencoded",
+      },
+      body: "grant_type=client_credentials",
+    }
+  );
+
+  const data = await response.json();
+
+  if (!response.ok || !data.access_token) {
+    console.error("PayPal token request failed:", data);
+    throw new Error("Failed to obtain PayPal access token");
+  }
+
+  return data.access_token;
 }
 
 // =========================
@@ -658,6 +729,14 @@ async function generateAccessToken() {
 app.post("/create-paypal-order", async (req, res) => {
   try {
     const { activityId, idNumber } = req.body;
+
+    if (!activityId) {
+      return res.status(400).json({
+        success: false,
+        message: "חסר מזהה פעילות",
+      });
+    }
+
     const activity = await getActivityForPayment(activityId);
 
     if (idNumber) {
@@ -669,7 +748,7 @@ app.post("/create-paypal-order", async (req, res) => {
     const frontendUrl =
       process.env.FRONTEND_URL || "http://localhost:5173";
 
-    const response = await fetch(
+    const response = await fetchWithTimeout(
       `${process.env.PAYPAL_BASE_URL}/v2/checkout/orders`,
       {
         method: "POST",
@@ -734,7 +813,7 @@ async function findPaymentByPaypalOrderId(orderID) {
 }
 
 async function getPayPalOrder(orderID, accessToken) {
-  const response = await fetch(
+  const response = await fetchWithTimeout(
     `${process.env.PAYPAL_BASE_URL}/v2/checkout/orders/${orderID}`,
     {
       headers: {
@@ -795,7 +874,6 @@ async function savePayPalPayment({
 // =========================
 
 app.post("/capture-paypal-order", async (req, res) => {
-  console.log("capture route hit");
   try {
     const {
       orderID,
@@ -803,7 +881,6 @@ app.post("/capture-paypal-order", async (req, res) => {
       idNumber,
       phone,
       paymentMethod,
-      amount,
       activityId,
       programId,
     } = req.body;
@@ -812,6 +889,25 @@ app.post("/capture-paypal-order", async (req, res) => {
       return res.status(400).json({
         success: false,
         message: "Missing PayPal order ID",
+      });
+    }
+
+    if (!activityId) {
+      return res.status(400).json({
+        success: false,
+        message: "חסר מזהה פעילות",
+      });
+    }
+
+    const participantValidation = validateParticipantPayload({
+      firstName,
+      idNumber,
+      phone,
+    });
+    if (!participantValidation.valid) {
+      return res.status(400).json({
+        success: false,
+        message: participantValidation.message,
       });
     }
 
@@ -826,14 +922,10 @@ app.post("/capture-paypal-order", async (req, res) => {
       });
     }
 
-    let activity = null;
-    if (activityId) {
-      activity = await getActivityForPayment(activityId);
-    }
-
+    const activity = await getActivityForPayment(activityId);
     const accessToken = await generateAccessToken();
 
-    const response = await fetch(
+    const response = await fetchWithTimeout(
       `${process.env.PAYPAL_BASE_URL}/v2/checkout/orders/${orderID}/capture`,
       {
         method: "POST",
@@ -845,32 +937,42 @@ app.post("/capture-paypal-order", async (req, res) => {
     );
 
     const data = await response.json();
-    console.log(data);
 
-    if (data.status === "COMPLETED") {
+    const completeCapturedOrder = async (orderData) => {
+      assertPayPalAmountMatchesActivity(activity, getPayPalOrderAmount(orderData));
+
       const transactionId =
-        data.purchase_units?.[0]?.payments?.captures?.[0]?.id;
+        orderData.purchase_units?.[0]?.payments?.captures?.[0]?.id;
 
       const paymentId = await savePayPalPayment({
         orderID,
-        firstName,
-        idNumber,
-        phone,
+        firstName: participantValidation.firstName,
+        idNumber: participantValidation.idNumber,
+        phone: participantValidation.phone,
         paymentMethod,
-        amount: activity?.price ?? amount,
+        amount: activity.price,
         transactionId,
-        status: data.status,
-        activityId: activity?.activityId ?? activityId,
+        status: orderData.status,
+        activityId: activity.activityId,
         programId,
-        currency: activity?.currency,
-        activityTitle: activity?.title,
+        currency: activity.currency,
+        activityTitle: activity.title,
       });
+
+      return {
+        transactionId,
+        paymentId,
+      };
+    };
+
+    if (data.status === "COMPLETED") {
+      const result = await completeCapturedOrder(data);
 
       return res.json({
         success: true,
         message: "Payment completed and saved",
-        transactionId,
-        paymentId,
+        transactionId: result.transactionId,
+        paymentId: result.paymentId,
       });
     }
 
@@ -878,29 +980,13 @@ app.post("/capture-paypal-order", async (req, res) => {
       const order = await getPayPalOrder(orderID, accessToken);
 
       if (order.status === "COMPLETED") {
-        const transactionId =
-          order.purchase_units?.[0]?.payments?.captures?.[0]?.id;
-
-        const paymentId = await savePayPalPayment({
-          orderID,
-          firstName,
-          idNumber,
-          phone,
-          paymentMethod,
-          amount: activity?.price ?? amount,
-          transactionId,
-          status: order.status,
-          activityId: activity?.activityId ?? activityId,
-          programId,
-          currency: activity?.currency,
-          activityTitle: activity?.title,
-        });
+        const result = await completeCapturedOrder(order);
 
         return res.json({
           success: true,
           message: "Payment already captured",
-          transactionId,
-          paymentId,
+          transactionId: result.transactionId,
+          paymentId: result.paymentId,
         });
       }
     }
@@ -912,6 +998,16 @@ app.post("/capture-paypal-order", async (req, res) => {
     });
   } catch (error) {
     console.error(error);
+    if (
+      error?.code === "PAYMENT_AMOUNT_MISMATCH" ||
+      error?.code === "PAYMENT_CURRENCY_MISMATCH"
+    ) {
+      return res.status(400).json({
+        success: false,
+        message: error.message,
+        code: error.code,
+      });
+    }
     return handlePaymentRouteError(res, error, "שגיאה באישור התשלום");
   }
 });
@@ -927,12 +1023,31 @@ app.post("/save-cash-payment", async (req, res) => {
       programId,
     } = req.body;
 
-    const activity = await getActivityForPayment(activityId);
+    if (!activityId) {
+      return res.status(400).json({
+        success: false,
+        message: "חסר מזהה פעילות",
+      });
+    }
 
-    const result = await savePaymentWithRegistration({
+    const participantValidation = validateParticipantPayload({
       firstName,
       idNumber,
       phone,
+    });
+    if (!participantValidation.valid) {
+      return res.status(400).json({
+        success: false,
+        message: participantValidation.message,
+      });
+    }
+
+    const activity = await getActivityForPayment(activityId);
+
+    const result = await savePaymentWithRegistration({
+      firstName: participantValidation.firstName,
+      idNumber: participantValidation.idNumber,
+      phone: participantValidation.phone,
       paymentMethod: paymentMethod || "cash",
       amount: activity.price,
       activityId: activity.activityId,
@@ -959,9 +1074,7 @@ app.post("/save-cash-payment", async (req, res) => {
 }); 
 
 app.post("/save-bit-payment", async (req, res) => {
-
   try {
-
     const {
       firstName,
       idNumber,
@@ -971,12 +1084,31 @@ app.post("/save-bit-payment", async (req, res) => {
       programId,
     } = req.body;
 
-    const activity = await getActivityForPayment(activityId);
+    if (!activityId) {
+      return res.status(400).json({
+        success: false,
+        message: "חסר מזהה פעילות",
+      });
+    }
 
-    const result = await savePaymentWithRegistration({
+    const participantValidation = validateParticipantPayload({
       firstName,
       idNumber,
       phone,
+    });
+    if (!participantValidation.valid) {
+      return res.status(400).json({
+        success: false,
+        message: participantValidation.message,
+      });
+    }
+
+    const activity = await getActivityForPayment(activityId);
+
+    const result = await savePaymentWithRegistration({
+      firstName: participantValidation.firstName,
+      idNumber: participantValidation.idNumber,
+      phone: participantValidation.phone,
       paymentMethod: paymentMethod || "bit",
       amount: activity.price,
       activityId: activity.activityId,

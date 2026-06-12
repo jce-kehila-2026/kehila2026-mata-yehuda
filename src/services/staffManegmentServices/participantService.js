@@ -14,7 +14,6 @@ import {
 import { normalizeSearchQuery } from "../../utils/staffManegmentUtils/adminListUtils";
 import { resolveCanonicalProgramId } from "../../utils/staffManegmentUtils/programConstants";
 import { toSafeString, matchesPaymentStatusFilter, matchesRegistrationStatusFilter } from "../../utils/staffManegmentUtils/participantStatusLabels";
-import { shouldShowParticipantAsInitialRequest } from "../../utils/staffManegmentUtils/initialRequestFilters";
 import {
     extractParticipantPersonalFields,
     validateParticipantForm

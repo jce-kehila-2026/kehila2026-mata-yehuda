@@ -663,3 +663,77 @@
 .supportive-community-page .registration-flow.community-section {
   padding-top: 1.2rem;
 }
+
+/* Unified payment failure UI */
+.supportive-community-page .payment-failure-section {
+  padding-top: 1.2rem;
+}
+
+.supportive-community-page .payment-failure-card {
+  margin: 0 0 1.25rem;
+  padding: 1.15rem 1.2rem;
+  border-radius: var(--radius);
+  background: #fef2f2;
+  border: 1.5px solid #fecaca;
+  color: #7f1d1d;
+  line-height: 1.65;
+}
+
+.supportive-community-page .payment-failure-card__heading {
+  margin: 0 0 0.35rem;
+  font-size: 1.1rem;
+  color: #991b1b;
+}
+
+.supportive-community-page .payment-failure-card__heading:not(:first-child) {
+  margin-top: 1rem;
+}
+
+.supportive-community-page .payment-failure-card p {
+  margin: 0;
+}
+
+.supportive-community-page .payment-failure-card__raw {
+  margin-top: 1rem;
+  padding-top: 0.85rem;
+  border-top: 1px solid #fecaca;
+  font-size: 0.95rem;
+  color: #991b1b;
+}
+
+.supportive-community-page .payment-failure-inline {
+  margin: 0 0 1rem;
+  padding: 1rem 1.1rem;
+  border-radius: var(--radius);
+  background: #fef2f2;
+  border: 1.5px solid #fecaca;
+  color: #7f1d1d;
+  line-height: 1.6;
+}
+
+.supportive-community-page .payment-failure-inline__title {
+  margin: 0 0 0.35rem;
+  font-size: 1.1rem;
+  font-weight: 700;
+  color: #991b1b;
+}
+
+.supportive-community-page .payment-failure-inline__summary {
+  margin: 0 0 0.5rem;
+  font-weight: 600;
+  color: #991b1b;
+}
+
+.supportive-community-page .payment-failure-inline__text,
+.supportive-community-page .payment-failure-inline__action {
+  margin: 0 0 0.35rem;
+  font-size: 1rem;
+}
+
+.supportive-community-page .payment-failure-inline__raw {
+  margin: 0.65rem 0 0;
+  padding-top: 0.65rem;
+  border-top: 1px solid #fecaca;
+  font-size: 0.92rem;
+  color: #991b1b;
+}

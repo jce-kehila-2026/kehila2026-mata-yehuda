@@ -1,7 +1,7 @@
-import VolunteerRegistrationForm from "../../components/volunteer/VolunteerRegistrationForm";
+import VolunteerRegistrationForm from "../../components/volunteer supportive community/VolunteerRegistrationForm";
 import PublicParticipantLayout from "../../layouts/PublicParticipantLayout";
-import "../styles/SupportiveCommunityPage.css";
-import "../styles/CommunityJoinForm.css";
+import "../../styles/supportive community/SupportiveCommunityPage.css";
+import "../../styles/staffManegmentStyles/CommunityJoinForm.css";
 
 function VolunteerRegistrationPage() {
   return (

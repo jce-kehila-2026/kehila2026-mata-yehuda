@@ -1,13 +1,15 @@
 import { useState } from "react";
 import { useNavigate } from "react-router-dom";
 import CancelRegistrationButton from "../CancelTheRegistration/CancelRegistrationButton";
+import PaymentFailureScreen from "./PaymentFailureScreen";
 import PaymentSuccessMessage from "./PaymentSuccessMessage";
 import RegistrationStepper, { REGISTRATION_STEPS } from "./RegistrationStepper";
+import { PAYMENT_ERROR_REASONS } from "../../services/Payment/paymentErrorMessages";
 import {
   validateIsraeliId,
   validateRegistrationDetails,
   validateRegistrationForm,
-} from "../../services/validation";
+} from "../../services/Payment/validation";
 import { apiPost } from "../../services/Payment/api";
 import { formatDisplayPrice } from "../../services/Payment/formatPrice";
 import { notifyRegistrationBlock } from "../../services/Payment/registrationErrors";
@@ -50,6 +52,7 @@ function PaymentForm({
   const [lookupStatus, setLookupStatus] = useState(null);
   const [lookupRegistrations, setLookupRegistrations] = useState([]);
   const [lookupCancelMessage, setLookupCancelMessage] = useState("");
+  const [lookupError, setLookupError] = useState("");
   const [lookupLoading, setLookupLoading] = useState(false);
   const [formError, setFormError] = useState("");
   const [isSubmitting, setIsSubmitting] = useState(false);
@@ -195,7 +198,6 @@ function PaymentForm({
       firstName,
       idNumber,
       phone,
-      amount: paymentInfo.price,
       activityId: paymentInfo.activityId,
       programId: programId || undefined,
     };
@@ -300,6 +302,7 @@ function PaymentForm({
     setLookupStatus(null);
     setLookupRegistrations([]);
     setLookupCancelMessage("");
+    setLookupError("");
     setLookupLoading(false);
   };
 
@@ -307,6 +310,7 @@ function PaymentForm({
     setLookupStatus(null);
     setLookupRegistrations([]);
     setLookupCancelMessage("");
+    setLookupError("");
     setLookupIdNumber("");
   };
 
@@ -322,7 +326,7 @@ function PaymentForm({
   const searchRegistrationsByIdNumber = async () => {
     const idValidation = validateIsraeliId(lookupIdNumber);
     if (!idValidation.valid) {
-      alert(idValidation.message);
+      setLookupError(idValidation.message);
       return;
     }
 
@@ -330,6 +334,7 @@ function PaymentForm({
     setLookupStatus(null);
     setLookupRegistrations([]);
     setLookupCancelMessage("");
+    setLookupError("");
 
     try {
       const { data } = await apiPost("/find-active-registration", {
@@ -344,7 +349,7 @@ function PaymentForm({
       }
     } catch (error) {
       console.error(error);
-      alert(error.message || "שגיאה בחיבור לשרת");
+      setLookupError(error.message || "שגיאה בחיבור לשרת");
     } finally {
       setLookupLoading(false);
     }
@@ -361,6 +366,7 @@ function PaymentForm({
     setLookupStatus(null);
     setLookupRegistrations([]);
     setLookupCancelMessage("");
+    setLookupError("");
     setFormError("");
     setIdCheckMessage("");
     setIsCheckingId(false);
@@ -488,6 +494,19 @@ function PaymentForm({
           </>
         )}
 
+        {lookupError && (
+          <PaymentFailureScreen
+            variant="inline"
+            message={lookupError}
+            reason={
+              lookupError.includes("חיבור")
+                ? PAYMENT_ERROR_REASONS.CONNECTION_ERROR
+                : PAYMENT_ERROR_REASONS.VALIDATION
+            }
+            showRawMessage={false}
+          />
+        )}
+
         {lookupStatus !== "found" && lookupStatus !== "not_found" && (
           <>
             <p className="section-description">מספר תעודת זהות</p>
@@ -535,9 +554,11 @@ function PaymentForm({
 
       <form className="payment-form" onSubmit={handlePayment}>
         {formError && (
-          <p className="form-error" role="alert">
-            {formError}
-          </p>
+          <PaymentFailureScreen
+            variant="inline"
+            message={formError}
+            showRawMessage={false}
+          />
         )}
 
         {currentStep === 1 && (

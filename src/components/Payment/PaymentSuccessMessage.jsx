@@ -1,4 +1,4 @@
-import { BIT_TRANSFER_PHONE } from "../../config/payment";
+import { BIT_TRANSFER_PHONE } from "../../config/Payment/payment";
 
 function PaymentSuccessMessage({ paymentMethod }) {
   const method = (paymentMethod || "").toLowerCase();

@@ -1,10 +1,11 @@
 import { useEffect, useState } from "react";
 import { useNavigate, useSearchParams } from "react-router-dom";
-import PaymentForm from "../components/PaymentForm";
+import PaymentForm from "../../components/Payment/PaymentForm";
+import PaymentFailureScreen from "../../components/Payment/PaymentFailureScreen";
 import { apiGet } from "../../services/Payment/api";
 import { formatDisplayPrice } from "../../services/Payment/formatPrice";
 import { buildActivityPaymentPath } from "../../services/Payment/paymentLink";
-import { notifyRegistrationBlock } from "../../services/Payment/registrationErrors";
+import { PAYMENT_ERROR_REASONS } from "../../services/Payment/paymentErrorMessages";
 
 function PaymentPage() {
   const navigate = useNavigate();
@@ -118,12 +119,6 @@ function PaymentPage() {
     };
   }, [activityId]);
 
-  useEffect(() => {
-    if (loadError) {
-      notifyRegistrationBlock(loadError);
-    }
-  }, [loadError]);
-
   const startRegistration = (id) => {
     setShowCancelLookup(false);
     navigate(buildActivityPaymentPath(id, { programId }));
@@ -168,9 +163,12 @@ function PaymentPage() {
           {activitiesLoading && <p className="section-description">טוען פעילויות...</p>}
 
           {activitiesError && (
-            <p className="form-error" role="alert">
-              {activitiesError}
-            </p>
+            <PaymentFailureScreen
+              variant="inline"
+              message={activitiesError}
+              reason={PAYMENT_ERROR_REASONS.CONNECTION_ERROR}
+              showRawMessage={false}
+            />
           )}
 
           {!activitiesLoading && !activitiesError && openActivities.length > 0 && (
@@ -200,17 +198,21 @@ function PaymentPage() {
             !activitiesError &&
             activities.length > 0 &&
             openActivities.length === 0 && (
-              <p className="form-error" role="alert">
-                אין פעילויות פתוחות להרשמה כרגע. ייתכן שההרשמה עדיין לא נפתחה, שהמועד
-                הסתיים, או שאין מקומות פנויים.
-              </p>
+              <PaymentFailureScreen
+                variant="inline"
+                message="אין פעילויות פתוחות להרשמה כרגע."
+                reason={PAYMENT_ERROR_REASONS.REGISTRATION_NOT_OPEN}
+                showRawMessage={false}
+              />
             )}
 
           {!activitiesLoading && !activitiesError && activities.length === 0 && (
-            <p className="form-error" role="alert">
-              לא נמצאו פעילויות עם מחיר. הוסיפו מסמך ב-Firestore תחת{" "}
-              <code dir="ltr">activities</code> עם שדות title ו-price.
-            </p>
+            <PaymentFailureScreen
+              variant="inline"
+              message="לא נמצאו פעילויות עם מחיר."
+              reason={PAYMENT_ERROR_REASONS.ACTIVITY_NOT_FOUND}
+              showRawMessage={false}
+            />
           )}
         </section>
       )}
@@ -219,9 +221,11 @@ function PaymentPage() {
         <section className="community-section">
           {loading && <p className="section-description">טוען פרטי פעילות...</p>}
           {loadError && (
-            <p className="form-error" role="alert">
-              {loadError}
-            </p>
+            <PaymentFailureScreen
+              variant="inline"
+              message={loadError}
+              showRawMessage={false}
+            />
           )}
         </section>
       )}
