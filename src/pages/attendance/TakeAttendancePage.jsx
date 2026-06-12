@@ -12,7 +12,7 @@ import {
   getActivitiesByDate,
   loadParticipantsForActivities,
   saveAttendance,
-} from "../../services/attendanceService";
+} from "../../services/attendance/attendanceService";
 
 const DATE_MISMATCH_WARNING =
   "שימו לב: התאריך שנבחר אינו תואם לתאריך הפעילות. מוצגת הנוכחות עבור הפעילות שנבחרה.";

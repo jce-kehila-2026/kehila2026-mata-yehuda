@@ -2,7 +2,7 @@ import { useMemo, useState } from "react";
 import {
   getTopRegisteredActivities,
   TOP_REGISTERED_LIMIT_OPTIONS,
-} from "../../services/attendanceService";
+} from "../../services/attendance/attendanceService";
 import TopRegisteredActivityCard from "./TopRegisteredActivityCard";
 
 const DEFAULT_TOP_LIMIT = TOP_REGISTERED_LIMIT_OPTIONS[0];

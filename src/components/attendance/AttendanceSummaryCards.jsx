@@ -1,4 +1,4 @@
-import { formatAttendancePercentage } from "../../services/attendanceService";
+import { formatAttendancePercentage } from "../../services/attendance/attendanceService";
 
 const ACTIVITY_CARDS = [
   { key: "totalRegistered", label: "נרשמים" },

@@ -1,5 +1,5 @@
-import CommunityHelpRequestsTable from "../../components/communityStaff/CommunityHelpRequestsTable";
-import "../styles/CommunityStaffDashboard.css";
+import CommunityHelpRequestsTable from "../../components/communityStaff/CommunityHelpRequestsTable.jsx";
+import "../../styles/communityStaff/CommunityStaffDashboard.css";
 
 function CommunityHelpRequestsPage() {
   return (

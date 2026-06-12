@@ -2,7 +2,7 @@ import { useCallback, useEffect, useState } from "react";
 import {
   approveVolunteer,
   getPendingVolunteerRequests,
-} from "../../services/communityStaffService";
+} from "../../services/communityStaff/communityStaffService";
 
 function formatList(value) {
   if (!value) return "—";

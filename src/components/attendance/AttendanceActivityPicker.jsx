@@ -3,7 +3,7 @@ import {
   getActivityDate,
   getActivityLocation,
   getActivityTime,
-} from "../../services/attendanceService";
+} from "../../services/attendance/attendanceService";
 import "../../styles/attendance/AttendanceButtons.css";
 
 function AttendanceActivityPicker({

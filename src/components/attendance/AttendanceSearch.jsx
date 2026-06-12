@@ -1,4 +1,4 @@
-import { formatActivityOptionLabel } from "../../services/attendanceService";
+import { formatActivityOptionLabel } from "../../services/attendance/attendanceService";
 import "../../styles/attendance/AttendanceButtons.css";
 
 function AttendanceSearch({
