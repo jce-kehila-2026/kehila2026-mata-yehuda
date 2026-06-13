@@ -559,7 +559,7 @@ export async function approveHelpRequestMatch(helpRequest, volunteerMatch) {
     notes: "",
     participant_ref: participantRef,
     requestId,
-    status: "active",
+    status: "matched",
     volunteer_ref: volunteerRef,
   };
 
@@ -577,9 +577,9 @@ export async function approveHelpRequestMatch(helpRequest, volunteerMatch) {
 
 export async function getActiveVolunteerMatches() {
   const matchesRef = collection(db, "volunteerMatches");
-  const activeMatchesQuery = query(matchesRef, where("status", "==", "active"));
+  const matchedMatchesQuery = query(matchesRef, where("status", "==", "matched"));
   const [snapshot, languageLookup, helpTypesLookup] = await Promise.all([
-    getDocs(activeMatchesQuery),
+    getDocs(matchedMatchesQuery),
     loadLanguageLookup(),
     loadHelpTypesLookup(),
   ]);
