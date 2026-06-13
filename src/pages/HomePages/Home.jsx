@@ -1,4 +1,4 @@
-import { useEffect, useState } from "react";
+import { useEffect, useRef ,useState } from "react";
 import ProgramCard from "../../components/Homecomponents/ProgramCard";
 import { getAllPrograms } from "../../services/HomeServices/programService";
 import RequestBox from "../../components/Homecomponents/RequestBox";
@@ -18,8 +18,17 @@ function Home() {
   const navigate = useNavigate();
   const [showDayCenterForm, setShowDayCenterForm] = useState(false);
   const [showVolunteerForm, setShowVolunteerForm] = useState(false);
-  const [showContact, setShowContact] = useState(false);
-  
+  const contactRef = useRef(null);
+
+  function scrollToContact() {
+  contactRef.current?.scrollIntoView({ behavior: "smooth" });
+  contactRef.current?.classList.add("contact-highlight");
+
+  setTimeout(() => {
+    contactRef.current?.classList.remove("contact-highlight");
+  }, 2000);
+  }
+
   useEffect(() => {
     async function loadPrograms() {
       const data = await getAllPrograms();
@@ -53,7 +62,7 @@ function Home() {
       <nav className="top-nav">
         <button onClick={() => navigate("/about")}>מי אנחנו</button>
         <button onClick={() => navigate("/services")}>השירותים שלנו</button>
-        <button onClick={() => setShowContact(true)}>צור קשר</button>
+        <button onClick={scrollToContact}>צור קשר</button>
       </nav>
 
       <div className="login-area">
@@ -64,7 +73,6 @@ function Home() {
         {showLoginOptions && (
           <div className="login-box">
             <button onClick={() => navigate("/staff-login")}>מנהל</button>
-            <button>מתנדב</button>
           </div>
         )}
       </div>
@@ -126,18 +134,13 @@ function Home() {
           onClose={() => setShowVolunteerForm(false)}
         />
       )}
-      {showContact && (
-        <div className="contact-popup">
-          <div className="contact-popup-box">
-            <button onClick={() => setShowContact(false)}>×</button>
 
-            <h2>צור קשר</h2>
-            <p>📞 04-1234567</p>
-            <p>✉️ info@shalva.org.il</p>
-            <p>📍 מטה יהודה</p>
-          </div>
-        </div>
-      )}
+      <footer className="footer-contact" ref={contactRef}>
+        <p>📞 04-1234567</p>
+        <p>✉️ info@shalva.org.il</p>
+        <p>📍 מטה יהודה</p>
+      </footer>
+
     </div>
     
   );

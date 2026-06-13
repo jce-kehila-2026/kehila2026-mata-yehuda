@@ -1,11 +1,13 @@
 import { useState } from "react";
-import { registerVolunteer } from "../../services/HomeServices/dayCenterVolunteerService";
+import { registerToDayCenter } from "../../services/HomeServices/dayCenterService";
 
-function VolunteerForm({ onClose }) {
+function DayCenterRegisterForm({ onClose }) {
   const [firstName, setFirstName] = useState("");
   const [lastName, setLastName] = useState("");
   const [idNumber, setIdNumber] = useState("");
   const [phone, setPhone] = useState("");
+  const [message, setMessage] = useState("");
+  const [messageType, setMessageType] = useState("");
 
   async function handleSubmit() {
     if (
@@ -14,24 +16,40 @@ function VolunteerForm({ onClose }) {
       idNumber === "" ||
       phone === ""
     ) {
-      alert("נא למלא את כל השדות");
+      setMessage("נא למלא את כל השדות");
+      setMessageType("error");
       return;
     }
 
-    if (idNumber.length !== 9) {
-      alert("מספר זהות חייב להיות 9 ספרות");
+    if (!/^\d{9}$/.test(idNumber)) {
+      setMessage("מספר זהות חייב להיות 9 ספרות");
+      setMessageType("error");
       return;
     }
 
-    await registerVolunteer({
+    if (
+      !/^(\+972\d{8,9}|972\d{8,9}|0\d{8,9})$/.test(
+        phone.replace(/[\s-]/g, "")
+      )
+    ) {
+      setMessage("מספר טלפון לא תקין");
+      setMessageType("error");
+      return;
+    }
+
+    await registerToDayCenter({
       firstName,
       lastName,
       idNumber,
       phone,
     });
 
-    alert("הבקשה נשלחה בהצלחה");
-    onClose();
+    setMessage("תודה שנרשמת. הצוות יחזור אליך בימים הקרובים");
+    setMessageType("success");
+
+    setTimeout(() => {
+      onClose();
+    }, 1600);
   }
 
   return (
@@ -39,7 +57,13 @@ function VolunteerForm({ onClose }) {
       <div className="form-box">
         <button onClick={onClose}>×</button>
 
-        <h2>הרשמה להתנדבות</h2>
+        <h2>הרשמה למרכז יום</h2>
+
+        {message && (
+          <div className={`form-message ${messageType}`}>
+            {message}
+          </div>
+        )}
 
         <input
           type="text"
@@ -75,4 +99,4 @@ function VolunteerForm({ onClose }) {
   );
 }
 
-export default VolunteerForm;
+export default DayCenterRegisterForm;

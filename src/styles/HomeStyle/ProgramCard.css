@@ -5,6 +5,9 @@
   padding: 1.25rem;
   box-shadow: 0 3px 10px rgba(0, 0, 0, 0.04);
   text-align: center;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
 }
 
 .program-card h2 {
@@ -19,11 +22,14 @@
   object-fit: cover;
   border-radius: calc(var(--radius) - 4px);
   margin-bottom: 1rem;
+  display: block;
 }
 
 .program-card p {
   margin: 1rem 0;
   line-height: 1.6;
+  text-align: center;
+  white-space: normal;
 }
 
 .program-buttons {
@@ -31,6 +37,7 @@
   flex-direction: column;
   gap: 10px;
   margin-top: 1rem;
+  width: 100%;
 }
 
 .top-buttons {
@@ -51,3 +58,4 @@
 .volunteer-btn:hover {
   background: #5c636a;
 }
+

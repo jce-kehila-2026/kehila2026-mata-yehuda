@@ -8,13 +8,16 @@ import ActivityCalendar from "../../components/Homecomponents/ActivityCalendar";
 import "../../styles/HomeStyle/Plus60Page.css";
 import "../../styles/HomeStyle/ActivityCard.css";
 import "../../styles/HomeStyle/Calendar.css";
+
 function Plus60Page() {
     const navigate = useNavigate();
     const [activities, setActivities] = useState([]);
+    const [visibleCount, setVisibleCount] = useState(3);
 
     useEffect(() => {
         async function loadActivities() {
         const data = await getAllActivities();
+
         const plus60Activities = data.filter((activity) => {
           const activityProgramId =
             activity.program_id || activity.programId || "";
@@ -29,10 +32,25 @@ function Plus60Page() {
         loadActivities();
     }, []);
 
+      const visibleActivities = activities.slice(0, visibleCount);
+
+      function handleShowMore() {
+        setVisibleCount((prev) =>
+          Math.min(prev + 3, activities.length)
+        );
+      }
+
+      function handleShowLess() {
+        setVisibleCount((prev) =>
+          Math.max(prev - 3, 3)
+        );
+      }
+
     return (
     <div className="plus60-page">
 
         <div className="plus60-header">
+        <div className="header-buttons">
         <button
           className="cancel-btn"
           onClick={() =>
@@ -41,7 +59,14 @@ function Plus60Page() {
         >
             ביטול הרשמה
         </button>
-
+        <button
+          className="home-btn"
+          onClick={() => navigate("/")}
+        >
+          חזרה לדף הבית
+        </button>
+        </div>
+        
         <div className="plus60-title">
             <h1>פעילויות</h1>
             <p>כל הפעילויות הזמינות במרכז</p>
@@ -49,7 +74,7 @@ function Plus60Page() {
         </div>
 
         <div className="activities-grid">
-        {activities.map((activity) => (
+        {visibleActivities.map((activity) => (
             <ActivityCard
             key={activity.id}
             activity={activity}
@@ -57,6 +82,26 @@ function Plus60Page() {
             />
         ))}
         </div>
+
+        {activities.length > 3 && (
+        <div className="activities-actions">
+          {visibleCount < activities.length ? (
+            <button
+              className="show-more-circle"
+              onClick={handleShowMore}
+            >
+              ↓
+            </button>
+          ) : (
+            <button
+              className="show-more-circle"
+              onClick={handleShowLess}
+            >
+              ↑
+            </button>
+          )}
+        </div>
+      )}
 
         <ActivityCalendar activities={activities} /> 
     </div>

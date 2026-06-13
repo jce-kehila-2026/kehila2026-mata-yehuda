@@ -6,23 +6,36 @@ function DayCenterRegisterForm({ onClose }) {
   const [lastName, setLastName] = useState("");
   const [idNumber, setIdNumber] = useState("");
   const [phone, setPhone] = useState("");
+  const [message, setMessage] = useState("");
+  const [messageType, setMessageType] = useState("");
 
   async function handleSubmit() {
     if (
-        firstName === "" ||
-        lastName === "" ||
-        idNumber === "" ||
-        phone === ""
+      firstName === "" ||
+      lastName === "" ||
+      idNumber === "" ||
+      phone === ""
     ) {
-      alert("נא למלא את כל השדות");
+      setMessage("נא למלא את כל השדות");
+      setMessageType("error");
       return;
     }
 
-    if (idNumber.length !== 9) {
-      alert("מספר זהות חייב להיות 9 ספרות");
+    if (!/^\d{9}$/.test(idNumber)) {
+      setMessage("מספר זהות חייב להיות 9 ספרות");
+      setMessageType("error");
       return;
     }
 
+    if (
+      !/^(\+972\d{8,9}|972\d{8,9}|0\d{8,9})$/.test(
+        phone.replace(/[\s-]/g, "")
+      )
+    ) {
+      setMessage("מספר טלפון לא תקין");
+      setMessageType("error");
+      return;
+    }
 
     await registerToDayCenter({
       firstName,
@@ -31,9 +44,12 @@ function DayCenterRegisterForm({ onClose }) {
       phone,
     });
 
-    alert("תודה שנרשמת. הצוות יחזור אליך בימים הקרובים");
+    setMessage("תודה שנרשמת. הצוות יחזור אליך בימים הקרובים");
+    setMessageType("success");
 
-    onClose();
+    setTimeout(() => {
+      onClose();
+    }, 1600);
   }
 
   return (
@@ -42,18 +58,25 @@ function DayCenterRegisterForm({ onClose }) {
         <button onClick={onClose}>×</button>
 
         <h2>הרשמה למרכז יום</h2>
+
+        {message && (
+          <div className={`form-message ${messageType}`}>
+            {message}
+          </div>
+        )}
+
         <input
-            type="text"
-            placeholder="שם פרטי"
-            value={firstName}
-            onChange={(e) => setFirstName(e.target.value)}
+          type="text"
+          placeholder="שם פרטי"
+          value={firstName}
+          onChange={(e) => setFirstName(e.target.value)}
         />
 
         <input
-            type="text"
-            placeholder="שם משפחה"
-            value={lastName}
-            onChange={(e) => setLastName(e.target.value)}
+          type="text"
+          placeholder="שם משפחה"
+          value={lastName}
+          onChange={(e) => setLastName(e.target.value)}
         />
 
         <input

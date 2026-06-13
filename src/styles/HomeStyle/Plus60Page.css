@@ -7,8 +7,42 @@
 }
 
 .plus60-header {
+  display: flex;
+  justify-content: center;
+  align-items: flex-start;
   position: relative;
+  min-height: 135px;
   margin-bottom: 2rem;
+}
+
+.header-buttons {
+  position: absolute;
+  left: 0;
+  top: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+
+.cancel-btn,
+.home-btn {
+  width: 220px;
+}
+
+.cancel-btn {
+  background: #c94c4c;
+}
+
+.cancel-btn:hover {
+  background: #a83d3d;
+}
+
+.home-btn {
+  background: var(--color-primary);
+}
+
+.home-btn:hover {
+  background: var(--color-primary-hover);
 }
 
 .plus60-title {
@@ -27,32 +61,87 @@
   margin-top: 0.5rem;
 }
 
-.cancel-btn {
-  position: absolute;
-  left: 0;
-  top: 0;
-  background: #c94c4c;
-}
-
-.cancel-btn:hover {
-  background: #a83d3d;
-}
-
 .activities-grid {
   display: grid;
-  grid-template-columns: repeat(auto-fit, minmax(min(100%, 280px), 1fr));
-  gap: var(--app-section-gap, 1.5rem);
+  grid-template-columns: repeat(3, 1fr);
+  gap: 24px;
+}
+
+.activities-actions {
+  display: flex;
+  justify-content: center;
+  margin: 30px 0;
+}
+
+.show-more-circle {
+  width: 56px;
+  height: 56px;
+  border-radius: 50%;
+  padding: 0;
+  font-size: 28px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.contact-highlight {
+  animation: highlight 2s ease;
+}
+
+@keyframes highlight {
+  0% {
+    background: #c8f0d3;
+  }
+
+  100% {
+    background: #e4f7ea;
+  }
 }
 
 @media (max-width: 768px) {
-  .cancel-btn {
-    position: static;
-    margin-bottom: 1rem;
-    width: 100%;
-    max-width: 100%;
+  .plus60-page {
+    padding: 1rem;
   }
 
   .plus60-header {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    min-height: auto;
+    margin-bottom: 1.5rem;
+  }
+
+  .header-buttons {
+    position: static;
+
+    display: flex;
+    flex-direction: row;
+    justify-content: center;
+    gap: 8px;
+
+    margin-bottom: 12px;
+  }
+
+  .cancel-btn,
+  .home-btn {
+    width: 140px;
+    font-size: 0.85rem;
+    padding: 10px 8px;
+  }
+
+  .plus60-title {
     text-align: center;
+  }
+
+  .plus60-title h1 {
+    font-size: 2rem;
+  }
+
+  .plus60-title p {
+    font-size: 1rem;
+  }
+
+  .activities-grid {
+    grid-template-columns: 1fr;
   }
 }
