@@ -9,6 +9,43 @@
   padding: 1.5rem 1.25rem 2.5rem;
 }
 
+/* ===== Shared inline messages ===== */
+
+.community-staff-message {
+  margin: 0 0 1rem;
+  padding: 0.85rem 1rem;
+  border-radius: 6px;
+  border: 1px solid transparent;
+  font-size: 0.95rem;
+  font-weight: 600;
+  line-height: 1.5;
+  text-align: right;
+}
+
+.community-staff-message--success {
+  background: #eaf6ee;
+  border-color: #cfe7d5;
+  color: #2d7d46;
+}
+
+.community-staff-message--error {
+  background: #fef3f2;
+  border-color: #f2c6c2;
+  color: #b42318;
+}
+
+.community-staff-message--warning {
+  background: #fff8e8;
+  border-color: #f2df9f;
+  color: #8a6200;
+}
+
+.community-staff-message--info {
+  background: #f4f8f5;
+  border-color: #cfe7d5;
+  color: #3d4a42;
+}
+
 .community-staff-dashboard__container {
   max-width: 960px;
   margin: 0 auto;

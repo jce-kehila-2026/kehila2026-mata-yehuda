@@ -3,6 +3,9 @@ import {
   approveVolunteer,
   getPendingVolunteerRequests,
 } from "../../services/communityStaff/communityStaffService";
+import CommunityStaffMessage, {
+  useCommunityStaffMessage,
+} from "./CommunityStaffMessage";
 
 function formatList(value) {
   if (!value) return "—";
@@ -116,6 +119,7 @@ function VolunteerRequestsTable() {
   const [error, setError] = useState(null);
   const [selectedVolunteer, setSelectedVolunteer] = useState(null);
   const [isApproving, setIsApproving] = useState(false);
+  const { message, showError, clearMessage } = useCommunityStaffMessage();
 
   const loadVolunteers = useCallback(async () => {
     setLoading(true);
@@ -145,7 +149,7 @@ function VolunteerRequestsTable() {
       await loadVolunteers();
     } catch (err) {
       console.error("Failed to approve volunteer:", err);
-      alert("אירעה שגיאה באישור המתנדב");
+      showError("אירעה שגיאה באישור המתנדב");
     } finally {
       setIsApproving(false);
     }
@@ -170,6 +174,8 @@ function VolunteerRequestsTable() {
           בקשות ממתינות {volunteers.length}
         </span>
       </div>
+
+      <CommunityStaffMessage message={message} onDismiss={clearMessage} />
 
       <div className="community-volunteer-requests__card">
         {volunteers.length === 0 ? (

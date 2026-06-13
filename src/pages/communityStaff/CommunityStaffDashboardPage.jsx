@@ -3,6 +3,9 @@ import { useNavigate } from "react-router-dom";
 import { getCommunityStaffDashboardStats } from "../../services/communityStaff/communityStaffService";
 import CommunityStaffDashboardSummary from "../../components/communityStaff/CommunityStaffDashboardSummary.jsx";
 import CommunityStaffDashboardAlerts from "../../components/communityStaff/CommunityStaffDashboardAlerts.jsx";
+import CommunityStaffMessage, {
+  useCommunityStaffMessage,
+} from "../../components/communityStaff/CommunityStaffMessage.jsx";
 import "../../styles/communityStaff/CommunityStaffDashboard.css";
 
 const DASHBOARD_CARDS = [
@@ -63,6 +66,7 @@ function CommunityStaffDashboardPage() {
   const [stats, setStats] = useState(EMPTY_STATS);
   const [statsLoading, setStatsLoading] = useState(true);
   const [statsError, setStatsError] = useState(null);
+  const { message, showInfo, clearMessage } = useCommunityStaffMessage();
 
   useEffect(() => {
     let isMounted = true;
@@ -103,7 +107,7 @@ function CommunityStaffDashboardPage() {
       return;
     }
 
-    alert("בקרוב");
+    showInfo("המודול עדיין לא זמין");
   };
 
   return (
@@ -115,6 +119,8 @@ function CommunityStaffDashboardPage() {
             גישה לניהול בקשות ולטיפול שוטף בפעילות הקהילה התומכת
           </p>
         </header>
+
+        <CommunityStaffMessage message={message} onDismiss={clearMessage} />
 
         <CommunityStaffDashboardSummary
           stats={stats}

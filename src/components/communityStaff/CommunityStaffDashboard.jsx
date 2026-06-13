@@ -1,4 +1,7 @@
 import { useNavigate } from "react-router-dom";
+import CommunityStaffMessage, {
+  useCommunityStaffMessage,
+} from "./CommunityStaffMessage";
 import "../styles/CommunityStaffDashboard.css";
 
 const DASHBOARD_CARDS = [
@@ -27,6 +30,7 @@ const DASHBOARD_CARDS = [
 
 function CommunityStaffDashboardPage() {
   const navigate = useNavigate();
+  const { message, showInfo, clearMessage } = useCommunityStaffMessage();
 
   const handleCardClick = (card) => {
     if (card.isAvailable) {
@@ -34,7 +38,7 @@ function CommunityStaffDashboardPage() {
       return;
     }
 
-    alert("בקרוב");
+    showInfo("המודול עדיין לא זמין");
   };
 
   return (
@@ -46,6 +50,8 @@ function CommunityStaffDashboardPage() {
             גישה לניהול בקשות ולטיפול שוטף בפעילות הקהילה התומכת
           </p>
         </header>
+
+        <CommunityStaffMessage message={message} onDismiss={clearMessage} />
 
         <section className="community-staff-dashboard__section" aria-label="מודולי מערכת">
           <h2 className="community-staff-dashboard__section-title">מודולים</h2>

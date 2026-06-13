@@ -3,6 +3,9 @@ import {
   getCommunityMembers,
   updateCommunityMemberSubscriptionStatus,
 } from "../../services/communityStaff/communityStaffService";
+import CommunityStaffMessage, {
+  useCommunityStaffMessage,
+} from "./CommunityStaffMessage";
 
 const PAGE_SIZE_OPTIONS = [5, 10, 25];
 
@@ -55,6 +58,7 @@ function CommunityMembersTable({
   const [pageSize, setPageSize] = useState(10);
   const [currentPage, setCurrentPage] = useState(1);
   const [updatingSubscriptionId, setUpdatingSubscriptionId] = useState(null);
+  const { message, showError, clearMessage } = useCommunityStaffMessage();
 
   const loadMembers = useCallback(async () => {
     setLoading(true);
@@ -125,7 +129,7 @@ function CommunityMembersTable({
       await loadMembers();
     } catch (err) {
       console.error("Failed to update member subscription status:", err);
-      alert("אירעה שגיאה בעדכון סטטוס החברות");
+      showError("אירעה שגיאה בעדכון סטטוס החברות");
     } finally {
       setUpdatingSubscriptionId(null);
     }
@@ -146,6 +150,8 @@ function CommunityMembersTable({
           חברי קהילה {members.length}
         </span>
       </div>
+
+      <CommunityStaffMessage message={message} onDismiss={clearMessage} />
 
       <div className="community-members__toolbar">
         <div className="community-members__search">

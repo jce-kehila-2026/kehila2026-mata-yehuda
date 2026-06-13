@@ -3,6 +3,9 @@ import {
   getAllVolunteers,
   updateVolunteerActiveStatus,
 } from "../../services/communityStaff/communityStaffService";
+import CommunityStaffMessage, {
+  useCommunityStaffMessage,
+} from "./CommunityStaffMessage";
 
 const PAGE_SIZE_OPTIONS = [5, 10, 25];
 
@@ -56,6 +59,7 @@ function VolunteersManagementTable({
   const [pageSize, setPageSize] = useState(10);
   const [currentPage, setCurrentPage] = useState(1);
   const [updatingVolunteerId, setUpdatingVolunteerId] = useState(null);
+  const { message, showError, clearMessage } = useCommunityStaffMessage();
 
   const loadVolunteers = useCallback(async () => {
     setLoading(true);
@@ -121,7 +125,7 @@ function VolunteersManagementTable({
       await loadVolunteers();
     } catch (err) {
       console.error("Failed to update volunteer active status:", err);
-      alert("אירעה שגיאה בעדכון סטטוס המתנדב");
+      showError("אירעה שגיאה בעדכון סטטוס המתנדב");
     } finally {
       setUpdatingVolunteerId(null);
     }
@@ -144,6 +148,8 @@ function VolunteersManagementTable({
           מתנדבים {volunteers.length}
         </span>
       </div>
+
+      <CommunityStaffMessage message={message} onDismiss={clearMessage} />
 
       <div className="community-volunteers-mgmt__toolbar">
         <div className="community-volunteers-mgmt__search">

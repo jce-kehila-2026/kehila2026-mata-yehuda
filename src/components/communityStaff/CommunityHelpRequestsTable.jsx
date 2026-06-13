@@ -4,6 +4,9 @@ import {
   getPendingHomeHelpRequests,
   getSuggestedVolunteersForRequest,
 } from "../../services/communityStaff/communityStaffService";
+import CommunityStaffMessage, {
+  useCommunityStaffMessage,
+} from "./CommunityStaffMessage";
 
 function formatStringArray(value) {
   if (!Array.isArray(value) || value.length === 0) {
@@ -33,6 +36,7 @@ function MatchModal({
   const [loadingSuggestions, setLoadingSuggestions] = useState(true);
   const [suggestionsError, setSuggestionsError] = useState(null);
   const [approvingVolunteerId, setApprovingVolunteerId] = useState(null);
+  const { message, showError, clearMessage } = useCommunityStaffMessage();
 
   useEffect(() => {
     let isMounted = true;
@@ -76,7 +80,7 @@ function MatchModal({
       onMatchApproved();
     } catch (err) {
       console.error("Failed to approve help request match:", err);
-      alert("אירעה שגיאה בשמירת ההתאמה");
+      showError("אירעה שגיאה בשמירת ההתאמה");
     } finally {
       setApprovingVolunteerId(null);
     }
@@ -106,6 +110,8 @@ function MatchModal({
             ×
           </button>
         </div>
+
+        <CommunityStaffMessage message={message} onDismiss={clearMessage} />
 
         <div className="community-help-requests__request-summary">
           <p>
