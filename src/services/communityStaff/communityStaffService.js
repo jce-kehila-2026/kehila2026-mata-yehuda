@@ -962,3 +962,46 @@ export async function updateVolunteerDetails(volunteerDocId, volunteerData) {
     phone: volunteerData.phone?.trim() || "",
   });
 }
+
+export async function getCommunityStaffDashboardStats() {
+  const [
+    activeMembersSnapshot,
+    activeVolunteersSnapshot,
+    pendingRequestsSnapshot,
+    matchedMatchesSnapshot,
+    allMatchesSnapshot,
+  ] = await Promise.all([
+    getDocs(
+      query(
+        collection(db, "communitySubscriptions"),
+        where("status", "==", "active")
+      )
+    ),
+    getDocs(query(collection(db, "volunteers"), where("is_active", "==", true))),
+    getDocs(
+      query(collection(db, "homeHelpRequests"), where("status", "==", "pending"))
+    ),
+    getDocs(
+      query(collection(db, "volunteerMatches"), where("status", "==", "matched"))
+    ),
+    getDocs(collection(db, "volunteerMatches")),
+  ]);
+
+  const requestIdsWithMatches = new Set(
+    allMatchesSnapshot.docs
+      .map((matchDoc) => matchDoc.data().requestId)
+      .filter(Boolean)
+  );
+
+  const unmatchedPendingRequests = pendingRequestsSnapshot.docs.filter(
+    (requestDoc) => !requestIdsWithMatches.has(requestDoc.id)
+  ).length;
+
+  return {
+    activeCommunityMembers: activeMembersSnapshot.size,
+    activeVolunteers: activeVolunteersSnapshot.size,
+    pendingHelpRequests: pendingRequestsSnapshot.size,
+    activeMatches: matchedMatchesSnapshot.size,
+    unmatchedPendingRequests,
+  };
+}

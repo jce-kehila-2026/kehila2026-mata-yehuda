@@ -1,4 +1,8 @@
+import { useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
+import { getCommunityStaffDashboardStats } from "../../services/communityStaff/communityStaffService";
+import CommunityStaffDashboardSummary from "../../components/communityStaff/CommunityStaffDashboardSummary.jsx";
+import CommunityStaffDashboardAlerts from "../../components/communityStaff/CommunityStaffDashboardAlerts.jsx";
 import "../../styles/communityStaff/CommunityStaffDashboard.css";
 
 const DASHBOARD_CARDS = [
@@ -46,8 +50,52 @@ const DASHBOARD_CARDS = [
   },
 ];
 
+const EMPTY_STATS = {
+  activeCommunityMembers: 0,
+  activeVolunteers: 0,
+  pendingHelpRequests: 0,
+  activeMatches: 0,
+  unmatchedPendingRequests: 0,
+};
+
 function CommunityStaffDashboardPage() {
   const navigate = useNavigate();
+  const [stats, setStats] = useState(EMPTY_STATS);
+  const [statsLoading, setStatsLoading] = useState(true);
+  const [statsError, setStatsError] = useState(null);
+
+  useEffect(() => {
+    let isMounted = true;
+
+    async function loadDashboardStats() {
+      setStatsLoading(true);
+      setStatsError(null);
+
+      try {
+        const dashboardStats = await getCommunityStaffDashboardStats();
+
+        if (isMounted) {
+          setStats(dashboardStats);
+        }
+      } catch (error) {
+        console.error("Failed to load dashboard stats:", error);
+
+        if (isMounted) {
+          setStatsError("שגיאה בטעינת נתוני לוח הבקרה");
+        }
+      } finally {
+        if (isMounted) {
+          setStatsLoading(false);
+        }
+      }
+    }
+
+    loadDashboardStats();
+
+    return () => {
+      isMounted = false;
+    };
+  }, []);
 
   const handleCardClick = (card) => {
     if (card.isAvailable) {
@@ -68,7 +116,24 @@ function CommunityStaffDashboardPage() {
           </p>
         </header>
 
-        <section className="community-staff-dashboard__section" aria-label="מודולי מערכת">
+        <CommunityStaffDashboardSummary
+          stats={stats}
+          loading={statsLoading}
+          error={statsError}
+          onNavigate={navigate}
+        />
+
+        <CommunityStaffDashboardAlerts
+          unmatchedPendingRequests={stats.unmatchedPendingRequests}
+          loading={statsLoading}
+          error={statsError}
+          onNavigateToHelpRequests={() => navigate("/community-staff/help-requests")}
+        />
+
+        <section
+          className="community-staff-dashboard__section community-staff-dashboard__modules"
+          aria-label="מודולי מערכת"
+        >
           <h2 className="community-staff-dashboard__section-title">מודולים</h2>
 
           <div className="community-staff-dashboard__cards">
