@@ -53,17 +53,17 @@ function buildVolunteerData(form) {
   return {
     volunteerId: form.volunteerId,
     phone: form.phone,
-    firstName: form.firstName,
-    lastName: form.lastName,
+    first_name: form.firstName,
+    last_name: form.lastName,
     gender: form.gender,
     birthDate: form.birthDate,
     address: form.address,
-    services: form.services,
+    help_types: form.services,
     otherService: form.otherService,
     languages: form.languages,
     about: form.about,
     notes: form.notes,
-    isActive: true,
+    is_active: false,
     status: "pending",
   };
 }

@@ -21,7 +21,7 @@ function formatGender(gender) {
 }
 
 function VolunteerDetailsModal({ volunteer, onClose, onApprove, isApproving }) {
-  const servicesDisplay = formatList(volunteer.services);
+  const servicesDisplay = formatList(volunteer.help_types ?? volunteer.services);
   const servicesText =
     volunteer.otherService && servicesDisplay !== "—"
       ? `${servicesDisplay}, ${volunteer.otherService}`

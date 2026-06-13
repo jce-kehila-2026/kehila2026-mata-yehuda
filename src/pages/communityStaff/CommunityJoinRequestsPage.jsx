@@ -1,9 +1,23 @@
+import { useState } from "react";
 import CommunityJoinRequestsTable from "../../components/communityStaff/CommunityJoinRequestsTable.jsx";
+import CompleteCommunityJoinModal from "../../components/communityStaff/CompleteCommunityJoinModal.jsx";
 import "../../styles/communityStaff/CommunityStaffDashboard.css";
+
 function CommunityJoinRequestsPage() {
+  const [selectedRequest, setSelectedRequest] = useState(null);
+  const [refreshKey, setRefreshKey] = useState(0);
+
   const handleCompleteRegistration = (request) => {
-    console.log("Complete registration for:", request);
-    alert("בהמשך ייפתח טופס השלמת רישום");
+    setSelectedRequest(request);
+  };
+
+  const handleCloseModal = () => {
+    setSelectedRequest(null);
+  };
+
+  const handleSaved = () => {
+    setSelectedRequest(null);
+    setRefreshKey((current) => current + 1);
   };
 
   return (
@@ -15,7 +29,14 @@ function CommunityJoinRequestsPage() {
       </header>
 
       <CommunityJoinRequestsTable
+        refreshKey={refreshKey}
         onCompleteRegistration={handleCompleteRegistration}
+      />
+
+      <CompleteCommunityJoinModal
+        request={selectedRequest}
+        onClose={handleCloseModal}
+        onSaved={handleSaved}
       />
     </div>
   );

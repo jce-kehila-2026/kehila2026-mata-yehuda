@@ -14,12 +14,14 @@ function formatStringArray(value) {
   return items.length > 0 ? items.join(", ") : "—";
 }
 
-function formatRequestedServices(requestedServices) {
-  if (!Array.isArray(requestedServices) || requestedServices.length === 0) {
+function formatRequestedHelpTypes(request) {
+  const helpTypes = request.requestedHelpTypes ?? request.requestedServices;
+
+  if (!Array.isArray(helpTypes) || helpTypes.length === 0) {
     return "—";
   }
 
-  return requestedServices.join(", ");
+  return helpTypes.join(", ");
 }
 
 function MatchModal({
@@ -113,11 +115,10 @@ function MatchModal({
           </p>
           <p>
             <strong>סוגי עזרה:</strong>{" "}
-            {formatRequestedServices(helpRequest.requestedServices)}
+            {formatRequestedHelpTypes(helpRequest)}
           </p>
           <p>
-            <strong>שפות:</strong>{" "}
-            {formatStringArray(helpRequest.languages)}
+            <strong>שפות:</strong> {helpRequest.languagesDisplay || "—"}
           </p>
           <p>
             <strong>תיאור:</strong> {helpRequest.description || "—"}
@@ -161,12 +162,22 @@ function MatchModal({
                     <strong>טלפון:</strong> {volunteer.phone}
                   </p>
                   <p>
+                    <strong>ציון התאמה:</strong>{" "}
+                    <span className="community-help-requests__match-score">
+                      {volunteer.matchScore}
+                    </span>
+                  </p>
+                  <p>
                     <strong>סוגי עזרה משותפים:</strong>{" "}
-                    {formatStringArray(volunteer.matchingHelpTypes)}
+                    {formatStringArray(
+                      volunteer.matchedHelpTypes ?? volunteer.matchingHelpTypes
+                    )}
                   </p>
                   <p>
                     <strong>שפות משותפות:</strong>{" "}
-                    {formatStringArray(volunteer.matchingLanguages)}
+                    {formatStringArray(
+                      volunteer.matchedLanguages ?? volunteer.matchingLanguages
+                    )}
                   </p>
                 </div>
                 <button
@@ -270,10 +281,10 @@ function CommunityHelpRequestsTable() {
                     </td>
                     <td data-label="טלפון">{request.participantPhone}</td>
                     <td data-label="סוגי עזרה">
-                      {formatRequestedServices(request.requestedServices)}
+                      {formatRequestedHelpTypes(request)}
                     </td>
                     <td data-label="שפות">
-                      {formatStringArray(request.languages)}
+                      {request.languagesDisplay || "—"}
                     </td>
                     <td data-label="תיאור">{request.description || "—"}</td>
                     <td data-label="סטטוס">

@@ -10,11 +10,25 @@ const DASHBOARD_CARDS = [
     route: "/community-staff/join-requests",
   },
   {
+    id: "community-members",
+    title: "חברי קהילה",
+    description: "ניהול חברי קהילה פעילים ומושבתים",
+    isAvailable: true,
+    route: "/community-staff/members",
+  },
+  {
     id: "volunteer-requests",
     title: "בקשות התנדבות",
     description: "ניהול בקשות התנדבות חדשות",
     isAvailable: true,
     route: "/community-staff/volunteer-requests",
+  },
+  {
+    id: "volunteers-management",
+    title: "מתנדבים",
+    description: "ניהול מתנדבים פעילים ולא פעילים",
+    isAvailable: true,
+    route: "/community-staff/volunteers",
   },
   {
     id: "support-requests",

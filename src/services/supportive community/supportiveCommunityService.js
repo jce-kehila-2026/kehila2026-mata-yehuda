@@ -87,6 +87,53 @@ async function resolveParticipantDocId(participantRefValue) {
   return "";
 }
 
+function mergeDescription(existingDescription, newDescription) {
+  const existing = existingDescription?.trim() || "";
+  const incoming = newDescription?.trim() || "";
+
+  if (!incoming) {
+    return existing;
+  }
+
+  if (!existing) {
+    return incoming;
+  }
+
+  if (existing.includes(incoming)) {
+    return existing;
+  }
+
+  return `${existing}\n${incoming}`;
+}
+
+async function findHomeHelpRequestByParticipantRef(participantDocId) {
+  let snapshot = await getDocs(
+    query(
+      collection(db, "homeHelpRequests"),
+      where("participant_ref", "==", participantDocId)
+    )
+  );
+
+  if (snapshot.empty && participantDocId) {
+    snapshot = await getDocs(
+      query(
+        collection(db, "homeHelpRequests"),
+        where(
+          "participant_ref",
+          "==",
+          doc(db, "participants", participantDocId)
+        )
+      )
+    );
+  }
+
+  if (snapshot.empty) {
+    return null;
+  }
+
+  return snapshot.docs[0];
+}
+
 function getSubscriptionRequestedHelpTypes(subscription) {
   return cleanStringArray(
     subscription.requestedHelpTypes ?? subscription.requestedServices
@@ -502,6 +549,32 @@ export const saveHomeHelpRequest = async (requestData) => {
         languages
       ),
     });
+  }
+
+  const existingHomeHelpRequest =
+    await findHomeHelpRequestByParticipantRef(participantDocId);
+
+  if (existingHomeHelpRequest) {
+    const existingRequestData = existingHomeHelpRequest.data();
+
+    await updateDoc(existingHomeHelpRequest.ref, {
+      requestedHelpTypes: mergeUniqueStringArrays(
+        existingRequestData.requestedHelpTypes ??
+          existingRequestData.requestedServices,
+        requestedHelpTypes
+      ),
+      languages: mergeUniqueStringArrays(
+        existingRequestData.languages,
+        languages
+      ),
+      description: mergeDescription(
+        existingRequestData.description,
+        description
+      ),
+      status: "pending",
+    });
+
+    return;
   }
 
   await addDoc(collection(db, "homeHelpRequests"), {

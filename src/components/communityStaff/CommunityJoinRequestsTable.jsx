@@ -58,7 +58,7 @@ function matchesSearch(request, searchTerm) {
   );
 }
 
-function CommunityJoinRequestsTable({ onCompleteRegistration }) {
+function CommunityJoinRequestsTable({ onCompleteRegistration, refreshKey = 0 }) {
   const [requests, setRequests] = useState([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
@@ -97,7 +97,7 @@ function CommunityJoinRequestsTable({ onCompleteRegistration }) {
     return () => {
       isMounted = false;
     };
-  }, []);
+  }, [refreshKey]);
 
   const filteredRequests = useMemo(() => {
     return requests.filter((request) => {
