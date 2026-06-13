@@ -4,6 +4,7 @@ import CommunityJoinRequestsPage from "../../pages/communityStaff/CommunityJoinR
 import CommunityMembersPage from "../../pages/communityStaff/CommunityMembersPage";
 import VolunteerRequestsPage from "../../pages/communityStaff/VolunteerRequestsPage";
 import VolunteersManagementPage from "../../pages/communityStaff/VolunteersManagementPage";
+import ActiveVolunteerMatchesPage from "../../pages/communityStaff/ActiveVolunteerMatchesPage";
 
 const communityStaffRoutes = [
   {
@@ -29,6 +30,10 @@ const communityStaffRoutes = [
   {
     path: "/community-staff/help-requests",
     element: <CommunityHelpRequestsPage />,
+  },
+  {
+    path: "/community-staff/active-matches",
+    element: <ActiveVolunteerMatchesPage />,
   },
 ];
 

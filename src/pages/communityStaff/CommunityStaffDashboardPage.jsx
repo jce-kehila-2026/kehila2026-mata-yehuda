@@ -37,6 +37,13 @@ const DASHBOARD_CARDS = [
     isAvailable: true,
     route: "/community-staff/help-requests",
   },
+  {
+    id: "active-matches",
+    title: "התאמות פעילות",
+    description: "צפייה וניהול התאמות שאושרו על ידי הצוות",
+    isAvailable: true,
+    route: "/community-staff/active-matches",
+  },
 ];
 
 function CommunityStaffDashboardPage() {

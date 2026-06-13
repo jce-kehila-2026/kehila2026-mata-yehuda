@@ -141,16 +141,7 @@ function getRequestHelpTypes(helpRequest) {
 }
 
 function getVolunteerHelpTypes(volunteer) {
-  return normalizeStringArray(volunteer.help_types ?? volunteer.services);
-}
-
-function isVolunteerActiveForMatching(volunteer) {
-  if (volunteer.is_active === true) {
-    return true;
-  }
-
-  // Legacy documents saved before field-name sync.
-  return volunteer.isActive === true && volunteer.status === "active";
+  return normalizeStringArray(volunteer.help_types);
 }
 
 function getParticipantFullName(participant) {
@@ -444,26 +435,19 @@ export async function getPendingHomeHelpRequests() {
 
 async function loadActiveVolunteers() {
   const volunteersRef = collection(db, "volunteers");
-  const [activeSnapshot, legacyActiveSnapshot] = await Promise.all([
-    getDocs(query(volunteersRef, where("is_active", "==", true))),
-    getDocs(query(volunteersRef, where("isActive", "==", true))),
-  ]);
-
-  const volunteersMap = new Map();
-
-  [...activeSnapshot.docs, ...legacyActiveSnapshot.docs].forEach(
-    (volunteerDoc) => {
-      const volunteerData = volunteerDoc.data();
-
-      volunteersMap.set(volunteerDoc.id, {
-        id: volunteerDoc.id,
-        ...volunteerData,
-        volunteerId: volunteerData.volunteerId ?? volunteerDoc.id,
-      });
-    }
+  const activeSnapshot = await getDocs(
+    query(volunteersRef, where("is_active", "==", true))
   );
 
-  return Array.from(volunteersMap.values()).filter(isVolunteerActiveForMatching);
+  return activeSnapshot.docs.map((volunteerDoc) => {
+    const volunteerData = volunteerDoc.data();
+
+    return {
+      id: volunteerDoc.id,
+      ...volunteerData,
+      volunteerId: volunteerData.volunteerId ?? volunteerDoc.id,
+    };
+  });
 }
 
 export async function getSuggestedVolunteersForRequest(helpRequest) {
@@ -512,9 +496,12 @@ export async function getSuggestedVolunteersForRequest(helpRequest) {
       return {
         volunteer,
         volunteerId: volunteer.volunteerId,
+        volunteerRef: volunteer.id,
         fullNameDisplay: getVolunteerFullName(volunteer),
         phone: volunteer.phone || "—",
         matchScore,
+        matchedLanguageIds,
+        matchedHelpTypeIds,
         matchedLanguages,
         matchedHelpTypes,
         matchingHelpTypes: matchedHelpTypes,
@@ -545,6 +532,7 @@ async function findExistingVolunteerMatch(requestId, volunteerRef) {
 
 function getVolunteerRefId(volunteerMatch) {
   return (
+    volunteerMatch.volunteerRef ||
     volunteerMatch.volunteer?.id ||
     volunteerMatch.volunteerId ||
     volunteerMatch.volunteer?.volunteerId ||
@@ -562,16 +550,16 @@ export async function approveHelpRequestMatch(helpRequest, volunteerMatch) {
     matchScore: Number(volunteerMatch.matchScore) || 0,
     matchedAt: serverTimestamp(),
     matchedByStaffId: "",
-    matchedHelpTypes: Array.isArray(volunteerMatch.matchedHelpTypes)
-      ? volunteerMatch.matchedHelpTypes
-      : volunteerMatch.matchingHelpTypes ?? [],
-    matchedLanguages: Array.isArray(volunteerMatch.matchedLanguages)
-      ? volunteerMatch.matchedLanguages
-      : volunteerMatch.matchingLanguages ?? [],
+    matchedHelpTypes: normalizeStringArray(
+      volunteerMatch.matchedHelpTypeIds ?? volunteerMatch.matchedHelpTypes
+    ),
+    matchedLanguages: normalizeStringArray(
+      volunteerMatch.matchedLanguageIds ?? volunteerMatch.matchedLanguages
+    ),
     notes: "",
     participant_ref: participantRef,
     requestId,
-    status: "matched",
+    status: "active",
     volunteer_ref: volunteerRef,
   };
 
@@ -585,6 +573,111 @@ export async function approveHelpRequestMatch(helpRequest, volunteerMatch) {
 
   const requestRef = doc(db, "homeHelpRequests", requestId);
   await updateDoc(requestRef, { status: "matched" });
+}
+
+export async function getActiveVolunteerMatches() {
+  const matchesRef = collection(db, "volunteerMatches");
+  const activeMatchesQuery = query(matchesRef, where("status", "==", "active"));
+  const [snapshot, languageLookup, helpTypesLookup] = await Promise.all([
+    getDocs(activeMatchesQuery),
+    loadLanguageLookup(),
+    loadHelpTypesLookup(),
+  ]);
+
+  const matches = await Promise.all(
+    snapshot.docs.map(async (matchDoc) => {
+      const match = {
+        id: matchDoc.id,
+        ...matchDoc.data(),
+      };
+      const participantDocId = getParticipantRefId(match.participant_ref);
+      const volunteerDocId = String(match.volunteer_ref || "").trim();
+
+      const [participantSnap, volunteerSnap, requestSnap] = await Promise.all([
+        participantDocId
+          ? getDoc(doc(db, "participants", participantDocId))
+          : Promise.resolve(null),
+        volunteerDocId
+          ? getDoc(doc(db, "volunteers", volunteerDocId))
+          : Promise.resolve(null),
+        match.requestId
+          ? getDoc(doc(db, "homeHelpRequests", match.requestId))
+          : Promise.resolve(null),
+      ]);
+
+      const participant =
+        participantSnap?.exists()
+          ? { id: participantSnap.id, ...participantSnap.data() }
+          : null;
+      const volunteer =
+        volunteerSnap?.exists()
+          ? { id: volunteerSnap.id, ...volunteerSnap.data() }
+          : null;
+      const helpRequest =
+        requestSnap?.exists()
+          ? { id: requestSnap.id, ...requestSnap.data() }
+          : null;
+
+      return {
+        ...match,
+        matchedAtDisplay: formatFirestoreTimestamp(match.matchedAt),
+        matchedLanguagesDisplay: resolveLanguageNames(
+          match.matchedLanguages,
+          languageLookup
+        ),
+        matchedHelpTypesDisplay: resolveIdList(
+          match.matchedHelpTypes,
+          helpTypesLookup
+        ),
+        notesDisplay: match.notes?.trim() || "—",
+        participant,
+        participantDocId,
+        participantFullName: getParticipantFullName(participant),
+        participantPhone: participant?.phone || "—",
+        participantIdNumber: participant?.id_number || "—",
+        volunteer,
+        volunteerDocId,
+        volunteerFullName: getVolunteerFullName(volunteer),
+        volunteerPhone: volunteer?.phone || "—",
+        volunteerIsActive: volunteer?.is_active === true,
+        volunteerIsActiveDisplay:
+          volunteer?.is_active === true ? "פעיל" : "לא פעיל",
+        helpRequest,
+        helpRequestDescription: helpRequest?.description || "—",
+        helpRequestStatus: helpRequest?.status || "—",
+        helpRequestLanguagesDisplay: resolveLanguageNames(
+          helpRequest?.languages,
+          languageLookup
+        ),
+        helpRequestHelpTypesDisplay: resolveIdList(
+          helpRequest?.requestedHelpTypes,
+          helpTypesLookup
+        ),
+        helpRequestCreatedAtDisplay: formatFirestoreTimestamp(
+          helpRequest?.createdAt
+        ),
+      };
+    })
+  );
+
+  return matches.sort((a, b) => {
+    const aTime =
+      typeof a.matchedAt?.toMillis === "function" ? a.matchedAt.toMillis() : 0;
+    const bTime =
+      typeof b.matchedAt?.toMillis === "function" ? b.matchedAt.toMillis() : 0;
+
+    return bTime - aTime;
+  });
+}
+
+export async function updateVolunteerMatchNotes(matchId, notes) {
+  if (!matchId) {
+    throw new Error("Missing volunteerMatches document id");
+  }
+
+  await updateDoc(doc(db, "volunteerMatches", matchId), {
+    notes: notes?.trim() || "",
+  });
 }
 
 function formatFirestoreTimestamp(timestamp) {

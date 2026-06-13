@@ -68,7 +68,8 @@ function MatchModal({
   }, [helpRequest]);
 
   const handleApproveMatch = async (volunteer) => {
-    setApprovingVolunteerId(volunteer.volunteerId);
+    const volunteerKey = volunteer.volunteerRef || volunteer.volunteerId;
+    setApprovingVolunteerId(volunteerKey);
 
     try {
       await approveHelpRequestMatch(helpRequest, volunteer);
@@ -149,9 +150,12 @@ function MatchModal({
 
         {!loadingSuggestions && !suggestionsError && suggestions.length > 0 && (
           <div className="community-help-requests__suggestions-list">
-            {suggestions.map((volunteer) => (
+            {suggestions.map((volunteer) => {
+              const volunteerKey = volunteer.volunteerRef || volunteer.volunteerId;
+
+              return (
               <div
-                key={volunteer.volunteerId}
+                key={volunteerKey}
                 className="community-help-requests__suggestion-row"
               >
                 <div className="community-help-requests__suggestion-details">
@@ -184,14 +188,15 @@ function MatchModal({
                   type="button"
                   className="community-help-requests__approve-btn"
                   onClick={() => handleApproveMatch(volunteer)}
-                  disabled={approvingVolunteerId === volunteer.volunteerId}
+                  disabled={approvingVolunteerId === volunteerKey}
                 >
-                  {approvingVolunteerId === volunteer.volunteerId
+                  {approvingVolunteerId === volunteerKey
                     ? "שומר..."
                     : "אישור התאמה"}
                 </button>
               </div>
-            ))}
+            );
+            })}
           </div>
         )}
       </div>
