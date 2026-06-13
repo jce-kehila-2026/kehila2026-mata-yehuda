@@ -1,14 +1,17 @@
 import { useState } from "react";
 import VolunteersManagementTable from "../../components/communityStaff/VolunteersManagementTable.jsx";
 import EditVolunteerModal from "../../components/communityStaff/EditVolunteerModal.jsx";
+import VolunteerManagementDetailsModal from "../../components/communityStaff/VolunteerManagementDetailsModal.jsx";
 import "../../styles/communityStaff/CommunityStaffDashboard.css";
 
 function VolunteersManagementPage() {
   const [selectedVolunteer, setSelectedVolunteer] = useState(null);
+  const [detailsVolunteer, setDetailsVolunteer] = useState(null);
   const [refreshKey, setRefreshKey] = useState(0);
 
   const handleVolunteerUpdated = () => {
     setSelectedVolunteer(null);
+    setDetailsVolunteer(null);
     setRefreshKey((current) => current + 1);
   };
 
@@ -21,7 +24,17 @@ function VolunteersManagementPage() {
       <VolunteersManagementTable
         refreshKey={refreshKey}
         onEditVolunteer={setSelectedVolunteer}
-        onVolunteerUpdated={() => setRefreshKey((current) => current + 1)}
+        onViewDetails={setDetailsVolunteer}
+      />
+
+      <VolunteerManagementDetailsModal
+        volunteer={detailsVolunteer}
+        onClose={() => setDetailsVolunteer(null)}
+        onEdit={(volunteer) => {
+          setDetailsVolunteer(null);
+          setSelectedVolunteer(volunteer);
+        }}
+        onVolunteerUpdated={handleVolunteerUpdated}
       />
 
       <EditVolunteerModal

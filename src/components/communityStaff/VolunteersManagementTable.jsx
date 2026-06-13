@@ -1,11 +1,6 @@
 import { useCallback, useEffect, useMemo, useState } from "react";
-import {
-  getAllVolunteers,
-  updateVolunteerActiveStatus,
-} from "../../services/communityStaff/communityStaffService";
-import CommunityStaffMessage, {
-  useCommunityStaffMessage,
-} from "./CommunityStaffMessage";
+import { getAllVolunteers } from "../../services/communityStaff/communityStaffService";
+import { CommunityStaffCompactCard } from "./CommunityStaffListUi.jsx";
 
 const PAGE_SIZE_OPTIONS = [5, 10, 25];
 
@@ -49,7 +44,7 @@ function matchesActiveFilter(volunteer, activeFilter) {
 function VolunteersManagementTable({
   refreshKey = 0,
   onEditVolunteer,
-  onVolunteerUpdated,
+  onViewDetails,
 }) {
   const [volunteers, setVolunteers] = useState([]);
   const [loading, setLoading] = useState(true);
@@ -58,8 +53,6 @@ function VolunteersManagementTable({
   const [activeFilter, setActiveFilter] = useState("all");
   const [pageSize, setPageSize] = useState(10);
   const [currentPage, setCurrentPage] = useState(1);
-  const [updatingVolunteerId, setUpdatingVolunteerId] = useState(null);
-  const { message, showError, clearMessage } = useCommunityStaffMessage();
 
   const loadVolunteers = useCallback(async () => {
     setLoading(true);
@@ -108,29 +101,6 @@ function VolunteersManagementTable({
     }
   }, [currentPage, totalPages]);
 
-  const handleActiveStatusChange = async (volunteer, isActive) => {
-    const confirmMessage = isActive
-      ? "להפעיל את המתנדב/ה מחדש?"
-      : "להשבית את המתנדב/ה?";
-
-    if (!window.confirm(confirmMessage)) {
-      return;
-    }
-
-    setUpdatingVolunteerId(volunteer.id);
-
-    try {
-      await updateVolunteerActiveStatus(volunteer.id, isActive);
-      onVolunteerUpdated();
-      await loadVolunteers();
-    } catch (err) {
-      console.error("Failed to update volunteer active status:", err);
-      showError("אירעה שגיאה בעדכון סטטוס המתנדב");
-    } finally {
-      setUpdatingVolunteerId(null);
-    }
-  };
-
   if (loading) {
     return (
       <p className="community-volunteers-mgmt__loading">טוען מתנדבים...</p>
@@ -148,8 +118,6 @@ function VolunteersManagementTable({
           מתנדבים {volunteers.length}
         </span>
       </div>
-
-      <CommunityStaffMessage message={message} onDismiss={clearMessage} />
 
       <div className="community-volunteers-mgmt__toolbar">
         <div className="community-volunteers-mgmt__search">
@@ -200,83 +168,27 @@ function VolunteersManagementTable({
               : "לא נמצאו תוצאות לפי החיפוש או הסינון"}
           </p>
         ) : (
-          <div className="community-volunteers-mgmt__table-wrapper">
-            <table className="community-volunteers-mgmt__table">
-              <thead>
-                <tr>
-                  <th>שם מלא</th>
-                  <th>טלפון</th>
-                  <th>אימייל</th>
-                  <th>שפות</th>
-                  <th>סוגי עזרה</th>
-                  <th>סטטוס פעילות</th>
-                  <th>הערות</th>
-                  <th>פעולות</th>
-                </tr>
-              </thead>
-              <tbody>
-                {paginatedVolunteers.map((volunteer) => {
-                  const isUpdating = updatingVolunteerId === volunteer.id;
-
-                  return (
-                    <tr key={volunteer.id} className="community-volunteers-mgmt__row">
-                      <td data-label="שם מלא">{volunteer.fullNameDisplay}</td>
-                      <td data-label="טלפון">{volunteer.phoneDisplay}</td>
-                      <td data-label="אימייל">{volunteer.emailDisplay}</td>
-                      <td data-label="שפות">{volunteer.languagesDisplay}</td>
-                      <td data-label="סוגי עזרה">{volunteer.helpTypesDisplay}</td>
-                      <td data-label="סטטוס פעילות">
-                        <span
-                          className={`community-volunteers-mgmt__status community-volunteers-mgmt__status--${
-                            volunteer.is_active === true ? "active" : "inactive"
-                          }`}
-                        >
-                          {volunteer.activeStatusDisplay}
-                        </span>
-                      </td>
-                      <td data-label="הערות">{volunteer.notesDisplay}</td>
-                      <td data-label="פעולות">
-                        <div className="community-volunteers-mgmt__actions">
-                          {volunteer.is_active === true ? (
-                            <button
-                              type="button"
-                              className="community-volunteers-mgmt__action-btn community-volunteers-mgmt__action-btn--warning"
-                              onClick={() =>
-                                handleActiveStatusChange(volunteer, false)
-                              }
-                              disabled={isUpdating}
-                            >
-                              {isUpdating ? "מעדכן..." : "השבתת מתנדב"}
-                            </button>
-                          ) : (
-                            <button
-                              type="button"
-                              className="community-volunteers-mgmt__action-btn"
-                              onClick={() =>
-                                handleActiveStatusChange(volunteer, true)
-                              }
-                              disabled={isUpdating}
-                            >
-                              {isUpdating ? "מעדכן..." : "הפעלת מתנדב"}
-                            </button>
-                          )}
-
-                          <button
-                            type="button"
-                            className="community-volunteers-mgmt__action-btn"
-                            onClick={() => onEditVolunteer(volunteer)}
-                            disabled={isUpdating}
-                          >
-                            עריכת פרטים
-                          </button>
-                        </div>
-                      </td>
-                    </tr>
-                  );
-                })}
-              </tbody>
-            </table>
-          </div>
+          <ul className="community-staff-compact-list">
+            {paginatedVolunteers.map((volunteer) => (
+              <CommunityStaffCompactCard
+                key={volunteer.id}
+                name={volunteer.fullNameDisplay}
+                phone={volunteer.phoneDisplay}
+                status={
+                  <span
+                    className={`community-volunteers-mgmt__status community-volunteers-mgmt__status--${
+                      volunteer.is_active === true ? "active" : "inactive"
+                    }`}
+                  >
+                    {volunteer.activeStatusDisplay}
+                  </span>
+                }
+                primaryLabel="עריכת פרטים"
+                onPrimaryClick={() => onEditVolunteer(volunteer)}
+                onViewDetails={() => onViewDetails(volunteer)}
+              />
+            ))}
+          </ul>
         )}
       </div>
 

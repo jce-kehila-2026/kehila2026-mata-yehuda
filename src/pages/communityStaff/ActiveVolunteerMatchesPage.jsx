@@ -1,10 +1,12 @@
 import { useState } from "react";
 import ActiveVolunteerMatchesTable from "../../components/communityStaff/ActiveVolunteerMatchesTable.jsx";
 import ActiveVolunteerMatchDetailsModal from "../../components/communityStaff/ActiveVolunteerMatchDetailsModal.jsx";
+import ActiveVolunteerMatchSummaryModal from "../../components/communityStaff/ActiveVolunteerMatchSummaryModal.jsx";
 import "../../styles/communityStaff/CommunityStaffDashboard.css";
 
 function ActiveVolunteerMatchesPage() {
   const [selectedMatch, setSelectedMatch] = useState(null);
+  const [detailsMatch, setDetailsMatch] = useState(null);
   const [refreshKey, setRefreshKey] = useState(0);
 
   const handleMatchUpdated = () => {
@@ -20,7 +22,17 @@ function ActiveVolunteerMatchesPage() {
 
       <ActiveVolunteerMatchesTable
         refreshKey={refreshKey}
-        onViewMatch={setSelectedMatch}
+        onManageMatch={setSelectedMatch}
+        onViewDetails={setDetailsMatch}
+      />
+
+      <ActiveVolunteerMatchSummaryModal
+        match={detailsMatch}
+        onClose={() => setDetailsMatch(null)}
+        onManage={(match) => {
+          setDetailsMatch(null);
+          setSelectedMatch(match);
+        }}
       />
 
       <ActiveVolunteerMatchDetailsModal

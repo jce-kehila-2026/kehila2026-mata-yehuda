@@ -172,3 +172,22 @@
     gap: 0.9rem;
   }
 }
+
+@media (max-width: 768px) {
+  .supportive-community-page .community-join-form,
+  .supportive-community-page .volunteer-registration-form {
+    padding: 1.25rem 1rem 2rem;
+  }
+
+  .supportive-community-page .options-container {
+    grid-template-columns: 1fr;
+  }
+}
+
+@media (max-width: 480px) {
+  .supportive-community-page .community-join-form,
+  .supportive-community-page .volunteer-registration-form {
+    padding: 1rem 0.85rem 1.75rem;
+  }
+}
+

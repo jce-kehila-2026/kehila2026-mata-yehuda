@@ -1,24 +1,19 @@
 import { useState } from "react";
 import CommunityMembersTable from "../../components/communityStaff/CommunityMembersTable.jsx";
 import EditCommunityMemberModal from "../../components/communityStaff/EditCommunityMemberModal.jsx";
+import CommunityMemberDetailsModal from "../../components/communityStaff/CommunityMemberDetailsModal.jsx";
 import CommunityMemberRequestsHistoryModal from "../../components/communityStaff/CommunityMemberRequestsHistoryModal.jsx";
 import "../../styles/communityStaff/CommunityStaffDashboard.css";
 
 function CommunityMembersPage() {
   const [selectedMember, setSelectedMember] = useState(null);
+  const [detailsMember, setDetailsMember] = useState(null);
   const [historyMember, setHistoryMember] = useState(null);
   const [refreshKey, setRefreshKey] = useState(0);
 
-  const handleEditMember = (member) => {
-    setSelectedMember(member);
-  };
-
-  const handleViewHistory = (member) => {
-    setHistoryMember(member);
-  };
-
   const handleMemberUpdated = () => {
     setSelectedMember(null);
+    setDetailsMember(null);
     setRefreshKey((current) => current + 1);
   };
 
@@ -30,15 +25,28 @@ function CommunityMembersPage() {
 
       <CommunityMembersTable
         refreshKey={refreshKey}
-        onEditMember={handleEditMember}
-        onViewHistory={handleViewHistory}
-        onMemberUpdated={() => setRefreshKey((current) => current + 1)}
+        onEditMember={setSelectedMember}
+        onViewDetails={setDetailsMember}
       />
 
       <EditCommunityMemberModal
         member={selectedMember}
         onClose={() => setSelectedMember(null)}
         onSaved={handleMemberUpdated}
+      />
+
+      <CommunityMemberDetailsModal
+        member={detailsMember}
+        onClose={() => setDetailsMember(null)}
+        onEdit={(member) => {
+          setDetailsMember(null);
+          setSelectedMember(member);
+        }}
+        onViewHistory={(member) => {
+          setDetailsMember(null);
+          setHistoryMember(member);
+        }}
+        onMemberUpdated={handleMemberUpdated}
       />
 
       <CommunityMemberRequestsHistoryModal

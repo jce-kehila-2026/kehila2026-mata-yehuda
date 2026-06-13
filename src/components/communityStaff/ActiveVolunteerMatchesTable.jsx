@@ -1,5 +1,6 @@
 import { useCallback, useEffect, useMemo, useState } from "react";
 import { getActiveVolunteerMatches } from "../../services/communityStaff/communityStaffService";
+import { CommunityStaffCompactCard } from "./CommunityStaffListUi.jsx";
 
 const PAGE_SIZE_OPTIONS = [5, 10, 25];
 
@@ -24,7 +25,11 @@ function matchesSearch(match, searchTerm) {
   );
 }
 
-function ActiveVolunteerMatchesTable({ refreshKey = 0, onViewMatch }) {
+function ActiveVolunteerMatchesTable({
+  refreshKey = 0,
+  onManageMatch,
+  onViewDetails,
+}) {
   const [matches, setMatches] = useState([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
@@ -127,52 +132,23 @@ function ActiveVolunteerMatchesTable({ refreshKey = 0, onViewMatch }) {
               : "לא נמצאו תוצאות לפי החיפוש"}
           </p>
         ) : (
-          <div className="community-active-matches__table-wrapper">
-            <table className="community-active-matches__table">
-              <thead>
-                <tr>
-                  <th>משתתף/ת</th>
-                  <th>טלפון משתתף/ת</th>
-                  <th>מתנדב/ת</th>
-                  <th>טלפון מתנדב/ת</th>
-                  <th>ציון</th>
-                  <th>תאריך התאמה</th>
-                  <th>שפות משותפות</th>
-                  <th>סוגי עזרה משותפים</th>
-                  <th>הערות</th>
-                  <th>פעולות</th>
-                </tr>
-              </thead>
-              <tbody>
-                {paginatedMatches.map((match) => (
-                  <tr key={match.id} className="community-active-matches__row">
-                    <td data-label="משתתף/ת">{match.participantFullName}</td>
-                    <td data-label="טלפון משתתף/ת">{match.participantPhone}</td>
-                    <td data-label="מתנדב/ת">{match.volunteerFullName}</td>
-                    <td data-label="טלפון מתנדב/ת">{match.volunteerPhone}</td>
-                    <td data-label="ציון">{match.matchScore}</td>
-                    <td data-label="תאריך התאמה">{match.matchedAtDisplay}</td>
-                    <td data-label="שפות משותפות">
-                      {match.matchedLanguagesDisplay}
-                    </td>
-                    <td data-label="סוגי עזרה משותפים">
-                      {match.matchedHelpTypesDisplay}
-                    </td>
-                    <td data-label="הערות">{match.notesDisplay}</td>
-                    <td data-label="פעולות">
-                      <button
-                        type="button"
-                        className="community-active-matches__action-btn"
-                        onClick={() => onViewMatch(match)}
-                      >
-                        צפייה בפרטים
-                      </button>
-                    </td>
-                  </tr>
-                ))}
-              </tbody>
-            </table>
-          </div>
+          <ul className="community-staff-compact-list">
+            {paginatedMatches.map((match) => (
+              <CommunityStaffCompactCard
+                key={match.id}
+                name={match.participantFullName}
+                phone={match.participantPhone}
+                status={
+                  <span className="community-volunteers-mgmt__status community-volunteers-mgmt__status--active">
+                    התאמה פעילה
+                  </span>
+                }
+                primaryLabel="ניהול התאמה"
+                onPrimaryClick={() => onManageMatch(match)}
+                onViewDetails={() => onViewDetails(match)}
+              />
+            ))}
+          </ul>
         )}
       </div>
 

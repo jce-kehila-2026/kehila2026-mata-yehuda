@@ -1,18 +1,17 @@
 import { useState } from "react";
 import CommunityJoinRequestsTable from "../../components/communityStaff/CommunityJoinRequestsTable.jsx";
 import CompleteCommunityJoinModal from "../../components/communityStaff/CompleteCommunityJoinModal.jsx";
+import CommunityJoinRequestDetailsModal from "../../components/communityStaff/CommunityJoinRequestDetailsModal.jsx";
 import "../../styles/communityStaff/CommunityStaffDashboard.css";
 
 function CommunityJoinRequestsPage() {
   const [selectedRequest, setSelectedRequest] = useState(null);
+  const [detailsRequest, setDetailsRequest] = useState(null);
   const [refreshKey, setRefreshKey] = useState(0);
 
   const handleCompleteRegistration = (request) => {
+    setDetailsRequest(null);
     setSelectedRequest(request);
-  };
-
-  const handleCloseModal = () => {
-    setSelectedRequest(null);
   };
 
   const handleSaved = () => {
@@ -31,11 +30,18 @@ function CommunityJoinRequestsPage() {
       <CommunityJoinRequestsTable
         refreshKey={refreshKey}
         onCompleteRegistration={handleCompleteRegistration}
+        onViewDetails={setDetailsRequest}
+      />
+
+      <CommunityJoinRequestDetailsModal
+        request={detailsRequest}
+        onClose={() => setDetailsRequest(null)}
+        onCompleteRegistration={handleCompleteRegistration}
       />
 
       <CompleteCommunityJoinModal
         request={selectedRequest}
-        onClose={handleCloseModal}
+        onClose={() => setSelectedRequest(null)}
         onSaved={handleSaved}
       />
     </div>

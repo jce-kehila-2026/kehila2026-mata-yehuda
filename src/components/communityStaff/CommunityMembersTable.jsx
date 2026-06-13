@@ -1,11 +1,5 @@
 import { useCallback, useEffect, useMemo, useState } from "react";
-import {
-  getCommunityMembers,
-  updateCommunityMemberSubscriptionStatus,
-} from "../../services/communityStaff/communityStaffService";
-import CommunityStaffMessage, {
-  useCommunityStaffMessage,
-} from "./CommunityStaffMessage";
+import { getCommunityMembers } from "../../services/communityStaff/communityStaffService";
 
 const PAGE_SIZE_OPTIONS = [5, 10, 25];
 
@@ -47,8 +41,7 @@ function matchesSearch(member, searchTerm) {
 function CommunityMembersTable({
   refreshKey = 0,
   onEditMember,
-  onViewHistory,
-  onMemberUpdated,
+  onViewDetails,
 }) {
   const [members, setMembers] = useState([]);
   const [loading, setLoading] = useState(true);
@@ -57,8 +50,6 @@ function CommunityMembersTable({
   const [statusFilter, setStatusFilter] = useState("all");
   const [pageSize, setPageSize] = useState(10);
   const [currentPage, setCurrentPage] = useState(1);
-  const [updatingSubscriptionId, setUpdatingSubscriptionId] = useState(null);
-  const { message, showError, clearMessage } = useCommunityStaffMessage();
 
   const loadMembers = useCallback(async () => {
     setLoading(true);
@@ -111,30 +102,6 @@ function CommunityMembersTable({
     }
   }, [currentPage, totalPages]);
 
-  const handleStatusChange = async (member, nextStatus) => {
-    const confirmMessage =
-      nextStatus === "inactive"
-        ? "להשבית את חברות המשתתף/ת בקהילה?"
-        : "להפעיל מחדש את חברות המשתתף/ת בקהילה?";
-
-    if (!window.confirm(confirmMessage)) {
-      return;
-    }
-
-    setUpdatingSubscriptionId(member.id);
-
-    try {
-      await updateCommunityMemberSubscriptionStatus(member.id, nextStatus);
-      onMemberUpdated();
-      await loadMembers();
-    } catch (err) {
-      console.error("Failed to update member subscription status:", err);
-      showError("אירעה שגיאה בעדכון סטטוס החברות");
-    } finally {
-      setUpdatingSubscriptionId(null);
-    }
-  };
-
   if (loading) {
     return <p className="community-members__loading">טוען חברי קהילה...</p>;
   }
@@ -150,8 +117,6 @@ function CommunityMembersTable({
           חברי קהילה {members.length}
         </span>
       </div>
-
-      <CommunityStaffMessage message={message} onDismiss={clearMessage} />
 
       <div className="community-members__toolbar">
         <div className="community-members__search">
@@ -202,96 +167,43 @@ function CommunityMembersTable({
               : "לא נמצאו תוצאות לפי החיפוש או הסינון"}
           </p>
         ) : (
-          <div className="community-members__table-wrapper">
-            <table className="community-members__table">
-              <thead>
-                <tr>
-                  <th>שם מלא</th>
-                  <th>טלפון</th>
-                  <th>תעודת זהות</th>
-                  <th>סטטוס</th>
-                  <th>מחיר חודשי</th>
-                  <th>שירותים מבוקשים</th>
-                  <th>שפות</th>
-                  <th>פעולות</th>
-                </tr>
-              </thead>
-              <tbody>
-                {paginatedMembers.map((member) => {
-                  const isUpdating = updatingSubscriptionId === member.id;
+          <ul className="community-members__list">
+            {paginatedMembers.map((member) => (
+              <li key={member.id} className="community-members__member-card">
+                <div className="community-members__member-card-info">
+                  <span className="community-members__member-card-name">
+                    {member.fullNameDisplay}
+                  </span>
+                  <span className="community-members__member-card-phone">
+                    {member.phone}
+                  </span>
+                  <span
+                    className={`community-members__status community-members__status--${member.status}`}
+                  >
+                    {getStatusLabel(member.status)}
+                  </span>
+                </div>
 
-                  return (
-                    <tr key={member.id} className="community-members__row">
-                      <td data-label="שם מלא">{member.fullNameDisplay}</td>
-                      <td data-label="טלפון">{member.phone}</td>
-                      <td data-label="תעודת זהות">{member.idNumberDisplay}</td>
-                      <td data-label="סטטוס">
-                        <span
-                          className={`community-members__status community-members__status--${member.status}`}
-                        >
-                          {getStatusLabel(member.status)}
-                        </span>
-                      </td>
-                      <td data-label="מחיר חודשי">
-                        {member.monthlyPriceDisplay}
-                      </td>
-                      <td data-label="שירותים מבוקשים">
-                        {member.requestedServicesDisplay}
-                      </td>
-                      <td data-label="שפות">{member.languagesDisplay}</td>
-                      <td data-label="פעולות">
-                        <div className="community-members__actions">
-                          {member.status === "active" && (
-                            <button
-                              type="button"
-                              className="community-members__action-btn community-members__action-btn--warning"
-                              onClick={() =>
-                                handleStatusChange(member, "inactive")
-                              }
-                              disabled={isUpdating}
-                            >
-                              {isUpdating ? "מעדכן..." : "השבתת חברות"}
-                            </button>
-                          )}
+                <div className="community-members__member-card-actions">
+                  <button
+                    type="button"
+                    className="community-members__action-btn"
+                    onClick={() => onEditMember(member)}
+                  >
+                    עריכת פרטי חבר
+                  </button>
 
-                          {member.status === "inactive" && (
-                            <button
-                              type="button"
-                              className="community-members__action-btn"
-                              onClick={() =>
-                                handleStatusChange(member, "active")
-                              }
-                              disabled={isUpdating}
-                            >
-                              {isUpdating ? "מעדכן..." : "הפעלת חברות מחדש"}
-                            </button>
-                          )}
-
-                          <button
-                            type="button"
-                            className="community-members__action-btn"
-                            onClick={() => onEditMember(member)}
-                            disabled={isUpdating}
-                          >
-                            עריכת פרטי חבר
-                          </button>
-
-                          <button
-                            type="button"
-                            className="community-members__action-btn"
-                            onClick={() => onViewHistory(member)}
-                            disabled={isUpdating}
-                          >
-                            צפייה בהיסטוריית בקשות
-                          </button>
-                        </div>
-                      </td>
-                    </tr>
-                  );
-                })}
-              </tbody>
-            </table>
-          </div>
+                  <button
+                    type="button"
+                    className="community-members__action-btn community-members__action-btn--secondary"
+                    onClick={() => onViewDetails(member)}
+                  >
+                    הצגת פרטים
+                  </button>
+                </div>
+              </li>
+            ))}
+          </ul>
         )}
       </div>
 

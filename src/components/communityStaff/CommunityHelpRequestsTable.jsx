@@ -7,6 +7,8 @@ import {
 import CommunityStaffMessage, {
   useCommunityStaffMessage,
 } from "./CommunityStaffMessage";
+import { CommunityStaffCompactCard } from "./CommunityStaffListUi.jsx";
+import CommunityHelpRequestDetailsModal from "./CommunityHelpRequestDetailsModal.jsx";
 
 function formatStringArray(value) {
   if (!Array.isArray(value) || value.length === 0) {
@@ -215,6 +217,7 @@ function CommunityHelpRequestsTable() {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
   const [selectedRequest, setSelectedRequest] = useState(null);
+  const [detailsRequest, setDetailsRequest] = useState(null);
 
   const loadRequests = useCallback(async () => {
     setLoading(true);
@@ -237,7 +240,13 @@ function CommunityHelpRequestsTable() {
 
   const handleMatchApproved = () => {
     setSelectedRequest(null);
+    setDetailsRequest(null);
     loadRequests();
+  };
+
+  const handleOpenMatch = (request) => {
+    setDetailsRequest(null);
+    setSelectedRequest(request);
   };
 
   if (loading) {
@@ -264,61 +273,31 @@ function CommunityHelpRequestsTable() {
             אין בקשות סיוע ממתינות
           </p>
         ) : (
-          <div className="community-help-requests__table-wrapper">
-            <table className="community-help-requests__table">
-              <thead>
-                <tr>
-                  <th>שם מבקש</th>
-                  <th>תעודת זהות</th>
-                  <th>טלפון</th>
-                  <th>סוגי עזרה</th>
-                  <th>שפות</th>
-                  <th>תיאור</th>
-                  <th>סטטוס</th>
-                  <th>פעולה</th>
-                </tr>
-              </thead>
-              <tbody>
-                {requests.map((request) => (
-                  <tr
-                    key={request.id}
-                    className="community-help-requests__row"
-                  >
-                    <td data-label="שם מבקש">
-                      {request.participantFullName}
-                    </td>
-                    <td data-label="תעודת זהות">
-                      {request.participantIdNumber}
-                    </td>
-                    <td data-label="טלפון">{request.participantPhone}</td>
-                    <td data-label="סוגי עזרה">
-                      {formatRequestedHelpTypes(request)}
-                    </td>
-                    <td data-label="שפות">
-                      {request.languagesDisplay || "—"}
-                    </td>
-                    <td data-label="תיאור">{request.description || "—"}</td>
-                    <td data-label="סטטוס">
-                      <span className="community-help-requests__status">
-                        {request.status || "—"}
-                      </span>
-                    </td>
-                    <td data-label="פעולה">
-                      <button
-                        type="button"
-                        className="community-help-requests__match-btn"
-                        onClick={() => setSelectedRequest(request)}
-                      >
-                        התאמה
-                      </button>
-                    </td>
-                  </tr>
-                ))}
-              </tbody>
-            </table>
-          </div>
+          <ul className="community-staff-compact-list">
+            {requests.map((request) => (
+              <CommunityStaffCompactCard
+                key={request.id}
+                name={request.participantFullName}
+                phone={request.participantPhone}
+                status={
+                  <span className="community-help-requests__status">
+                    {request.status || "—"}
+                  </span>
+                }
+                primaryLabel="התאמה"
+                onPrimaryClick={() => handleOpenMatch(request)}
+                onViewDetails={() => setDetailsRequest(request)}
+              />
+            ))}
+          </ul>
         )}
       </div>
+
+      <CommunityHelpRequestDetailsModal
+        request={detailsRequest}
+        onClose={() => setDetailsRequest(null)}
+        onMatch={handleOpenMatch}
+      />
 
       {selectedRequest && (
         <MatchModal

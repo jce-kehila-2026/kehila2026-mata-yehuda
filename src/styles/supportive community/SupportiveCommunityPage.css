@@ -877,3 +877,337 @@
     bottom: 0.85rem;
   }
 }
+
+/* Tablet and mobile only — desktop (901px+) layout unchanged */
+
+@media (max-width: 768px) {
+  .supportive-community-page {
+    --pad-y: 1.35rem;
+    --pad-x: 1rem;
+    font-size: 18px;
+    padding-bottom: 4.5rem;
+  }
+
+  .supportive-community-page .site-header-inner {
+    padding: 0.65rem var(--pad-x);
+  }
+
+  .supportive-community-page .site-brand {
+    font-size: 0.98rem;
+  }
+
+  .supportive-community-page .site-program {
+    font-size: 0.85rem;
+    width: 100%;
+  }
+
+  .supportive-community-page .community-hero {
+    padding: 1rem 0 1.15rem;
+  }
+
+  .supportive-community-page .hero-banner {
+    min-height: 220px;
+    border-radius: 10px;
+  }
+
+  .supportive-community-page .hero-image {
+    height: 220px;
+  }
+
+  .supportive-community-page .hero-panel {
+    padding: 1rem var(--pad-x) 1.1rem;
+  }
+
+  .supportive-community-page .community-hero h1 {
+    font-size: 1.65rem;
+  }
+
+  .supportive-community-page .hero-lead {
+    font-size: 1rem;
+    margin-bottom: 0.65rem;
+  }
+
+  .supportive-community-page .hero-price-value {
+    font-size: 1.55rem;
+  }
+
+  .supportive-community-page .hero-price-label {
+    font-size: 0.95rem;
+  }
+
+  .supportive-community-page .page-wrap {
+    padding: var(--pad-y) var(--pad-x);
+  }
+
+  .supportive-community-page .page-wrap--compact {
+    padding-block: 1.1rem;
+  }
+
+  .supportive-community-page .section-header h2,
+  .supportive-community-page .actions-title {
+    font-size: 1.45rem;
+  }
+
+  .supportive-community-page .section-intro,
+  .supportive-community-page .actions-intro {
+    font-size: 0.98rem;
+  }
+
+  .supportive-community-page .services-grid,
+  .supportive-community-page .steps-timeline,
+  .supportive-community-page .volunteer-card-grid {
+    grid-template-columns: 1fr;
+    gap: 0.55rem;
+  }
+
+  .supportive-community-page .service-card-trigger,
+  .supportive-community-page .faq-trigger {
+    padding: 0.75rem 0.85rem;
+    min-height: 52px;
+  }
+
+  .supportive-community-page .service-card-title {
+    font-size: 1rem;
+  }
+
+  .supportive-community-page .price-value {
+    font-size: 1.95rem;
+  }
+
+  .supportive-community-page .price-highlight {
+    padding: 0.9rem 1rem;
+  }
+
+  .supportive-community-page .payment-discounts,
+  .supportive-community-page .payment-details li {
+    font-size: 0.98rem;
+  }
+
+  .supportive-community-page .btn {
+    font-size: 1.05rem;
+    min-height: 52px;
+    padding: 0.8rem 1rem;
+  }
+
+  .supportive-community-page .actions-buttons {
+    max-width: none;
+    display: flex;
+    flex-direction: column;
+  }
+
+  .supportive-community-page .volunteer-card {
+    min-height: 44px;
+    padding: 0.55rem 0.65rem;
+  }
+
+  .supportive-community-page .volunteer-card-label {
+    font-size: 0.9rem;
+  }
+
+  .supportive-community-page .floating-contact {
+    left: 0.75rem;
+    bottom: 0.75rem;
+  }
+
+  .supportive-community-page .floating-contact-btn {
+    font-size: 0.95rem;
+    padding: 0.75rem 1.1rem;
+    min-height: 48px;
+  }
+
+  .supportive-community-page .community-section,
+  .supportive-community-page .payment-info,
+  .supportive-community-page .community-actions {
+    padding-left: 1rem;
+    padding-right: 1rem;
+  }
+
+  .supportive-community-page .community-hero p {
+    font-size: 1rem;
+  }
+
+  .supportive-community-page .community-section h2,
+  .supportive-community-page .payment-info h2 {
+    font-size: 1.4rem;
+  }
+
+  .supportive-community-page .service-card {
+    padding: 1rem;
+  }
+
+  .supportive-community-page .service-card h3 {
+    font-size: 1.2rem;
+  }
+
+  .supportive-community-page .community-join-form,
+  .supportive-community-page .volunteer-registration-form {
+    padding: 1.25rem 1rem 2rem;
+  }
+
+  .supportive-community-page .form-section {
+    margin-bottom: 1.5rem;
+  }
+
+  .supportive-community-page .form-section h2 {
+    font-size: 1.4rem;
+  }
+
+  .supportive-community-page .form-section h3 {
+    font-size: 1.2rem;
+  }
+
+  .supportive-community-page .form-field label,
+  .supportive-community-page .form-hint {
+    font-size: 1rem;
+  }
+
+  .supportive-community-page .form-field input,
+  .supportive-community-page .form-field select,
+  .supportive-community-page .form-field textarea,
+  .supportive-community-page input,
+  .supportive-community-page select,
+  .supportive-community-page textarea {
+    font-size: 1rem;
+    padding: 0.85rem 0.95rem;
+    min-height: 52px;
+  }
+
+  .supportive-community-page .option-label {
+    font-size: 1rem;
+    padding: 0.85rem 0.95rem;
+    min-height: 52px;
+  }
+
+  .supportive-community-page .options-container {
+    grid-template-columns: 1fr;
+  }
+
+  .supportive-community-page .form-submit button,
+  .supportive-community-page .community-actions button {
+    font-size: 1.1rem;
+    min-height: 52px;
+    padding: 0.9rem 1rem;
+  }
+
+  .supportive-community-page .duplicate-prompt-actions {
+    gap: 0.6rem;
+  }
+}
+
+@media (max-width: 480px) {
+  .supportive-community-page {
+    --pad-x: 0.85rem;
+    font-size: 17px;
+  }
+
+  .supportive-community-page .community-hero h1 {
+    font-size: 1.45rem;
+  }
+
+  .supportive-community-page .hero-banner {
+    min-height: 190px;
+  }
+
+  .supportive-community-page .hero-image {
+    height: 190px;
+  }
+
+  .supportive-community-page .hero-lead {
+    font-size: 0.95rem;
+  }
+
+  .supportive-community-page .section-header h2,
+  .supportive-community-page .actions-title,
+  .supportive-community-page .community-section h2,
+  .supportive-community-page .payment-info h2 {
+    font-size: 1.3rem;
+  }
+
+  .supportive-community-page .service-card-trigger {
+    gap: 0.55rem;
+    align-items: flex-start;
+  }
+
+  .supportive-community-page .service-card-title {
+    font-size: 0.95rem;
+    line-height: 1.4;
+  }
+
+  .supportive-community-page .price-value {
+    font-size: 1.75rem;
+  }
+
+  .supportive-community-page .step-card {
+    padding: 0.75rem 0.85rem;
+  }
+
+  .supportive-community-page .step-content h3 {
+    font-size: 1rem;
+  }
+
+  .supportive-community-page .step-content p {
+    font-size: 0.92rem;
+  }
+
+  .supportive-community-page .btn-hero {
+    max-width: none;
+  }
+
+  .supportive-community-page .community-join-form,
+  .supportive-community-page .volunteer-registration-form {
+    padding: 1rem 0.85rem 1.75rem;
+  }
+
+  .supportive-community-page .form-message {
+    font-size: 1rem;
+    padding: 0.85rem 0.9rem;
+  }
+
+  .supportive-community-page .floating-contact-panel {
+    width: min(17rem, calc(100vw - 1.5rem));
+  }
+}
+
+@media (max-width: 375px) {
+  .supportive-community-page {
+    --pad-x: 0.75rem;
+    font-size: 16px;
+  }
+
+  .supportive-community-page .community-hero h1 {
+    font-size: 1.35rem;
+  }
+
+  .supportive-community-page .hero-price {
+    flex-wrap: wrap;
+  }
+
+  .supportive-community-page .service-icon-wrap {
+    width: 2rem;
+    height: 2rem;
+  }
+
+  .supportive-community-page .faq-trigger {
+    font-size: 0.98rem;
+  }
+
+  .supportive-community-page .footer-org {
+    font-size: 1rem;
+  }
+
+  .supportive-community-page .footer-tagline {
+    font-size: 0.92rem;
+  }
+
+  .supportive-community-page .form-field input,
+  .supportive-community-page .form-field select,
+  .supportive-community-page .form-field textarea {
+    padding: 0.75rem 0.85rem;
+  }
+
+  .supportive-community-page .option-label {
+    gap: 0.75rem;
+    padding: 0.75rem 0.85rem;
+  }
+}
+
