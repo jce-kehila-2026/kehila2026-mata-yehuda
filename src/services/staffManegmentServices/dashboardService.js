@@ -2,7 +2,7 @@ import { collection, getDocs } from "firebase/firestore";
 import { db } from "../../config/firebase";
 import { fetchActivities } from "./activityService";
 import { getCancellationRequests } from "./cancellationService";
-import { fetchWaitingRequests } from "../ RespOneonRequest/requestsService";
+import { fetchWaitingRequests } from "../RespOneonRequest/requestsService";
 import { sortWaitingRequests } from "../../utils/RespOneonRequest/formatters";
 import { fetchInitialRegistrationRequests } from "./registrationService";
 

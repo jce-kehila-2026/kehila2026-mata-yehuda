@@ -180,7 +180,7 @@
 }
 
 @media (min-width: 900px) {
-  .supportive-community-page .services-grid {
+  .supportive-community-page .services-grid:not(.services-grid--single) {
     display: grid;
     grid-template-columns: 1fr 1fr;
   }
