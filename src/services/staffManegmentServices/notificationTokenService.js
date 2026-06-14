@@ -75,30 +75,47 @@ export async function saveNotificationToken({
     const normalizedToken = String(token || "").trim();
 
     if (!normalizedToken) {
+        console.error("[fcm] saveNotificationToken aborted: empty token");
         throw new Error("TOKEN_REQUIRED");
     }
 
     if (!Array.isArray(groups) || groups.length === 0) {
+        console.error("[fcm] saveNotificationToken aborted: groups missing", {
+            groups
+        });
         throw new Error("GROUPS_REQUIRED");
     }
 
     const tokenRef = doc(db, "notification_tokens", normalizedToken);
     const existingSnap = await getDoc(tokenRef);
+    const payload = {
+        token: normalizedToken,
+        groups,
+        participantId: participantId || "",
+        lastActive: serverTimestamp(),
+        createdAt: existingSnap.exists()
+            ? existingSnap.data().createdAt || serverTimestamp()
+            : serverTimestamp(),
+        isActive: true
+    };
 
-    await setDoc(
-        tokenRef,
-        {
-            token: normalizedToken,
-            groups,
-            participantId: participantId || "",
-            lastActive: serverTimestamp(),
-            createdAt: existingSnap.exists()
-                ? existingSnap.data().createdAt || serverTimestamp()
-                : serverTimestamp(),
-            isActive: true
-        },
-        { merge: true }
-    );
+    console.info("[fcm] Writing notification_tokens document", {
+        docId: normalizedToken,
+        token: normalizedToken,
+        isActive: payload.isActive,
+        participantId: payload.participantId,
+        groups: payload.groups,
+        isUpdate: existingSnap.exists()
+    });
+
+    await setDoc(tokenRef, payload, { merge: true });
+
+    console.info("[fcm] notification_tokens document saved", {
+        docId: normalizedToken,
+        isActive: true,
+        participantId: payload.participantId,
+        groups: payload.groups
+    });
 }
 
 /**
@@ -109,26 +126,44 @@ export async function touchNotificationToken(token) {
     const normalizedToken = String(token || "").trim();
 
     if (!normalizedToken) {
+        console.warn("[fcm] touchNotificationToken skipped: empty token");
         return;
     }
+
+    console.info("[fcm] Refreshing notification_tokens document", {
+        docId: normalizedToken
+    });
 
     const tokenRef = doc(db, "notification_tokens", normalizedToken);
     const existingSnap = await getDoc(tokenRef);
     const existingData = existingSnap.exists() ? existingSnap.data() : {};
     const participantId = String(existingData.participantId || "").trim();
     const groups = await resolveNotificationGroupsForParticipant(participantId);
+    const payload = {
+        token: normalizedToken,
+        groups,
+        lastActive: serverTimestamp(),
+        isActive: true,
+        ...(participantId ? { participantId } : {})
+    };
 
-    await setDoc(
-        tokenRef,
-        {
-            token: normalizedToken,
-            groups,
-            lastActive: serverTimestamp(),
-            isActive: true,
-            ...(participantId ? { participantId } : {})
-        },
-        { merge: true }
-    );
+    console.info("[fcm] Writing notification_tokens touch payload", {
+        docId: normalizedToken,
+        token: normalizedToken,
+        isActive: payload.isActive,
+        participantId: payload.participantId || "",
+        groups: payload.groups,
+        isUpdate: existingSnap.exists()
+    });
+
+    await setDoc(tokenRef, payload, { merge: true });
+
+    console.info("[fcm] notification_tokens document refreshed", {
+        docId: normalizedToken,
+        isActive: true,
+        participantId: payload.participantId || "",
+        groups: payload.groups
+    });
 }
 
 export function getStoredFcmToken() {

@@ -4,7 +4,6 @@ import {
     CheckCircle2,
     ClipboardList,
     FileText,
-    HandHeart,
     Mail,
     Menu,
     MessageCircle,
@@ -58,8 +57,7 @@ const DASHBOARD_ACTION_ICONS = {
     registrations: FileText,
     inquiries: Mail,
     cancellations: Undo2,
-    attendance: CheckCircle2,
-    volunteers: HandHeart
+    attendance: CheckCircle2
 };
 
 const DASHBOARD_ACTIONS = [
@@ -79,8 +77,7 @@ const DASHBOARD_ACTIONS = [
     },
     { id: "inquiries", label: "פניות", page: "inquiries" },
     { id: "cancellations", label: "ביטולים", page: "cancellations" },
-    { id: "attendance", label: "נוכחות", page: "attendance" },
-    { id: "volunteers", label: "מתנדבים", page: null }
+    { id: "attendance", label: "נוכחות", page: "attendance" }
 ];
 
 const DASHBOARD_ACTIONS_BY_ID = Object.fromEntries(
@@ -157,21 +154,35 @@ function StaffDashboard({ onLogout }) {
         }
 
         function handlePointerDown(event) {
+            const target = event.target;
+            const clickedInsidePortaledDrawer =
+                target instanceof Node &&
+                (document
+                    .getElementById("staff-dashboard-sidebar-drawer")
+                    ?.contains(target) ||
+                    document
+                        .getElementById("staff-mobile-menu-drawer")
+                        ?.contains(target));
             const clickedInsideMobileNav =
                 dashboardNavRef.current &&
-                dashboardNavRef.current.contains(event.target);
+                dashboardNavRef.current.contains(target);
             const clickedInsideDesktopNav =
                 desktopNavRef.current &&
-                desktopNavRef.current.contains(event.target);
+                desktopNavRef.current.contains(target);
 
-            if (isMobileActionsOpen && !clickedInsideMobileNav) {
+            if (
+                isMobileActionsOpen &&
+                !clickedInsideMobileNav &&
+                !clickedInsidePortaledDrawer
+            ) {
                 closeDashboardNav();
             }
 
             if (
                 isDesktopSidebarOpen &&
                 !isMobileDashboard &&
-                !clickedInsideDesktopNav
+                !clickedInsideDesktopNav &&
+                !clickedInsidePortaledDrawer
             ) {
                 closeDesktopSidebar();
             }
@@ -487,15 +498,15 @@ function StaffDashboard({ onLogout }) {
         <div
             className={
                 currentPage === "dashboard"
-                    ? "staff-page staff-page--dashboard"
-                    : "staff-page"
+                    ? "staff-page staff-page--dashboard staff-dashboard-root"
+                    : "staff-page staff-dashboard-root"
             }
         >
             {currentPage === "dashboard" && (
                 <div className="staff-dashboard-page staff-dashboard-page--home">
                     <header className="staff-dashboard-hero">
                         <div className="staff-dashboard-hero__bar">
-                            <div className="staff-dashboard-hero__start">
+                            <div className="staff-dashboard-hero__brand">
                                 <div
                                     className="staff-dashboard-hero__mobile-nav"
                                     ref={dashboardNavRef}
@@ -578,11 +589,11 @@ function StaffDashboard({ onLogout }) {
                                         key={item.id}
                                         className="staff-dashboard-summary-card"
                                     >
-                                        <span className="staff-dashboard-summary-card__label">
-                                            {item.label}
-                                        </span>
                                         <span className="staff-dashboard-summary-card__value">
                                             {getSummaryValue(item.id)}
+                                        </span>
+                                        <span className="staff-dashboard-summary-card__label">
+                                            {item.label}
                                         </span>
                                     </article>
                                 ))}
