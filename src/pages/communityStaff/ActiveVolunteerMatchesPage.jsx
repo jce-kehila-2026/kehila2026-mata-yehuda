@@ -17,7 +17,7 @@ function ActiveVolunteerMatchesPage() {
   return (
     <div className="community-active-matches-page" dir="rtl">
       <header className="community-active-matches-page__header">
-        <h1 className="community-active-matches-page__title">התאמות פעילות</h1>
+        <h1 className="community-active-matches-page__title page-title">התאמות פעילות</h1>
       </header>
 
       <ActiveVolunteerMatchesTable

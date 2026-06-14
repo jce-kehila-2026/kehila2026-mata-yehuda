@@ -1,5 +1,15 @@
 import { useCallback, useEffect, useMemo, useState } from "react";
-import { getCommunityMembers } from "../../services/communityStaff/communityStaffService";
+import {
+  getCommunityMembers,
+  updateCommunityMemberSubscriptionStatus,
+} from "../../services/communityStaff/communityStaffService";
+import {
+  AdminTableActions,
+  AdminTableDeleteButton,
+  AdminTableEditButton,
+  AdminTableViewButton,
+} from "../admin/AdminTableActions.jsx";
+import CommunityStaffConfirmModal from "./CommunityStaffConfirmModal.jsx";
 
 const PAGE_SIZE_OPTIONS = [5, 10, 25];
 
@@ -42,6 +52,8 @@ function CommunityMembersTable({
   refreshKey = 0,
   onEditMember,
   onViewDetails,
+  onMemberUpdated,
+  onShowError,
 }) {
   const [members, setMembers] = useState([]);
   const [loading, setLoading] = useState(true);
@@ -50,6 +62,8 @@ function CommunityMembersTable({
   const [statusFilter, setStatusFilter] = useState("all");
   const [pageSize, setPageSize] = useState(10);
   const [currentPage, setCurrentPage] = useState(1);
+  const [pendingDeactivateMember, setPendingDeactivateMember] = useState(null);
+  const [deactivating, setDeactivating] = useState(false);
 
   const loadMembers = useCallback(async () => {
     setLoading(true);
@@ -101,6 +115,31 @@ function CommunityMembersTable({
       setCurrentPage(totalPages);
     }
   }, [currentPage, totalPages]);
+
+  const handleConfirmDeactivate = async () => {
+    if (!pendingDeactivateMember) {
+      return;
+    }
+
+    setDeactivating(true);
+
+    try {
+      await updateCommunityMemberSubscriptionStatus(
+        pendingDeactivateMember.id,
+        "inactive"
+      );
+      onMemberUpdated?.({
+        successMessage: "חברות המשתתף/ת הושבתה בהצלחה",
+      });
+      setPendingDeactivateMember(null);
+      await loadMembers();
+    } catch (err) {
+      console.error("Failed to update member subscription status:", err);
+      onShowError?.("אירעה שגיאה. נסה שוב.");
+    } finally {
+      setDeactivating(false);
+    }
+  };
 
   if (loading) {
     return <p className="community-members__loading">טוען חברי קהילה...</p>;
@@ -185,21 +224,21 @@ function CommunityMembersTable({
                 </div>
 
                 <div className="community-members__member-card-actions">
-                  <button
-                    type="button"
-                    className="community-members__action-btn"
-                    onClick={() => onEditMember(member)}
-                  >
-                    עריכת פרטי חבר
-                  </button>
-
-                  <button
-                    type="button"
-                    className="community-members__action-btn community-members__action-btn--secondary"
-                    onClick={() => onViewDetails(member)}
-                  >
-                    הצגת פרטים
-                  </button>
+                  <AdminTableActions>
+                    <AdminTableViewButton
+                      onClick={() => onViewDetails(member)}
+                      label="הצגת פרטים"
+                    />
+                    <AdminTableEditButton
+                      onClick={() => onEditMember(member)}
+                      label="עריכת פרטי חבר"
+                    />
+                    <AdminTableDeleteButton
+                      onClick={() => setPendingDeactivateMember(member)}
+                      label="השבתת חברות"
+                      disabled={member.status !== "active"}
+                    />
+                  </AdminTableActions>
                 </div>
               </li>
             ))}
@@ -230,6 +269,17 @@ function CommunityMembersTable({
           </button>
         </div>
       )}
+
+      <CommunityStaffConfirmModal
+        message={
+          pendingDeactivateMember
+            ? "להשבית את חברות המשתתף/ת בקהילה?"
+            : null
+        }
+        onConfirm={handleConfirmDeactivate}
+        onCancel={() => setPendingDeactivateMember(null)}
+        confirming={deactivating}
+      />
     </div>
   );
 }

@@ -27,7 +27,7 @@ function CommunityJoinRequestsPage() {
   return (
     <div className="community-join-requests-page" dir="rtl">
       <header className="community-join-requests-page__header">
-        <h1 className="community-join-requests-page__title">
+        <h1 className="community-join-requests-page__title page-title">
           בקשות הצטרפות לקהילה תומכת
         </h1>
       </header>

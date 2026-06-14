@@ -1,5 +1,6 @@
 import { useState } from "react";
 import { updateVolunteerActiveStatus } from "../../services/communityStaff/communityStaffService";
+import { AdminTableDeleteButton } from "../admin/AdminTableActions.jsx";
 import CommunityStaffConfirmModal from "./CommunityStaffConfirmModal.jsx";
 import {
   CommunityStaffDetailItem,
@@ -66,14 +67,11 @@ function VolunteerManagementDetailsModal({
             </button>
 
             {volunteer.is_active === true ? (
-              <button
-                type="button"
-                className="community-volunteers-mgmt__action-btn community-volunteers-mgmt__action-btn--warning"
+              <AdminTableDeleteButton
                 onClick={() => setPendingAction({ isActive: false })}
                 disabled={updatingStatus}
-              >
-                השבתת מתנדב
-              </button>
+                label="השבתת מתנדב"
+              />
             ) : (
               <button
                 type="button"
