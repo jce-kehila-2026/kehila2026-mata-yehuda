@@ -154,21 +154,35 @@ function StaffDashboard({ onLogout }) {
         }
 
         function handlePointerDown(event) {
+            const target = event.target;
+            const clickedInsidePortaledDrawer =
+                target instanceof Node &&
+                (document
+                    .getElementById("staff-dashboard-sidebar-drawer")
+                    ?.contains(target) ||
+                    document
+                        .getElementById("staff-mobile-menu-drawer")
+                        ?.contains(target));
             const clickedInsideMobileNav =
                 dashboardNavRef.current &&
-                dashboardNavRef.current.contains(event.target);
+                dashboardNavRef.current.contains(target);
             const clickedInsideDesktopNav =
                 desktopNavRef.current &&
-                desktopNavRef.current.contains(event.target);
+                desktopNavRef.current.contains(target);
 
-            if (isMobileActionsOpen && !clickedInsideMobileNav) {
+            if (
+                isMobileActionsOpen &&
+                !clickedInsideMobileNav &&
+                !clickedInsidePortaledDrawer
+            ) {
                 closeDashboardNav();
             }
 
             if (
                 isDesktopSidebarOpen &&
                 !isMobileDashboard &&
-                !clickedInsideDesktopNav
+                !clickedInsideDesktopNav &&
+                !clickedInsidePortaledDrawer
             ) {
                 closeDesktopSidebar();
             }

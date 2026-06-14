@@ -1,3 +1,4 @@
+import { createPortal } from "react-dom";
 import StaffNavigationSections from "./StaffNavigationSections";
 
 function DashboardSidebar({
@@ -13,7 +14,7 @@ function DashboardSidebar({
         return null;
     }
 
-    return (
+    return createPortal(
         <>
             <div
                 className="staff-dashboard-desktop-overlay"
@@ -26,6 +27,8 @@ function DashboardSidebar({
                 aria-label="ניווט לוח בקרה"
                 role="dialog"
                 aria-modal="true"
+                onMouseDown={(event) => event.stopPropagation()}
+                onClick={(event) => event.stopPropagation()}
             >
                 <div className="staff-dashboard-sidebar__header">
                     <h2 className="staff-dashboard-sidebar__title">תפריט ניווט</h2>
@@ -52,7 +55,8 @@ function DashboardSidebar({
                     />
                 </nav>
             </aside>
-        </>
+        </>,
+        document.body
     );
 }
 
