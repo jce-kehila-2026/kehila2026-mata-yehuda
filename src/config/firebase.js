@@ -2,19 +2,20 @@ import { initializeApp } from "firebase/app";
 import { getAuth } from "firebase/auth";
 import { getFirestore } from "firebase/firestore";
 import { getStorage } from "firebase/storage";
+import { getFirebaseEnvValues } from "./firebaseEnvironment";
 
-export const STORAGE_BUCKET =
-  import.meta.env.VITE_FIREBASE_STORAGE_BUCKET ||
-  "matayehuda.firebasestorage.app";
+const env = getFirebaseEnvValues();
+
+export const STORAGE_BUCKET = env.storageBucket;
 
 const firebaseConfig = {
-  apiKey: import.meta.env.VITE_FIREBASE_API_KEY,
-  authDomain: import.meta.env.VITE_FIREBASE_AUTH_DOMAIN,
-  projectId: import.meta.env.VITE_FIREBASE_PROJECT_ID,
-  storageBucket: STORAGE_BUCKET,
-  messagingSenderId: import.meta.env.VITE_FIREBASE_MESSAGING_SENDER_ID,
-  appId: import.meta.env.VITE_FIREBASE_APP_ID,
-  measurementId: import.meta.env.VITE_FIREBASE_MEASUREMENT_ID,
+    apiKey: env.apiKey,
+    authDomain: env.authDomain,
+    projectId: env.projectId,
+    storageBucket: STORAGE_BUCKET,
+    messagingSenderId: env.messagingSenderId,
+    appId: env.appId,
+    ...(env.measurementId ? { measurementId: env.measurementId } : {}),
 };
 
 const app = initializeApp(firebaseConfig);

@@ -9,6 +9,7 @@ import Plus60Page from "./pages/HomePages/Plus60Page.jsx";
 import AboutPage from "./pages/HomePages/AboutPage.jsx";
 import ServicesPage from "./pages/HomePages/ServicesPage.jsx";
 import StaffLogin from "./pages/staffManegmentPages/StaffLogin";
+import StaffStatisticsRoute from "./pages/staffManegmentPages/StaffStatisticsRoute";
 import RegistrationLayout from "./components/Payment/RegistrationLayout";
 import PaymentPage from "./pages/Payment/PaymentPage";
 import PaymentSuccess from "./pages/Payment/PaymentSuccess";
@@ -28,6 +29,7 @@ function App() {
         <Route path="/about" element={<AboutPage />} />
         <Route path="/services" element={<ServicesPage />} />
         <Route path="/staff-login" element={<StaffLogin />} />
+        <Route path="/staff/statistics" element={<StaffStatisticsRoute />} />
         <Route path="/requests" element={<RequestsPage />} />
         <Route
           path="/pay"

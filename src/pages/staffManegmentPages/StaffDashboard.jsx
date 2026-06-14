@@ -1,6 +1,7 @@
 import { useState, useEffect, useRef } from "react";
 import {
     Calendar,
+    BarChart3,
     CheckCircle2,
     ClipboardList,
     FileText,
@@ -22,6 +23,7 @@ import ManageParticipants from "./ManageParticipants";
 import ViewRegistrations from "./ViewRegistrations";
 import ManageCancellations from "./ManageCancellations";
 import SendMessages from "./SendMessages";
+import StaffStatistics from "./StaffStatistics";
 import AttendancePage from "../attendance/AttendancePage";
 import RequestsPage from "../RespOneonRequest/RequestsPage";
 import DashboardControlPanels from "../../components/dashboard/DashboardControlPanels";
@@ -54,6 +56,7 @@ const DASHBOARD_ACTION_ICONS = {
     manageStaff: Users,
     manageParticipants: UserRound,
     messages: MessageCircle,
+    statistics: BarChart3,
     registrations: FileText,
     inquiries: Mail,
     cancellations: Undo2,
@@ -70,6 +73,7 @@ const DASHBOARD_ACTIONS = [
         page: "manageParticipants"
     },
     { id: "messages", label: "התראות", page: "messages" },
+    { id: "statistics", label: "סטטיסטיקות", page: "statistics" },
     {
         id: "registrations",
         label: "בקשות",
@@ -100,6 +104,7 @@ const SUBPAGE_TITLES = {
     inquiries: "ניהול פניות",
     cancellations: "ניהול ביטולים",
     messages: "שליחת התראות",
+    statistics: "סטטיסטיקות",
     attendance: "בדיקת נוכחות"
 };
 
@@ -449,6 +454,12 @@ function StaffDashboard({ onLogout }) {
                                 goToPage(buildStaffPage("attendance", view))
                             }
                         />
+                    </div>
+                );
+            case "statistics":
+                return (
+                    <div data-dashboard-page="statistics">
+                        <StaffStatistics onBack={goToDashboard} />
                     </div>
                 );
             case "dashboard":
