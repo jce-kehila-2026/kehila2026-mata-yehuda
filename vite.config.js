@@ -9,10 +9,26 @@ export default defineConfig({
       "/api/notifications": {
         target: "http://127.0.0.1:3001",
         changeOrigin: true,
+        configure: (proxy) => {
+          proxy.on("error", (err) => {
+            console.error(
+              "[vite proxy] /api/notifications → http://127.0.0.1:3001",
+              err.message
+            );
+          });
+        },
       },
       "/health": {
         target: "http://127.0.0.1:3001",
         changeOrigin: true,
+        configure: (proxy) => {
+          proxy.on("error", (err) => {
+            console.error(
+              "[vite proxy] /health → http://127.0.0.1:3001",
+              err.message
+            );
+          });
+        },
       },
       "/api": {
         target: "http://localhost:5001",

@@ -12,11 +12,24 @@ dotenv.config({ path: path.resolve(__dirname, ".env") });
 
 const app = express();
 const port = Number(process.env.PORT) || 3001;
-const clientOrigin = process.env.CLIENT_ORIGIN?.trim() || "http://localhost:5173";
+const defaultDevOrigins = ["http://localhost:5173", "http://127.0.0.1:5173"];
+const allowedOrigins = (
+    process.env.CLIENT_ORIGIN?.trim() || defaultDevOrigins.join(",")
+)
+    .split(",")
+    .map((origin) => origin.trim())
+    .filter(Boolean);
 
 app.use(
     cors({
-        origin: clientOrigin,
+        origin(origin, callback) {
+            if (!origin || allowedOrigins.includes(origin)) {
+                callback(null, true);
+                return;
+            }
+
+            callback(new Error(`CORS blocked origin: ${origin}`));
+        },
         methods: ["GET", "POST", "OPTIONS"],
         allowedHeaders: ["Content-Type", "Authorization"]
     })
@@ -96,6 +109,7 @@ app.post("/api/notifications/send", async (req, res) => {
     }
 });
 
-app.listen(port, () => {
+app.listen(port, "0.0.0.0", () => {
     console.log(`FCM notification server listening on http://localhost:${port}`);
+    console.log(`Allowed CORS origins: ${allowedOrigins.join(", ")}`);
 });

@@ -3,8 +3,24 @@ import {
     NOTIFICATION_BACKEND_REQUIRED_MESSAGE
 } from "../../components/messages/helpers/messageHelpers";
 
-function getNotificationsApiBase() {
+const LOCAL_NOTIFICATION_SERVER_PATTERN =
+    /^https?:\/\/(localhost|127\.0\.0\.1):3001\/?$/i;
+
+function getConfiguredNotificationsApiBase() {
     return import.meta.env.VITE_NOTIFICATIONS_API_URL?.trim().replace(/\/$/, "") || "";
+}
+
+function getNotificationsApiBase() {
+    const configured = getConfiguredNotificationsApiBase();
+
+    if (
+        import.meta.env.DEV &&
+        (!configured || LOCAL_NOTIFICATION_SERVER_PATTERN.test(configured))
+    ) {
+        return "";
+    }
+
+    return configured;
 }
 
 function getNotificationsSendUrl() {
@@ -15,6 +31,19 @@ function getNotificationsSendUrl() {
 function getNotificationsHealthUrl() {
     const base = getNotificationsApiBase();
     return base ? `${base}/health` : "/health";
+}
+
+export function getNotificationBackendUrls() {
+    const configured = getConfiguredNotificationsApiBase();
+    const apiBase = getNotificationsApiBase();
+
+    return {
+        configuredApiBase: configured || "(not set)",
+        resolvedApiBase: apiBase || "(vite dev proxy → http://127.0.0.1:3001)",
+        healthUrl: getNotificationsHealthUrl(),
+        sendUrl: getNotificationsSendUrl(),
+        mode: import.meta.env.DEV ? "development" : "production"
+    };
 }
 
 function mapNotificationApiError(response, data) {
@@ -36,27 +65,47 @@ function mapNotificationApiError(response, data) {
     return data?.message || NOTIFICATION_BACKEND_REQUIRED_MESSAGE;
 }
 
-async function assertNotificationBackendAvailable() {
+export async function checkNotificationBackendHealth() {
+    const urls = getNotificationBackendUrls();
+
+    console.info("[notifications] Checking backend health", urls);
+
     try {
-        const response = await fetch(getNotificationsHealthUrl(), {
+        const response = await fetch(urls.healthUrl, {
             method: "GET",
             signal: AbortSignal.timeout(5000)
         });
-
-        if (!response.ok) {
-            throw new Error(NOTIFICATION_BACKEND_REQUIRED_MESSAGE);
-        }
-
         const data = await response.json().catch(() => ({}));
+        const ok = response.ok && data.ok === true;
+        const result = {
+            ...urls,
+            status: response.status,
+            ok,
+            firebaseConfigured: Boolean(data.firebaseConfigured)
+        };
 
-        if (data.ok !== true) {
-            throw new Error(NOTIFICATION_BACKEND_REQUIRED_MESSAGE);
-        }
+        console.info("[notifications] Health check result", result);
+
+        return result;
     } catch (error) {
-        if (error.message === NOTIFICATION_BACKEND_REQUIRED_MESSAGE) {
-            throw error;
-        }
+        console.error("[notifications] Health check failed", {
+            ...urls,
+            error: error.message
+        });
 
+        return {
+            ...urls,
+            ok: false,
+            status: 0,
+            error: error.message
+        };
+    }
+}
+
+async function assertNotificationBackendAvailable() {
+    const health = await checkNotificationBackendHealth();
+
+    if (!health.ok) {
         throw new Error(NOTIFICATION_BACKEND_REQUIRED_MESSAGE);
     }
 }

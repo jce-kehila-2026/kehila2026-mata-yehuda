@@ -1,6 +1,7 @@
 import { db } from "../../config/firebase";
 import {
     collection,
+    getCountFromServer,
     getDocs,
     limit,
     orderBy,
@@ -37,24 +38,19 @@ function startOfWeekMillis() {
     return monday.getTime();
 }
 
-function computeStatsFromTokens(tokenDocs) {
-    const participantIds = new Set();
+function countActiveDevices(tokenDocs) {
+    return tokenDocs.length;
+}
 
-    tokenDocs.forEach((tokenDoc) => {
-        const participantId = String(tokenDoc.participantId || "").trim();
+async function countParticipantsWithNotificationConsent() {
+    const snapshot = await getCountFromServer(
+        query(
+            collection(db, "participants"),
+            where("marketing_consent", "==", true)
+        )
+    );
 
-        if (participantId) {
-            participantIds.add(participantId);
-        }
-    });
-
-    const activeDevices = tokenDocs.length;
-
-    return {
-        registeredParticipants: participantIds.size || activeDevices,
-        activeDevices,
-        participantCountIsEstimated: participantIds.size === 0 && activeDevices > 0
-    };
+    return snapshot.data().count;
 }
 
 function computeSentThisWeek(logDocs) {
@@ -66,7 +62,8 @@ function computeSentThisWeek(logDocs) {
 }
 
 export async function fetchNotificationDashboardData() {
-    const [tokensSnapshot, logsSnapshot] = await Promise.all([
+    const [registeredParticipants, tokensSnapshot, logsSnapshot] = await Promise.all([
+        countParticipantsWithNotificationConsent(),
         getDocs(
             query(
                 collection(db, "notification_tokens"),
@@ -83,7 +80,6 @@ export async function fetchNotificationDashboardData() {
     ]);
 
     const tokenDocs = tokensSnapshot.docs.map((tokenDoc) => tokenDoc.data());
-    const tokenStats = computeStatsFromTokens(tokenDocs);
 
     const recentNotifications = logsSnapshot.docs.map((logDoc) => ({
         id: logDoc.id,
@@ -92,8 +88,8 @@ export async function fetchNotificationDashboardData() {
 
     return {
         stats: {
-            registeredParticipants: tokenStats.registeredParticipants,
-            activeDevices: tokenStats.activeDevices,
+            registeredParticipants,
+            activeDevices: countActiveDevices(tokenDocs),
             sentThisWeek: computeSentThisWeek(recentNotifications)
         },
         recentNotifications: recentNotifications.slice(0, 5)

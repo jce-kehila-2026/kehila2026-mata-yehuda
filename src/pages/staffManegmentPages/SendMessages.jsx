@@ -6,10 +6,14 @@ import {
     formatNotificationSummary,
     NOTIFICATION_BACKEND_REQUIRED_MESSAGE,
     NOTIFICATION_COMPLIANCE_NOTE,
+    NOTIFICATION_NO_ACTIVE_DEVICES_MESSAGE,
     validateNotificationMessage
 } from "../../components/messages/helpers/messageHelpers";
 import { fetchNotificationDashboardData } from "../../services/staffManegmentServices/notificationDashboardService";
-import { sendPushNotification } from "../../services/staffManegmentServices/notificationService";
+import {
+    checkNotificationBackendHealth,
+    sendPushNotification
+} from "../../services/staffManegmentServices/notificationService";
 
 function SendMessages() {
     const [title, setTitle] = useState("מטה יהודה");
@@ -46,6 +50,10 @@ function SendMessages() {
         loadDashboardData();
     }, [loadDashboardData]);
 
+    useEffect(() => {
+        checkNotificationBackendHealth();
+    }, []);
+
     async function handleSendNotification() {
         setError("");
         setSuccess("");
@@ -54,6 +62,11 @@ function SendMessages() {
 
         if (validationError) {
             setError(validationError);
+            return;
+        }
+
+        if (!dashboardLoading && (stats?.activeDevices ?? 0) === 0) {
+            setError(NOTIFICATION_NO_ACTIVE_DEVICES_MESSAGE);
             return;
         }
 
