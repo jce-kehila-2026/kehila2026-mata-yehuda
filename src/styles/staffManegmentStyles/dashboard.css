@@ -2034,27 +2034,21 @@
 }
 
 /* RequestsPage embedded in staff inquiries subpage */
-[data-dashboard-page="inquiries"] .supportive-community-page {
+[data-dashboard-page="inquiries"] .requests-inbox {
   min-height: auto;
   background: transparent;
-  font-size: 1rem;
-  line-height: 1.6;
+  font-size: 14px;
 }
 
-[data-dashboard-page="inquiries"] .supportive-community-page .community-hero {
+[data-dashboard-page="inquiries"] .requests-inbox__page-header {
   display: none;
 }
 
-[data-dashboard-page="inquiries"] .supportive-community-page .requests-toolbar,
-[data-dashboard-page="inquiries"] .supportive-community-page .requests-tabs-wrap,
-[data-dashboard-page="inquiries"] .supportive-community-page .requests-panel {
+[data-dashboard-page="inquiries"] .requests-inbox__shell {
   max-width: none;
-  margin-inline: 0;
-  padding-inline: clamp(1rem, 3vw, 2rem);
+  padding: 0 clamp(1rem, 3vw, 2rem) 1rem;
 }
 
-[data-dashboard-page="inquiries"] .supportive-community-page .requests-tabs-wrap {
-  position: static;
-  background: transparent;
-  padding-top: 0;
+[data-dashboard-page="inquiries"] .requests-inbox__workspace {
+  min-height: min(68vh, 600px);
 }
