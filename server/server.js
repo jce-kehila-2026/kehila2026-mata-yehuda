@@ -50,6 +50,82 @@ function isFirebaseCloudRuntime() {
   );
 }
 
+function normalizeFirebasePrivateKey(raw) {
+  if (!raw) return null;
+
+  let key = String(raw).trim();
+  if (
+    (key.startsWith('"') && key.endsWith('"')) ||
+    (key.startsWith("'") && key.endsWith("'"))
+  ) {
+    key = key.slice(1, -1).trim();
+  }
+
+  // Render / .env escaping: \\n and \n → real newlines
+  key = key.replace(/\\\\n/g, "\n").replace(/\\n/g, "\n");
+
+  const begin = "-----BEGIN PRIVATE KEY-----";
+  const end = "-----END PRIVATE KEY-----";
+
+  if (!key.includes(begin) || !key.includes(end)) {
+    return key;
+  }
+
+  const startIdx = key.indexOf(begin);
+  const endIdx = key.indexOf(end) + end.length;
+  key = key.slice(startIdx, endIdx);
+
+  const body = key.replace(begin, "").replace(end, "").replace(/\s/g, "");
+  if (!body) {
+    return key;
+  }
+
+  const wrapped = body.match(/.{1,64}/g)?.join("\n") || body;
+  return `${begin}\n${wrapped}\n${end}\n`;
+}
+
+function parseServiceAccountJson(raw) {
+  let json = String(raw).trim();
+  if (
+    (json.startsWith('"') && json.endsWith('"')) ||
+    (json.startsWith("'") && json.endsWith("'"))
+  ) {
+    json = json.slice(1, -1).trim();
+  }
+
+  const parsed = JSON.parse(json);
+  if (!parsed.client_email || !parsed.private_key) {
+    throw new Error("FIREBASE_SERVICE_ACCOUNT_JSON חסר client_email או private_key");
+  }
+
+  return {
+    projectId: parsed.project_id?.trim() || "",
+    clientEmail: parsed.client_email.trim(),
+    privateKey: normalizeFirebasePrivateKey(parsed.private_key),
+  };
+}
+
+function initializeFirebaseWithCert({ projectId, clientEmail, privateKey }) {
+  admin.initializeApp({
+    credential: admin.credential.cert({
+      projectId,
+      clientEmail,
+      privateKey: normalizeFirebasePrivateKey(privateKey),
+    }),
+  });
+}
+
+function reportFirebaseCredentialError(error) {
+  console.error(
+    "\n❌ Firebase Admin credentials לא תקינים.\n\n" +
+      "ב-Render (הכי פשוט): הוסיפי משתנה FIREBASE_SERVICE_ACCOUNT_JSON\n" +
+      "והדביקי את כל קובץ ה-JSON בשורה אחת (מקומית: node -e \"console.log(JSON.stringify(JSON.parse(require('fs').readFileSync('server/KEY.json','utf8'))))\").\n\n" +
+      "או השתמשי ב-FIREBASE_CLIENT_EMAIL + FIREBASE_PRIVATE_KEY (בלי גרשיים מסביב).\n\n" +
+      `פרטים: ${error.message}\n`
+  );
+  process.exit(1);
+}
+
 function initializePaymentFirebase() {
   if (admin.apps.length) {
     return;
@@ -65,6 +141,7 @@ function initializePaymentFirebase() {
 
   const clientEmail = process.env.FIREBASE_CLIENT_EMAIL?.trim();
   const privateKeyRaw = process.env.FIREBASE_PRIVATE_KEY;
+  const serviceAccountJson = process.env.FIREBASE_SERVICE_ACCOUNT_JSON?.trim();
 
   const credentialsPath = resolveGoogleApplicationCredentialsPath();
 
@@ -77,20 +154,38 @@ function initializePaymentFirebase() {
     return;
   }
 
+  if (serviceAccountJson) {
+    try {
+      const creds = parseServiceAccountJson(serviceAccountJson);
+      initializeFirebaseWithCert({
+        projectId: creds.projectId || projectId,
+        clientEmail: creds.clientEmail,
+        privateKey: creds.privateKey,
+      });
+    } catch (error) {
+      reportFirebaseCredentialError(error);
+    }
+    return;
+  }
+
   if (clientEmail && privateKeyRaw) {
-    admin.initializeApp({
-      credential: admin.credential.cert({
+    try {
+      initializeFirebaseWithCert({
         projectId,
         clientEmail,
-        privateKey: privateKeyRaw.replace(/\\n/g, "\n"),
-      }),
-    });
+        privateKey: privateKeyRaw,
+      });
+    } catch (error) {
+      reportFirebaseCredentialError(error);
+    }
     return;
   }
 
   console.error(
     "\n❌ Firebase Admin לא מוגדר — שרת התשלום לא יכול להתחיל.\n\n" +
       "צרו קובץ server/.env (או .env בשורש הפרויקט) עם:\n" +
+      "  FIREBASE_SERVICE_ACCOUNT_JSON={...}  (מומלץ ב-Render)\n" +
+      "או:\n" +
       "  FIREBASE_PROJECT_ID=matayehuda\n" +
       "  FIREBASE_CLIENT_EMAIL=...\n" +
       "  FIREBASE_PRIVATE_KEY=\"-----BEGIN PRIVATE KEY-----\\n...\\n-----END PRIVATE KEY-----\\n\"\n\n" +

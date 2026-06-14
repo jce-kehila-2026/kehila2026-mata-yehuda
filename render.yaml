@@ -21,6 +21,8 @@ services:
         sync: false
       - key: FIREBASE_PRIVATE_KEY
         sync: false
+      - key: FIREBASE_SERVICE_ACCOUNT_JSON
+        sync: false
       - key: PAYPAL_CLIENT_ID
         sync: false
       - key: PAYPAL_CLIENT_SECRET
@@ -50,6 +52,8 @@ services:
       - key: FIREBASE_CLIENT_EMAIL
         sync: false
       - key: FIREBASE_PRIVATE_KEY
+        sync: false
+      - key: FIREBASE_SERVICE_ACCOUNT_JSON
         sync: false
       - key: CLIENT_ORIGIN
         sync: false
