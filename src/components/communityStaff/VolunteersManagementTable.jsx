@@ -1,6 +1,10 @@
 import { useCallback, useEffect, useMemo, useState } from "react";
-import { getAllVolunteers } from "../../services/communityStaff/communityStaffService";
+import {
+  getAllVolunteers,
+  updateVolunteerActiveStatus,
+} from "../../services/communityStaff/communityStaffService";
 import { CommunityStaffCompactCard } from "./CommunityStaffListUi.jsx";
+import CommunityStaffConfirmModal from "./CommunityStaffConfirmModal.jsx";
 
 const PAGE_SIZE_OPTIONS = [5, 10, 25];
 
@@ -45,6 +49,8 @@ function VolunteersManagementTable({
   refreshKey = 0,
   onEditVolunteer,
   onViewDetails,
+  onVolunteerUpdated,
+  onShowError,
 }) {
   const [volunteers, setVolunteers] = useState([]);
   const [loading, setLoading] = useState(true);
@@ -53,6 +59,9 @@ function VolunteersManagementTable({
   const [activeFilter, setActiveFilter] = useState("all");
   const [pageSize, setPageSize] = useState(10);
   const [currentPage, setCurrentPage] = useState(1);
+  const [pendingDeactivateVolunteer, setPendingDeactivateVolunteer] =
+    useState(null);
+  const [deactivating, setDeactivating] = useState(false);
 
   const loadVolunteers = useCallback(async () => {
     setLoading(true);
@@ -100,6 +109,28 @@ function VolunteersManagementTable({
       setCurrentPage(totalPages);
     }
   }, [currentPage, totalPages]);
+
+  const handleConfirmDeactivate = async () => {
+    if (!pendingDeactivateVolunteer) {
+      return;
+    }
+
+    setDeactivating(true);
+
+    try {
+      await updateVolunteerActiveStatus(pendingDeactivateVolunteer.id, false);
+      onVolunteerUpdated?.({
+        successMessage: "המתנדב הושבת בהצלחה",
+      });
+      setPendingDeactivateVolunteer(null);
+      await loadVolunteers();
+    } catch (err) {
+      console.error("Failed to update volunteer active status:", err);
+      onShowError?.("אירעה שגיאה. נסה שוב.");
+    } finally {
+      setDeactivating(false);
+    }
+  };
 
   if (loading) {
     return (
@@ -186,6 +217,9 @@ function VolunteersManagementTable({
                 primaryLabel="עריכת פרטים"
                 onPrimaryClick={() => onEditVolunteer(volunteer)}
                 onViewDetails={() => onViewDetails(volunteer)}
+                onDeactivate={() => setPendingDeactivateVolunteer(volunteer)}
+                deactivateLabel="השבתת מתנדב"
+                deactivateDisabled={volunteer.is_active !== true}
               />
             ))}
           </ul>
@@ -215,6 +249,15 @@ function VolunteersManagementTable({
           </button>
         </div>
       )}
+
+      <CommunityStaffConfirmModal
+        message={
+          pendingDeactivateVolunteer ? "להשבית את המתנדב/ה?" : null
+        }
+        onConfirm={handleConfirmDeactivate}
+        onCancel={() => setPendingDeactivateVolunteer(null)}
+        confirming={deactivating}
+      />
     </div>
   );
 }

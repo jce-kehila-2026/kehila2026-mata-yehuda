@@ -1,10 +1,7 @@
-import { useState } from "react";
 import "./App.css";
 import { BrowserRouter, Routes, Route } from "react-router-dom";
 
 import AttendancePage from "./pages/attendance/AttendancePage";
-import TakeAttendancePage from "./pages/attendance/TakeAttendancePage";
-import AttendanceRecordsPage from "./pages/attendance/AttendanceRecordsPage";
 
 import Home from "./pages/HomePages/Home.jsx";
 import Plus60Page from "./pages/HomePages/Plus60Page.jsx";
@@ -19,20 +16,6 @@ import RequestsPage from "./pages/RespOneonRequest/RequestsPage";
 
 import supportiveCommunityRoutes from "./routes/supportive community/supportiveCommunityRoutes";
 import communityStaffRoutes from "./routes/communityStaff/communityStaffRoutes";
-
-function AttendanceFlow() {
-  const [currentPage, setCurrentPage] = useState("menu");
-
-  if (currentPage === "take") {
-    return <TakeAttendancePage onBack={() => setCurrentPage("menu")} />;
-  }
-
-  if (currentPage === "records") {
-    return <AttendanceRecordsPage onBack={() => setCurrentPage("menu")} />;
-  }
-
-  return <AttendancePage onNavigate={setCurrentPage} />;
-}
 
 function App() {
   return (
@@ -69,7 +52,7 @@ function App() {
           }
         />
 
-        <Route path="/attendance" element={<AttendanceFlow />} />
+        <Route path="/attendance" element={<AttendancePage />} />
 
         {supportiveCommunityRoutes.map((route) => (
           <Route

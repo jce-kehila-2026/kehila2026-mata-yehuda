@@ -29,7 +29,7 @@ function CommunityMembersPage() {
   return (
     <div className="community-members-page" dir="rtl">
       <header className="community-members-page__header">
-        <h1 className="community-members-page__title">חברי קהילה</h1>
+        <h1 className="community-members-page__title page-title">חברי קהילה</h1>
       </header>
 
       <CommunityStaffMessage message={message} onDismiss={clearMessage} />
@@ -38,6 +38,8 @@ function CommunityMembersPage() {
         refreshKey={refreshKey}
         onEditMember={setSelectedMember}
         onViewDetails={setDetailsMember}
+        onMemberUpdated={handleMemberUpdated}
+        onShowError={showError}
       />
 
       <EditCommunityMemberModal

@@ -25,24 +25,34 @@ export function AdminTableActions({ children }) {
     return <div className="admin-data-table__actions admin-data-table__actions--compact">{children}</div>;
 }
 
-export function AdminTableEditButton({ onClick, label = "עריכה" }) {
+export function AdminTableEditButton({
+    onClick,
+    label = "עריכה",
+    disabled = false
+}) {
     return (
         <AdminTableIconButton
             icon={Pencil}
             label={label}
             variant="edit"
             onClick={onClick}
+            disabled={disabled}
         />
     );
 }
 
-export function AdminTableViewButton({ onClick, label = "צפייה בפרטים" }) {
+export function AdminTableViewButton({
+    onClick,
+    label = "צפייה בפרטים",
+    disabled = false
+}) {
     return (
         <AdminTableIconButton
             icon={Eye}
             label={label}
             variant="view"
             onClick={onClick}
+            disabled={disabled}
         />
     );
 }
