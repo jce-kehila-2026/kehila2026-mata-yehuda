@@ -1,5 +1,10 @@
 import { getApp } from "firebase/app";
 import { getMessaging, getToken, isSupported } from "firebase/messaging";
+import {
+    explainGetTokenFailure,
+    getConfiguredVapidKey,
+    isVapidKeyConfigured
+} from "./fcmEnvironment";
 
 const LOG_PREFIX = "[fcm]";
 
@@ -27,13 +32,7 @@ export async function getFirebaseMessaging() {
 }
 
 export function getVapidKey() {
-    const vapidKey = import.meta.env.VITE_FIREBASE_VAPID_KEY?.trim() || "";
-
-    if (!vapidKey) {
-        logNoToken("VITE_FIREBASE_VAPID_KEY is missing from environment");
-    }
-
-    return vapidKey;
+    return getConfiguredVapidKey();
 }
 
 export async function requestBrowserNotificationPermission({
@@ -79,16 +78,22 @@ export async function registerMessagingServiceWorker() {
     }
 
     try {
-        console.info(
-            `${LOG_PREFIX} Registering service worker /firebase-messaging-sw.js`
-        );
+        console.info(`${LOG_PREFIX} Registering service worker`);
         const registration = await navigator.serviceWorker.register(
             "/firebase-messaging-sw.js"
         );
-        console.info(`${LOG_PREFIX} Service worker registered`, {
-            scope: registration.scope
+        const readyRegistration = await navigator.serviceWorker.ready;
+
+        console.info(`${LOG_PREFIX} Service worker registration result`, {
+            scope: registration.scope,
+            scriptURL: registration.active?.scriptURL || null,
+            active: Boolean(registration.active),
+            installing: Boolean(registration.installing),
+            waiting: Boolean(registration.waiting),
+            readyScope: readyRegistration.scope
         });
-        return { ok: true, registration };
+
+        return { ok: true, registration: readyRegistration };
     } catch (error) {
         logNoToken("service worker registration failed", {
             message: error?.message
@@ -102,14 +107,15 @@ export async function registerMessagingServiceWorker() {
 }
 
 export async function fetchFcmToken(serviceWorkerRegistration) {
-    console.info(`${LOG_PREFIX} Calling getToken() from Firebase Messaging`);
-
-    const vapidKey = getVapidKey();
-
-    if (!vapidKey) {
+    if (!isVapidKeyConfigured()) {
+        logNoToken("VITE_FIREBASE_VAPID_KEY is missing from environment");
         return { ok: false, reason: "VAPID_KEY_MISSING" };
     }
 
+    console.info(`${LOG_PREFIX} VAPID key loaded`);
+    console.info(`${LOG_PREFIX} Calling getToken()`);
+
+    const vapidKey = getVapidKey();
     const messaging = await getFirebaseMessaging();
 
     if (!messaging) {
@@ -124,20 +130,27 @@ export async function fetchFcmToken(serviceWorkerRegistration) {
 
         if (!token) {
             logNoToken("getToken() returned an empty value");
-            return { ok: false, reason: "GET_TOKEN_EMPTY" };
+            return {
+                ok: false,
+                reason: "GET_TOKEN_EMPTY",
+                explanation:
+                    "Firebase returned an empty token. Check notification permission and service worker registration."
+            };
         }
 
-        console.info(`${LOG_PREFIX} FCM token generated`, { token });
+        console.info(`${LOG_PREFIX} Token generated`, { token });
         return { ok: true, token, messaging };
     } catch (error) {
-        logNoToken("getToken() failed", {
-            code: error?.code,
-            message: error?.message
-        });
+        const failure = explainGetTokenFailure(error);
+
+        logNoToken("getToken() failed", failure);
+        console.error(`${LOG_PREFIX} getToken() failure`, failure);
+
         return {
             ok: false,
             reason: "GET_TOKEN_FAILED",
-            error
+            error,
+            ...failure
         };
     }
 }
@@ -145,6 +158,16 @@ export async function fetchFcmToken(serviceWorkerRegistration) {
 export async function acquireFcmTokenWithPermission({
     requestPermission = true
 } = {}) {
+    if (!isVapidKeyConfigured()) {
+        logNoToken("VITE_FIREBASE_VAPID_KEY is missing from environment");
+        return { ok: false, reason: "VAPID_KEY_MISSING" };
+    }
+
+    console.info(`${LOG_PREFIX} acquireFcmTokenWithPermission() started`, {
+        requestPermission,
+        vapidKeyConfigured: true
+    });
+
     const permissionResult = await requestBrowserNotificationPermission({
         promptIfNeeded: requestPermission
     });

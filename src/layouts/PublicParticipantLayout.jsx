@@ -1,3 +1,4 @@
+import { FcmTokenRegistrationProvider } from "../components/notifications/FcmTokenRegistrationProvider";
 import NotificationOptIn from "../components/notifications/NotificationOptIn";
 
 /**
@@ -6,10 +7,10 @@ import NotificationOptIn from "../components/notifications/NotificationOptIn";
  */
 function PublicParticipantLayout({ children }) {
     return (
-        <>
+        <FcmTokenRegistrationProvider>
             <NotificationOptIn />
             {children}
-        </>
+        </FcmTokenRegistrationProvider>
     );
 }
 

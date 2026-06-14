@@ -110,7 +110,7 @@ export async function saveNotificationToken({
 
     await setDoc(tokenRef, payload, { merge: true });
 
-    console.info("[fcm] notification_tokens document saved", {
+    console.info("[fcm] Token saved to Firestore", {
         docId: normalizedToken,
         isActive: true,
         participantId: payload.participantId,
@@ -174,14 +174,59 @@ export function getStoredFcmToken() {
     }
 }
 
-export function storeFcmTokenLocally(token) {
+export const NOTIFICATION_OPT_IN_SEEN_KEY = "notification_opt_in_seen";
+
+export function hasSeenNotificationOptIn() {
     try {
-        if (token) {
-            localStorage.setItem("fcm_token", token);
-        } else {
-            localStorage.removeItem("fcm_token");
-        }
+        return localStorage.getItem(NOTIFICATION_OPT_IN_SEEN_KEY) === "true";
+    } catch {
+        return false;
+    }
+}
+
+export function markNotificationOptInSeen() {
+    try {
+        localStorage.setItem(NOTIFICATION_OPT_IN_SEEN_KEY, "true");
     } catch {
         // ignore storage errors
+    }
+}
+
+export function shouldShowNotificationOptInModal() {
+    if (hasSeenNotificationOptIn()) {
+        return false;
+    }
+
+    if (getStoredFcmToken()) {
+        return false;
+    }
+
+    if (typeof Notification === "undefined") {
+        return false;
+    }
+
+    if (Notification.permission === "granted" || Notification.permission === "denied") {
+        return false;
+    }
+
+    return Notification.permission === "default";
+}
+
+export function storeFcmTokenLocally(token) {
+    const storageKey = "fcm_token";
+
+    try {
+        if (token) {
+            localStorage.setItem(storageKey, token);
+            console.info(`[fcm] Saved token to localStorage key "${storageKey}"`, {
+                token,
+                storedValue: localStorage.getItem(storageKey)
+            });
+        } else {
+            localStorage.removeItem(storageKey);
+            console.info(`[fcm] Removed localStorage key "${storageKey}"`);
+        }
+    } catch (error) {
+        console.error(`[fcm] Failed to write localStorage key "${storageKey}"`, error);
     }
 }

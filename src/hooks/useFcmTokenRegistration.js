@@ -4,6 +4,7 @@ import {
     acquireFcmTokenWithPermission,
     getFirebaseMessaging
 } from "../config/firebaseMessaging";
+import { isVapidKeyConfigured } from "../config/fcmEnvironment";
 import {
     getStoredFcmToken,
     resolveNotificationGroupsForParticipant,
@@ -13,8 +14,35 @@ import {
 } from "../services/staffManegmentServices/notificationTokenService";
 
 const LOG_PREFIX = "[fcm]";
+const FCM_TOKEN_STORAGE_KEY = "fcm_token";
 
-function mapFcmReasonToMessage(reason) {
+function getInitialGenerationStatus() {
+    if (!isVapidKeyConfigured()) {
+        return "missing_vapid_key";
+    }
+
+    if (getStoredFcmToken()) {
+        return "token_in_local_storage";
+    }
+
+    if (typeof Notification !== "undefined") {
+        if (Notification.permission === "default") {
+            return "waiting_for_permission";
+        }
+
+        if (Notification.permission === "denied") {
+            return "permission_denied";
+        }
+
+        if (Notification.permission === "granted") {
+            return "ready_to_generate";
+        }
+    }
+
+    return "idle";
+}
+
+function mapFcmReasonToMessage(reason, result = {}) {
     switch (reason) {
         case "NOTIFICATION_API_UNSUPPORTED":
             return "הדפדפן אינו תומך בהתראות";
@@ -28,21 +56,28 @@ function mapFcmReasonToMessage(reason) {
         case "SERVICE_WORKER_REGISTRATION_FAILED":
             return "שגיאה ברישום Service Worker להתראות";
         case "GET_TOKEN_EMPTY":
-            return "לא התקבל אסימון התראה";
+            return result.explanation || "לא התקבל אסימון התראה";
         case "GET_TOKEN_FAILED":
-            return "שגיאה בקבלת אסימון התראה";
+            return result.explanation || "שגיאה בקבלת אסימון התראה";
         default:
             return "שגיאה בהפעלת התראות";
     }
 }
 
+async function checkServiceWorkerRegistered() {
+    if (!("serviceWorker" in navigator)) {
+        return false;
+    }
+
+    const registration = await navigator.serviceWorker.getRegistration(
+        "/firebase-messaging-sw.js"
+    );
+
+    return Boolean(registration?.active);
+}
+
 async function persistFcmToken({ token, participantId = "" }) {
     const groups = await resolveNotificationGroupsForParticipant(participantId);
-
-    console.info(`${LOG_PREFIX} Persisting token to Firestore`, {
-        participantId: participantId || "(anonymous)",
-        groups
-    });
 
     await saveNotificationToken({
         token,
@@ -50,16 +85,38 @@ async function persistFcmToken({ token, participantId = "" }) {
         groups
     });
 
+    console.info(`${LOG_PREFIX} Token saved to Firestore`);
+
     storeFcmTokenLocally(token);
-    console.info(`${LOG_PREFIX} Token persisted successfully`);
+
+    console.info(`${LOG_PREFIX} Token saved to localStorage`);
 }
 
 export function useFcmTokenRegistration({ enabled = true } = {}) {
     const [permission, setPermission] = useState(
-        () => Notification.permission || "default"
+        () =>
+            (typeof Notification !== "undefined" && Notification.permission) ||
+            "default"
     );
     const [token, setToken] = useState(() => getStoredFcmToken());
     const [error, setError] = useState("");
+    const [generationStatus, setGenerationStatus] = useState(
+        getInitialGenerationStatus
+    );
+    const [serviceWorkerRegistered, setServiceWorkerRegistered] = useState(null);
+    const [lastFailure, setLastFailure] = useState(null);
+
+    useEffect(() => {
+        console.info(`${LOG_PREFIX} hook mounted`, {
+            enabled,
+            permission:
+                typeof Notification !== "undefined"
+                    ? Notification.permission
+                    : "unavailable",
+            storedToken: getStoredFcmToken() || null,
+            vapidKeyConfigured: isVapidKeyConfigured()
+        });
+    }, [enabled]);
 
     useEffect(() => {
         if (!enabled) {
@@ -69,37 +126,43 @@ export function useFcmTokenRegistration({ enabled = true } = {}) {
         let cancelled = false;
 
         async function initializeTokenRegistration() {
+            setLastFailure(null);
+
+            if (!isVapidKeyConfigured()) {
+                setGenerationStatus("missing_vapid_key");
+                return;
+            }
+
+            console.info(`${LOG_PREFIX} VAPID key loaded`);
+
             const existingToken = getStoredFcmToken();
 
             if (existingToken) {
-                console.info(
-                    `${LOG_PREFIX} Found token in localStorage, syncing to Firestore`
-                );
+                setGenerationStatus("syncing_existing_token");
 
                 try {
                     await touchNotificationToken(existingToken);
 
                     if (!cancelled) {
                         setToken(existingToken);
+                        setGenerationStatus("success");
                     }
-
-                    console.info(
-                        `${LOG_PREFIX} localStorage token synced to notification_tokens`
-                    );
                 } catch (syncError) {
                     console.error(
                         `${LOG_PREFIX} Failed to sync localStorage token to Firestore`,
                         syncError
                     );
+
+                    if (!cancelled) {
+                        setGenerationStatus("sync_failed");
+                    }
                 }
 
                 return;
             }
 
             if (!("Notification" in window)) {
-                console.info(
-                    `${LOG_PREFIX} No FCM token yet: browser does not support notifications`
-                );
+                setGenerationStatus("notifications_unsupported");
                 return;
             }
 
@@ -109,23 +172,50 @@ export function useFcmTokenRegistration({ enabled = true } = {}) {
                 setPermission(currentPermission);
             }
 
-            if (currentPermission !== "granted") {
-                console.info(
-                    `${LOG_PREFIX} No FCM token yet: browser permission is "${currentPermission}"`
-                );
+            if (currentPermission === "default") {
+                setGenerationStatus("waiting_for_permission");
                 return;
             }
 
-            console.info(
-                `${LOG_PREFIX} Permission already granted but no stored token; acquiring FCM token automatically`
-            );
+            if (currentPermission !== "granted") {
+                setGenerationStatus("permission_denied");
+                return;
+            }
+
+            setGenerationStatus("generating_token");
 
             try {
                 const result = await acquireFcmTokenWithPermission({
                     requestPermission: false
                 });
 
-                if (cancelled || !result.ok) {
+                const swRegistered = await checkServiceWorkerRegistered();
+
+                if (!cancelled) {
+                    setServiceWorkerRegistered(swRegistered);
+                }
+
+                if (cancelled) {
+                    return;
+                }
+
+                if (!result.ok) {
+                    setGenerationStatus(result.reason || "failed");
+                    setLastFailure(
+                        result.code
+                            ? {
+                                  code: result.code,
+                                  explanation: result.explanation
+                              }
+                            : null
+                    );
+                    console.error(`${LOG_PREFIX} Automatic token acquisition failed`, {
+                        reason: result.reason,
+                        permission: result.permission,
+                        code: result.code,
+                        explanation: result.explanation,
+                        message: result.error?.message
+                    });
                     return;
                 }
 
@@ -137,12 +227,17 @@ export function useFcmTokenRegistration({ enabled = true } = {}) {
                 if (!cancelled) {
                     setToken(result.token);
                     setPermission("granted");
+                    setGenerationStatus("success");
                 }
             } catch (initError) {
                 console.error(
                     `${LOG_PREFIX} Automatic token acquisition failed`,
                     initError
                 );
+
+                if (!cancelled) {
+                    setGenerationStatus("failed");
+                }
             }
         }
 
@@ -189,25 +284,44 @@ export function useFcmTokenRegistration({ enabled = true } = {}) {
 
     async function requestNotificationPermission(participantId = "") {
         setError("");
+        setLastFailure(null);
 
-        console.info(`${LOG_PREFIX} Manual notification opt-in started`, {
-            participantId: participantId || "(anonymous)"
-        });
+        if (!isVapidKeyConfigured()) {
+            setGenerationStatus("missing_vapid_key");
+            setError("מפתח VAPID חסר בהגדרות המערכת");
+            return null;
+        }
+
+        setGenerationStatus("generating_token");
 
         const result = await acquireFcmTokenWithPermission({
             requestPermission: true
         });
+
+        const swRegistered = await checkServiceWorkerRegistered();
+        setServiceWorkerRegistered(swRegistered);
 
         if (result.permission) {
             setPermission(result.permission);
         }
 
         if (!result.ok) {
-            const message = mapFcmReasonToMessage(result.reason);
+            const message = mapFcmReasonToMessage(result.reason, result);
             setError(message);
+            setGenerationStatus(result.reason || "failed");
+            setLastFailure(
+                result.code
+                    ? {
+                          code: result.code,
+                          explanation: result.explanation
+                      }
+                    : null
+            );
             console.error(`${LOG_PREFIX} Manual opt-in failed`, {
                 reason: result.reason,
-                message
+                message,
+                code: result.code,
+                explanation: result.explanation
             });
             return null;
         }
@@ -223,11 +337,13 @@ export function useFcmTokenRegistration({ enabled = true } = {}) {
                 persistError
             );
             setError("שגיאה בשמירת אסימון ההתראה");
+            setGenerationStatus("persist_failed");
             return null;
         }
 
         setPermission("granted");
         setToken(result.token);
+        setGenerationStatus("success");
         return result.token;
     }
 
@@ -235,6 +351,9 @@ export function useFcmTokenRegistration({ enabled = true } = {}) {
         permission,
         token,
         error,
+        generationStatus,
+        serviceWorkerRegistered,
+        lastFailure,
         requestNotificationPermission
     };
 }

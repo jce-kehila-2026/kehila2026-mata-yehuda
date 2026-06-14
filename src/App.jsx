@@ -1,6 +1,7 @@
 import { useState } from "react";
 import "./App.css";
 import { BrowserRouter, Routes, Route } from "react-router-dom";
+import PublicNotificationRegistration from "./components/notifications/PublicNotificationRegistration";
 
 import AttendancePage from "./pages/attendance/AttendancePage";
 import TakeAttendancePage from "./pages/attendance/TakeAttendancePage";
@@ -37,6 +38,7 @@ function AttendanceFlow() {
 function App() {
   return (
     <BrowserRouter>
+      <PublicNotificationRegistration />
       <Routes>
         <Route path="/" element={<Home />} />
         <Route path="/plus60" element={<Plus60Page />} />

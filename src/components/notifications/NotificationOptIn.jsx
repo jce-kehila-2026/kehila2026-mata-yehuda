@@ -1,97 +1,122 @@
-import { useState } from "react";
-import { useFcmTokenRegistration } from "../../hooks/useFcmTokenRegistration";
-import { verifyParticipantForNotifications } from "../../services/staffManegmentServices/notificationTokenService";
+import { useEffect, useState } from "react";
+import { useFcmTokenRegistrationContext } from "./FcmTokenRegistrationProvider";
+import {
+    markNotificationOptInSeen,
+    shouldShowNotificationOptInModal
+} from "../../services/staffManegmentServices/notificationTokenService";
+import "../../styles/notificationOptInModal.css";
 
 function NotificationOptIn() {
-    const [idNumber, setIdNumber] = useState("");
-    const [phone, setPhone] = useState("");
+    const [isOpen, setIsOpen] = useState(() => shouldShowNotificationOptInModal());
     const [submitting, setSubmitting] = useState(false);
-    const [formError, setFormError] = useState("");
-    const { permission, token, error, requestNotificationPermission } =
-        useFcmTokenRegistration({
-            enabled: true
-        });
+    const { permission, token, requestNotificationPermission } =
+        useFcmTokenRegistrationContext();
 
-    if (token || permission === "denied") {
+    useEffect(() => {
+        if (
+            permission === "granted" ||
+            permission === "denied" ||
+            token
+        ) {
+            markNotificationOptInSeen();
+            setIsOpen(false);
+        }
+    }, [permission, token]);
+
+    if (!isOpen) {
         return null;
     }
 
-    async function handleEnableNotifications(event) {
-        event.preventDefault();
-        setFormError("");
+    function dismissOptIn() {
+        markNotificationOptInSeen();
+        setIsOpen(false);
+    }
+
+    async function handleApprove() {
+        dismissOptIn();
         setSubmitting(true);
 
+        console.info("[fcm] Opt-in approve clicked", { permission });
+
         try {
-            let participantId = "";
+            const nextToken = await requestNotificationPermission("");
 
-            if (idNumber.trim()) {
-                const verification = await verifyParticipantForNotifications({
-                    idNumber,
-                    phone
-                });
-
-                if (!verification.ok) {
-                    setFormError(verification.message);
-                    return;
-                }
-
-                participantId = verification.participantId;
-            }
-
-            await requestNotificationPermission(participantId);
+            console.info("[fcm] Opt-in flow finished", {
+                success: Boolean(nextToken),
+                localStorageToken: localStorage.getItem("fcm_token")
+            });
         } catch (requestError) {
-            console.error(requestError);
-            setFormError("שגיאה בהפעלת התראות");
+            console.error("[fcm] Opt-in flow failed", requestError);
         } finally {
             setSubmitting(false);
         }
     }
 
+    function handleLater() {
+        console.info("[fcm] Opt-in dismissed by user");
+        dismissOptIn();
+    }
+
     return (
-        <section className="notification-opt-in" dir="rtl" aria-label="הרשמה להתראות">
-            <div className="notification-opt-in__card">
-                <h2 className="notification-opt-in__title">התראות מטה יהודה</h2>
-                <p className="notification-opt-in__text">
-                    קבלו עדכונים ותזכורות ישירות לדפדפן. ניתן לאמת זהות באמצעות תעודת
-                    זהות וטלפון.
+        <div
+            className="notification-opt-in-modal"
+            dir="rtl"
+            role="alertdialog"
+            aria-modal="true"
+            aria-labelledby="notification-opt-in-title"
+            aria-describedby="notification-opt-in-body"
+        >
+            <button
+                type="button"
+                className="notification-opt-in-modal__overlay"
+                aria-label="סגירה"
+                onClick={handleLater}
+            />
+
+            <div className="notification-opt-in-modal__dialog">
+                <button
+                    type="button"
+                    className="notification-opt-in-modal__close"
+                    aria-label="סגירה"
+                    onClick={handleLater}
+                >
+                    ×
+                </button>
+
+                <h2
+                    id="notification-opt-in-title"
+                    className="notification-opt-in-modal__title"
+                >
+                    קבלת התראות
+                </h2>
+
+                <p
+                    id="notification-opt-in-body"
+                    className="notification-opt-in-modal__body"
+                >
+                    האם תרצה/י לקבל עדכונים ותזכורות ישירות לדפדפן?
                 </p>
 
-                <form className="notification-opt-in__form staff-form" onSubmit={handleEnableNotifications}>
-                    <label htmlFor="notification-id-number">תעודת זהות (אופציונלי)</label>
-                    <input
-                        id="notification-id-number"
-                        type="text"
-                        value={idNumber}
-                        onChange={(event) => setIdNumber(event.target.value)}
-                        placeholder="תעודת זהות"
-                    />
-
-                    <label htmlFor="notification-phone">טלפון (אופציונלי)</label>
-                    <input
-                        id="notification-phone"
-                        type="tel"
-                        value={phone}
-                        onChange={(event) => setPhone(event.target.value)}
-                        placeholder="טלפון"
-                    />
-
-                    {formError ? (
-                        <p className="staff-alert staff-alert--error">{formError}</p>
-                    ) : null}
-                    {error ? (
-                        <p className="staff-alert staff-alert--error">{error}</p>
-                    ) : null}
-
+                <div className="notification-opt-in-modal__actions">
                     <button
-                        type="submit"
-                        className="staff-button"
+                        type="button"
+                        className="notification-opt-in-modal__approve"
+                        onClick={handleApprove}
                         disabled={submitting}
                     >
                         {submitting ? "מפעיל..." : "אישור קבלת התראות"}
                     </button>
-                </form>
+                    <button
+                        type="button"
+                        className="notification-opt-in-modal__later"
+                        onClick={handleLater}
+                        disabled={submitting}
+                    >
+                        לא עכשיו
+                    </button>
+                </div>
             </div>
-        </section>
+        </div>
     );
 }
 
