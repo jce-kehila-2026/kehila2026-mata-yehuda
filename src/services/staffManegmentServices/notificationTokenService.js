@@ -175,13 +175,20 @@ export function getStoredFcmToken() {
 }
 
 export function storeFcmTokenLocally(token) {
+    const storageKey = "fcm_token";
+
     try {
         if (token) {
-            localStorage.setItem("fcm_token", token);
+            localStorage.setItem(storageKey, token);
+            console.info(`[fcm] Saved token to localStorage key "${storageKey}"`, {
+                token,
+                storedValue: localStorage.getItem(storageKey)
+            });
         } else {
-            localStorage.removeItem("fcm_token");
+            localStorage.removeItem(storageKey);
+            console.info(`[fcm] Removed localStorage key "${storageKey}"`);
         }
-    } catch {
-        // ignore storage errors
+    } catch (error) {
+        console.error(`[fcm] Failed to write localStorage key "${storageKey}"`, error);
     }
 }

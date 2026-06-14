@@ -13,6 +13,7 @@ import {
 } from "../services/staffManegmentServices/notificationTokenService";
 
 const LOG_PREFIX = "[fcm]";
+const FCM_TOKEN_STORAGE_KEY = "fcm_token";
 
 function mapFcmReasonToMessage(reason) {
     switch (reason) {
@@ -51,15 +52,35 @@ async function persistFcmToken({ token, participantId = "" }) {
     });
 
     storeFcmTokenLocally(token);
-    console.info(`${LOG_PREFIX} Token persisted successfully`);
+
+    console.info(`${LOG_PREFIX} Token persisted successfully`, {
+        localStorageKey: FCM_TOKEN_STORAGE_KEY,
+        localStorageValue: localStorage.getItem(FCM_TOKEN_STORAGE_KEY)
+    });
 }
 
 export function useFcmTokenRegistration({ enabled = true } = {}) {
     const [permission, setPermission] = useState(
-        () => Notification.permission || "default"
+        () =>
+            (typeof Notification !== "undefined" && Notification.permission) ||
+            "default"
     );
     const [token, setToken] = useState(() => getStoredFcmToken());
     const [error, setError] = useState("");
+
+    useEffect(() => {
+        console.info(`${LOG_PREFIX} hook mounted`, {
+            enabled,
+            permission:
+                typeof Notification !== "undefined"
+                    ? Notification.permission
+                    : "unavailable",
+            storedToken: getStoredFcmToken() || null,
+            vapidKeyConfigured: Boolean(
+                import.meta.env.VITE_FIREBASE_VAPID_KEY?.trim()
+            )
+        });
+    }, [enabled]);
 
     useEffect(() => {
         if (!enabled) {
@@ -69,11 +90,15 @@ export function useFcmTokenRegistration({ enabled = true } = {}) {
         let cancelled = false;
 
         async function initializeTokenRegistration() {
+            console.info(`${LOG_PREFIX} VITE_FIREBASE_VAPID_KEY exists:`, Boolean(
+                import.meta.env.VITE_FIREBASE_VAPID_KEY?.trim()
+            ));
+
             const existingToken = getStoredFcmToken();
 
             if (existingToken) {
                 console.info(
-                    `${LOG_PREFIX} Found token in localStorage, syncing to Firestore`
+                    `${LOG_PREFIX} Found token in localStorage key "${FCM_TOKEN_STORAGE_KEY}", syncing to Firestore`
                 );
 
                 try {
@@ -109,6 +134,13 @@ export function useFcmTokenRegistration({ enabled = true } = {}) {
                 setPermission(currentPermission);
             }
 
+            if (currentPermission === "default") {
+                console.info(
+                    `${LOG_PREFIX} No FCM token yet: permission is "default" — use opt-in button to request permission`
+                );
+                return;
+            }
+
             if (currentPermission !== "granted") {
                 console.info(
                     `${LOG_PREFIX} No FCM token yet: browser permission is "${currentPermission}"`
@@ -117,7 +149,7 @@ export function useFcmTokenRegistration({ enabled = true } = {}) {
             }
 
             console.info(
-                `${LOG_PREFIX} Permission already granted but no stored token; acquiring FCM token automatically`
+                `${LOG_PREFIX} Permission is granted; calling acquireFcmTokenWithPermission() automatically`
             );
 
             try {
@@ -125,7 +157,16 @@ export function useFcmTokenRegistration({ enabled = true } = {}) {
                     requestPermission: false
                 });
 
-                if (cancelled || !result.ok) {
+                if (cancelled) {
+                    return;
+                }
+
+                if (!result.ok) {
+                    console.error(`${LOG_PREFIX} Automatic token acquisition failed`, {
+                        reason: result.reason,
+                        permission: result.permission,
+                        message: result.error?.message
+                    });
                     return;
                 }
 
@@ -191,7 +232,8 @@ export function useFcmTokenRegistration({ enabled = true } = {}) {
         setError("");
 
         console.info(`${LOG_PREFIX} Manual notification opt-in started`, {
-            participantId: participantId || "(anonymous)"
+            participantId: participantId || "(anonymous)",
+            permission: Notification.permission
         });
 
         const result = await acquireFcmTokenWithPermission({
@@ -228,6 +270,10 @@ export function useFcmTokenRegistration({ enabled = true } = {}) {
 
         setPermission("granted");
         setToken(result.token);
+        console.info(`${LOG_PREFIX} Manual opt-in succeeded`, {
+            localStorageKey: FCM_TOKEN_STORAGE_KEY,
+            localStorageValue: localStorage.getItem(FCM_TOKEN_STORAGE_KEY)
+        });
         return result.token;
     }
 
