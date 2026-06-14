@@ -22,6 +22,9 @@ import "./styles/Payment/global.css";
 import "./styles/Payment/registration.css";
 
 import App from "./App.jsx";
+import { validateFcmEnvironmentAtStartup } from "./config/fcmEnvironment";
+
+validateFcmEnvironmentAtStartup();
 
 createRoot(document.getElementById("root")).render(
   <StrictMode>

@@ -1,3 +1,10 @@
+import {
+  AdminTableActions,
+  AdminTableDeleteButton,
+  AdminTableEditButton,
+  AdminTableViewButton,
+} from "../admin/AdminTableActions.jsx";
+
 export function CommunityStaffDetailItem({ label, value }) {
   return (
     <div className="community-staff-detail-item">
@@ -59,6 +66,9 @@ export function CommunityStaffCompactCard({
   onPrimaryClick,
   onViewDetails,
   primaryDisabled = false,
+  onDeactivate,
+  deactivateLabel = "השבתה",
+  deactivateDisabled = false,
 }) {
   return (
     <li className="community-staff-compact-card">
@@ -71,22 +81,25 @@ export function CommunityStaffCompactCard({
       </div>
 
       <div className="community-staff-compact-card__actions">
-        <button
-          type="button"
-          className="community-staff-compact-card__btn"
-          onClick={onPrimaryClick}
-          disabled={primaryDisabled}
-        >
-          {primaryLabel}
-        </button>
-        <button
-          type="button"
-          className="community-staff-compact-card__btn community-staff-compact-card__btn--secondary"
-          onClick={onViewDetails}
-          disabled={primaryDisabled}
-        >
-          הצגת פרטים
-        </button>
+        <AdminTableActions>
+          <AdminTableViewButton
+            onClick={onViewDetails}
+            label="הצגת פרטים"
+            disabled={primaryDisabled}
+          />
+          <AdminTableEditButton
+            onClick={onPrimaryClick}
+            label={primaryLabel}
+            disabled={primaryDisabled}
+          />
+          {onDeactivate ? (
+            <AdminTableDeleteButton
+              onClick={onDeactivate}
+              label={deactivateLabel}
+              disabled={deactivateDisabled || primaryDisabled}
+            />
+          ) : null}
+        </AdminTableActions>
       </div>
     </li>
   );

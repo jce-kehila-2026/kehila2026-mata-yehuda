@@ -1,6 +1,10 @@
 import { useEffect, useState } from "react";
-import { getToken, onMessage } from "firebase/messaging";
-import { getFirebaseMessaging, getVapidKey } from "../config/firebaseMessaging";
+import { onMessage } from "firebase/messaging";
+import {
+    acquireFcmTokenWithPermission,
+    getFirebaseMessaging
+} from "../config/firebaseMessaging";
+import { isVapidKeyConfigured } from "../config/fcmEnvironment";
 import {
     getStoredFcmToken,
     resolveNotificationGroupsForParticipant,
@@ -9,20 +13,110 @@ import {
     touchNotificationToken
 } from "../services/staffManegmentServices/notificationTokenService";
 
-async function registerServiceWorker() {
-    if (!("serviceWorker" in navigator)) {
-        return null;
+const LOG_PREFIX = "[fcm]";
+const FCM_TOKEN_STORAGE_KEY = "fcm_token";
+
+function getInitialGenerationStatus() {
+    if (!isVapidKeyConfigured()) {
+        return "missing_vapid_key";
     }
 
-    return navigator.serviceWorker.register("/firebase-messaging-sw.js");
+    if (getStoredFcmToken()) {
+        return "token_in_local_storage";
+    }
+
+    if (typeof Notification !== "undefined") {
+        if (Notification.permission === "default") {
+            return "waiting_for_permission";
+        }
+
+        if (Notification.permission === "denied") {
+            return "permission_denied";
+        }
+
+        if (Notification.permission === "granted") {
+            return "ready_to_generate";
+        }
+    }
+
+    return "idle";
+}
+
+function mapFcmReasonToMessage(reason, result = {}) {
+    switch (reason) {
+        case "NOTIFICATION_API_UNSUPPORTED":
+            return "הדפדפן אינו תומך בהתראות";
+        case "PERMISSION_NOT_GRANTED":
+            return "לא ניתנה הרשאה להתראות";
+        case "VAPID_KEY_MISSING":
+            return "מפתח VAPID חסר בהגדרות המערכת";
+        case "MESSAGING_NOT_SUPPORTED":
+            return "התראות אינן נתמכות בדפדפן זה";
+        case "SERVICE_WORKER_UNSUPPORTED":
+        case "SERVICE_WORKER_REGISTRATION_FAILED":
+            return "שגיאה ברישום Service Worker להתראות";
+        case "GET_TOKEN_EMPTY":
+            return result.explanation || "לא התקבל אסימון התראה";
+        case "GET_TOKEN_FAILED":
+            return result.explanation || "שגיאה בקבלת אסימון התראה";
+        default:
+            return "שגיאה בהפעלת התראות";
+    }
+}
+
+async function checkServiceWorkerRegistered() {
+    if (!("serviceWorker" in navigator)) {
+        return false;
+    }
+
+    const registration = await navigator.serviceWorker.getRegistration(
+        "/firebase-messaging-sw.js"
+    );
+
+    return Boolean(registration?.active);
+}
+
+async function persistFcmToken({ token, participantId = "" }) {
+    const groups = await resolveNotificationGroupsForParticipant(participantId);
+
+    await saveNotificationToken({
+        token,
+        participantId,
+        groups
+    });
+
+    console.info(`${LOG_PREFIX} Token saved to Firestore`);
+
+    storeFcmTokenLocally(token);
+
+    console.info(`${LOG_PREFIX} Token saved to localStorage`);
 }
 
 export function useFcmTokenRegistration({ enabled = true } = {}) {
     const [permission, setPermission] = useState(
-        () => Notification.permission || "default"
+        () =>
+            (typeof Notification !== "undefined" && Notification.permission) ||
+            "default"
     );
     const [token, setToken] = useState(() => getStoredFcmToken());
     const [error, setError] = useState("");
+    const [generationStatus, setGenerationStatus] = useState(
+        getInitialGenerationStatus
+    );
+    const [serviceWorkerRegistered, setServiceWorkerRegistered] = useState(null);
+    const [lastFailure, setLastFailure] = useState(null);
+
+    useEffect(() => {
+        console.info(`${LOG_PREFIX} hook mounted`, {
+            enabled,
+            permission:
+                typeof Notification !== "undefined"
+                    ? Notification.permission
+                    : "unavailable",
+            storedToken: getStoredFcmToken() || null,
+            vapidKeyConfigured: isVapidKeyConfigured()
+        });
+    }, [enabled]);
 
     useEffect(() => {
         if (!enabled) {
@@ -31,25 +125,123 @@ export function useFcmTokenRegistration({ enabled = true } = {}) {
 
         let cancelled = false;
 
-        async function syncExistingToken() {
-            const existingToken = getStoredFcmToken();
+        async function initializeTokenRegistration() {
+            setLastFailure(null);
 
-            if (!existingToken) {
+            if (!isVapidKeyConfigured()) {
+                setGenerationStatus("missing_vapid_key");
                 return;
             }
 
+            console.info(`${LOG_PREFIX} VAPID key loaded`);
+
+            const existingToken = getStoredFcmToken();
+
+            if (existingToken) {
+                setGenerationStatus("syncing_existing_token");
+
+                try {
+                    await touchNotificationToken(existingToken);
+
+                    if (!cancelled) {
+                        setToken(existingToken);
+                        setGenerationStatus("success");
+                    }
+                } catch (syncError) {
+                    console.error(
+                        `${LOG_PREFIX} Failed to sync localStorage token to Firestore`,
+                        syncError
+                    );
+
+                    if (!cancelled) {
+                        setGenerationStatus("sync_failed");
+                    }
+                }
+
+                return;
+            }
+
+            if (!("Notification" in window)) {
+                setGenerationStatus("notifications_unsupported");
+                return;
+            }
+
+            const currentPermission = Notification.permission;
+
+            if (!cancelled) {
+                setPermission(currentPermission);
+            }
+
+            if (currentPermission === "default") {
+                setGenerationStatus("waiting_for_permission");
+                return;
+            }
+
+            if (currentPermission !== "granted") {
+                setGenerationStatus("permission_denied");
+                return;
+            }
+
+            setGenerationStatus("generating_token");
+
             try {
-                await touchNotificationToken(existingToken);
+                const result = await acquireFcmTokenWithPermission({
+                    requestPermission: false
+                });
+
+                const swRegistered = await checkServiceWorkerRegistered();
 
                 if (!cancelled) {
-                    setToken(existingToken);
+                    setServiceWorkerRegistered(swRegistered);
                 }
-            } catch (syncError) {
-                console.error("[fcm] touch token failed", syncError);
+
+                if (cancelled) {
+                    return;
+                }
+
+                if (!result.ok) {
+                    setGenerationStatus(result.reason || "failed");
+                    setLastFailure(
+                        result.code
+                            ? {
+                                  code: result.code,
+                                  explanation: result.explanation
+                              }
+                            : null
+                    );
+                    console.error(`${LOG_PREFIX} Automatic token acquisition failed`, {
+                        reason: result.reason,
+                        permission: result.permission,
+                        code: result.code,
+                        explanation: result.explanation,
+                        message: result.error?.message
+                    });
+                    return;
+                }
+
+                await persistFcmToken({
+                    token: result.token,
+                    participantId: ""
+                });
+
+                if (!cancelled) {
+                    setToken(result.token);
+                    setPermission("granted");
+                    setGenerationStatus("success");
+                }
+            } catch (initError) {
+                console.error(
+                    `${LOG_PREFIX} Automatic token acquisition failed`,
+                    initError
+                );
+
+                if (!cancelled) {
+                    setGenerationStatus("failed");
+                }
             }
         }
 
-        syncExistingToken();
+        initializeTokenRegistration();
 
         return () => {
             cancelled = true;
@@ -92,62 +284,76 @@ export function useFcmTokenRegistration({ enabled = true } = {}) {
 
     async function requestNotificationPermission(participantId = "") {
         setError("");
+        setLastFailure(null);
 
-        if (!("Notification" in window)) {
-            setError("הדפדפן אינו תומך בהתראות");
-            return null;
-        }
-
-        const result = await Notification.requestPermission();
-        setPermission(result);
-
-        if (result !== "granted") {
-            setError("לא ניתנה הרשאה להתראות");
-            return null;
-        }
-
-        const vapidKey = getVapidKey();
-
-        if (!vapidKey) {
+        if (!isVapidKeyConfigured()) {
+            setGenerationStatus("missing_vapid_key");
             setError("מפתח VAPID חסר בהגדרות המערכת");
             return null;
         }
 
-        const messaging = await getFirebaseMessaging();
+        setGenerationStatus("generating_token");
 
-        if (!messaging) {
-            setError("התראות אינן נתמכות בדפדפן זה");
+        const result = await acquireFcmTokenWithPermission({
+            requestPermission: true
+        });
+
+        const swRegistered = await checkServiceWorkerRegistered();
+        setServiceWorkerRegistered(swRegistered);
+
+        if (result.permission) {
+            setPermission(result.permission);
+        }
+
+        if (!result.ok) {
+            const message = mapFcmReasonToMessage(result.reason, result);
+            setError(message);
+            setGenerationStatus(result.reason || "failed");
+            setLastFailure(
+                result.code
+                    ? {
+                          code: result.code,
+                          explanation: result.explanation
+                      }
+                    : null
+            );
+            console.error(`${LOG_PREFIX} Manual opt-in failed`, {
+                reason: result.reason,
+                message,
+                code: result.code,
+                explanation: result.explanation
+            });
             return null;
         }
 
-        const registration = await registerServiceWorker();
-        const nextToken = await getToken(messaging, {
-            vapidKey,
-            serviceWorkerRegistration: registration || undefined
-        });
-
-        if (!nextToken) {
-            setError("לא התקבל אסימון התראה");
+        try {
+            await persistFcmToken({
+                token: result.token,
+                participantId
+            });
+        } catch (persistError) {
+            console.error(
+                `${LOG_PREFIX} Failed to save token to Firestore`,
+                persistError
+            );
+            setError("שגיאה בשמירת אסימון ההתראה");
+            setGenerationStatus("persist_failed");
             return null;
         }
 
-        const groups = await resolveNotificationGroupsForParticipant(participantId);
-
-        await saveNotificationToken({
-            token: nextToken,
-            participantId,
-            groups
-        });
-
-        storeFcmTokenLocally(nextToken);
-        setToken(nextToken);
-        return nextToken;
+        setPermission("granted");
+        setToken(result.token);
+        setGenerationStatus("success");
+        return result.token;
     }
 
     return {
         permission,
         token,
         error,
+        generationStatus,
+        serviceWorkerRegistered,
+        lastFailure,
         requestNotificationPermission
     };
 }

@@ -10,16 +10,18 @@
 }
 
 .home-header {
-  display: flex;
-  justify-content: space-between;
+ display: flex;
   align-items: center;
-  
+  justify-content: space-between;
+  flex-wrap: nowrap;
+  gap: 1rem;
+
   position: sticky;
   top: 0;
   z-index: 1000;
   background: #e4f7ea;
-  
-  padding: 0.8rem 0; 
+
+  padding: 0.8rem 0;
   margin-bottom: 2rem;
 }
 ٍٍ.site-header {
@@ -43,14 +45,16 @@
 }
 
 .brand-logo {
-  width: 60px;  
-  height: 60px; 
+  width: clamp(38px, 6vw, 60px);
+  height: clamp(38px, 6vw, 60px);
   object-fit: contain;
+  flex-shrink: 0;
 }
 
 .login-area {
   position: relative;
   margin-bottom: 0;
+  flex-shrink: 0;
 }
 
 .login-box {
@@ -125,7 +129,9 @@
 .top-nav {
   display: flex;
   align-items: center;
-  gap: 3rem;
+  gap: clamp(1rem, 4vw, 3rem);
+  flex-wrap: nowrap;
+  white-space: nowrap;
 }
 
 .top-nav button {

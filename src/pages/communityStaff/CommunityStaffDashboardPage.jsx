@@ -119,7 +119,7 @@ function CommunityStaffDashboardPage() {
 
         <header className="community-staff-dashboard__header">
 
-          <h1 className="community-staff-dashboard__title">לוח בקרה — צוות קהילה</h1>
+          <h1 className="community-staff-dashboard__title page-title">לוח בקרה — צוות קהילה</h1>
 
           <p className="community-staff-dashboard__subtitle">
 

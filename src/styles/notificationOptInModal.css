@@ -1,0 +1,89 @@
+.notification-opt-in-modal {
+  position: fixed;
+  inset: 0;
+  z-index: 9000;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 1rem;
+}
+
+.notification-opt-in-modal__overlay {
+  position: absolute;
+  inset: 0;
+  border: 0;
+  padding: 0;
+  background: rgba(0, 0, 0, 0.45);
+  cursor: pointer;
+}
+
+.notification-opt-in-modal__dialog {
+  position: relative;
+  z-index: 1;
+  width: min(100%, 22rem);
+  padding: 1.25rem 1.25rem 1rem;
+  border-radius: 12px;
+  background: #fff;
+  box-shadow: 0 16px 40px rgba(0, 0, 0, 0.18);
+  text-align: center;
+}
+
+.notification-opt-in-modal__close {
+  position: absolute;
+  top: 0.5rem;
+  left: 0.5rem;
+  width: 2rem;
+  height: 2rem;
+  border: 0;
+  border-radius: 999px;
+  background: transparent;
+  color: #666;
+  font-size: 1.5rem;
+  line-height: 1;
+  cursor: pointer;
+}
+
+.notification-opt-in-modal__title {
+  margin: 0 0 0.75rem;
+  font-size: 1.2rem;
+  color: #1f4d2f;
+}
+
+.notification-opt-in-modal__body {
+  margin: 0 0 1.25rem;
+  color: #444;
+  line-height: 1.55;
+}
+
+.notification-opt-in-modal__actions {
+  display: flex;
+  flex-direction: column;
+  gap: 0.65rem;
+}
+
+.notification-opt-in-modal__approve,
+.notification-opt-in-modal__later {
+  width: 100%;
+  min-height: 2.75rem;
+  border-radius: 8px;
+  font-size: 1rem;
+  cursor: pointer;
+}
+
+.notification-opt-in-modal__approve {
+  border: 0;
+  background: #2f6b3a;
+  color: #fff;
+}
+
+.notification-opt-in-modal__approve:disabled,
+.notification-opt-in-modal__later:disabled {
+  opacity: 0.7;
+  cursor: not-allowed;
+}
+
+.notification-opt-in-modal__later {
+  border: 1px solid #d6d6d6;
+  background: #fff;
+  color: #333;
+}

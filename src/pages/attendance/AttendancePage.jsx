@@ -1,6 +1,19 @@
+import { useState } from "react";
+import TakeAttendancePage from "./TakeAttendancePage";
+import AttendanceRecordsPage from "./AttendanceRecordsPage";
 import "../../styles/attendance/AttendancePage.css";
 
-function AttendancePage({ onNavigate }) {
+function AttendancePage() {
+  const [currentPage, setCurrentPage] = useState("menu");
+
+  if (currentPage === "take") {
+    return <TakeAttendancePage onBack={() => setCurrentPage("menu")} />;
+  }
+
+  if (currentPage === "records") {
+    return <AttendanceRecordsPage onBack={() => setCurrentPage("menu")} />;
+  }
+
   return (
     <div className="attendance-page" dir="rtl">
       <header className="attendance-page__header">
@@ -12,7 +25,7 @@ function AttendancePage({ onNavigate }) {
           <button
             type="button"
             className="attendance-page__card-link"
-            onClick={() => onNavigate("take")}
+            onClick={() => setCurrentPage("take")}
           >
             <h2 className="attendance-page__card-title">לקיחת נוכחות</h2>
             <p className="attendance-page__card-text">
@@ -23,7 +36,7 @@ function AttendancePage({ onNavigate }) {
           <button
             type="button"
             className="attendance-page__card-link"
-            onClick={() => onNavigate("records")}
+            onClick={() => setCurrentPage("records")}
           >
             <h2 className="attendance-page__card-title">צפייה בנוכחות</h2>
             <p className="attendance-page__card-text">

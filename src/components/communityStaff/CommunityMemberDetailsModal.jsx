@@ -1,5 +1,6 @@
 import { useState } from "react";
 import { updateCommunityMemberSubscriptionStatus } from "../../services/communityStaff/communityStaffService";
+import { AdminTableDeleteButton } from "../admin/AdminTableActions.jsx";
 import CommunityStaffConfirmModal from "./CommunityStaffConfirmModal.jsx";
 
 function getStatusLabel(status) {
@@ -222,14 +223,11 @@ function CommunityMemberDetailsModal({
             </button>
 
             {member.status === "active" && (
-              <button
-                type="button"
-                className="community-members__action-btn community-members__action-btn--warning"
+              <AdminTableDeleteButton
                 onClick={() => setPendingStatus("inactive")}
                 disabled={updatingStatus}
-              >
-                השבתת חברות
-              </button>
+                label="השבתת חברות"
+              />
             )}
 
             {member.status === "inactive" && (

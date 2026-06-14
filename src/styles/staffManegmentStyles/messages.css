@@ -500,38 +500,6 @@
   white-space: nowrap;
 }
 
-/* Participant opt-in (public pages) */
-.notification-opt-in {
-  padding: 0.75rem 1rem;
-}
-
-.notification-opt-in__card {
-  max-width: 36rem;
-  margin: 0 auto;
-  padding: 1rem 1.1rem;
-  border: 1px solid var(--staff-color-card-border);
-  border-radius: var(--staff-radius);
-  background: var(--staff-color-accent-light);
-}
-
-.notification-opt-in__title {
-  margin: 0 0 0.35rem;
-  font-size: 1.05rem;
-  color: var(--staff-color-primary);
-}
-
-.notification-opt-in__text {
-  margin: 0 0 0.75rem;
-  color: var(--staff-color-muted);
-  line-height: 1.45;
-}
-
-.notification-opt-in__form {
-  display: flex;
-  flex-direction: column;
-  gap: 0.5rem;
-}
-
 /* Tablet improvements */
 @media (min-width: 769px) {
   .notifications-page {

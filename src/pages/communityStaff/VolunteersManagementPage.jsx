@@ -27,7 +27,7 @@ function VolunteersManagementPage() {
   return (
     <div className="community-volunteers-mgmt-page" dir="rtl">
       <header className="community-volunteers-mgmt-page__header">
-        <h1 className="community-volunteers-mgmt-page__title">מתנדבים</h1>
+        <h1 className="community-volunteers-mgmt-page__title page-title">מתנדבים</h1>
       </header>
 
       <CommunityStaffMessage message={message} onDismiss={clearMessage} />
@@ -36,6 +36,8 @@ function VolunteersManagementPage() {
         refreshKey={refreshKey}
         onEditVolunteer={setSelectedVolunteer}
         onViewDetails={setDetailsVolunteer}
+        onVolunteerUpdated={handleVolunteerUpdated}
+        onShowError={showError}
       />
 
       <VolunteerManagementDetailsModal

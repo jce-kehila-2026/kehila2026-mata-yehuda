@@ -14,7 +14,6 @@ export const STAFF_NAVIGATION_GROUPS = [
             "registrations",
             "inquiries",
             "cancellations",
-            "volunteers",
             "attendance"
         ]
     }
