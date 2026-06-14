@@ -110,7 +110,7 @@ export async function saveNotificationToken({
 
     await setDoc(tokenRef, payload, { merge: true });
 
-    console.info("[fcm] notification_tokens document saved", {
+    console.info("[fcm] Token saved to Firestore", {
         docId: normalizedToken,
         isActive: true,
         participantId: payload.participantId,
