@@ -1,6 +1,5 @@
 import { useLocation } from "react-router-dom";
 import { FcmTokenRegistrationProvider } from "./FcmTokenRegistrationProvider";
-import FcmDebugPanel from "./FcmDebugPanel";
 import NotificationOptIn from "./NotificationOptIn";
 
 const EXCLUDED_PATH_PREFIXES = ["/staff-login", "/community-staff", "/attendance"];
@@ -25,7 +24,6 @@ function PublicNotificationRegistration() {
     return (
         <FcmTokenRegistrationProvider>
             <NotificationOptIn />
-            {import.meta.env.DEV ? <FcmDebugPanel /> : null}
         </FcmTokenRegistrationProvider>
     );
 }

@@ -18,16 +18,31 @@ import "./styles/staffManegmentStyles/registrations.css";
 import "./styles/staffManegmentStyles/requests.css";
 import "./styles/staffManegmentStyles/cancellations.css";
 import "./styles/staffManegmentStyles/messages.css";
+import "./styles/staffManegmentStyles/staffStatistics.css";
 import "./styles/Payment/global.css";
 import "./styles/Payment/registration.css";
 
-import App from "./App.jsx";
+import FirebaseConfigError from "./components/FirebaseConfigError.jsx";
+import { validateFirebaseEnvironmentAtStartup } from "./config/firebaseEnvironment";
 import { validateFcmEnvironmentAtStartup } from "./config/fcmEnvironment";
 
+const firebaseEnv = validateFirebaseEnvironmentAtStartup();
 validateFcmEnvironmentAtStartup();
 
-createRoot(document.getElementById("root")).render(
-  <StrictMode>
-    <App />
-  </StrictMode>
-);
+const root = createRoot(document.getElementById("root"));
+
+if (!firebaseEnv.ok) {
+    root.render(
+        <StrictMode>
+            <FirebaseConfigError missing={firebaseEnv.missing} />
+        </StrictMode>
+    );
+} else {
+    import("./App.jsx").then(({ default: App }) => {
+        root.render(
+            <StrictMode>
+                <App />
+            </StrictMode>
+        );
+    });
+}
