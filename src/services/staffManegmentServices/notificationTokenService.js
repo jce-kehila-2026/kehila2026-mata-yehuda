@@ -174,6 +174,44 @@ export function getStoredFcmToken() {
     }
 }
 
+export const NOTIFICATION_OPT_IN_SEEN_KEY = "notification_opt_in_seen";
+
+export function hasSeenNotificationOptIn() {
+    try {
+        return localStorage.getItem(NOTIFICATION_OPT_IN_SEEN_KEY) === "true";
+    } catch {
+        return false;
+    }
+}
+
+export function markNotificationOptInSeen() {
+    try {
+        localStorage.setItem(NOTIFICATION_OPT_IN_SEEN_KEY, "true");
+    } catch {
+        // ignore storage errors
+    }
+}
+
+export function shouldShowNotificationOptInModal() {
+    if (hasSeenNotificationOptIn()) {
+        return false;
+    }
+
+    if (getStoredFcmToken()) {
+        return false;
+    }
+
+    if (typeof Notification === "undefined") {
+        return false;
+    }
+
+    if (Notification.permission === "granted" || Notification.permission === "denied") {
+        return false;
+    }
+
+    return Notification.permission === "default";
+}
+
 export function storeFcmTokenLocally(token) {
     const storageKey = "fcm_token";
 
