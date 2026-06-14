@@ -109,7 +109,7 @@ app.use(cors());
 
 app.use(express.json());
 
-const PORT = 5001;
+const PORT = Number(process.env.PORT) || 5001;
 
 const db = admin.firestore();
 
@@ -1569,7 +1569,7 @@ function isDirectExecution() {
 }
 
 if (isDirectExecution()) {
-  app.listen(PORT, () => {
+  app.listen(PORT, "0.0.0.0", () => {
     console.log(`Server running on http://localhost:${PORT}`);
   });
 }
