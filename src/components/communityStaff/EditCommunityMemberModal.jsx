@@ -1,5 +1,13 @@
 import { useEffect, useState } from "react";
-import { updateCommunityMemberParticipant } from "../../services/communityStaff/communityStaffService";
+import {
+  getVolunteerManagementLookups,
+  updateCommunityMemberParticipant,
+  updateCommunityMemberSubscription,
+} from "../../services/communityStaff/communityStaffService";
+import CommunityStaffSubscriptionFormFields, {
+  buildSubscriptionFormValues,
+  validateSubscriptionForm,
+} from "./CommunityStaffSubscriptionFormFields.jsx";
 
 function formatBirthDateForInput(value) {
   if (!value) {
@@ -20,19 +28,22 @@ function formatBirthDateForInput(value) {
   return date.toISOString().slice(0, 10);
 }
 
-function buildInitialForm(participant) {
+function buildInitialForm(member) {
+  const participant = member?.participant || {};
+
   return {
-    first_name: participant?.first_name || "",
-    last_name: participant?.last_name || "",
-    id_number: participant?.id_number || "",
-    phone: participant?.phone || "",
-    birth_date: formatBirthDateForInput(participant?.birth_date),
-    gender: participant?.gender || "",
-    address: participant?.address || "",
-    emergency_number: participant?.emergency_number || "",
-    medical_notes: participant?.medical_notes || "",
-    mobility_limitations: participant?.mobility_limitations || "",
-    marketing_consent: Boolean(participant?.marketing_consent),
+    first_name: participant.first_name || "",
+    last_name: participant.last_name || "",
+    id_number: participant.id_number || "",
+    phone: participant.phone || "",
+    birth_date: formatBirthDateForInput(participant.birth_date),
+    gender: participant.gender || "",
+    address: participant.address || "",
+    emergency_number: participant.emergency_number || "",
+    medical_notes: participant.medical_notes || "",
+    mobility_limitations: participant.mobility_limitations || "",
+    marketing_consent: Boolean(participant.marketing_consent),
+    ...buildSubscriptionFormValues(member),
   };
 }
 
@@ -53,7 +64,7 @@ function getEmergencyNumberError(value) {
   return "";
 }
 
-function validateForm(form) {
+function validateParticipantForm(form) {
   if (!form.first_name.trim()) {
     return "נא למלא שם פרטי";
   }
@@ -95,16 +106,77 @@ function validateForm(form) {
   return "";
 }
 
+function splitFormData(form) {
+  return {
+    participantData: {
+      first_name: form.first_name,
+      last_name: form.last_name,
+      id_number: form.id_number,
+      phone: form.phone,
+      birth_date: form.birth_date,
+      gender: form.gender,
+      address: form.address,
+      emergency_number: form.emergency_number,
+      medical_notes: form.medical_notes,
+      mobility_limitations: form.mobility_limitations,
+      marketing_consent: form.marketing_consent,
+    },
+    subscriptionData: {
+      monthlyPrice: form.monthlyPrice,
+      requestedServices: form.requestedServices,
+      languages: form.languages,
+      otherService: form.otherService,
+    },
+  };
+}
+
 function EditCommunityMemberModal({ member, onClose, onSaved }) {
-  const [form, setForm] = useState(buildInitialForm(member?.participant));
+  const [form, setForm] = useState(buildInitialForm(member));
+  const [lookups, setLookups] = useState({ languages: [], helpTypes: [] });
+  const [lookupsLoading, setLookupsLoading] = useState(false);
   const [message, setMessage] = useState({ type: "", text: "" });
   const [saving, setSaving] = useState(false);
   const [emergencyNumberTouched, setEmergencyNumberTouched] = useState(false);
 
   useEffect(() => {
-    setForm(buildInitialForm(member?.participant));
+    setForm(buildInitialForm(member));
     setMessage({ type: "", text: "" });
     setEmergencyNumberTouched(false);
+  }, [member]);
+
+  useEffect(() => {
+    if (!member) {
+      return undefined;
+    }
+
+    let isMounted = true;
+
+    async function loadLookups() {
+      setLookupsLoading(true);
+
+      try {
+        const data = await getVolunteerManagementLookups();
+
+        if (isMounted) {
+          setLookups(data);
+        }
+      } catch (error) {
+        console.error("Failed to load member form lookups:", error);
+        if (isMounted) {
+          setMessage({ type: "error", text: "שגיאה בטעינת שפות וסוגי עזרה" });
+        }
+      } finally {
+        if (isMounted) {
+          setLookupsLoading(false);
+        }
+      }
+    }
+
+    loadLookups();
+
+    return () => {
+      isMounted = false;
+    };
   }, [member]);
 
   if (!member) {
@@ -120,8 +192,12 @@ function EditCommunityMemberModal({ member, onClose, onSaved }) {
   const handleSubmit = async (event) => {
     event.preventDefault();
     setMessage({ type: "", text: "" });
+    setEmergencyNumberTouched(true);
 
-    const validationError = validateForm(form);
+    const participantValidationError = validateParticipantForm(form);
+    const subscriptionValidationError = validateSubscriptionForm(form);
+    const validationError =
+      participantValidationError || subscriptionValidationError;
 
     if (validationError) {
       setMessage({ type: "error", text: validationError });
@@ -133,10 +209,21 @@ function EditCommunityMemberModal({ member, onClose, onSaved }) {
       return;
     }
 
+    if (!member.id) {
+      setMessage({ type: "error", text: "לא נמצא מסמך מנוי לעדכון" });
+      return;
+    }
+
     setSaving(true);
 
     try {
-      await updateCommunityMemberParticipant(participantDocId, form);
+      const { participantData, subscriptionData } = splitFormData(form);
+
+      await Promise.all([
+        updateCommunityMemberParticipant(participantDocId, participantData),
+        updateCommunityMemberSubscription(member.id, subscriptionData),
+      ]);
+
       onSaved();
     } catch (error) {
       console.error("Failed to update community member:", error);
@@ -180,8 +267,10 @@ function EditCommunityMemberModal({ member, onClose, onSaved }) {
 
         <form className="community-join-modal__form" onSubmit={handleSubmit} noValidate>
           <p className="community-join-modal__hint">
-            עדכון פרטים אישיים בלבד במסמך המשתתף. נתוני המנוי נשארים ללא שינוי.
+            עדכון פרטים אישיים במסמך המשתתף ופרטי מנוי במסמך ההצטרפות.
           </p>
+
+          <h3 className="community-join-modal__section-title">פרטי משתתף/ת</h3>
 
           <div className="community-join-modal__fields">
             <div className="community-join-modal__field">
@@ -321,6 +410,18 @@ function EditCommunityMemberModal({ member, onClose, onSaved }) {
             </div>
           </div>
 
+          <h3 className="community-join-modal__section-title">פרטי מנוי</h3>
+
+          <div className="community-join-modal__fields">
+            <CommunityStaffSubscriptionFormFields
+              form={form}
+              updateField={updateField}
+              lookups={lookups}
+              lookupsLoading={lookupsLoading}
+              idPrefix="edit-member"
+            />
+          </div>
+
           {message.text && (
             <p
               className={`community-join-modal__message community-join-modal__message--${message.type}`}
@@ -334,7 +435,7 @@ function EditCommunityMemberModal({ member, onClose, onSaved }) {
             <button type="button" onClick={onClose} disabled={saving}>
               ביטול
             </button>
-            <button type="submit" disabled={saving}>
+            <button type="submit" disabled={saving || lookupsLoading}>
               {saving ? "שומר..." : "שמירת פרטים"}
             </button>
           </div>

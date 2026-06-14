@@ -6,6 +6,8 @@ const MODULE_CARDS = [
     description: "ניהול בקשות חדשות",
     isAvailable: true,
     route: "/community-staff/join-requests",
+    statKey: "pendingJoinRequests",
+    badgeType: "requests",
   },
   {
     id: "community-members",

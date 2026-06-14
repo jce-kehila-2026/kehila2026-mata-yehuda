@@ -251,6 +251,7 @@ function VolunteerRegistrationForm() {
             <label>כתובת מגורים *</label>
             <input
               type="text"
+              autoComplete="street-address"
               value={volunteerForm.address}
               onChange={(e) => updateField("address", e.target.value)}
             />

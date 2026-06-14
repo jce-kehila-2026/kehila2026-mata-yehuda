@@ -3,6 +3,9 @@ import CommunityMembersTable from "../../components/communityStaff/CommunityMemb
 import EditCommunityMemberModal from "../../components/communityStaff/EditCommunityMemberModal.jsx";
 import CommunityMemberDetailsModal from "../../components/communityStaff/CommunityMemberDetailsModal.jsx";
 import CommunityMemberRequestsHistoryModal from "../../components/communityStaff/CommunityMemberRequestsHistoryModal.jsx";
+import CommunityStaffMessage, {
+  useCommunityStaffMessage,
+} from "../../components/communityStaff/CommunityStaffMessage.jsx";
 import "../../styles/communityStaff/CommunityStaffDashboard.css";
 
 function CommunityMembersPage() {
@@ -10,8 +13,14 @@ function CommunityMembersPage() {
   const [detailsMember, setDetailsMember] = useState(null);
   const [historyMember, setHistoryMember] = useState(null);
   const [refreshKey, setRefreshKey] = useState(0);
+  const { message, showSuccess, showError, clearMessage } =
+    useCommunityStaffMessage();
 
-  const handleMemberUpdated = () => {
+  const handleMemberUpdated = (result) => {
+    if (result?.successMessage) {
+      showSuccess(result.successMessage);
+    }
+
     setSelectedMember(null);
     setDetailsMember(null);
     setRefreshKey((current) => current + 1);
@@ -23,6 +32,8 @@ function CommunityMembersPage() {
         <h1 className="community-members-page__title">חברי קהילה</h1>
       </header>
 
+      <CommunityStaffMessage message={message} onDismiss={clearMessage} />
+
       <CommunityMembersTable
         refreshKey={refreshKey}
         onEditMember={setSelectedMember}
@@ -32,7 +43,10 @@ function CommunityMembersPage() {
       <EditCommunityMemberModal
         member={selectedMember}
         onClose={() => setSelectedMember(null)}
-        onSaved={handleMemberUpdated}
+        onSaved={() => {
+          showSuccess("החבר עודכן בהצלחה");
+          handleMemberUpdated();
+        }}
       />
 
       <CommunityMemberDetailsModal
@@ -47,6 +61,7 @@ function CommunityMembersPage() {
           setHistoryMember(member);
         }}
         onMemberUpdated={handleMemberUpdated}
+        onShowError={showError}
       />
 
       <CommunityMemberRequestsHistoryModal

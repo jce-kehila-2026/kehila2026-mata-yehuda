@@ -14,7 +14,7 @@ function matchesSearch(volunteer, searchTerm) {
     volunteer.searchFirstName,
     volunteer.searchLastName,
     volunteer.phoneDisplay,
-    volunteer.emailDisplay,
+    volunteer.addressDisplay,
     volunteer.fullNameDisplay,
   ];
 
@@ -127,7 +127,7 @@ function VolunteersManagementTable({
             type="search"
             value={searchTerm}
             onChange={(event) => setSearchTerm(event.target.value)}
-            placeholder="חיפוש לפי שם, טלפון או אימייל..."
+            placeholder="חיפוש לפי שם, טלפון או כתובת..."
           />
         </div>
 

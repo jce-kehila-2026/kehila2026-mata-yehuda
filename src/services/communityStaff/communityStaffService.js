@@ -243,6 +243,29 @@ function parseBirthDateForFirestore(value) {
   return Timestamp.fromDate(date);
 }
 
+function parseMonthlyPrice(value) {
+  if (value === "" || value === null || value === undefined) {
+    return null;
+  }
+
+  const price = parseFloat(value);
+
+  if (Number.isNaN(price) || price < 0) {
+    throw new Error("Invalid monthly price");
+  }
+
+  return price;
+}
+
+function buildSubscriptionUpdatePayload(subscriptionData) {
+  return {
+    monthlyPrice: parseMonthlyPrice(subscriptionData.monthlyPrice),
+    requestedServices: normalizeStringArray(subscriptionData.requestedServices),
+    languages: normalizeStringArray(subscriptionData.languages),
+    otherService: subscriptionData.otherService?.trim() || "",
+  };
+}
+
 export async function completeCommunityJoinRegistration({
   subscriptionId,
   participantDocId,
@@ -266,20 +289,10 @@ export async function completeCommunityJoinRegistration({
     );
   }
 
-  const existingSubscription = subscriptionSnapshot.data();
-  const requestedHelpTypes = normalizeStringArray(
-    existingSubscription.requestedHelpTypes ??
-      existingSubscription.requestedServices ??
-      subscriptionData.requestedServices
-  );
-  const languages = normalizeStringArray(
-    existingSubscription.languages ?? subscriptionData.languages
-  );
-  const description =
-    subscriptionData.otherService?.trim() ||
-    existingSubscription.otherService?.trim() ||
-    existingSubscription.description?.trim() ||
-    "";
+  const subscriptionFields = buildSubscriptionUpdatePayload(subscriptionData);
+  const requestedHelpTypes = subscriptionFields.requestedServices;
+  const languages = subscriptionFields.languages;
+  const description = subscriptionFields.otherService;
 
   await updateDoc(doc(db, "participants", participantDocId), {
     first_name: participantData.first_name?.trim() || "",
@@ -297,6 +310,7 @@ export async function completeCommunityJoinRegistration({
   });
 
   await updateDoc(subscriptionRef, {
+    ...subscriptionFields,
     status: "active",
     updatedAt: serverTimestamp(),
   });
@@ -353,6 +367,30 @@ function getVolunteerFullName(volunteer) {
   const fullName = `${firstName} ${lastName}`.trim();
 
   return fullName || "—";
+}
+
+export function isStaffActiveVolunteer(volunteer) {
+  return volunteer?.status === "active" && volunteer?.is_active === true;
+}
+
+export function isStaffInactiveVolunteer(volunteer) {
+  return volunteer?.status === "inactive" && volunteer?.is_active === false;
+}
+
+function getVolunteerActiveStatusLabel(volunteer) {
+  if (isStaffActiveVolunteer(volunteer)) {
+    return "פעיל";
+  }
+
+  if (isStaffInactiveVolunteer(volunteer)) {
+    return "לא פעיל";
+  }
+
+  if (volunteer?.status === "pending") {
+    return "ממתין";
+  }
+
+  return volunteer?.status || "—";
 }
 
 export async function getPendingVolunteerRequests() {
@@ -436,7 +474,11 @@ export async function getPendingHomeHelpRequests() {
 async function loadActiveVolunteers() {
   const volunteersRef = collection(db, "volunteers");
   const activeSnapshot = await getDocs(
-    query(volunteersRef, where("is_active", "==", true))
+    query(
+      volunteersRef,
+      where("status", "==", "active"),
+      where("is_active", "==", true)
+    )
   );
 
   return activeSnapshot.docs.map((volunteerDoc) => {
@@ -639,9 +681,8 @@ export async function getActiveVolunteerMatches() {
         volunteerDocId,
         volunteerFullName: getVolunteerFullName(volunteer),
         volunteerPhone: volunteer?.phone || "—",
-        volunteerIsActive: volunteer?.is_active === true,
-        volunteerIsActiveDisplay:
-          volunteer?.is_active === true ? "פעיל" : "לא פעיל",
+        volunteerIsActive: isStaffActiveVolunteer(volunteer),
+        volunteerIsActiveDisplay: getVolunteerActiveStatusLabel(volunteer),
         helpRequest,
         helpRequestDescription: helpRequest?.description || "—",
         helpRequestStatus: helpRequest?.status || "—",
@@ -848,6 +889,20 @@ export async function updateCommunityMemberParticipant(
   });
 }
 
+export async function updateCommunityMemberSubscription(
+  subscriptionId,
+  subscriptionData
+) {
+  if (!subscriptionId) {
+    throw new Error("Missing communitySubscriptions document id");
+  }
+
+  await updateDoc(doc(db, "communitySubscriptions", subscriptionId), {
+    ...buildSubscriptionUpdatePayload(subscriptionData),
+    updatedAt: serverTimestamp(),
+  });
+}
+
 export async function getCommunityMemberHomeHelpRequests(participantDocId) {
   const [requests, languageLookup, helpTypesLookup] = await Promise.all([
     getHomeHelpRequestsForParticipant(participantDocId),
@@ -878,7 +933,7 @@ export async function getCommunityMemberHomeHelpRequests(participantDocId) {
     });
 }
 
-function getVolunteerActiveStatusLabel(isActive) {
+function getVolunteerActiveStatusLabelForLegacy(isActive) {
   return isActive === true ? "פעיל" : "לא פעיל";
 }
 
@@ -927,9 +982,11 @@ export async function getAllVolunteers() {
         activeStatusDisplay: getVolunteerActiveStatusLabel(volunteer.is_active),
         notesDisplay: volunteer.notes?.trim() || "—",
         emailDisplay: volunteer.email?.trim() || "—",
+        addressDisplay: volunteer.address?.trim() || "—",
         phoneDisplay: volunteer.phone?.trim() || "—",
         searchFirstName: volunteer.first_name || volunteer.firstName || "",
         searchLastName: volunteer.last_name || volunteer.lastName || "",
+        searchAddress: volunteer.address || "",
       };
     })
     .sort((a, b) => a.fullNameDisplay.localeCompare(b.fullNameDisplay, "he"));
@@ -967,7 +1024,8 @@ export async function getCommunityStaffDashboardStats() {
   const [
     activeMembersSnapshot,
     activeVolunteersSnapshot,
-    pendingRequestsSnapshot,
+    pendingJoinRequestsSnapshot,
+    pendingHelpRequestsSnapshot,
     matchedMatchesSnapshot,
     allMatchesSnapshot,
   ] = await Promise.all([
@@ -977,7 +1035,19 @@ export async function getCommunityStaffDashboardStats() {
         where("status", "==", "active")
       )
     ),
-    getDocs(query(collection(db, "volunteers"), where("is_active", "==", true))),
+    getDocs(
+      query(
+        collection(db, "volunteers"),
+        where("status", "==", "active"),
+        where("is_active", "==", true)
+      )
+    ),
+    getDocs(
+      query(
+        collection(db, "communitySubscriptions"),
+        where("status", "==", "pending")
+      )
+    ),
     getDocs(
       query(collection(db, "homeHelpRequests"), where("status", "==", "pending"))
     ),
@@ -993,14 +1063,15 @@ export async function getCommunityStaffDashboardStats() {
       .filter(Boolean)
   );
 
-  const unmatchedPendingRequests = pendingRequestsSnapshot.docs.filter(
+  const unmatchedPendingRequests = pendingHelpRequestsSnapshot.docs.filter(
     (requestDoc) => !requestIdsWithMatches.has(requestDoc.id)
   ).length;
 
   return {
     activeCommunityMembers: activeMembersSnapshot.size,
     activeVolunteers: activeVolunteersSnapshot.size,
-    pendingHelpRequests: pendingRequestsSnapshot.size,
+    pendingJoinRequests: pendingJoinRequestsSnapshot.size,
+    pendingHelpRequests: pendingHelpRequestsSnapshot.size,
     activeMatches: matchedMatchesSnapshot.size,
     unmatchedPendingRequests,
   };

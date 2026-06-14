@@ -95,9 +95,15 @@ function ActiveVolunteerMatchDetailsModal({ match, onClose, onSaved }) {
               <dd>{match.volunteerIsActiveDisplay}</dd>
             </div>
             <div>
-              <dt>אימייל</dt>
-              <dd>{match.volunteer?.email || "—"}</dd>
+              <dt>כתובת</dt>
+              <dd>{match.volunteer?.address || "—"}</dd>
             </div>
+            {match.volunteer?.email?.trim() ? (
+              <div>
+                <dt>אימייל</dt>
+                <dd>{match.volunteer.email}</dd>
+              </div>
+            ) : null}
           </dl>
         </div>
 

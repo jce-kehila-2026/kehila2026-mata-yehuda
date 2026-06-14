@@ -1,5 +1,12 @@
 import { useEffect, useState } from "react";
-import { completeCommunityJoinRegistration } from "../../services/communityStaff/communityStaffService";
+import {
+  completeCommunityJoinRegistration,
+  getVolunteerManagementLookups,
+} from "../../services/communityStaff/communityStaffService";
+import CommunityStaffSubscriptionFormFields, {
+  buildSubscriptionFormValues,
+  validateSubscriptionForm,
+} from "./CommunityStaffSubscriptionFormFields.jsx";
 
 function formatBirthDateForInput(value) {
   if (!value) {
@@ -35,6 +42,7 @@ function buildInitialForm(request) {
     medical_notes: participant.medical_notes || "",
     mobility_limitations: participant.mobility_limitations || "",
     marketing_consent: Boolean(participant.marketing_consent),
+    ...buildSubscriptionFormValues(request),
   };
 }
 
@@ -55,7 +63,7 @@ function getEmergencyNumberError(value) {
   return "";
 }
 
-function validateForm(form) {
+function validateParticipantForm(form) {
   if (!form.first_name.trim()) {
     return "נא למלא שם פרטי";
   }
@@ -97,8 +105,34 @@ function validateForm(form) {
   return "";
 }
 
+function splitFormData(form) {
+  return {
+    participantData: {
+      first_name: form.first_name,
+      last_name: form.last_name,
+      id_number: form.id_number,
+      phone: form.phone,
+      birth_date: form.birth_date,
+      gender: form.gender,
+      address: form.address,
+      emergency_number: form.emergency_number,
+      medical_notes: form.medical_notes,
+      mobility_limitations: form.mobility_limitations,
+      marketing_consent: form.marketing_consent,
+    },
+    subscriptionData: {
+      monthlyPrice: form.monthlyPrice,
+      requestedServices: form.requestedServices,
+      languages: form.languages,
+      otherService: form.otherService,
+    },
+  };
+}
+
 function CompleteCommunityJoinModal({ request, onClose, onSaved }) {
   const [form, setForm] = useState(buildInitialForm(request));
+  const [lookups, setLookups] = useState({ languages: [], helpTypes: [] });
+  const [lookupsLoading, setLookupsLoading] = useState(false);
   const [message, setMessage] = useState({ type: "", text: "" });
   const [saving, setSaving] = useState(false);
   const [emergencyNumberTouched, setEmergencyNumberTouched] = useState(false);
@@ -107,6 +141,41 @@ function CompleteCommunityJoinModal({ request, onClose, onSaved }) {
     setForm(buildInitialForm(request));
     setMessage({ type: "", text: "" });
     setEmergencyNumberTouched(false);
+  }, [request]);
+
+  useEffect(() => {
+    if (!request) {
+      return undefined;
+    }
+
+    let isMounted = true;
+
+    async function loadLookups() {
+      setLookupsLoading(true);
+
+      try {
+        const data = await getVolunteerManagementLookups();
+
+        if (isMounted) {
+          setLookups(data);
+        }
+      } catch (error) {
+        console.error("Failed to load subscription form lookups:", error);
+        if (isMounted) {
+          setMessage({ type: "error", text: "שגיאה בטעינת שפות וסוגי עזרה" });
+        }
+      } finally {
+        if (isMounted) {
+          setLookupsLoading(false);
+        }
+      }
+    }
+
+    loadLookups();
+
+    return () => {
+      isMounted = false;
+    };
   }, [request]);
 
   if (!request) {
@@ -131,10 +200,12 @@ function CompleteCommunityJoinModal({ request, onClose, onSaved }) {
   const handleSubmit = async (event) => {
     event.preventDefault();
     setMessage({ type: "", text: "" });
-
     setEmergencyNumberTouched(true);
 
-    const validationError = validateForm(form);
+    const participantValidationError = validateParticipantForm(form);
+    const subscriptionValidationError = validateSubscriptionForm(form);
+    const validationError =
+      participantValidationError || subscriptionValidationError;
 
     if (validationError) {
       setMessage({ type: "error", text: validationError });
@@ -161,11 +232,13 @@ function CompleteCommunityJoinModal({ request, onClose, onSaved }) {
     setSaving(true);
 
     try {
+      const { participantData, subscriptionData } = splitFormData(form);
+
       await completeCommunityJoinRegistration({
         subscriptionId: request.id,
         participantDocId,
-        participantData: form,
-        subscriptionData: request,
+        participantData,
+        subscriptionData,
       });
 
       onSaved?.();
@@ -212,8 +285,11 @@ function CompleteCommunityJoinModal({ request, onClose, onSaved }) {
 
         <form className="community-join-modal__form" onSubmit={handleSubmit}>
           <p className="community-join-modal__hint">
-            השלימו את פרטי המשתתף. שדות שכבר הוזנו בבקשה הראשונית מולאו אוטומטית.
+            השלימו את פרטי המשתתף ופרטי המנוי. שדות שכבר הוזנו בבקשה הראשונית
+            מולאו אוטומטית.
           </p>
+
+          <h3 className="community-join-modal__section-title">פרטי משתתף/ת</h3>
 
           <div className="community-join-modal__fields">
             <div className="community-join-modal__field">
@@ -374,6 +450,18 @@ function CompleteCommunityJoinModal({ request, onClose, onSaved }) {
             </div>
           </div>
 
+          <h3 className="community-join-modal__section-title">פרטי מנוי</h3>
+
+          <div className="community-join-modal__fields">
+            <CommunityStaffSubscriptionFormFields
+              form={form}
+              updateField={updateField}
+              lookups={lookups}
+              lookupsLoading={lookupsLoading}
+              idPrefix="join"
+            />
+          </div>
+
           {message.text && (
             <p
               className={`community-join-modal__message community-join-modal__message--${message.type}`}
@@ -395,7 +483,7 @@ function CompleteCommunityJoinModal({ request, onClose, onSaved }) {
             <button
               type="submit"
               className="community-join-modal__btn community-join-modal__btn--primary"
-              disabled={saving}
+              disabled={saving || lookupsLoading}
             >
               {saving ? "שומר..." : "שמירה והפעלת חברות"}
             </button>

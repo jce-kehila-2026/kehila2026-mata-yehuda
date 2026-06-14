@@ -15,7 +15,7 @@ function VolunteerRequestsTable() {
   const [error, setError] = useState(null);
   const [selectedVolunteer, setSelectedVolunteer] = useState(null);
   const [isApproving, setIsApproving] = useState(false);
-  const { message, showError, clearMessage } = useCommunityStaffMessage();
+  const { message, showSuccess, showError, clearMessage } = useCommunityStaffMessage();
 
   const loadVolunteers = useCallback(async () => {
     setLoading(true);
@@ -42,6 +42,7 @@ function VolunteerRequestsTable() {
     try {
       await approveVolunteer(volunteerId);
       setSelectedVolunteer(null);
+      showSuccess("המתנדב אושר בהצלחה");
       await loadVolunteers();
     } catch (err) {
       console.error("Failed to approve volunteer:", err);

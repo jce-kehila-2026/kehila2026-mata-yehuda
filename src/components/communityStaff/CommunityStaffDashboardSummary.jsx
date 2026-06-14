@@ -13,9 +13,9 @@ const SUMMARY_ITEMS = [
   },
   {
     id: "pending-requests",
-    label: "בקשות ממתינות",
-    key: "pendingHelpRequests",
-    route: "/community-staff/help-requests",
+    label: "בקשות הצטרפות ממתינות",
+    key: "pendingJoinRequests",
+    route: "/community-staff/join-requests",
   },
   {
     id: "active-matches",

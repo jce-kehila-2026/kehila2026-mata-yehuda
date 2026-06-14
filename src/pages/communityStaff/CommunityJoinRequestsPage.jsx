@@ -2,12 +2,16 @@ import { useState } from "react";
 import CommunityJoinRequestsTable from "../../components/communityStaff/CommunityJoinRequestsTable.jsx";
 import CompleteCommunityJoinModal from "../../components/communityStaff/CompleteCommunityJoinModal.jsx";
 import CommunityJoinRequestDetailsModal from "../../components/communityStaff/CommunityJoinRequestDetailsModal.jsx";
+import CommunityStaffMessage, {
+  useCommunityStaffMessage,
+} from "../../components/communityStaff/CommunityStaffMessage.jsx";
 import "../../styles/communityStaff/CommunityStaffDashboard.css";
 
 function CommunityJoinRequestsPage() {
   const [selectedRequest, setSelectedRequest] = useState(null);
   const [detailsRequest, setDetailsRequest] = useState(null);
   const [refreshKey, setRefreshKey] = useState(0);
+  const { message, showSuccess, clearMessage } = useCommunityStaffMessage();
 
   const handleCompleteRegistration = (request) => {
     setDetailsRequest(null);
@@ -16,6 +20,7 @@ function CommunityJoinRequestsPage() {
 
   const handleSaved = () => {
     setSelectedRequest(null);
+    showSuccess("הרישום הושלם בהצלחה");
     setRefreshKey((current) => current + 1);
   };
 
@@ -26,6 +31,8 @@ function CommunityJoinRequestsPage() {
           בקשות הצטרפות לקהילה תומכת
         </h1>
       </header>
+
+      <CommunityStaffMessage message={message} onDismiss={clearMessage} />
 
       <CommunityJoinRequestsTable
         refreshKey={refreshKey}

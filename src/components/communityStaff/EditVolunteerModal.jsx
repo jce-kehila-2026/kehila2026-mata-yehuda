@@ -193,15 +193,17 @@ function EditVolunteerModal({ volunteer, onClose, onSaved }) {
               />
             </div>
 
-            <div className="community-join-modal__field">
-              <label htmlFor="edit-volunteer-email">אימייל</label>
-              <input
-                id="edit-volunteer-email"
-                type="email"
-                value={form.email}
-                onChange={(event) => updateField("email", event.target.value)}
-              />
-            </div>
+            {volunteer?.email?.trim() ? (
+              <div className="community-join-modal__field">
+                <label htmlFor="edit-volunteer-email">אימייל</label>
+                <input
+                  id="edit-volunteer-email"
+                  type="email"
+                  value={form.email}
+                  onChange={(event) => updateField("email", event.target.value)}
+                />
+              </div>
+            ) : null}
 
             <div className="community-join-modal__field">
               <label htmlFor="edit-volunteer-gender">מין</label>
@@ -218,10 +220,11 @@ function EditVolunteerModal({ volunteer, onClose, onSaved }) {
             </div>
 
             <div className="community-join-modal__field community-join-modal__field--full">
-              <label htmlFor="edit-volunteer-address">כתובת</label>
+              <label htmlFor="edit-volunteer-address">כתובת מגורים</label>
               <input
                 id="edit-volunteer-address"
                 type="text"
+                autoComplete="street-address"
                 value={form.address}
                 onChange={(event) => updateField("address", event.target.value)}
               />

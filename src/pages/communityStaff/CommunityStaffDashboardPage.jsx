@@ -21,17 +21,12 @@ import "../../styles/communityStaff/CommunityStaffDashboard.css";
 
 
 const EMPTY_STATS = {
-
   activeCommunityMembers: 0,
-
   activeVolunteers: 0,
-
+  pendingJoinRequests: 0,
   pendingHelpRequests: 0,
-
   activeMatches: 0,
-
   unmatchedPendingRequests: 0,
-
 };
 
 

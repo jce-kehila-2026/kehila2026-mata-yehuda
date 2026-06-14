@@ -7,6 +7,7 @@ import {
 import CommunityStaffMessage, {
   useCommunityStaffMessage,
 } from "./CommunityStaffMessage";
+import CommunityStaffConfirmModal from "./CommunityStaffConfirmModal.jsx";
 import { CommunityStaffCompactCard } from "./CommunityStaffListUi.jsx";
 import CommunityHelpRequestDetailsModal from "./CommunityHelpRequestDetailsModal.jsx";
 
@@ -38,6 +39,7 @@ function MatchModal({
   const [loadingSuggestions, setLoadingSuggestions] = useState(true);
   const [suggestionsError, setSuggestionsError] = useState(null);
   const [approvingVolunteerId, setApprovingVolunteerId] = useState(null);
+  const [pendingVolunteer, setPendingVolunteer] = useState(null);
   const { message, showError, clearMessage } = useCommunityStaffMessage();
 
   useEffect(() => {
@@ -79,12 +81,19 @@ function MatchModal({
 
     try {
       await approveHelpRequestMatch(helpRequest, volunteer);
+      setPendingVolunteer(null);
       onMatchApproved();
     } catch (err) {
       console.error("Failed to approve help request match:", err);
-      showError("אירעה שגיאה בשמירת ההתאמה");
+      showError("אירעה שגיאה. נסה שוב.");
     } finally {
       setApprovingVolunteerId(null);
+    }
+  };
+
+  const handleConfirmApproveMatch = () => {
+    if (pendingVolunteer) {
+      handleApproveMatch(pendingVolunteer);
     }
   };
 
@@ -195,7 +204,7 @@ function MatchModal({
                 <button
                   type="button"
                   className="community-help-requests__approve-btn"
-                  onClick={() => handleApproveMatch(volunteer)}
+                  onClick={() => setPendingVolunteer(volunteer)}
                   disabled={approvingVolunteerId === volunteerKey}
                 >
                   {approvingVolunteerId === volunteerKey
@@ -208,6 +217,17 @@ function MatchModal({
           </div>
         )}
       </div>
+
+      <CommunityStaffConfirmModal
+        message={
+          pendingVolunteer
+            ? `לאשר התאמה עם ${pendingVolunteer.fullNameDisplay}?`
+            : null
+        }
+        onConfirm={handleConfirmApproveMatch}
+        onCancel={() => setPendingVolunteer(null)}
+        confirming={Boolean(approvingVolunteerId)}
+      />
     </div>
   );
 }
@@ -218,6 +238,7 @@ function CommunityHelpRequestsTable() {
   const [error, setError] = useState(null);
   const [selectedRequest, setSelectedRequest] = useState(null);
   const [detailsRequest, setDetailsRequest] = useState(null);
+  const { message, showSuccess, clearMessage } = useCommunityStaffMessage();
 
   const loadRequests = useCallback(async () => {
     setLoading(true);
@@ -241,6 +262,7 @@ function CommunityHelpRequestsTable() {
   const handleMatchApproved = () => {
     setSelectedRequest(null);
     setDetailsRequest(null);
+    showSuccess("ההתאמה אושרה בהצלחה");
     loadRequests();
   };
 
@@ -266,6 +288,8 @@ function CommunityHelpRequestsTable() {
           בקשות ממתינות {requests.length}
         </span>
       </div>
+
+      <CommunityStaffMessage message={message} onDismiss={clearMessage} />
 
       <div className="community-help-requests__card">
         {requests.length === 0 ? (
