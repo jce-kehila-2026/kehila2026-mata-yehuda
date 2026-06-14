@@ -12,6 +12,9 @@ dist
 dist-ssr
 *.local
 
+# Legacy / unused — React app lives at repo root in src/
+frontend/
+
 .env
 .env.*
 !.env.example
@@ -36,3 +39,4 @@ secrets/
 *.njsproj
 *.sln
 *.sw?
+.firebase/

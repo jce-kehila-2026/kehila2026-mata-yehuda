@@ -32,13 +32,16 @@ Briefly describe what the project does, who it serves, and the main value (1–2
 See the team workflow page in the repository wiki.
 
 ## Quick start (local)
+
+Frontend: **repo root** (`src/`, `index.html`) — not the `frontend/` folder.
+
 1. git clone https://github.com/<org>/<repo>.git
 2. cd <repo>
 3. cp .env.example .env  # edit values (see FCM setup below)
 4. npm install
 5. cd server && npm install && cd ..
 6. npm run dev
-7. In another terminal: `cd server && npm run dev`
+7. In another terminal: `cd server && npm run dev:payment` (payment API, port 5001)
 
 Open http://localhost:5173
 

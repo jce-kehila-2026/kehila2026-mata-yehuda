@@ -1,6 +1,5 @@
 export const API_BASE =
-  import.meta.env.VITE_API_BASE ||
-  (import.meta.env.DEV ? "/api" : "http://localhost:5001");
+  import.meta.env.VITE_API_BASE || "/api";
 const DEFAULT_TIMEOUT_MS = 25000;
 
 function connectionErrorMessage(error) {
