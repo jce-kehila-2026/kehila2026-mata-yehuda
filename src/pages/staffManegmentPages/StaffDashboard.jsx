@@ -24,7 +24,7 @@ import ViewRegistrations from "./ViewRegistrations";
 import ManageCancellations from "./ManageCancellations";
 import SendMessages from "./SendMessages";
 import AttendancePage from "../attendance/AttendancePage";
-import RequestsPage from "../RequestsPage";
+import RequestsPage from "../RespOneonRequest/RequestsPage";
 import DashboardControlPanels from "../../components/dashboard/DashboardControlPanels";
 import { fetchDashboardOverview } from "../../services/staffManegmentServices/dashboardService";
 import {

@@ -15,7 +15,7 @@ import RegistrationLayout from "./components/Payment/RegistrationLayout";
 import PaymentPage from "./pages/Payment/PaymentPage";
 import PaymentSuccess from "./pages/Payment/PaymentSuccess";
 import PaymentCancel from "./pages/CancelTheRegistration/PaymentCancel";
-import RequestsPage from "./pages/RequestsPage";
+import RequestsPage from "./pages/RespOneonRequest/RequestsPage";
 
 import supportiveCommunityRoutes from "./routes/supportive community/supportiveCommunityRoutes";
 import communityStaffRoutes from "./routes/communityStaff/communityStaffRoutes";
