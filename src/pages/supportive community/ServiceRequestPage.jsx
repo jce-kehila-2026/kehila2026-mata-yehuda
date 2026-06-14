@@ -1,11 +1,31 @@
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import CommunityMembershipCheck from "../../components/supportiveCommunity/CommunityMembershipCheck";
 import ServiceRequestForm from "../../components/supportiveCommunity/ServiceRequestForm";
+import { syncActiveCommunitySubscriptionsToHomeHelpRequests } from "../../services/supportive community/supportiveCommunityService";
 import "../../styles/supportive community/SupportiveCommunityPage.css";
 import "../../styles/supportive community/CommunityJoinForm.css";
 
 function ServiceRequestPage() {
-  const [verifiedParticipantId, setVerifiedParticipantId] = useState(null);
+  const [verifiedMember, setVerifiedMember] = useState(null);
+
+  useEffect(() => {
+    if (!import.meta.env.DEV) {
+      return undefined;
+    }
+
+    window.syncActiveCommunitySubscriptions = async () => {
+      return syncActiveCommunitySubscriptionsToHomeHelpRequests();
+    };
+
+    const params = new URLSearchParams(window.location.search);
+    if (params.get("syncSubscriptions") === "1") {
+      syncActiveCommunitySubscriptionsToHomeHelpRequests();
+    }
+
+    return () => {
+      delete window.syncActiveCommunitySubscriptions;
+    };
+  }, []);
 
   return (
     <div className="supportive-community-page" dir="rtl">
@@ -16,13 +36,12 @@ function ServiceRequestPage() {
         </p>
       </section>
 
-      {!verifiedParticipantId ? (
-        <CommunityMembershipCheck
-          onVerified={setVerifiedParticipantId}
-        />
+      {!verifiedMember ? (
+        <CommunityMembershipCheck onVerified={setVerifiedMember} />
       ) : (
         <ServiceRequestForm
-          participantDocId={verifiedParticipantId}
+          participantDocId={verifiedMember.participantDocId}
+          subscriptionDocId={verifiedMember.subscriptionDocId}
         />
       )}
     </div>

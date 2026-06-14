@@ -34,7 +34,10 @@ function CommunityMembershipCheck({ onVerified }) {
         return;
       }
 
-      onVerified(result.participantDocId);
+      onVerified({
+        participantDocId: result.participantDocId,
+        subscriptionDocId: result.subscriptionDocId,
+      });
     } catch (error) {
       console.error("Error checking membership:", error);
       setMessage("אירעה שגיאה בבדיקת החברות");

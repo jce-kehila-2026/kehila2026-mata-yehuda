@@ -4,6 +4,12 @@ import {
   getPendingHomeHelpRequests,
   getSuggestedVolunteersForRequest,
 } from "../../services/communityStaff/communityStaffService";
+import CommunityStaffMessage, {
+  useCommunityStaffMessage,
+} from "./CommunityStaffMessage";
+import CommunityStaffConfirmModal from "./CommunityStaffConfirmModal.jsx";
+import { CommunityStaffCompactCard } from "./CommunityStaffListUi.jsx";
+import CommunityHelpRequestDetailsModal from "./CommunityHelpRequestDetailsModal.jsx";
 
 function formatStringArray(value) {
   if (!Array.isArray(value) || value.length === 0) {
@@ -14,12 +20,14 @@ function formatStringArray(value) {
   return items.length > 0 ? items.join(", ") : "—";
 }
 
-function formatRequestedServices(requestedServices) {
-  if (!Array.isArray(requestedServices) || requestedServices.length === 0) {
+function formatRequestedHelpTypes(request) {
+  const helpTypes = request.requestedHelpTypes ?? request.requestedServices;
+
+  if (!Array.isArray(helpTypes) || helpTypes.length === 0) {
     return "—";
   }
 
-  return requestedServices.join(", ");
+  return helpTypes.join(", ");
 }
 
 function MatchModal({
@@ -31,6 +39,8 @@ function MatchModal({
   const [loadingSuggestions, setLoadingSuggestions] = useState(true);
   const [suggestionsError, setSuggestionsError] = useState(null);
   const [approvingVolunteerId, setApprovingVolunteerId] = useState(null);
+  const [pendingVolunteer, setPendingVolunteer] = useState(null);
+  const { message, showError, clearMessage } = useCommunityStaffMessage();
 
   useEffect(() => {
     let isMounted = true;
@@ -66,16 +76,24 @@ function MatchModal({
   }, [helpRequest]);
 
   const handleApproveMatch = async (volunteer) => {
-    setApprovingVolunteerId(volunteer.volunteerId);
+    const volunteerKey = volunteer.volunteerRef || volunteer.volunteerId;
+    setApprovingVolunteerId(volunteerKey);
 
     try {
       await approveHelpRequestMatch(helpRequest, volunteer);
+      setPendingVolunteer(null);
       onMatchApproved();
     } catch (err) {
       console.error("Failed to approve help request match:", err);
-      alert("אירעה שגיאה בשמירת ההתאמה");
+      showError("אירעה שגיאה. נסה שוב.");
     } finally {
       setApprovingVolunteerId(null);
+    }
+  };
+
+  const handleConfirmApproveMatch = () => {
+    if (pendingVolunteer) {
+      handleApproveMatch(pendingVolunteer);
     }
   };
 
@@ -104,6 +122,8 @@ function MatchModal({
           </button>
         </div>
 
+        <CommunityStaffMessage message={message} onDismiss={clearMessage} />
+
         <div className="community-help-requests__request-summary">
           <p>
             <strong>מבקש/ת:</strong> {helpRequest.participantFullName}
@@ -113,11 +133,10 @@ function MatchModal({
           </p>
           <p>
             <strong>סוגי עזרה:</strong>{" "}
-            {formatRequestedServices(helpRequest.requestedServices)}
+            {formatRequestedHelpTypes(helpRequest)}
           </p>
           <p>
-            <strong>שפות:</strong>{" "}
-            {formatStringArray(helpRequest.languages)}
+            <strong>שפות:</strong> {helpRequest.languagesDisplay || "—"}
           </p>
           <p>
             <strong>תיאור:</strong> {helpRequest.description || "—"}
@@ -148,9 +167,12 @@ function MatchModal({
 
         {!loadingSuggestions && !suggestionsError && suggestions.length > 0 && (
           <div className="community-help-requests__suggestions-list">
-            {suggestions.map((volunteer) => (
+            {suggestions.map((volunteer) => {
+              const volunteerKey = volunteer.volunteerRef || volunteer.volunteerId;
+
+              return (
               <div
-                key={volunteer.volunteerId}
+                key={volunteerKey}
                 className="community-help-requests__suggestion-row"
               >
                 <div className="community-help-requests__suggestion-details">
@@ -161,29 +183,51 @@ function MatchModal({
                     <strong>טלפון:</strong> {volunteer.phone}
                   </p>
                   <p>
+                    <strong>ציון התאמה:</strong>{" "}
+                    <span className="community-help-requests__match-score">
+                      {volunteer.matchScore}
+                    </span>
+                  </p>
+                  <p>
                     <strong>סוגי עזרה משותפים:</strong>{" "}
-                    {formatStringArray(volunteer.matchingHelpTypes)}
+                    {formatStringArray(
+                      volunteer.matchedHelpTypes ?? volunteer.matchingHelpTypes
+                    )}
                   </p>
                   <p>
                     <strong>שפות משותפות:</strong>{" "}
-                    {formatStringArray(volunteer.matchingLanguages)}
+                    {formatStringArray(
+                      volunteer.matchedLanguages ?? volunteer.matchingLanguages
+                    )}
                   </p>
                 </div>
                 <button
                   type="button"
                   className="community-help-requests__approve-btn"
-                  onClick={() => handleApproveMatch(volunteer)}
-                  disabled={approvingVolunteerId === volunteer.volunteerId}
+                  onClick={() => setPendingVolunteer(volunteer)}
+                  disabled={approvingVolunteerId === volunteerKey}
                 >
-                  {approvingVolunteerId === volunteer.volunteerId
+                  {approvingVolunteerId === volunteerKey
                     ? "שומר..."
                     : "אישור התאמה"}
                 </button>
               </div>
-            ))}
+            );
+            })}
           </div>
         )}
       </div>
+
+      <CommunityStaffConfirmModal
+        message={
+          pendingVolunteer
+            ? `לאשר התאמה עם ${pendingVolunteer.fullNameDisplay}?`
+            : null
+        }
+        onConfirm={handleConfirmApproveMatch}
+        onCancel={() => setPendingVolunteer(null)}
+        confirming={Boolean(approvingVolunteerId)}
+      />
     </div>
   );
 }
@@ -193,6 +237,8 @@ function CommunityHelpRequestsTable() {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
   const [selectedRequest, setSelectedRequest] = useState(null);
+  const [detailsRequest, setDetailsRequest] = useState(null);
+  const { message, showSuccess, clearMessage } = useCommunityStaffMessage();
 
   const loadRequests = useCallback(async () => {
     setLoading(true);
@@ -215,7 +261,14 @@ function CommunityHelpRequestsTable() {
 
   const handleMatchApproved = () => {
     setSelectedRequest(null);
+    setDetailsRequest(null);
+    showSuccess("ההתאמה אושרה בהצלחה");
     loadRequests();
+  };
+
+  const handleOpenMatch = (request) => {
+    setDetailsRequest(null);
+    setSelectedRequest(request);
   };
 
   if (loading) {
@@ -236,67 +289,39 @@ function CommunityHelpRequestsTable() {
         </span>
       </div>
 
+      <CommunityStaffMessage message={message} onDismiss={clearMessage} />
+
       <div className="community-help-requests__card">
         {requests.length === 0 ? (
           <p className="community-help-requests__empty">
             אין בקשות סיוע ממתינות
           </p>
         ) : (
-          <div className="community-help-requests__table-wrapper">
-            <table className="community-help-requests__table">
-              <thead>
-                <tr>
-                  <th>שם מבקש</th>
-                  <th>תעודת זהות</th>
-                  <th>טלפון</th>
-                  <th>סוגי עזרה</th>
-                  <th>שפות</th>
-                  <th>תיאור</th>
-                  <th>סטטוס</th>
-                  <th>פעולה</th>
-                </tr>
-              </thead>
-              <tbody>
-                {requests.map((request) => (
-                  <tr
-                    key={request.id}
-                    className="community-help-requests__row"
-                  >
-                    <td data-label="שם מבקש">
-                      {request.participantFullName}
-                    </td>
-                    <td data-label="תעודת זהות">
-                      {request.participantIdNumber}
-                    </td>
-                    <td data-label="טלפון">{request.participantPhone}</td>
-                    <td data-label="סוגי עזרה">
-                      {formatRequestedServices(request.requestedServices)}
-                    </td>
-                    <td data-label="שפות">
-                      {formatStringArray(request.languages)}
-                    </td>
-                    <td data-label="תיאור">{request.description || "—"}</td>
-                    <td data-label="סטטוס">
-                      <span className="community-help-requests__status">
-                        {request.status || "—"}
-                      </span>
-                    </td>
-                    <td data-label="פעולה">
-                      <button
-                        type="button"
-                        className="community-help-requests__match-btn"
-                        onClick={() => setSelectedRequest(request)}
-                      >
-                        התאמה
-                      </button>
-                    </td>
-                  </tr>
-                ))}
-              </tbody>
-            </table>
-          </div>
+          <ul className="community-staff-compact-list">
+            {requests.map((request) => (
+              <CommunityStaffCompactCard
+                key={request.id}
+                name={request.participantFullName}
+                phone={request.participantPhone}
+                status={
+                  <span className="community-help-requests__status">
+                    {request.status || "—"}
+                  </span>
+                }
+                primaryLabel="התאמה"
+                onPrimaryClick={() => handleOpenMatch(request)}
+                onViewDetails={() => setDetailsRequest(request)}
+              />
+            ))}
+          </ul>
         )}
       </div>
+
+      <CommunityHelpRequestDetailsModal
+        request={detailsRequest}
+        onClose={() => setDetailsRequest(null)}
+        onMatch={handleOpenMatch}
+      />
 
       {selectedRequest && (
         <MatchModal

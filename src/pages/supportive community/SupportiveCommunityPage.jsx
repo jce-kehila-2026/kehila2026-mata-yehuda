@@ -1,5 +1,5 @@
 import { useState } from "react";
-import { useNavigate } from "react-router-dom";
+import { Link, useNavigate } from "react-router-dom";
 import "../../styles/supportive community/SupportiveCommunityPage.css";
 
 /* Demo hero image — replace with organization photo when available */
@@ -94,9 +94,9 @@ const HOW_IT_WORKS = [
 ];
 
 const CONTACTS = [
-  { name: "שר־נהר", phone: "02-9958649", tel: "+97229958649" },
-  { name: "אלון", phone: "050-2182051", tel: "+972502182051" },
-  { name: "מאיר", phone: "052-7250847", tel: "+972527250847" },
+  { name: "רכזת הקהילה — שרה", phone: "02-9958649", tel: "+97229958649" },
+  { name: "מנהלת הקהילה — אילנה", phone: "050-2182051", tel: "+972502182051" },
+  { name: "אב קהילה — מאיר", phone: "052-7250847", tel: "+972527250847" },
 ];
 
 const FAQ_ITEMS = [
@@ -268,6 +268,14 @@ function SupportiveCommunityPage() {
           <span className="site-program">קהילה תומכת</span>
         </div>
       </div>
+
+      <nav className="community-home-nav" aria-label="ניווט חזרה">
+        <div className="community-home-nav-inner">
+          <Link className="community-home-nav-link" to="/">
+            ← חזרה לדף הראשי
+          </Link>
+        </div>
+      </nav>
 
       <header className="community-hero">
         <div className="hero-shell">

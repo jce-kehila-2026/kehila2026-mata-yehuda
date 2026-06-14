@@ -8,13 +8,13 @@ export const checkIfVolunteerExists = async (id) => {
   return volunteerSnapshot.exists();
 };
 
-export const saveVolunteerData = async (id, data) => {
+export const saveVolunteerData = async (id, data, { merge = false } = {}) => {
   await setDoc(
     doc(db, "volunteers", id),
     {
       ...data,
       updatedAt: serverTimestamp(),
     },
-    { merge: true }
+    merge ? { merge: true } : undefined
   );
 };

@@ -1,5 +1,6 @@
 import { useEffect, useMemo, useState } from "react";
 import { getPendingCommunityJoinRequests } from "../../services/communityStaff/communityStaffService";
+import { CommunityStaffCompactCard } from "./CommunityStaffListUi.jsx";
 
 const PAGE_SIZE_OPTIONS = [5, 10, 25];
 
@@ -11,21 +12,6 @@ function getParticipantFullName(participant) {
   const fullName = `${firstName} ${lastName}`.trim();
 
   return fullName || "—";
-}
-
-function formatDate(timestamp) {
-  if (!timestamp) return "—";
-
-  const date =
-    typeof timestamp.toDate === "function"
-      ? timestamp.toDate()
-      : timestamp instanceof Date
-        ? timestamp
-        : null;
-
-  if (!date) return "—";
-
-  return date.toLocaleString("he-IL");
 }
 
 function getServicesDisplay(request) {
@@ -58,7 +44,11 @@ function matchesSearch(request, searchTerm) {
   );
 }
 
-function CommunityJoinRequestsTable({ onCompleteRegistration }) {
+function CommunityJoinRequestsTable({
+  onCompleteRegistration,
+  onViewDetails,
+  refreshKey = 0,
+}) {
   const [requests, setRequests] = useState([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
@@ -97,7 +87,7 @@ function CommunityJoinRequestsTable({ onCompleteRegistration }) {
     return () => {
       isMounted = false;
     };
-  }, []);
+  }, [refreshKey]);
 
   const filteredRequests = useMemo(() => {
     return requests.filter((request) => {
@@ -200,64 +190,27 @@ function CommunityJoinRequestsTable({ onCompleteRegistration }) {
               : "לא נמצאו בקשות התואמות לחיפוש"}
           </p>
         ) : (
-          <div className="community-join-requests__table-wrapper">
-            <table className="community-join-requests__table">
-              <thead>
-                <tr>
-                  <th>שם מלא</th>
-                  <th>תעודת זהות</th>
-                  <th>טלפון</th>
-                  <th>כתובת</th>
-                  <th>שירותים מבוקשים</th>
-                  <th>שפות</th>
-                  <th>סטטוס</th>
-                  <th>תאריך הגשה</th>
-                  <th>פעולות</th>
-                </tr>
-              </thead>
-              <tbody>
-                {paginatedRequests.map((request) => {
-                  const participant = request.participant;
+          <ul className="community-staff-compact-list">
+            {paginatedRequests.map((request) => {
+              const participant = request.participant;
 
-                  return (
-                    <tr key={request.id} className="community-join-requests__row">
-                      <td data-label="שם מלא">
-                        {getParticipantFullName(participant)}
-                      </td>
-                      <td data-label="תעודת זהות">
-                        {participant?.id_number || "—"}
-                      </td>
-                      <td data-label="טלפון">{participant?.phone || "—"}</td>
-                      <td data-label="כתובת">{participant?.address || "—"}</td>
-                      <td data-label="שירותים מבוקשים">
-                        {getServicesDisplay(request)}
-                      </td>
-                      <td data-label="שפות">
-                        {request.languagesDisplay || "—"}
-                      </td>
-                      <td data-label="סטטוס">
-                        <span className="community-join-requests__status">
-                          {request.status || "—"}
-                        </span>
-                      </td>
-                      <td data-label="תאריך הגשה">
-                        {formatDate(request.createdAt)}
-                      </td>
-                      <td data-label="פעולות">
-                        <button
-                          type="button"
-                          className="community-join-requests__complete-btn"
-                          onClick={() => onCompleteRegistration?.(request)}
-                        >
-                          השלמת רישום
-                        </button>
-                      </td>
-                    </tr>
-                  );
-                })}
-              </tbody>
-            </table>
-          </div>
+              return (
+                <CommunityStaffCompactCard
+                  key={request.id}
+                  name={getParticipantFullName(participant)}
+                  phone={participant?.phone || "—"}
+                  status={
+                    <span className="community-join-requests__status">
+                      {request.status || "—"}
+                    </span>
+                  }
+                  primaryLabel="השלמת רישום"
+                  onPrimaryClick={() => onCompleteRegistration?.(request)}
+                  onViewDetails={() => onViewDetails?.(request)}
+                />
+              );
+            })}
+          </ul>
         )}
       </div>
 

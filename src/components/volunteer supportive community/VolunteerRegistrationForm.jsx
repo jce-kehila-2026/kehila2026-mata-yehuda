@@ -7,6 +7,67 @@ import {
 import HelpServicesSelector from "../supportiveCommunity/HelpServicesSelector";
 import LanguagesSelector from "../supportiveCommunity/LanguagesSelector";
 
+import "../../styles/supportive community/VolunteerRegistrationForm.css";
+
+const DUPLICATE_MESSAGE =
+  "מספר תעודת הזהות כבר קיים במערכת. האם תרצה/י לעדכן את הפרטים?";
+
+function validateVolunteerForm(form) {
+  if (
+    !form.volunteerId.trim() ||
+    !form.phone.trim() ||
+    !form.firstName.trim() ||
+    !form.lastName.trim() ||
+    !form.gender ||
+    !form.birthDate ||
+    !form.address.trim() ||
+    !form.about.trim()
+  ) {
+    return { submit: "נא למלא את כל שדות החובה" };
+  }
+
+  if (!/^\d{9}$/.test(form.volunteerId)) {
+    return { submit: "מספר תעודת זהות חייב להיות מספר בן 9 ספרות" };
+  }
+
+  if (!/^05\d{8}$/.test(form.phone)) {
+    return { submit: "מספר טלפון חייב להיות מספר תקין בן 10 ספרות" };
+  }
+
+  if (form.services.length === 0) {
+    return { submit: "נא לבחור לפחות סוג עזרה אחד" };
+  }
+
+  if (form.services.includes("other") && !form.otherService.trim()) {
+    return { submit: "נא לתאר את סוג העזרה הנוסף" };
+  }
+
+  if (form.languages.length === 0) {
+    return { submit: "נא לבחור לפחות שפה אחת" };
+  }
+
+  return {};
+}
+
+function buildVolunteerData(form) {
+  return {
+    volunteerId: form.volunteerId,
+    phone: form.phone,
+    first_name: form.firstName,
+    last_name: form.lastName,
+    gender: form.gender,
+    birthDate: form.birthDate,
+    address: form.address,
+    help_types: form.services,
+    otherService: form.otherService,
+    languages: form.languages,
+    about: form.about,
+    notes: form.notes,
+    is_active: false,
+    status: "pending",
+  };
+}
+
 function VolunteerRegistrationForm() {
   const [volunteerForm, setVolunteerForm] = useState({
     volunteerId: "",
@@ -22,12 +83,18 @@ function VolunteerRegistrationForm() {
     about: "",
     notes: "",
   });
+  const [message, setMessage] = useState({ type: "", text: "" });
+  const [duplicatePrompt, setDuplicatePrompt] = useState(false);
 
   const updateField = (field, value) => {
     setVolunteerForm((prev) => ({
       ...prev,
       [field]: value,
     }));
+
+    if (duplicatePrompt) {
+      setDuplicatePrompt(false);
+    }
   };
 
   const resetForm = () => {
@@ -47,93 +114,71 @@ function VolunteerRegistrationForm() {
     });
   };
 
-  const handleSubmit = async (e) => {
-    e.preventDefault();
+  const saveNewVolunteer = async (volunteerData) => {
+    await saveVolunteerData(volunteerForm.volunteerId, volunteerData);
+    resetForm();
+    setMessage({
+      type: "success",
+      text: "בקשת ההתנדבות נשמרה בהצלחה",
+    });
+  };
 
-    if (
-      !volunteerForm.volunteerId.trim() ||
-      !volunteerForm.phone.trim() ||
-      !volunteerForm.firstName.trim() ||
-      !volunteerForm.lastName.trim() ||
-      !volunteerForm.gender ||
-      !volunteerForm.birthDate ||
-      !volunteerForm.address.trim() ||
-      !volunteerForm.about.trim()
-    ) {
-      alert("נא למלא את כל שדות החובה");
-      return;
-    }
-
-    if (!/^\d{9}$/.test(volunteerForm.volunteerId)) {
-      alert("מספר תעודת זהות חייב להיות מספר בן 9 ספרות");
-      return;
-    }
-
-    if (!/^05\d{8}$/.test(volunteerForm.phone)) {
-      alert("מספר טלפון חייב להיות מספר תקין בן 10 ספרות");
-      return;
-    }
-
-    if (volunteerForm.services.length === 0) {
-      alert("נא לבחור לפחות סוג עזרה אחד");
-      return;
-    }
-
-    if (
-      volunteerForm.services.includes("other") &&
-      !volunteerForm.otherService.trim()
-    ) {
-      alert("נא לתאר את סוג העזרה הנוסף");
-      return;
-    }
-
-    if (volunteerForm.languages.length === 0) {
-      alert("נא לבחור לפחות שפה אחת");
-      return;
-    }
-
-    const exists = await checkIfVolunteerExists(volunteerForm.volunteerId);
-
-    if (exists) {
-      const shouldUpdate = window.confirm(
-        "מתנדב עם מספר זהות זה כבר קיים במערכת. האם ברצונך לעדכן את הפרטים?"
-      );
-
-      if (!shouldUpdate) {
-        return;
-      }
-    }
-
-    const volunteerData = {
-      volunteerId: volunteerForm.volunteerId,
-      phone: volunteerForm.phone,
-      firstName: volunteerForm.firstName,
-      lastName: volunteerForm.lastName,
-      gender: volunteerForm.gender,
-      birthDate: volunteerForm.birthDate,
-      address: volunteerForm.address,
-      services: volunteerForm.services,
-      otherService: volunteerForm.otherService,
-      languages: volunteerForm.languages,
-      about: volunteerForm.about,
-      notes: volunteerForm.notes,
-      isActive: true,
-      status: "pending",
-    };
+  const handleUpdateDuplicate = async () => {
+    const volunteerData = buildVolunteerData(volunteerForm);
 
     try {
-      await saveVolunteerData(volunteerForm.volunteerId, volunteerData);
+      await saveVolunteerData(volunteerForm.volunteerId, volunteerData, {
+        merge: true,
+      });
 
-      alert("בקשת ההתנדבות נשמרה בהצלחה");
-      resetForm();
+      setDuplicatePrompt(false);
+      setMessage({
+        type: "success",
+        text: "הפרטים עודכנו בהצלחה.",
+      });
+    } catch (error) {
+      console.error("Error updating volunteer:", error);
+      setMessage({
+        type: "error",
+        text: "אירעה שגיאה בשמירת הנתונים",
+      });
+    }
+  };
+
+  const handleSubmit = async (e) => {
+    e.preventDefault();
+    setMessage({ type: "", text: "" });
+    setDuplicatePrompt(false);
+
+    const errors = validateVolunteerForm(volunteerForm);
+
+    if (errors.submit) {
+      setMessage({ type: "error", text: errors.submit });
+      return;
+    }
+
+    const volunteerData = buildVolunteerData(volunteerForm);
+
+    try {
+      const exists = await checkIfVolunteerExists(volunteerForm.volunteerId);
+
+      if (exists) {
+        setDuplicatePrompt(true);
+        return;
+      }
+
+      await saveNewVolunteer(volunteerData);
     } catch (error) {
       console.error("Error saving volunteer:", error);
-      alert("אירעה שגיאה בשמירת הנתונים");
+      setMessage({
+        type: "error",
+        text: "אירעה שגיאה בשמירת הנתונים",
+      });
     }
   };
 
   return (
-    <form className="community-join-form" onSubmit={handleSubmit}>
+    <form className="community-join-form volunteer-registration-form" onSubmit={handleSubmit} noValidate>
       <section className="form-section">
         <h2>פרטים אישיים</h2>
         <p className="form-hint">כל השדות המסומנים ב-* הם שדות חובה</p>
@@ -206,6 +251,7 @@ function VolunteerRegistrationForm() {
             <label>כתובת מגורים *</label>
             <input
               type="text"
+              autoComplete="street-address"
               value={volunteerForm.address}
               onChange={(e) => updateField("address", e.target.value)}
             />
@@ -261,7 +307,29 @@ function VolunteerRegistrationForm() {
       </section>
 
       <div className="form-submit">
-        <button type="submit">שליחת בקשת התנדבות</button>
+        {duplicatePrompt && (
+          <div className="duplicate-prompt" role="status">
+            <div className="form-message form-message--prompt">{DUPLICATE_MESSAGE}</div>
+            <div className="duplicate-prompt-actions">
+              <button type="button" onClick={handleUpdateDuplicate}>
+                עדכון פרטים
+              </button>
+            </div>
+          </div>
+        )}
+
+        {message.text && (
+          <div
+            className={`form-message form-message--${message.type}`}
+            role={message.type === "error" ? "alert" : "status"}
+          >
+            {message.text}
+          </div>
+        )}
+
+        {!duplicatePrompt && (
+          <button type="submit">שליחת בקשת התנדבות</button>
+        )}
       </div>
     </form>
   );
