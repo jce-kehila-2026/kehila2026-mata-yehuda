@@ -6,7 +6,10 @@ function connectionErrorMessage(error) {
   if (error?.name === "AbortError") {
     return "הבקשה ארכה יותר מדי זמן. בדקו חיבור לאינטרנט ושהשרת פועל.";
   }
-  return "שגיאה בחיבור לשרת. ודאו שבטרמינל רץ: cd server && npm run dev";
+  if (import.meta.env.VITE_API_BASE) {
+    return `שגיאה בחיבור לשרת התשלומים. בדקו חיבור לאינטרנט (${import.meta.env.VITE_API_BASE}).`;
+  }
+  return "שגיאה בחיבור לשרת. ודאו שבטרמינל רץ: cd server && npm run start:payment";
 }
 
 export async function apiGet(path, timeoutMs = DEFAULT_TIMEOUT_MS) {

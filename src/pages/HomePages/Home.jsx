@@ -2,6 +2,7 @@ import { useEffect, useRef ,useState } from "react";
 import ProgramCard from "../../components/Homecomponents/ProgramCard";
 import { getAllPrograms } from "../../services/HomeServices/programService";
 import RequestBox from "../../components/Homecomponents/RequestBox";
+import DonationBox from "../../donations/components/DonationBox";
 import { useNavigate } from "react-router-dom";
 import DayCenterRegisterForm from "../../components/Homecomponents/DayCenterRegisterForm";
 import VolunteerForm from "../../components/Homecomponents/VolunteerForm";
@@ -62,6 +63,7 @@ function Home() {
       <nav className="top-nav">
         <button onClick={() => navigate("/about")}>מי אנחנו</button>
         <button onClick={() => navigate("/services")}>השירותים שלנו</button>
+        <button onClick={() => navigate("/donations")}>תרומות</button>
         <button onClick={scrollToContact}>צור קשר</button>
       </nav>
 
@@ -123,6 +125,7 @@ function Home() {
       })}
       </div>
       <RequestBox />
+      <DonationBox />
 
       {showDayCenterForm && (
          <DayCenterRegisterForm

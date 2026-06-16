@@ -18,6 +18,7 @@ import RequestsPage from "./pages/RespOneonRequest/RequestsPage";
 
 import supportiveCommunityRoutes from "./routes/supportive community/supportiveCommunityRoutes";
 import communityStaffRoutes from "./routes/communityStaff/communityStaffRoutes";
+import donationRoutes from "./donations/routes/donationRoutes";
 
 function App() {
   return (
@@ -68,6 +69,13 @@ function App() {
         {communityStaffRoutes.map((route) => (
           <Route
             key={`cs-${route.path}`}
+            path={route.path}
+            element={route.element}
+          />
+        ))}
+        {donationRoutes.map((route) => (
+          <Route
+            key={`donation-${route.path}`}
             path={route.path}
             element={route.element}
           />

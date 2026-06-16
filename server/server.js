@@ -1273,6 +1273,289 @@ app.post("/save-bit-payment", async (req, res) => {
 });
 
 // =========================
+// Donations
+// =========================
+
+function parseDonationAmount(raw) {
+  const amount = Number(raw);
+  if (!Number.isFinite(amount) || amount <= 0) {
+    return null;
+  }
+  return Math.round(amount * 100) / 100;
+}
+
+async function saveDonationRecord({
+  firstName = "",
+  phone = "",
+  paymentMethod,
+  amount,
+  status,
+  extraFields = {},
+}) {
+  const parsedAmount = parseDonationAmount(amount);
+  if (!parsedAmount) {
+    throw new Error("INVALID_DONATION_AMOUNT");
+  }
+
+  const donationRef = db.collection("donations").doc();
+  const payload = {
+    firstName: String(firstName || "").trim(),
+    phone: String(phone || "").trim(),
+    paymentMethod,
+    amount: parsedAmount,
+    currency: "ILS",
+    status,
+    type: "donation",
+    ...extraFields,
+    createdAt: admin.firestore.FieldValue.serverTimestamp(),
+  };
+
+  await withTimeout(
+    donationRef.set(payload),
+    FIRESTORE_TIMEOUT_MS,
+    "Firestore donation create timeout"
+  );
+
+  return { donationId: donationRef.id };
+}
+
+async function findDonationByPaypalOrderId(orderID) {
+  const snapshot = await db
+    .collection("donations")
+    .where("paypalOrderId", "==", orderID)
+    .limit(1)
+    .get();
+
+  if (snapshot.empty) {
+    return null;
+  }
+
+  const doc = snapshot.docs[0];
+  return { donationId: doc.id, ...doc.data() };
+}
+
+app.post("/donations/create-paypal-order", async (req, res) => {
+  try {
+    const amount = parseDonationAmount(req.body?.amount);
+    if (!amount) {
+      return res.status(400).json({
+        success: false,
+        message: "סכום תרומה לא תקין",
+      });
+    }
+
+    const accessToken = await generateAccessToken();
+    const frontendUrl =
+      process.env.FRONTEND_URL || "http://localhost:5173";
+
+    const response = await fetch(
+      `${process.env.PAYPAL_BASE_URL}/v2/checkout/orders`,
+      {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+          Authorization: `Bearer ${accessToken}`,
+        },
+        body: JSON.stringify({
+          intent: "CAPTURE",
+          purchase_units: [
+            {
+              amount: {
+                currency_code: "ILS",
+                value: formatPayPalAmount(amount),
+              },
+              description: "תרומה לעמותת ותיקי מטה יהודה",
+            },
+          ],
+          application_context: {
+            return_url: `${frontendUrl}/donations/success`,
+            cancel_url: `${frontendUrl}/donations/cancel`,
+            user_action: "PAY_NOW",
+          },
+        }),
+      }
+    );
+
+    const data = await response.json();
+
+    if (!response.ok) {
+      console.error("PayPal donation order failed:", data);
+      return res.status(500).json({
+        success: false,
+        message: "יצירת הזמנת PayPal לתרומה נכשלה",
+      });
+    }
+
+    res.json(data);
+  } catch (error) {
+    console.error(error);
+    return handlePaymentRouteError(res, error, "שגיאה ביצירת תשלום תרומה");
+  }
+});
+
+app.post("/donations/capture-paypal-order", async (req, res) => {
+  try {
+    const {
+      orderID,
+      firstName = "",
+      phone = "",
+      paymentMethod,
+      amount,
+    } = req.body || {};
+
+    if (!orderID) {
+      return res.status(400).json({
+        success: false,
+        message: "Missing PayPal order ID",
+      });
+    }
+
+    const existingDonation = await findDonationByPaypalOrderId(orderID);
+    if (existingDonation) {
+      return res.json({
+        success: true,
+        message: "Donation already saved",
+        donationId: existingDonation.donationId,
+        transactionId: existingDonation.transactionId || null,
+      });
+    }
+
+    const accessToken = await generateAccessToken();
+    const response = await fetch(
+      `${process.env.PAYPAL_BASE_URL}/v2/checkout/orders/${orderID}/capture`,
+      {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+          Authorization: `Bearer ${accessToken}`,
+        },
+      }
+    );
+
+    const data = await response.json();
+
+    const completeCapture = async (captureData) => {
+      const transactionId =
+        captureData.purchase_units?.[0]?.payments?.captures?.[0]?.id;
+      const capturedAmount =
+        parseDonationAmount(
+          captureData.purchase_units?.[0]?.payments?.captures?.[0]?.amount
+            ?.value
+        ) || parseDonationAmount(amount);
+
+      const result = await saveDonationRecord({
+        firstName,
+        phone,
+        paymentMethod: paymentMethod || "PayPal",
+        amount: capturedAmount,
+        status: captureData.status,
+        extraFields: {
+          paypalOrderId: orderID,
+          transactionId,
+        },
+      });
+
+      return res.json({
+        success: true,
+        message: "Donation completed and saved",
+        donationId: result.donationId,
+        transactionId,
+      });
+    };
+
+    if (data.status === "COMPLETED") {
+      return completeCapture(data);
+    }
+
+    if (isOrderAlreadyCapturedError(data)) {
+      const order = await getPayPalOrder(orderID, accessToken);
+      if (order.status === "COMPLETED") {
+        return completeCapture(order);
+      }
+    }
+
+    res.json({
+      success: false,
+      message: "Donation payment not completed",
+      paypalStatus: data.status,
+    });
+  } catch (error) {
+    console.error(error);
+    if (error.message === "INVALID_DONATION_AMOUNT") {
+      return res.status(400).json({
+        success: false,
+        message: "סכום תרומה לא תקין",
+      });
+    }
+    return handlePaymentRouteError(res, error, "שגיאה באישור תשלום תרומה");
+  }
+});
+
+app.post("/donations/save-cash-payment", async (req, res) => {
+  try {
+    const { firstName = "", phone = "", paymentMethod, amount } = req.body || {};
+    const parsedAmount = parseDonationAmount(amount);
+
+    if (!parsedAmount) {
+      return res.status(400).json({
+        success: false,
+        message: "סכום תרומה לא תקין",
+      });
+    }
+
+    const result = await saveDonationRecord({
+      firstName,
+      phone,
+      paymentMethod: paymentMethod || "cash",
+      amount: parsedAmount,
+      status: "PENDING_CASH_PAYMENT",
+      extraFields: {
+        message: "Waiting for cash donation.",
+      },
+    });
+
+    res.json({
+      success: true,
+      message: "Cash donation saved",
+      donationId: result.donationId,
+    });
+  } catch (error) {
+    console.error(error);
+    return handlePaymentRouteError(res, error, "שגיאה בשמירת תרומה במזומן");
+  }
+});
+
+app.post("/donations/save-bit-payment", async (req, res) => {
+  try {
+    const { firstName = "", phone = "", paymentMethod, amount } = req.body || {};
+    const parsedAmount = parseDonationAmount(amount);
+
+    if (!parsedAmount) {
+      return res.status(400).json({
+        success: false,
+        message: "סכום תרומה לא תקין",
+      });
+    }
+
+    const result = await saveDonationRecord({
+      firstName,
+      phone,
+      paymentMethod: paymentMethod || "bit",
+      amount: parsedAmount,
+      status: "WAITING_FOR_BIT_PAYMENT",
+    });
+
+    res.json({
+      success: true,
+      donationId: result.donationId,
+    });
+  } catch (error) {
+    console.error(error);
+    return handlePaymentRouteError(res, error, "שגיאה בשמירת תרומה ב-Bit");
+  }
+});
+
+// =========================
 // Check participant by ID (registration start)
 // =========================
 
