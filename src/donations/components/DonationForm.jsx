@@ -35,6 +35,25 @@ function resolveDonationAmount(selectedAmount, customAmount) {
   return null;
 }
 
+function buildDonationPayload(donor, donationAmount, selectedAmount, customAmount) {
+  const isCustomAmount =
+    selectedAmount === "other" || String(customAmount).trim() !== "";
+
+  return {
+    firstName: donor.firstName.trim(),
+    phone: donor.phone,
+    amount: donationAmount,
+    paymentMethod: donor.paymentMethod,
+    source: "website",
+    channel: "donations-page",
+    isCustomAmount,
+    presetAmount:
+      isCustomAmount || typeof selectedAmount !== "number"
+        ? null
+        : selectedAmount,
+  };
+}
+
 function DonationForm({ initialAmount = null, showBackToHome = false }) {
   const navigate = useNavigate();
   const [step, setStep] = useState(initialAmount ? 2 : 1);
@@ -132,12 +151,12 @@ function DonationForm({ initialAmount = null, showBackToHome = false }) {
       return;
     }
 
-    const payload = {
-      firstName: donor.firstName.trim(),
-      phone: donor.phone,
-      amount: donationAmount,
-      paymentMethod: donor.paymentMethod,
-    };
+    const payload = buildDonationPayload(
+      donor,
+      donationAmount,
+      selectedAmount,
+      customAmount
+    );
 
     setIsSubmitting(true);
 
@@ -166,7 +185,7 @@ function DonationForm({ initialAmount = null, showBackToHome = false }) {
         donor.paymentMethod === "paypal" ||
         donor.paymentMethod === "credit card"
       ) {
-        const { response, data } = await createDonationPayPalOrder(donationAmount);
+        const { response, data } = await createDonationPayPalOrder(payload);
 
         if (data?.success === false && data?.message) {
           setFormError(data.message);
@@ -188,6 +207,9 @@ function DonationForm({ initialAmount = null, showBackToHome = false }) {
         }
 
         persistDonationContext();
+        if (data.donationId) {
+          localStorage.setItem(DONATION_STORAGE_KEYS.donationId, data.donationId);
+        }
         window.location.href = approveLink.href;
       } else {
         setFormError("אנא בחרו שיטת תשלום");

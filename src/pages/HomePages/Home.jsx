@@ -20,6 +20,7 @@ function Home() {
   const [showDayCenterForm, setShowDayCenterForm] = useState(false);
   const [showVolunteerForm, setShowVolunteerForm] = useState(false);
   const contactRef = useRef(null);
+  const donationsRef = useRef(null);
 
   function scrollToContact() {
   contactRef.current?.scrollIntoView({ behavior: "smooth" });
@@ -28,6 +29,15 @@ function Home() {
   setTimeout(() => {
     contactRef.current?.classList.remove("contact-highlight");
   }, 2000);
+  }
+
+  function scrollToDonations() {
+    donationsRef.current?.scrollIntoView({ behavior: "smooth" });
+    donationsRef.current?.classList.add("contact-highlight");
+
+    setTimeout(() => {
+      donationsRef.current?.classList.remove("contact-highlight");
+    }, 2000);
   }
 
   useEffect(() => {
@@ -63,7 +73,7 @@ function Home() {
       <nav className="top-nav">
         <button onClick={() => navigate("/about")}>מי אנחנו</button>
         <button onClick={() => navigate("/services")}>השירותים שלנו</button>
-        <button onClick={() => navigate("/donations")}>תרומות</button>
+        <button onClick={scrollToDonations}>תרומות</button>
         <button onClick={scrollToContact}>צור קשר</button>
       </nav>
 
@@ -125,7 +135,9 @@ function Home() {
       })}
       </div>
       <RequestBox />
-      <DonationBox />
+      <div ref={donationsRef} className="home-donations-section">
+        <DonationBox />
+      </div>
 
       {showDayCenterForm && (
          <DayCenterRegisterForm

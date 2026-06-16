@@ -204,6 +204,38 @@ app.use(cors());
 
 app.use(express.json());
 
+function getFrontendUrl() {
+  return process.env.FRONTEND_URL?.trim() || "http://localhost:5173";
+}
+
+function redirectToFrontend(path) {
+  return (req, res) => {
+    const queryIndex = req.originalUrl.indexOf("?");
+    const query = queryIndex >= 0 ? req.originalUrl.slice(queryIndex) : "";
+    res.redirect(302, `${getFrontendUrl()}${path}${query}`);
+  };
+}
+
+app.get("/", (_req, res) => {
+  res.json({
+    ok: true,
+    service: "matayehuda-payment-api",
+    message: "זה שרת התשלומים (API). האתר נמצא בכתובת frontend.",
+    frontend: getFrontendUrl(),
+  });
+});
+
+[
+  "/donations",
+  "/donations/success",
+  "/donations/cancel",
+  "/payment-success",
+  "/payment-cancel",
+  "/pay",
+].forEach((path) => {
+  app.get(path, redirectToFrontend(path));
+});
+
 const PORT = Number(process.env.PORT) || 5001;
 
 const db = admin.firestore();
@@ -1284,10 +1316,44 @@ function parseDonationAmount(raw) {
   return Math.round(amount * 100) / 100;
 }
 
-async function saveDonationRecord({
-  firstName = "",
-  phone = "",
-  paymentMethod,
+const DONATION_PAYMENT_LABELS = {
+  cash: "מזומן",
+  bit: "Bit",
+  paypal: "PayPal",
+  "credit card": "כרטיס אשראי",
+  "PayPal/Credit Card": "כרטיס אשראי / PayPal",
+  PayPal: "PayPal",
+};
+
+function parseDonationMetadata(body = {}) {
+  const presetRaw = body.presetAmount;
+  const presetAmount =
+    presetRaw != null && presetRaw !== ""
+      ? parseDonationAmount(presetRaw)
+      : null;
+
+  return {
+    firstName: String(body.firstName || "").trim(),
+    phone: String(body.phone || "").trim(),
+    paymentMethod: String(body.paymentMethod || "").trim(),
+    source: String(body.source || "website").trim(),
+    channel: String(body.channel || "donations-page").trim(),
+    isCustomAmount: Boolean(body.isCustomAmount),
+    presetAmount,
+  };
+}
+
+function resolveDonationPaymentLabel(paymentMethod) {
+  const method = String(paymentMethod || "").trim();
+  return DONATION_PAYMENT_LABELS[method] || method || "לא ידוע";
+}
+
+function isDonationCompletedStatus(status) {
+  return status === "COMPLETED";
+}
+
+function buildDonationFirestorePayload({
+  metadata,
   amount,
   status,
   extraFields = {},
@@ -1297,16 +1363,33 @@ async function saveDonationRecord({
     throw new Error("INVALID_DONATION_AMOUNT");
   }
 
-  const donationRef = db.collection("donations").doc();
-  const payload = {
-    firstName: String(firstName || "").trim(),
-    phone: String(phone || "").trim(),
-    paymentMethod,
+  const paymentMethod =
+    extraFields.paymentMethod || metadata.paymentMethod || "unknown";
+  const now = admin.firestore.FieldValue.serverTimestamp();
+
+  return {
+    firstName: metadata.firstName,
+    phone: metadata.phone,
     amount: parsedAmount,
     currency: "ILS",
+    isCustomAmount: metadata.isCustomAmount,
+    presetAmount: metadata.presetAmount,
+    paymentMethod,
+    paymentMethodLabel: resolveDonationPaymentLabel(paymentMethod),
     status,
     type: "donation",
+    source: metadata.source,
+    channel: metadata.channel,
     ...extraFields,
+    updatedAt: now,
+    ...(isDonationCompletedStatus(status) ? { completedAt: now } : {}),
+  };
+}
+
+async function saveDonationRecord({ metadata, amount, status, extraFields = {} }) {
+  const donationRef = db.collection("donations").doc();
+  const payload = {
+    ...buildDonationFirestorePayload({ metadata, amount, status, extraFields }),
     createdAt: admin.firestore.FieldValue.serverTimestamp(),
   };
 
@@ -1317,6 +1400,20 @@ async function saveDonationRecord({
   );
 
   return { donationId: donationRef.id };
+}
+
+async function updateDonationRecord(donationId, updates) {
+  await withTimeout(
+    db
+      .collection("donations")
+      .doc(donationId)
+      .update({
+        ...updates,
+        updatedAt: admin.firestore.FieldValue.serverTimestamp(),
+      }),
+    FIRESTORE_TIMEOUT_MS,
+    "Firestore donation update timeout"
+  );
 }
 
 async function findDonationByPaypalOrderId(orderID) {
@@ -1336,6 +1433,7 @@ async function findDonationByPaypalOrderId(orderID) {
 
 app.post("/donations/create-paypal-order", async (req, res) => {
   try {
+    const metadata = parseDonationMetadata(req.body);
     const amount = parseDonationAmount(req.body?.amount);
     if (!amount) {
       return res.status(400).json({
@@ -1386,7 +1484,20 @@ app.post("/donations/create-paypal-order", async (req, res) => {
       });
     }
 
-    res.json(data);
+    const pendingRecord = await saveDonationRecord({
+      metadata: {
+        ...metadata,
+        paymentMethod: metadata.paymentMethod || "paypal",
+      },
+      amount,
+      status: "PENDING_PAYPAL",
+      extraFields: {
+        paymentMethod: metadata.paymentMethod || "paypal",
+        paypalOrderId: data.id,
+      },
+    });
+
+    res.json({ ...data, donationId: pendingRecord.donationId });
   } catch (error) {
     console.error(error);
     return handlePaymentRouteError(res, error, "שגיאה ביצירת תשלום תרומה");
@@ -1395,13 +1506,8 @@ app.post("/donations/create-paypal-order", async (req, res) => {
 
 app.post("/donations/capture-paypal-order", async (req, res) => {
   try {
-    const {
-      orderID,
-      firstName = "",
-      phone = "",
-      paymentMethod,
-      amount,
-    } = req.body || {};
+    const { orderID, amount, ...metadataBody } = req.body || {};
+    const metadata = parseDonationMetadata(metadataBody);
 
     if (!orderID) {
       return res.status(400).json({
@@ -1411,7 +1517,7 @@ app.post("/donations/capture-paypal-order", async (req, res) => {
     }
 
     const existingDonation = await findDonationByPaypalOrderId(orderID);
-    if (existingDonation) {
+    if (existingDonation?.status === "COMPLETED") {
       return res.json({
         success: true,
         message: "Donation already saved",
@@ -1443,13 +1549,39 @@ app.post("/donations/capture-paypal-order", async (req, res) => {
             ?.value
         ) || parseDonationAmount(amount);
 
+      const resolvedPaymentMethod =
+        metadata.paymentMethod || existingDonation?.paymentMethod || "PayPal";
+      const now = admin.firestore.FieldValue.serverTimestamp();
+
+      if (existingDonation?.donationId) {
+        await updateDonationRecord(existingDonation.donationId, {
+          firstName: metadata.firstName || existingDonation.firstName || "",
+          phone: metadata.phone || existingDonation.phone || "",
+          amount: capturedAmount,
+          paymentMethod: resolvedPaymentMethod,
+          paymentMethodLabel: resolveDonationPaymentLabel(resolvedPaymentMethod),
+          status: "COMPLETED",
+          transactionId,
+          completedAt: now,
+        });
+
+        return res.json({
+          success: true,
+          message: "Donation completed and saved",
+          donationId: existingDonation.donationId,
+          transactionId,
+        });
+      }
+
       const result = await saveDonationRecord({
-        firstName,
-        phone,
-        paymentMethod: paymentMethod || "PayPal",
+        metadata: {
+          ...metadata,
+          paymentMethod: resolvedPaymentMethod,
+        },
         amount: capturedAmount,
-        status: captureData.status,
+        status: "COMPLETED",
         extraFields: {
+          paymentMethod: resolvedPaymentMethod,
           paypalOrderId: orderID,
           transactionId,
         },
@@ -1493,8 +1625,8 @@ app.post("/donations/capture-paypal-order", async (req, res) => {
 
 app.post("/donations/save-cash-payment", async (req, res) => {
   try {
-    const { firstName = "", phone = "", paymentMethod, amount } = req.body || {};
-    const parsedAmount = parseDonationAmount(amount);
+    const metadata = parseDonationMetadata(req.body);
+    const parsedAmount = parseDonationAmount(req.body?.amount);
 
     if (!parsedAmount) {
       return res.status(400).json({
@@ -1504,13 +1636,15 @@ app.post("/donations/save-cash-payment", async (req, res) => {
     }
 
     const result = await saveDonationRecord({
-      firstName,
-      phone,
-      paymentMethod: paymentMethod || "cash",
+      metadata: {
+        ...metadata,
+        paymentMethod: metadata.paymentMethod || "cash",
+      },
       amount: parsedAmount,
       status: "PENDING_CASH_PAYMENT",
       extraFields: {
-        message: "Waiting for cash donation.",
+        paymentMethod: "cash",
+        staffNote: "ממתין לגביית מזומן מהתורם",
       },
     });
 
@@ -1527,8 +1661,8 @@ app.post("/donations/save-cash-payment", async (req, res) => {
 
 app.post("/donations/save-bit-payment", async (req, res) => {
   try {
-    const { firstName = "", phone = "", paymentMethod, amount } = req.body || {};
-    const parsedAmount = parseDonationAmount(amount);
+    const metadata = parseDonationMetadata(req.body);
+    const parsedAmount = parseDonationAmount(req.body?.amount);
 
     if (!parsedAmount) {
       return res.status(400).json({
@@ -1538,11 +1672,16 @@ app.post("/donations/save-bit-payment", async (req, res) => {
     }
 
     const result = await saveDonationRecord({
-      firstName,
-      phone,
-      paymentMethod: paymentMethod || "bit",
+      metadata: {
+        ...metadata,
+        paymentMethod: metadata.paymentMethod || "bit",
+      },
       amount: parsedAmount,
       status: "WAITING_FOR_BIT_PAYMENT",
+      extraFields: {
+        paymentMethod: "bit",
+        staffNote: "ממתין להעברת Bit מהתורם",
+      },
     });
 
     res.json({

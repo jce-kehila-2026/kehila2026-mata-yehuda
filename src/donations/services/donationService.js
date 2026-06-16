@@ -1,8 +1,8 @@
 import { apiPost } from "../../services/Payment/api.js";
 
 /** Donation endpoints live on the same payment server (matayehuda-payment-api). */
-export async function createDonationPayPalOrder(amount) {
-  return apiPost("/donations/create-paypal-order", { amount });
+export async function createDonationPayPalOrder(payload) {
+  return apiPost("/donations/create-paypal-order", payload);
 }
 
 export async function captureDonationPayPalOrder(payload) {
