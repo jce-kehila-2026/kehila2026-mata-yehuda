@@ -1,5 +1,5 @@
 import { useMemo } from "react";
-import { useNavigate, useSearchParams } from "react-router-dom";
+import { useSearchParams } from "react-router-dom";
 import DonationForm from "../components/DonationForm";
 import "../styles/donations.css";
 
@@ -18,7 +18,6 @@ function parseInitialAmount(searchParams) {
 }
 
 function DonationPage() {
-  const navigate = useNavigate();
   const [searchParams] = useSearchParams();
   const initialAmount = useMemo(
     () => parseInitialAmount(searchParams),
@@ -36,12 +35,6 @@ function DonationPage() {
       </header>
 
       <DonationForm initialAmount={initialAmount} showBackToHome />
-
-      <div className="donation-page-back">
-        <button type="button" className="secondary-btn" onClick={() => navigate("/")}>
-          חזרה למסך הראשי
-        </button>
-      </div>
     </>
   );
 }
