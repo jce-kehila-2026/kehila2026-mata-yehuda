@@ -4,14 +4,16 @@ function ProgramCard({program, buttons}){
 
      return (
         <div className="program-card">
-         <h2>{program.title}</h2>
+         <h2 className="program-card__title">{program.title}</h2>
 
-         <img 
-            src={program.image_url} 
+         <div className="program-card__image-wrap">
+           <img
+            src={program.image_url}
             alt={program.title}
           />
-          
-          <p>{program.description}</p>
+         </div>
+
+          <p className="program-card__description">{program.description}</p>
 
           <div className="program-buttons">
             {buttons}

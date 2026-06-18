@@ -1,7 +1,7 @@
 .contact-request-grid {
   display: flex;
   justify-content: center;
-  margin: 2rem 0;
+  margin: 2.5rem 0;
 }
 
 .request-box {
@@ -9,13 +9,10 @@
   border: 1.5px solid var(--color-border);
   border-radius: var(--radius);
   padding: 1.5rem;
-
   display: flex;
   flex-direction: column;
   gap: 0.8rem;
-
   width: 100%;
-  
 }
 
 .request-box h2,
@@ -40,6 +37,20 @@
   padding: 0.75rem;
   border: 1.5px solid var(--color-card-border);
   border-radius: 10px;
+}
+
+.request-box > button {
+  align-self: center;
+  width: 100%;
+  max-width: 560px;
+  min-height: 58px;
+  height: 58px;
+  margin-top: 0.75rem;
+  padding: 0.75rem 1.5rem;
+  font-size: 1.5rem;
+  font-weight: 700;
+  line-height: 1.2;
+  box-sizing: border-box;
 }
 
 .request-box .form-message {
