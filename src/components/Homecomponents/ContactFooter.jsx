@@ -42,7 +42,7 @@ function ContactFooter() {
 
   return (
     <>
-      <footer className="home-contact-footer">
+      <footer id="contact" className="home-contact-footer">
         <div className="home-contact-footer__main">
           <h2 className="home-contact-footer__title">רוצים לשמוע עוד?</h2>
           <p className="home-contact-footer__subtitle">

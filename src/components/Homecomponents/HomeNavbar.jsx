@@ -43,13 +43,23 @@ function HomeNavbar() {
     navigate(`/#${item.id}`);
   };
 
+  const handleBrandClick = () => {
+    if (location.pathname !== "/") {
+      navigate("/");
+      return;
+    }
+
+    window.scrollTo({ top: 0, behavior: "smooth" });
+  };
+
   return (
     <header className="home-navbar">
       <div className="home-navbar__inner">
         <button
           type="button"
           className="home-navbar__brand"
-          onClick={() => navigate("/")}
+          onClick={handleBrandClick}
+          aria-label="חזרה לראש העמוד"
         >
           <img src="/images/logo.png" alt="לוגו העמותה" className="home-navbar__logo" />
           <span className="home-navbar__title">ותיקי מטה יהודה</span>
@@ -60,9 +70,7 @@ function HomeNavbar() {
             <button
               key={item.id}
               type="button"
-              className={`home-navbar__link${
-                item.path && location.pathname === item.path ? " is-active" : ""
-              }`}
+              className="home-navbar__link"
               onClick={() => handleNavClick(item)}
             >
               {item.label}
