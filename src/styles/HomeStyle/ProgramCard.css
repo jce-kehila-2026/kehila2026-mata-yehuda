@@ -10,26 +10,43 @@
   align-items: center;
 }
 
-.program-card h2 {
-  font-size: 1.4rem;
-  color: var(--color-primary);
+.program-card__title {
+  display: flex;
+  align-items: flex-start;
+  justify-content: center;
+  width: 100%;
+  min-height: 3.5rem;
   margin: 0 0 0.55rem;
+  font-size: 1.4rem;
+  font-weight: inherit;
+  color: var(--color-primary);
+  line-height: 1.25;
+  text-align: center;
 }
 
-.program-card img {
+.program-card__image-wrap {
   width: 100%;
-  max-height: 220px;
-  object-fit: cover;
+  height: 220px;
+  flex-shrink: 0;
+  overflow: hidden;
   border-radius: calc(var(--radius) - 4px);
-  margin-bottom: 1rem;
+  margin: 0 0 1rem;
+}
+
+.program-card__image-wrap img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  object-position: center;
   display: block;
 }
 
-.program-card p {
-  margin: 1rem 0;
+.program-card__description {
+  margin: 0;
   line-height: 1.6;
   text-align: center;
   white-space: normal;
+  width: 100%;
 }
 
 .program-buttons {
@@ -40,22 +57,54 @@
   width: 100%;
 }
 
-.top-buttons {
+.program-card__day-actions {
   display: flex;
-  gap: 10px;
-  margin-bottom: 10px;
+  align-items: stretch;
+  gap: 14px;
+  width: 100%;
 }
 
-.top-buttons button {
-  flex: 1;
+.program-card__day-actions button {
+  flex: 1 1 0;
+  min-width: 0;
+  min-height: 48px;
+  padding: 0.75rem 1rem;
 }
 
 .volunteer-btn {
-  width: 100%;
-  background: #6c757d;
+  color: #ffffff;
+  background: #d8915e;
+  border: none;
+  box-shadow: none;
+  transition: all 0.2s ease-in-out;
 }
 
-.volunteer-btn:hover {
-  background: #5c636a;
+.volunteer-btn:hover,
+.volunteer-btn:active {
+  background: #d8915e;
+  color: #ffffff;
+  border: none;
+  box-shadow: 0 4px 12px rgba(87, 190, 129, 0.25);
+  transform: translateY(-2px);
 }
 
+@media (max-width: 700px) {
+  .program-card__title {
+    min-height: 3.25rem;
+    font-size: 1.3rem;
+  }
+
+  .program-card__image-wrap {
+    height: 200px;
+  }
+
+  .program-card__day-actions {
+    gap: 12px;
+  }
+}
+
+@media (max-width: 480px) {
+  .program-card__image-wrap {
+    height: 180px;
+  }
+}
