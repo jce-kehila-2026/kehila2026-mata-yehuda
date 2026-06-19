@@ -1,72 +1,30 @@
 import { useEffect, useState } from "react";
 import {
+  createVolunteerByStaff,
+  DUPLICATE_ID_NUMBER_ERROR,
   getVolunteerManagementLookups,
-  updateVolunteerDetails,
 } from "../../services/communityStaff/communityStaffService";
 import CommunityStaffCheckboxGrid from "./CommunityStaffCheckboxGrid.jsx";
+import {
+  buildEmptyVolunteerForm,
+  toggleArrayValue,
+  validateCreateVolunteerForm,
+} from "./communityStaffFormUtils.js";
 
-function buildInitialForm(volunteer) {
-  return {
-    first_name: volunteer?.first_name || volunteer?.firstName || "",
-    last_name: volunteer?.last_name || volunteer?.lastName || "",
-    phone: volunteer?.phone || "",
-    email: volunteer?.email || "",
-    gender: volunteer?.gender || "",
-    address: volunteer?.address || "",
-    notes: volunteer?.notes || "",
-    languages: Array.isArray(volunteer?.languages) ? [...volunteer.languages] : [],
-    help_types: Array.isArray(volunteer?.help_types) ? [...volunteer.help_types] : [],
-  };
-}
-
-function validateForm(form) {
-  if (!form.first_name.trim()) {
-    return "נא למלא שם פרטי";
-  }
-
-  if (!form.last_name.trim()) {
-    return "נא למלא שם משפחה";
-  }
-
-  if (!form.phone.trim()) {
-    return "נא למלא מספר טלפון";
-  }
-
-  if (form.languages.length === 0) {
-    return "נא לבחור לפחות שפה אחת";
-  }
-
-  if (form.help_types.length === 0) {
-    return "נא לבחור לפחות סוג עזרה אחד";
-  }
-
-  return "";
-}
-
-function toggleArrayValue(values, value) {
-  if (values.includes(value)) {
-    return values.filter((item) => item !== value);
-  }
-
-  return [...values, value];
-}
-
-function EditVolunteerModal({ volunteer, onClose, onSaved }) {
-  const [form, setForm] = useState(buildInitialForm(volunteer));
+function CreateVolunteerModal({ open, onClose, onSaved }) {
+  const [form, setForm] = useState(buildEmptyVolunteerForm);
   const [lookups, setLookups] = useState({ languages: [], helpTypes: [] });
   const [lookupsLoading, setLookupsLoading] = useState(false);
   const [message, setMessage] = useState({ type: "", text: "" });
   const [saving, setSaving] = useState(false);
 
   useEffect(() => {
-    setForm(buildInitialForm(volunteer));
-    setMessage({ type: "", text: "" });
-  }, [volunteer]);
-
-  useEffect(() => {
-    if (!volunteer) {
+    if (!open) {
       return undefined;
     }
+
+    setForm(buildEmptyVolunteerForm());
+    setMessage({ type: "", text: "" });
 
     let isMounted = true;
 
@@ -80,7 +38,7 @@ function EditVolunteerModal({ volunteer, onClose, onSaved }) {
           setLookups(data);
         }
       } catch (error) {
-        console.error("Failed to load volunteer form lookups:", error);
+        console.error("Failed to load volunteer creation lookups:", error);
         if (isMounted) {
           setMessage({ type: "error", text: "שגיאה בטעינת שפות וסוגי עזרה" });
         }
@@ -96,9 +54,9 @@ function EditVolunteerModal({ volunteer, onClose, onSaved }) {
     return () => {
       isMounted = false;
     };
-  }, [volunteer]);
+  }, [open]);
 
-  if (!volunteer) {
+  if (!open) {
     return null;
   }
 
@@ -106,11 +64,21 @@ function EditVolunteerModal({ volunteer, onClose, onSaved }) {
     setForm((prev) => ({ ...prev, [field]: value }));
   };
 
+  const handleIdNumberChange = (value) => {
+    const digitsOnly = value.replace(/\D/g, "").slice(0, 9);
+    updateField("id_number", digitsOnly);
+  };
+
+  const handlePhoneChange = (value) => {
+    const digitsOnly = value.replace(/\D/g, "").slice(0, 10);
+    updateField("phone", digitsOnly);
+  };
+
   const handleSubmit = async (event) => {
     event.preventDefault();
     setMessage({ type: "", text: "" });
 
-    const validationError = validateForm(form);
+    const validationError = validateCreateVolunteerForm(form);
 
     if (validationError) {
       setMessage({ type: "error", text: validationError });
@@ -120,11 +88,31 @@ function EditVolunteerModal({ volunteer, onClose, onSaved }) {
     setSaving(true);
 
     try {
-      await updateVolunteerDetails(volunteer.id, form);
-      onSaved();
+      await createVolunteerByStaff(form.id_number, {
+        first_name: form.first_name,
+        last_name: form.last_name,
+        phone: form.phone,
+        gender: form.gender,
+        address: form.address,
+        languages: form.languages,
+        help_types: form.help_types,
+        about: form.about,
+        notes: form.notes,
+      });
+
+      onSaved?.();
     } catch (error) {
-      console.error("Failed to update volunteer:", error);
-      setMessage({ type: "error", text: "אירעה שגיאה בעדכון פרטי המתנדב" });
+      console.error("Failed to create volunteer:", error);
+
+      if (
+        error?.code === "duplicate-id-number" ||
+        error?.message === DUPLICATE_ID_NUMBER_ERROR
+      ) {
+        setMessage({ type: "error", text: DUPLICATE_ID_NUMBER_ERROR });
+        return;
+      }
+
+      setMessage({ type: "error", text: "אירעה שגיאה ביצירת המתנדב/ה" });
     } finally {
       setSaving(false);
     }
@@ -143,10 +131,10 @@ function EditVolunteerModal({ volunteer, onClose, onSaved }) {
         className="community-join-modal__dialog"
         role="dialog"
         aria-modal="true"
-        aria-labelledby="edit-volunteer-title"
+        aria-labelledby="create-volunteer-modal-title"
       >
         <div className="community-join-modal__header">
-          <h2 id="edit-volunteer-title">עריכת פרטי מתנדב</h2>
+          <h2 id="create-volunteer-modal-title">הוספת מתנדב/ה</h2>
           <button
             type="button"
             className="community-join-modal__close"
@@ -159,14 +147,39 @@ function EditVolunteerModal({ volunteer, onClose, onSaved }) {
 
         <form className="community-join-modal__form" onSubmit={handleSubmit} noValidate>
           <p className="community-join-modal__hint">
-            עדכון פרטי המתנדב במסמך הקיים בלבד.
+            יצירת מתנדב/ה פעיל/ה ישירות על ידי צוות הקהילה.
           </p>
 
           <div className="community-join-modal__fields">
             <div className="community-join-modal__field">
-              <label htmlFor="edit-volunteer-first-name">שם פרטי *</label>
+              <label htmlFor="create-volunteer-id-number">מספר תעודת זהות *</label>
               <input
-                id="edit-volunteer-first-name"
+                id="create-volunteer-id-number"
+                type="text"
+                inputMode="numeric"
+                maxLength={9}
+                value={form.id_number}
+                onChange={(event) => handleIdNumberChange(event.target.value)}
+              />
+            </div>
+
+            <div className="community-join-modal__field">
+              <label htmlFor="create-volunteer-phone">טלפון *</label>
+              <input
+                id="create-volunteer-phone"
+                type="tel"
+                inputMode="numeric"
+                maxLength={10}
+                placeholder="05XXXXXXXX"
+                value={form.phone}
+                onChange={(event) => handlePhoneChange(event.target.value)}
+              />
+            </div>
+
+            <div className="community-join-modal__field">
+              <label htmlFor="create-volunteer-first-name">שם פרטי *</label>
+              <input
+                id="create-volunteer-first-name"
                 type="text"
                 value={form.first_name}
                 onChange={(event) => updateField("first_name", event.target.value)}
@@ -174,9 +187,9 @@ function EditVolunteerModal({ volunteer, onClose, onSaved }) {
             </div>
 
             <div className="community-join-modal__field">
-              <label htmlFor="edit-volunteer-last-name">שם משפחה *</label>
+              <label htmlFor="create-volunteer-last-name">שם משפחה *</label>
               <input
-                id="edit-volunteer-last-name"
+                id="create-volunteer-last-name"
                 type="text"
                 value={form.last_name}
                 onChange={(event) => updateField("last_name", event.target.value)}
@@ -184,32 +197,9 @@ function EditVolunteerModal({ volunteer, onClose, onSaved }) {
             </div>
 
             <div className="community-join-modal__field">
-              <label htmlFor="edit-volunteer-phone">טלפון *</label>
-              <input
-                id="edit-volunteer-phone"
-                type="text"
-                inputMode="tel"
-                value={form.phone}
-                onChange={(event) => updateField("phone", event.target.value)}
-              />
-            </div>
-
-            {volunteer?.email?.trim() ? (
-              <div className="community-join-modal__field">
-                <label htmlFor="edit-volunteer-email">אימייל</label>
-                <input
-                  id="edit-volunteer-email"
-                  type="email"
-                  value={form.email}
-                  onChange={(event) => updateField("email", event.target.value)}
-                />
-              </div>
-            ) : null}
-
-            <div className="community-join-modal__field">
-              <label htmlFor="edit-volunteer-gender">מין</label>
+              <label htmlFor="create-volunteer-gender">מין</label>
               <select
-                id="edit-volunteer-gender"
+                id="create-volunteer-gender"
                 value={form.gender}
                 onChange={(event) => updateField("gender", event.target.value)}
               >
@@ -221,9 +211,9 @@ function EditVolunteerModal({ volunteer, onClose, onSaved }) {
             </div>
 
             <div className="community-join-modal__field community-join-modal__field--full">
-              <label htmlFor="edit-volunteer-address">כתובת מגורים</label>
+              <label htmlFor="create-volunteer-address">כתובת</label>
               <input
-                id="edit-volunteer-address"
+                id="create-volunteer-address"
                 type="text"
                 autoComplete="street-address"
                 value={form.address}
@@ -267,9 +257,19 @@ function EditVolunteerModal({ volunteer, onClose, onSaved }) {
             </div>
 
             <div className="community-join-modal__field community-join-modal__field--full">
-              <label htmlFor="edit-volunteer-notes">הערות</label>
+              <label htmlFor="create-volunteer-about">זמינות *</label>
               <textarea
-                id="edit-volunteer-notes"
+                id="create-volunteer-about"
+                value={form.about}
+                onChange={(event) => updateField("about", event.target.value)}
+                placeholder="לדוגמה: ימים ושעות בהן ניתן להתנדב"
+              />
+            </div>
+
+            <div className="community-join-modal__field community-join-modal__field--full">
+              <label htmlFor="create-volunteer-notes">הערות נוספות</label>
+              <textarea
+                id="create-volunteer-notes"
                 value={form.notes}
                 onChange={(event) => updateField("notes", event.target.value)}
               />
@@ -286,11 +286,20 @@ function EditVolunteerModal({ volunteer, onClose, onSaved }) {
           )}
 
           <div className="community-join-modal__actions">
-            <button type="button" onClick={onClose} disabled={saving}>
+            <button
+              type="button"
+              className="community-join-modal__btn community-join-modal__btn--secondary"
+              onClick={onClose}
+              disabled={saving}
+            >
               ביטול
             </button>
-            <button type="submit" disabled={saving || lookupsLoading}>
-              {saving ? "שומר..." : "שמירת פרטים"}
+            <button
+              type="submit"
+              className="community-join-modal__btn community-join-modal__btn--primary"
+              disabled={saving || lookupsLoading}
+            >
+              {saving ? "שומר..." : "יצירת מתנדב/ה"}
             </button>
           </div>
         </form>
@@ -299,4 +308,4 @@ function EditVolunteerModal({ volunteer, onClose, onSaved }) {
   );
 }
 
-export default EditVolunteerModal;
+export default CreateVolunteerModal;

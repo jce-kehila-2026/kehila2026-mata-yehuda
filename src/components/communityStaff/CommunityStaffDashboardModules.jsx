@@ -1,8 +1,8 @@
 const MODULE_IMAGE_BY_ART = {
   join: "/images/community-staff-dashboard/clipboard.png",
   volunteer: "/images/community-staff-dashboard/hands-heart.png",
-  members: "/images/community-staff-dashboard/volunteer-character.png",
-  volunteers: "/images/community-staff-dashboard/people-group.png",
+  members: "/images/community-staff-dashboard/people.png",
+  volunteers: "/images/community-staff-dashboard/volunteer.png",
   matches: "/images/community-staff-dashboard/puzzle.png",
   support: "/images/community-staff-dashboard/megaphone.png",
 };
@@ -27,6 +27,8 @@ const MODULE_CARDS = [
     artClass: "volunteer",
     isAvailable: true,
     route: "/community-staff/volunteer-requests",
+    statKey: "pendingVolunteerRequests",
+    badgeType: "requests",
   },
   {
     id: "community-members",
@@ -105,7 +107,7 @@ function CommunityStaffDashboardModules({
   onUnavailableClick,
 }) {
   return (
-    <div className="community-staff-dashboard__modules" aria-label="מודולי מערכת">
+    <section className="community-staff-dashboard__modules" aria-label="מודולי מערכת">
       <div className="community-staff-dashboard__module-grid">
         {MODULE_CARDS.map((card) => {
           const badgeText =
@@ -167,7 +169,7 @@ function CommunityStaffDashboardModules({
           );
         })}
       </div>
-    </div>
+    </section>
   );
 }
 

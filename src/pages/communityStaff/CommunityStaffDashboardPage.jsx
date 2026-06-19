@@ -2,7 +2,7 @@ import { useEffect, useState } from "react";
 
 import { useNavigate } from "react-router-dom";
 
-import { getCommunityStaffDashboardStats } from "../../services/communityStaff/communityStaffService";
+import { getCommunityStaffDashboardStats, getPendingVolunteerRequests } from "../../services/communityStaff/communityStaffService";
 
 import CommunityStaffDashboardSummary from "../../components/communityStaff/CommunityStaffDashboardSummary.jsx";
 
@@ -24,6 +24,7 @@ const EMPTY_STATS = {
   activeCommunityMembers: 0,
   activeVolunteers: 0,
   pendingJoinRequests: 0,
+  pendingVolunteerRequests: 0,
   pendingHelpRequests: 0,
   activeMatches: 0,
   unmatchedPendingRequests: 0,
@@ -61,13 +62,19 @@ function CommunityStaffDashboardPage() {
 
       try {
 
-        const dashboardStats = await getCommunityStaffDashboardStats();
+        const [dashboardStats, pendingVolunteers] = await Promise.all([
+          getCommunityStaffDashboardStats(),
+          getPendingVolunteerRequests(),
+        ]);
 
 
 
         if (isMounted) {
 
-          setStats(dashboardStats);
+          setStats({
+            ...dashboardStats,
+            pendingVolunteerRequests: pendingVolunteers.length,
+          });
 
         }
 
@@ -120,36 +127,12 @@ function CommunityStaffDashboardPage() {
         <header className="community-staff-dashboard__header">
 
           <h1 className="community-staff-dashboard__title page-title">
-
             לוח בקרה — צוות קהילה
-
-            <span className="community-staff-dashboard__title-icon" aria-hidden="true">
-
-              <svg viewBox="0 0 32 32" fill="none">
-
-                <path
-
-                  d="M16 4C12 10 8 12 6 16c2 2 4 2 6 0 0 4-2 8-4 10 2 6 6 8 10-2 2-4 2-6 0-2 4-4 8-6 10 2-2 4-4 6-8 2 4 4 6 6 8-2-2-4-6-6-10 2 2 4 2 6 0-2-4-6-6-10-12-2z"
-
-                  fill="#3d9b56"
-
-                />
-
-                <path
-
-                  d="M20 6c-2 4-4 6-6 8 1 1 2 1 3 0 0 2-1 4-2 5 1-1 2-2 3-4 1 2 2 3 3 4-1-1-2-3-3-5 1 1 2 1 3 0-1-2-3-4-6-8z"
-
-                  fill="#2d7d46"
-
-                  opacity="0.85"
-
-                />
-
-              </svg>
-
-            </span>
-
           </h1>
+
+          <p className="community-staff-dashboard__subtitle">
+            ניהול חברי קהילה, מתנדבים, התאמות ובקשות
+          </p>
 
         </header>
 
