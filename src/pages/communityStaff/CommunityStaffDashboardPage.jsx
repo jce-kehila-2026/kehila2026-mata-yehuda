@@ -119,13 +119,37 @@ function CommunityStaffDashboardPage() {
 
         <header className="community-staff-dashboard__header">
 
-          <h1 className="community-staff-dashboard__title page-title">לוח בקרה — צוות קהילה</h1>
+          <h1 className="community-staff-dashboard__title page-title">
 
-          <p className="community-staff-dashboard__subtitle">
+            לוח בקרה — צוות קהילה
 
-            גישה לניהול בקשות ולטיפול שוטף בפעילות הקהילה התומכת
+            <span className="community-staff-dashboard__title-icon" aria-hidden="true">
 
-          </p>
+              <svg viewBox="0 0 32 32" fill="none">
+
+                <path
+
+                  d="M16 4C12 10 8 12 6 16c2 2 4 2 6 0 0 4-2 8-4 10 2 6 6 8 10-2 2-4 2-6 0-2 4-4 8-6 10 2-2 4-4 6-8 2 4 4 6 6 8-2-2-4-6-6-10 2 2 4 2 6 0-2-4-6-6-10-12-2z"
+
+                  fill="#3d9b56"
+
+                />
+
+                <path
+
+                  d="M20 6c-2 4-4 6-6 8 1 1 2 1 3 0 0 2-1 4-2 5 1-1 2-2 3-4 1 2 2 3 3 4-1-1-2-3-3-5 1 1 2 1 3 0-1-2-3-4-6-8z"
+
+                  fill="#2d7d46"
+
+                  opacity="0.85"
+
+                />
+
+              </svg>
+
+            </span>
+
+          </h1>
 
         </header>
 
@@ -181,6 +205,30 @@ function CommunityStaffDashboardPage() {
 
       </div>
 
+
+
+      <div className="community-staff-dashboard__landscape-wrap">
+
+        <img
+
+          className="community-staff-dashboard__landscape-image"
+
+          src="/images/community-staff-dashboard/landscape-footer.png"
+
+          alt=""
+
+          aria-hidden="true"
+
+          loading="lazy"
+
+          decoding="async"
+
+          draggable="false"
+
+        />
+
+      </div>
+
     </div>
 
   );
@@ -190,4 +238,3 @@ function CommunityStaffDashboardPage() {
 
 
 export default CommunityStaffDashboardPage;
-
