@@ -8,6 +8,7 @@ import Home from "./pages/HomePages/Home.jsx";
 import Plus60Page from "./pages/HomePages/Plus60Page.jsx";
 import AboutPage from "./pages/HomePages/AboutPage.jsx";
 import ServicesPage from "./pages/HomePages/ServicesPage.jsx";
+import DayCenterPage from "./pages/HomePages/DayCenterPage.jsx";
 import StaffLogin from "./pages/staffManegmentPages/StaffLogin";
 import StaffStatisticsRoute from "./pages/staffManegmentPages/StaffStatisticsRoute";
 import RegistrationLayout from "./components/Payment/RegistrationLayout";
@@ -26,6 +27,7 @@ function App() {
       <PublicNotificationRegistration>
       <Routes>
         <Route path="/" element={<Home />} />
+        <Route path="/day-center" element={<DayCenterPage />} />
         <Route path="/plus60" element={<Plus60Page />} />
         <Route path="/about" element={<AboutPage />} />
         <Route path="/services" element={<ServicesPage />} />
