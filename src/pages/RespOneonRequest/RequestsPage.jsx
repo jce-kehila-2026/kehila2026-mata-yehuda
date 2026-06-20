@@ -8,9 +8,10 @@ import {
 } from "../../services/RespOneonRequest/requestsService";
 import "../../styles/RespOneonRequest/requests.css";
 import {
-  buildWhatsAppUrl,
+  buildStaffWhatsAppMessage,
   formatDisplayDate,
   isWhatsAppCapablePhone,
+  openWhatsAppChat,
   sortAnsweredRequests,
   sortWaitingRequests,
 } from "../../utils/RespOneonRequest/formatters";
@@ -30,6 +31,7 @@ function RequestsPage() {
   const [selectedId, setSelectedId] = useState(null);
   const [mobileDetailOpen, setMobileDetailOpen] = useState(false);
   const [noWhatsAppRequestId, setNoWhatsAppRequestId] = useState(null);
+  const [whatsappHint, setWhatsappHint] = useState(null);
 
   const loadRequests = async ({ showLoading = false } = {}) => {
     if (showLoading) {
@@ -133,26 +135,33 @@ function RequestsPage() {
       return;
     }
 
-    const whatsappUrl = buildWhatsAppUrl(request.phone, answer);
-    if (!whatsappUrl) {
-      setNoWhatsAppRequestId(request.id);
-      setError(null);
-      return;
-    }
+    const whatsappMessage = buildStaffWhatsAppMessage({
+      answer,
+      content: request.content,
+      date: request.date,
+    });
 
     setSendingId(request.id);
     setError(null);
     setNoWhatsAppRequestId(null);
+    setWhatsappHint(null);
 
-    const whatsappWindow = window.open(
-      whatsappUrl,
-      "_blank",
-      "noopener,noreferrer",
+    const whatsappResult = await openWhatsAppChat(
+      request.phone,
+      whatsappMessage,
     );
 
-    if (whatsappWindow) {
-      whatsappWindow.opener = null;
+    if (!whatsappResult.ok) {
+      setNoWhatsAppRequestId(request.id);
+      setSendingId(null);
+      return;
     }
+
+    setWhatsappHint(
+      whatsappResult.copied
+        ? "וואטסאפ נפתח עם ההודעה המלאה. אם מופיעה רק התשובה — הדביקי (הדבק) את ההודעה שהועתקה."
+        : "וואטסאפ נפתח. ודאי שההודעה כוללת את הפנייה, התאריך ושם העמותה.",
+    );
 
     try {
       await markRequestAsAnswered(request.id, answer);
@@ -206,6 +215,12 @@ function RequestsPage() {
       {error && (
         <p className="requests-inbox__error" role="alert">
           {error}
+        </p>
+      )}
+
+      {whatsappHint && (
+        <p className="requests-inbox__hint" role="status">
+          {whatsappHint}
         </p>
       )}
 

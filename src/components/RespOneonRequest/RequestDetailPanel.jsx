@@ -1,4 +1,5 @@
 import {
+  buildStaffWhatsAppMessage,
   buildTelUrl,
   formatDisplayDate,
   isWhatsAppCapablePhone,
@@ -19,6 +20,14 @@ function RequestDetailPanel({
   const telUrl = buildTelUrl(request.phone);
   const useCallInstead =
     mode === "waiting" && (!canUseWhatsApp || showNoWhatsAppNotice);
+  const whatsappPreview =
+    mode === "waiting" && answer.trim()
+      ? buildStaffWhatsAppMessage({
+          answer,
+          content: request.content,
+          date: request.date,
+        })
+      : null;
 
   return (
     <article className="inbox-detail">
@@ -78,6 +87,17 @@ function RequestDetailPanel({
               rows={5}
               disabled={isSending || useCallInstead}
             />
+
+            {whatsappPreview && (
+              <div className="inbox-detail__whatsapp-preview">
+                <h4 className="inbox-detail__label">
+                  כך תיראה ההודעה בוואטסאפ
+                </h4>
+                <pre className="inbox-detail__whatsapp-preview-text">
+                  {whatsappPreview}
+                </pre>
+              </div>
+            )}
 
             <div className="inbox-detail__actions">
               <button
