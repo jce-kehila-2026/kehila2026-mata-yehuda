@@ -99,13 +99,13 @@ function mapNotificationApiError(response, data) {
     }
 
     if (response.status === 400 && data?.error === "MESSAGE_BODY_REQUIRED") {
-        return "יש להזין תוכן התראה";
+        return "יש להזין תוכן הודעה";
     }
 
     if (response.status === 503) {
         return (
             data?.message ||
-            "שרת ההתראות לא מוגדר. הפעל את שרת השליחה והגדר משתני סביבה."
+            "שרת ההודעות לא מוגדר. הפעל את שרת השליחה והגדר משתני סביבה."
         );
     }
 

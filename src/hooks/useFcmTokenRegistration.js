@@ -44,22 +44,22 @@ function getInitialGenerationStatus() {
 function mapFcmReasonToMessage(reason, result = {}) {
     switch (reason) {
         case "NOTIFICATION_API_UNSUPPORTED":
-            return "הדפדפן אינו תומך בהתראות";
+            return "הדפדפן אינו תומך בהודעות";
         case "PERMISSION_NOT_GRANTED":
-            return "לא ניתנה הרשאה להתראות";
+            return "לא ניתנה הרשאה להודעות";
         case "VAPID_KEY_MISSING":
             return "מפתח VAPID חסר בהגדרות המערכת";
         case "MESSAGING_NOT_SUPPORTED":
-            return "התראות אינן נתמכות בדפדפן זה";
+            return "הודעות אינן נתמכות בדפדפן זה";
         case "SERVICE_WORKER_UNSUPPORTED":
         case "SERVICE_WORKER_REGISTRATION_FAILED":
-            return "שגיאה ברישום Service Worker להתראות";
+            return "שגיאה ברישום Service Worker להודעות";
         case "GET_TOKEN_EMPTY":
-            return result.explanation || "לא התקבל אסימון התראה";
+            return result.explanation || "לא התקבל אסימון הודעה";
         case "GET_TOKEN_FAILED":
-            return result.explanation || "שגיאה בקבלת אסימון התראה";
+            return result.explanation || "שגיאה בקבלת אסימון הודעה";
         default:
-            return "שגיאה בהפעלת התראות";
+            return "שגיאה בהפעלת הודעות";
     }
 }
 
@@ -320,7 +320,7 @@ export function useFcmTokenRegistration({ enabled = true } = {}) {
                 `${LOG_PREFIX} Failed to save token to Firestore`,
                 persistError
             );
-            setError("שגיאה בשמירת אסימון ההתראה");
+            setError("שגיאה בשמירת אסימון ההודעה");
             setGenerationStatus("persist_failed");
             return null;
         }

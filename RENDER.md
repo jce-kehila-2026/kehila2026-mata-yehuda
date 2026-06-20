@@ -6,7 +6,7 @@
 |--------|--------|--------|
 | **matayehuda-frontend** | `src/` (בשורש) | React — נבנה ל-`dist/` |
 | **matayehuda-payment-api** | `server/server.js` | תשלומים, הרשמה, PayPal |
-| **matayehuda-notifications-api** | `server/index.js` | התראות FCM לצוות |
+| **matayehuda-notifications-api** | `server/index.js` | הודעות FCM לצוות |
 
 > תיקיית `frontend/` **לא בשימוש** — הקוד האמיתי ב-`src/`.
 
@@ -138,7 +138,7 @@ FCM_TOKEN_STALE_DAYS=90
 # טרמינל 1 — תשלומים
 cd server && npm run dev:payment
 
-# טרמינל 2 — התראות
+# טרמינל 2 — הודעות
 cd server && npm start
 
 # טרמינל 3 — פרונט
@@ -152,7 +152,7 @@ npm run dev
 | בעיה | פתרון |
 |------|--------|
 | האתר נטען אבל API נכשל | בדקי `VITE_API_BASE` — חייב URL מלא של payment-api |
-| CORS / התראות לא עובדות | עדכני `CLIENT_ORIGIN` לכתובת ה-frontend ב-Render |
+| CORS / הודעות לא עובדות | עדכני `CLIENT_ORIGIN` לכתובת ה-frontend ב-Render |
 | PayPal לא חוזר נכון | עדכני `FRONTEND_URL` לכתובת ה-frontend |
 | שירות "נרדם" (Free plan) | בקשה ראשונה אחרי 15 דק׳ איטית — נורמלי ב-Free |
 | `npm run build` נכשל | הריצי מקומית `npm run build` לבדיקה |

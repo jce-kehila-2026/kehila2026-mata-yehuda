@@ -69,7 +69,7 @@ Open http://localhost:5173
 ### Testing
 **Register a device token:** open the site, use the notification opt-in card, optionally verify with ת.ז./טלפון, allow browser notifications. Check Firestore `notification_tokens/{token}`.
 
-**Send from staff dashboard:** log in as staff → **התראות** → enter title/body → **שליחת התראה**. Requires the notification server running with Admin SDK configured.
+**Send from staff dashboard:** log in as staff → **הודעות** → enter title/body → **שליחת הודעה**. Requires the notification server running with Admin SDK configured.
 
 ## Demo / Deployment
 - Deployed app: https://your-app.example.com  

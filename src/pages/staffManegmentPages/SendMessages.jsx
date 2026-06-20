@@ -107,16 +107,16 @@ function SendMessages() {
             console.error(err);
 
             if (err.message === "NOT_AUTHENTICATED") {
-                setError("יש להתחבר מחדש כדי לשלוח התראות");
+                setError("יש להתחבר מחדש כדי לשלוח הודעות");
             } else if (err.name === NOTIFICATION_BACKEND_ERROR_NAME) {
                 setError(err.message);
             } else if (err.status === 503) {
                 setError(
                     err.message ||
-                        "שרת ההתראות לא מוגדר. הפעל את שרת השליחה והגדר משתני סביבה."
+                        "שרת ההודעות לא מוגדר. הפעל את שרת השליחה והגדר משתני סביבה."
                 );
             } else {
-                setError(err.message || "שגיאה בשליחת ההתראה");
+                setError(err.message || "שגיאה בשליחת ההודעה");
             }
         } finally {
             setSending(false);

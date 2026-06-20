@@ -142,7 +142,7 @@ function AddParticipant({ onSuccess, onCancel }) {
 
                 <div className="row checkbox-row">
                     <label htmlFor="add-marketing-consent">
-                        אני מאשר/ת קבלת התראות ועדכונים
+                        אני מאשר/ת קבלת הודעות ועדכונים
                     </label>
                     <input
                         id="add-marketing-consent"
