@@ -1,7 +1,7 @@
 import { useEffect, useState } from "react";
 import CommunityMembershipCheck from "../../components/supportiveCommunity/CommunityMembershipCheck";
 import ServiceRequestForm from "../../components/supportiveCommunity/ServiceRequestForm";
-import { syncActiveCommunitySubscriptionsToHomeHelpRequests } from "../../services/supportive community/supportiveCommunityService";
+import SupportiveCommunityBackNav from "../../components/supportiveCommunity/SupportiveCommunityBackNav";import { syncActiveCommunitySubscriptionsToHomeHelpRequests } from "../../services/supportive community/supportiveCommunityService";
 import "../../styles/supportive community/SupportiveCommunityPage.css";
 import "../../styles/supportive community/CommunityJoinForm.css";
 
@@ -29,6 +29,8 @@ function ServiceRequestPage() {
 
   return (
     <div className="supportive-community-page" dir="rtl">
+      <SupportiveCommunityBackNav />
+
       <section className="community-hero">
         <h1>בקשת שירות נוסף</h1>
         <p>

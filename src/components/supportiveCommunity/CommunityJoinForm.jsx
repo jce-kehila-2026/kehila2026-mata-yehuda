@@ -1,6 +1,7 @@
 import { useState } from "react";
 import HelpServicesSelector from "./HelpServicesSelector";
 import LanguagesSelector from "./LanguagesSelector";
+import SupportiveCommunityBackNav from "./SupportiveCommunityBackNav";
 
 import "../../styles/supportive community/CommunityJoinPage.css";
 import "../../styles/supportive community/CommunityJoinForm.css";
@@ -120,6 +121,8 @@ function CommunityJoinForm() {
 
   return (
     <div className="supportive-community-page">
+      <SupportiveCommunityBackNav />
+
       <section className="community-hero">
         <h1>בקשת הצטרפות לקהילה תומכת</h1>
         <p>מלאו את הפרטים ונחזור אליכם בהקדם</p>
