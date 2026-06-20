@@ -588,6 +588,56 @@
   }
 }
 
+@media (max-width: 640px) {
+  .day-center-stats__grid {
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+    max-width: 100%;
+    gap: clamp(0.3rem, 1.5vw, 0.45rem);
+  }
+
+  .day-center-stat-card {
+    min-height: 72px;
+    padding: 0.35rem 0.2rem;
+  }
+
+  .day-center-stat-card__value {
+    font-size: clamp(0.95rem, 4vw, 1.2rem);
+  }
+
+  .day-center-stat-card__label {
+    font-size: clamp(0.68rem, 2.5vw, 0.82rem);
+  }
+
+  .day-center-stat-card__note {
+    font-size: clamp(0.58rem, 2vw, 0.68rem);
+    line-height: 1.2;
+  }
+
+  .day-center-gallery__grid {
+    flex-direction: row;
+    flex-wrap: nowrap;
+    width: 100%;
+    max-width: 100%;
+    gap: clamp(0.35rem, 2vw, 0.6rem);
+  }
+
+  .day-center-gallery__card {
+    flex: 1 1 0;
+    min-width: 0;
+    width: auto;
+    max-width: none;
+    padding: 0.3rem;
+  }
+
+  .day-center-gallery__media,
+  .day-center-gallery__card--landscape .day-center-gallery__media,
+  .day-center-gallery__card--portrait .day-center-gallery__media {
+    width: 100%;
+    max-width: 100%;
+    aspect-ratio: 3 / 4;
+  }
+}
+
 @media (max-width: 700px) {
   .day-center-hero {
     padding-inline: 0.85rem;

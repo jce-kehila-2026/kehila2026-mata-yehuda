@@ -3,11 +3,23 @@ import { useNavigate } from "react-router-dom";
 import ActivityCard from "../../components/Homecomponents/ActivityCard";
 import { getAllActivities } from "../../services/HomeServices/activitiesService";
 import { PROGRAM_60_PLUS_MINUS_ID } from "../../utils/staffManegmentUtils/programConstants";
+import { toActivityDate } from "../../utils/staffManegmentUtils/dateUtils";
 import ActivityCalendar from "../../components/Homecomponents/ActivityCalendar"; 
 
 import "../../styles/HomeStyle/Plus60Page.css";
 import "../../styles/HomeStyle/ActivityCard.css";
 import "../../styles/HomeStyle/Calendar.css";
+
+function getActivityStartTime(activity) {
+  const startDate = toActivityDate(activity?.start_date);
+  return startDate ? startDate.getTime() : 0;
+}
+
+function sortActivitiesByStartDate(activities) {
+  return [...activities].sort(
+    (left, right) => getActivityStartTime(right) - getActivityStartTime(left)
+  );
+}
 
 function Plus60Page() {
     const navigate = useNavigate();
@@ -18,14 +30,16 @@ function Plus60Page() {
         async function loadActivities() {
         const data = await getAllActivities();
 
-        const plus60Activities = data.filter((activity) => {
-          const activityProgramId =
-            activity.program_id || activity.programId || "";
-          return (
-            !activityProgramId ||
-            activityProgramId === PROGRAM_60_PLUS_MINUS_ID
-          );
-        });
+        const plus60Activities = sortActivitiesByStartDate(
+          data.filter((activity) => {
+            const activityProgramId =
+              activity.program_id || activity.programId || "";
+            return (
+              !activityProgramId ||
+              activityProgramId === PROGRAM_60_PLUS_MINUS_ID
+            );
+          })
+        );
         setActivities(plus60Activities);
         }
 

@@ -21,6 +21,8 @@ const HOME_PROGRAM_TITLES = {
   supportive_community: "קהילה תומכת",
 };
 
+const PROGRAMS_PAGE_SIZE = 3;
+
 function scrollToSection(sectionId) {
   const element = document.getElementById(sectionId);
   if (!element) {
@@ -42,6 +44,7 @@ function Home() {
   const [showDayCenterForm, setShowDayCenterForm] = useState(false);
   const [showVolunteerForm, setShowVolunteerForm] = useState(false);
   const [selectedProgram, setSelectedProgram] = useState(null);
+  const [visibleProgramCount, setVisibleProgramCount] = useState(PROGRAMS_PAGE_SIZE);
 
   useEffect(() => {
     async function loadPrograms() {
@@ -78,6 +81,54 @@ function Home() {
     return () => window.clearTimeout(timer);
   }, []);
 
+  const visiblePrograms = programs.slice(0, visibleProgramCount);
+  const hasMorePrograms = programs.length > PROGRAMS_PAGE_SIZE;
+  const canShowMorePrograms = visibleProgramCount < programs.length;
+
+  function handleShowMorePrograms() {
+    setVisibleProgramCount((current) =>
+      Math.min(current + PROGRAMS_PAGE_SIZE, programs.length)
+    );
+  }
+
+  function handleShowLessPrograms() {
+    setVisibleProgramCount(PROGRAMS_PAGE_SIZE);
+  }
+
+  function renderProgramButtons(program) {
+    if (program.id === "supportive_community") {
+      return (
+        <button onClick={() => navigate("/supportive-community")}>
+          מידע נוסף והרשמה
+        </button>
+      );
+    }
+
+    if (program.id === "60_plus_minus") {
+      return (
+        <button onClick={() => navigate("/plus60")}>הצג פעילויות</button>
+      );
+    }
+
+    if (program.id === "day_center") {
+      return (
+        <div className="program-card__day-actions">
+          <button onClick={() => navigate("/day-center")}>
+            מידע נוסף והרשמה
+          </button>
+          <button
+            className="volunteer-btn"
+            onClick={() => setShowVolunteerForm(true)}
+          >
+            התנדב
+          </button>
+        </div>
+      );
+    }
+
+    return <button onClick={() => setSelectedProgram(program)}>הרשמה</button>;
+  }
+
   return (
     <div className="home-page">
       <HomeNavbar />
@@ -103,49 +154,41 @@ function Home() {
       {loading && <p>טוען תוכניות...</p>}
 
       <div className="programs-grid">
-        {programs.map((program) => {
-          let buttons;
-
-          if (program.id === "supportive_community") {
-            buttons = (
-              <button onClick={() => navigate("/supportive-community")}>
-                מידע נוסף והרשמה
-              </button>
-            );
-          } else if (program.id === "60_plus_minus") {
-            buttons = (
-              <button onClick={() => navigate("/plus60")}>הצג פעילויות</button>
-            );
-          } else if (program.id === "day_center") {
-            buttons = (
-              <div className="program-card__day-actions">
-                <button onClick={() => navigate("/day-center")}>
-                  מידע נוסף והרשמה
-                </button>
-                <button
-                  className="volunteer-btn"
-                  onClick={() => setShowVolunteerForm(true)}
-                >
-                  התנדב
-                </button>
-              </div>
-            );
-          } else {
-            buttons = <button onClick={() => setSelectedProgram(program)}>הרשמה</button>;
-          }
-
-          return (
-            <ProgramCard
-              key={program.id}
-              program={{
-                ...program,
-                title: HOME_PROGRAM_TITLES[program.id] || program.title,
-              }}
-              buttons={buttons}
-            />
-          );
-        })}
+        {visiblePrograms.map((program) => (
+          <ProgramCard
+            key={program.id}
+            program={{
+              ...program,
+              title: HOME_PROGRAM_TITLES[program.id] || program.title,
+            }}
+            buttons={renderProgramButtons(program)}
+          />
+        ))}
       </div>
+
+      {hasMorePrograms && (
+        <div className="home-programs-actions">
+          {canShowMorePrograms ? (
+            <button
+              type="button"
+              className="home-programs-more-btn"
+              onClick={handleShowMorePrograms}
+              aria-label="הצג עוד תוכניות"
+            >
+              ↓
+            </button>
+          ) : (
+            <button
+              type="button"
+              className="home-programs-more-btn"
+              onClick={handleShowLessPrograms}
+              aria-label="הצג פחות תוכניות"
+            >
+              ↑
+            </button>
+          )}
+        </div>
+      )}
 
       <div className="home-action-cards">
         <RequestBox />
