@@ -31,7 +31,6 @@ function RequestsPage() {
   const [selectedId, setSelectedId] = useState(null);
   const [mobileDetailOpen, setMobileDetailOpen] = useState(false);
   const [noWhatsAppRequestId, setNoWhatsAppRequestId] = useState(null);
-  const [whatsappHint, setWhatsappHint] = useState(null);
 
   const loadRequests = async ({ showLoading = false } = {}) => {
     if (showLoading) {
@@ -144,7 +143,6 @@ function RequestsPage() {
     setSendingId(request.id);
     setError(null);
     setNoWhatsAppRequestId(null);
-    setWhatsappHint(null);
 
     const whatsappResult = await openWhatsAppChat(
       request.phone,
@@ -156,12 +154,6 @@ function RequestsPage() {
       setSendingId(null);
       return;
     }
-
-    setWhatsappHint(
-      whatsappResult.copied
-        ? "וואטסאפ נפתח עם ההודעה המלאה. אם מופיעה רק התשובה — הדביקי (הדבק) את ההודעה שהועתקה."
-        : "וואטסאפ נפתח. ודאי שההודעה כוללת את הפנייה, התאריך ושם העמותה.",
-    );
 
     try {
       await markRequestAsAnswered(request.id, answer);
@@ -215,12 +207,6 @@ function RequestsPage() {
       {error && (
         <p className="requests-inbox__error" role="alert">
           {error}
-        </p>
-      )}
-
-      {whatsappHint && (
-        <p className="requests-inbox__hint" role="status">
-          {whatsappHint}
         </p>
       )}
 
