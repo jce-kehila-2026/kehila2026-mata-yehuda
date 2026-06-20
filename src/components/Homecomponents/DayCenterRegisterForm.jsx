@@ -1,5 +1,6 @@
 import { useState } from "react";
 import { registerToDayCenter } from "../../services/HomeServices/dayCenterService";
+import NotificationOptInFields from "../notifications/NotificationOptInFields";
 
 function DayCenterRegisterForm({ onClose }) {
   const [firstName, setFirstName] = useState("");
@@ -93,7 +94,9 @@ function DayCenterRegisterForm({ onClose }) {
           onChange={(e) => setPhone(e.target.value)}
         />
 
-        <button onClick={handleSubmit}>שליחה</button>
+        <NotificationOptInFields />
+
+        <button type="button" onClick={handleSubmit}>שליחה</button>
       </div>
     </div>
   );
