@@ -3,7 +3,7 @@ import { Bell, BellRing, Send } from "lucide-react";
 const STAT_ITEMS = [
     {
         id: "registered",
-        label: "משתתפים רשומים להתראות",
+        label: "משתתפים רשומים להודעות",
         icon: BellRing,
         key: "registeredParticipants"
     },
@@ -15,7 +15,7 @@ const STAT_ITEMS = [
     },
     {
         id: "weekly",
-        label: "התראות שנשלחו השבוע",
+        label: "הודעות שנשלחו השבוע",
         icon: Send,
         key: "sentThisWeek"
     }
@@ -25,7 +25,7 @@ function NotificationStatsCards({ stats, loading }) {
     return (
         <section
             className="notifications-stats"
-            aria-label="סטטיסטיקות התראות"
+            aria-label="סטטיסטיקות הודעות"
         >
             <div className="notifications-stats__grid">
                 {STAT_ITEMS.map((item) => {

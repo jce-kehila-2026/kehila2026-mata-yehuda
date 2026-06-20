@@ -79,7 +79,7 @@ function NotificationOptIn() {
                     id="notification-opt-in-title"
                     className="notification-opt-in-modal__title"
                 >
-                    קבלת התראות
+                    קבלת הודעות
                 </h2>
 
                 <p
@@ -96,7 +96,7 @@ function NotificationOptIn() {
                         onClick={handleApprove}
                         disabled={submitting}
                     >
-                        {submitting ? "מפעיל..." : "אישור קבלת התראות"}
+                        {submitting ? "מפעיל..." : "אישור קבלת הודעות"}
                     </button>
                     <button
                         type="button"

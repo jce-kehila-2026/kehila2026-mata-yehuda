@@ -23,7 +23,7 @@ function MessageForm({
             }}
         >
             <div className="notifications-form__header">
-                <h2 className="notifications-form__title">שליחת התראה חדשה</h2>
+                <h2 className="notifications-form__title">שליחת הודעה חדשה</h2>
                 {complianceNote ? (
                     <p className="notifications-form__note">{complianceNote}</p>
                 ) : null}
@@ -31,7 +31,7 @@ function MessageForm({
 
             <div className="notifications-form__fields-row">
                 <div className="notifications-form__field">
-                    <label htmlFor="notification-title">כותרת התראה</label>
+                    <label htmlFor="notification-title">כותרת הודעה</label>
                     <input
                         id="notification-title"
                         type="text"
@@ -45,7 +45,7 @@ function MessageForm({
                 </div>
 
                 <div className="notifications-form__field notifications-form__field--body">
-                    <label htmlFor="notification-body">תוכן ההתראה</label>
+                    <label htmlFor="notification-body">תוכן ההודעה</label>
                     <textarea
                         id="notification-body"
                         className="notifications-form__textarea"
@@ -129,7 +129,7 @@ function MessageForm({
                                 strokeWidth={2.25}
                                 aria-hidden="true"
                             />
-                            <span>שולח התראה...</span>
+                            <span>שולח הודעה...</span>
                         </>
                     ) : (
                         <>
@@ -138,7 +138,7 @@ function MessageForm({
                                 strokeWidth={2}
                                 aria-hidden="true"
                             />
-                            <span>שליחת התראה</span>
+                            <span>שליחת הודעה</span>
                         </>
                     )}
                 </button>

@@ -12,7 +12,7 @@ function CommunityStaffDashboardAlerts({
       <h2 className="community-staff-dashboard__section-title">דורש טיפול</h2>
 
       {loading && (
-        <p className="community-staff-dashboard__alerts-loading">טוען התראות...</p>
+        <p className="community-staff-dashboard__alerts-loading">טוען הודעות...</p>
       )}
 
       {error && (

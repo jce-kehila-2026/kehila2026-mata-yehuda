@@ -10,7 +10,7 @@ function NotificationRecentActivity({ items = [], loading }) {
                     פעילות אחרונה
                 </h2>
                 <p className="notifications-activity__subtitle">
-                    התראות שנשלחו לאחרונה מהמערכת
+                    הודעות שנשלחו לאחרונה מהמערכת
                 </p>
             </div>
 
@@ -20,7 +20,7 @@ function NotificationRecentActivity({ items = [], loading }) {
 
             {!loading && items.length === 0 ? (
                 <div className="notifications-activity__empty">
-                    <p>עדיין לא נשלחו התראות מהמערכת</p>
+                    <p>עדיין לא נשלחו הודעות מהמערכת</p>
                 </div>
             ) : null}
 

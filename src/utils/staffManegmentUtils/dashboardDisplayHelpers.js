@@ -84,7 +84,7 @@ export function buildRecentUpdates(overview) {
     if (overview.latestNotification) {
         items.push({
             id: `notification-${overview.latestNotification.id ?? "latest"}`,
-            title: "נשלחה התראה למשתתפים",
+            title: "נשלחה הודעה למשתתפים",
             timestamp: overview.latestNotification.sentAt,
             page: "messages"
         });
