@@ -33,7 +33,7 @@ function StaffStatisticsRoute() {
             try {
                 const staffSnap = await getDoc(doc(db, "staff", user.uid));
 
-                if (!staffSnap.exists()) {
+                if (!staffSnap.exists) {
                     setState({
                         loading: false,
                         allowed: false,

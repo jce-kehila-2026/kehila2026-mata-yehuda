@@ -36,15 +36,8 @@ function NotificationOptIn() {
         dismissOptIn();
         setSubmitting(true);
 
-        console.info("[fcm] Opt-in approve clicked", { permission });
-
         try {
-            const nextToken = await requestNotificationPermission("");
-
-            console.info("[fcm] Opt-in flow finished", {
-                success: Boolean(nextToken),
-                localStorageToken: localStorage.getItem("fcm_token")
-            });
+            await requestNotificationPermission("");
         } catch (requestError) {
             console.error("[fcm] Opt-in flow failed", requestError);
         } finally {
@@ -53,7 +46,6 @@ function NotificationOptIn() {
     }
 
     function handleLater() {
-        console.info("[fcm] Opt-in dismissed by user");
         dismissOptIn();
     }
 

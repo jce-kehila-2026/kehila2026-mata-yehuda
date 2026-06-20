@@ -15,7 +15,6 @@ export function getConfiguredVapidKey() {
 
 export function validateFcmEnvironmentAtStartup() {
     if (isVapidKeyConfigured()) {
-        console.info(`${LOG_PREFIX} VAPID key loaded`);
         return true;
     }
 

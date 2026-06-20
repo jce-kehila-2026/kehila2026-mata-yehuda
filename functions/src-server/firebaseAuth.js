@@ -67,7 +67,7 @@ export async function verifyActiveStaffUser(authorizationHeader) {
         .doc(decoded.uid)
         .get();
 
-    if (!staffSnap.exists() || staffSnap.data()?.is_active !== true) {
+    if (!staffSnap.exists || staffSnap.data()?.is_active !== true) {
         throw new Error("UNAUTHORIZED");
     }
 
