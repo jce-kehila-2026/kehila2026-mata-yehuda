@@ -54,6 +54,9 @@ function SendMessages() {
         checkNotificationBackendHealth();
     }, []);
 
+    const activeDevices = stats?.activeDevices ?? 0;
+    const pushSendingDisabled = !dashboardLoading && activeDevices === 0;
+
     async function handleSendNotification() {
         setError("");
         setSuccess("");
@@ -65,7 +68,7 @@ function SendMessages() {
             return;
         }
 
-        if (!dashboardLoading && (stats?.activeDevices ?? 0) === 0) {
+        if (pushSendingDisabled) {
             setError(NOTIFICATION_NO_ACTIVE_DEVICES_MESSAGE);
             return;
         }
@@ -124,6 +127,20 @@ function SendMessages() {
 
                 <div className="notifications-page__layout">
                     <section className="notifications-page__form-section">
+                        {pushSendingDisabled ? (
+                            <div
+                                className="notifications-alert"
+                                role="status"
+                                style={{
+                                    background: "#fff3cd",
+                                    color: "#664d03",
+                                    border: "1px solid #ffecb5"
+                                }}
+                            >
+                                {NOTIFICATION_NO_ACTIVE_DEVICES_MESSAGE}
+                            </div>
+                        ) : null}
+
                         {error ? (
                             <div
                                 className="notifications-alert notifications-alert--error"
@@ -148,7 +165,13 @@ function SendMessages() {
                                 body={body}
                                 targetGroup={targetGroup}
                                 complianceNote={NOTIFICATION_COMPLIANCE_NOTE}
+                                inactiveDevicesMessage={
+                                    pushSendingDisabled
+                                        ? NOTIFICATION_NO_ACTIVE_DEVICES_MESSAGE
+                                        : ""
+                                }
                                 sending={sending}
+                                sendDisabled={pushSendingDisabled}
                                 onTitleChange={setTitle}
                                 onBodyChange={setBody}
                                 onTargetGroupChange={setTargetGroup}

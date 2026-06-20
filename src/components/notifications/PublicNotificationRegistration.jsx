@@ -2,7 +2,12 @@ import { useLocation } from "react-router-dom";
 import { FcmTokenRegistrationProvider } from "./FcmTokenRegistrationProvider";
 import NotificationOptIn from "./NotificationOptIn";
 
-const EXCLUDED_PATH_PREFIXES = ["/staff-login", "/community-staff", "/attendance"];
+const EXCLUDED_PATH_PREFIXES = [
+    "/staff-login",
+    "/community-staff",
+    "/attendance",
+    "/fcm-test"
+];
 
 function isPublicParticipantPath(pathname) {
     return !EXCLUDED_PATH_PREFIXES.some(
