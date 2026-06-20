@@ -295,10 +295,6 @@ function SupportiveCommunityPage() {
               <p className="hero-lead">
                 שירותי תמיכה, ליווי וסיוע לבני 62+ בבית ובקהילה.
               </p>
-              <p className="hero-price">
-                <span className="hero-price-value">160 ₪</span>
-                <span className="hero-price-label">לחודש</span>
-              </p>
               <button
                 type="button"
                 className="btn btn-primary btn-hero"
@@ -323,7 +319,7 @@ function SupportiveCommunityPage() {
               <p className="section-intro">לחצו על שירות לפרטים נוספים.</p>
             </div>
 
-            <div className="services-grid">
+            <div className="services-grid services-grid--fixed">
               {FIXED_SERVICES.map((service, index) => {
                 const isOpen = expandedService === index;
                 return (

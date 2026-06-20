@@ -8,6 +8,9 @@ function VolunteerRequestsPage() {
         <h1 className="community-volunteer-requests-page__title page-title">
           בקשות התנדבות
         </h1>
+        <p className="community-staff-page-subtitle">
+          ניהול ואישור בקשות מתנדבים חדשות
+        </p>
       </header>
 
       <VolunteerRequestsTable />

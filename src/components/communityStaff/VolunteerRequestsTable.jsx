@@ -1,4 +1,4 @@
-import { useCallback, useEffect, useState } from "react";
+import { useCallback, useEffect, useMemo, useState } from "react";
 import {
   approveVolunteer,
   getPendingVolunteerRequests,
@@ -6,13 +6,46 @@ import {
 import CommunityStaffMessage, {
   useCommunityStaffMessage,
 } from "./CommunityStaffMessage";
-import { CommunityStaffCompactCard } from "./CommunityStaffListUi.jsx";
+import {
+  CommunityStaffCompactCard,
+  CommunityStaffEmptyState,
+  CommunityStaffListToolbar,
+  CommunityStaffPagination,
+  CommunityStaffStatusBadge,
+  CommunityStaffStatusOverview,
+  Users,
+  buildRequestStatusOverviewItems,
+} from "./CommunityStaffListUi.jsx";
 import VolunteerRequestDetailsModal from "./VolunteerRequestDetailsModal.jsx";
+
+const PAGE_SIZE_OPTIONS = [5, 10, 25];
+
+function matchesSearch(volunteer, searchTerm) {
+  if (!searchTerm) {
+    return true;
+  }
+
+  const normalizedSearch = searchTerm.trim().toLowerCase();
+  const searchableValues = [
+    volunteer.fullNameDisplay,
+    volunteer.phone,
+    volunteer.status,
+  ];
+
+  return searchableValues.some((value) =>
+    String(value || "")
+      .toLowerCase()
+      .includes(normalizedSearch)
+  );
+}
 
 function VolunteerRequestsTable() {
   const [volunteers, setVolunteers] = useState([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
+  const [searchTerm, setSearchTerm] = useState("");
+  const [pageSize, setPageSize] = useState(10);
+  const [currentPage, setCurrentPage] = useState(1);
   const [selectedVolunteer, setSelectedVolunteer] = useState(null);
   const [isApproving, setIsApproving] = useState(false);
   const { message, showSuccess, showError, clearMessage } = useCommunityStaffMessage();
@@ -35,6 +68,28 @@ function VolunteerRequestsTable() {
   useEffect(() => {
     loadVolunteers();
   }, [loadVolunteers]);
+
+  const filteredVolunteers = useMemo(() => {
+    return volunteers.filter((volunteer) => matchesSearch(volunteer, searchTerm));
+  }, [volunteers, searchTerm]);
+
+  const totalPages = Math.max(1, Math.ceil(filteredVolunteers.length / pageSize));
+
+  const paginatedVolunteers = useMemo(() => {
+    const safePage = Math.min(currentPage, totalPages);
+    const startIndex = (safePage - 1) * pageSize;
+    return filteredVolunteers.slice(startIndex, startIndex + pageSize);
+  }, [filteredVolunteers, currentPage, pageSize, totalPages]);
+
+  useEffect(() => {
+    setCurrentPage(1);
+  }, [searchTerm, pageSize]);
+
+  useEffect(() => {
+    if (currentPage > totalPages) {
+      setCurrentPage(totalPages);
+    }
+  }, [currentPage, totalPages]);
 
   const handleApprove = async (volunteerId) => {
     setIsApproving(true);
@@ -66,32 +121,44 @@ function VolunteerRequestsTable() {
 
   return (
     <div className="community-volunteer-requests">
-      <div className="community-volunteer-requests__top-row">
-        <span className="community-volunteer-requests__badge">
-          בקשות ממתינות {volunteers.length}
-        </span>
-      </div>
+      <CommunityStaffStatusOverview
+        items={buildRequestStatusOverviewItems(volunteers)}
+      />
 
       <CommunityStaffMessage message={message} onDismiss={clearMessage} />
 
-      <div className="community-volunteer-requests__card">
-        {volunteers.length === 0 ? (
-          <p className="community-volunteer-requests__empty">
-            אין בקשות התנדבות ממתינות
-          </p>
+      <CommunityStaffListToolbar
+        searchId="volunteer-requests-search"
+        searchValue={searchTerm}
+        onSearchChange={(event) => setSearchTerm(event.target.value)}
+        searchPlaceholder="חיפוש לפי שם, טלפון או סטטוס..."
+        pageSizeId="volunteer-requests-page-size"
+        pageSizeValue={pageSize}
+        onPageSizeChange={(event) => setPageSize(Number(event.target.value))}
+        pageSizeOptions={PAGE_SIZE_OPTIONS}
+        showFilter={false}
+      />
+
+      <div className="community-staff-request-list community-volunteer-requests__card">
+        {filteredVolunteers.length === 0 ? (
+          <CommunityStaffEmptyState
+            icon={Users}
+            message={
+              volunteers.length === 0
+                ? "אין בקשות ממתינות כרגע"
+                : "לא נמצאו בקשות התואמות לחיפוש"
+            }
+          />
         ) : (
           <ul className="community-staff-compact-list">
-            {volunteers.map((volunteer) => (
+            {paginatedVolunteers.map((volunteer) => (
               <CommunityStaffCompactCard
                 key={volunteer.id}
                 name={volunteer.fullNameDisplay}
                 phone={volunteer.phone || "—"}
-                status={
-                  <span className="community-volunteer-requests__status">
-                    {volunteer.status || "—"}
-                  </span>
-                }
-                primaryLabel="אישור מתנדב"
+                status={<CommunityStaffStatusBadge status={volunteer.status} />}
+                viewLabel="צפייה"
+                primaryLabel="אישור"
                 onPrimaryClick={() => setSelectedVolunteer(volunteer)}
                 onViewDetails={() => setSelectedVolunteer(volunteer)}
                 primaryDisabled={isApproving}
@@ -100,6 +167,17 @@ function VolunteerRequestsTable() {
           </ul>
         )}
       </div>
+
+      {filteredVolunteers.length > 0 && (
+        <CommunityStaffPagination
+          currentPage={currentPage}
+          totalPages={totalPages}
+          onPrevious={() => setCurrentPage((page) => Math.max(1, page - 1))}
+          onNext={() =>
+            setCurrentPage((page) => Math.min(totalPages, page + 1))
+          }
+        />
+      )}
 
       <VolunteerRequestDetailsModal
         volunteer={selectedVolunteer}

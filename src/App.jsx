@@ -9,7 +9,10 @@ import Plus60Page from "./pages/HomePages/Plus60Page.jsx";
 import AboutPage from "./pages/HomePages/AboutPage.jsx";
 import ServicesPage from "./pages/HomePages/ServicesPage.jsx";
 import StaffLogin from "./pages/staffManegmentPages/StaffLogin";
+import StaffAreaSelectionPage from "./pages/staffManegmentPages/StaffAreaSelectionPage";
+import StaffDashboardRoute from "./pages/staffManegmentPages/StaffDashboardRoute";
 import StaffStatisticsRoute from "./pages/staffManegmentPages/StaffStatisticsRoute";
+import { withStaffAuthGate } from "./components/staff/StaffAuthGate";
 import RegistrationLayout from "./components/Payment/RegistrationLayout";
 import PaymentPage from "./pages/Payment/PaymentPage";
 import PaymentSuccess from "./pages/Payment/PaymentSuccess";
@@ -30,8 +33,30 @@ function App() {
         <Route path="/about" element={<AboutPage />} />
         <Route path="/services" element={<ServicesPage />} />
         <Route path="/staff-login" element={<StaffLogin />} />
-        <Route path="/staff/statistics" element={<StaffStatisticsRoute />} />
-        <Route path="/requests" element={<RequestsPage />} />
+
+        <Route
+          path="/staff/area-selection"
+          Component={withStaffAuthGate(StaffAreaSelectionPage)}
+        />
+        <Route
+          path="/staff/dashboard"
+          Component={withStaffAuthGate(StaffDashboardRoute)}
+        />
+        <Route
+          path="/staff/statistics"
+          Component={withStaffAuthGate(StaffStatisticsRoute)}
+        />
+        <Route path="/attendance" Component={withStaffAuthGate(AttendancePage)} />
+        <Route path="/requests" Component={withStaffAuthGate(RequestsPage)} />
+
+        {communityStaffRoutes.map((route) => (
+          <Route
+            key={`cs-${route.path}`}
+            path={route.path}
+            Component={route.Component}
+          />
+        ))}
+
         <Route
           path="/pay"
           element={
@@ -57,18 +82,9 @@ function App() {
           }
         />
 
-        <Route path="/attendance" element={<AttendancePage />} />
-
         {supportiveCommunityRoutes.map((route) => (
           <Route
             key={`sc-${route.path}`}
-            path={route.path}
-            element={route.element}
-          />
-        ))}
-        {communityStaffRoutes.map((route) => (
-          <Route
-            key={`cs-${route.path}`}
             path={route.path}
             element={route.element}
           />

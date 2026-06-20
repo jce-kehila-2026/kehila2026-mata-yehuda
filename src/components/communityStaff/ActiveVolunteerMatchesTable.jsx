@@ -1,6 +1,15 @@
 import { useCallback, useEffect, useMemo, useState } from "react";
 import { getActiveVolunteerMatches } from "../../services/communityStaff/communityStaffService";
-import { CommunityStaffCompactCard } from "./CommunityStaffListUi.jsx";
+import {
+  CommunityStaffCompactCard,
+  CommunityStaffEmptyState,
+  CommunityStaffListToolbar,
+  CommunityStaffMatchBadge,
+  CommunityStaffPagination,
+  CommunityStaffStatusOverview,
+  Link2,
+  buildMatchesOverviewItems,
+} from "./CommunityStaffListUi.jsx";
 
 const PAGE_SIZE_OPTIONS = [5, 10, 25];
 
@@ -90,47 +99,30 @@ function ActiveVolunteerMatchesTable({
 
   return (
     <div className="community-active-matches">
-      <div className="community-active-matches__top-row">
-        <span className="community-active-matches__badge">
-          התאמות פעילות {matches.length}
-        </span>
-      </div>
+      <CommunityStaffStatusOverview items={buildMatchesOverviewItems(matches)} />
 
-      <div className="community-active-matches__toolbar">
-        <div className="community-active-matches__search">
-          <label htmlFor="active-matches-search">חיפוש</label>
-          <input
-            id="active-matches-search"
-            type="search"
-            value={searchTerm}
-            onChange={(event) => setSearchTerm(event.target.value)}
-            placeholder="חיפוש לפי שם או טלפון של משתתף/מתנדב..."
-          />
-        </div>
+      <CommunityStaffListToolbar
+        searchId="active-matches-search"
+        searchValue={searchTerm}
+        onSearchChange={(event) => setSearchTerm(event.target.value)}
+        searchPlaceholder="חיפוש לפי שם או טלפון של משתתף/מתנדב..."
+        pageSizeId="active-matches-page-size"
+        pageSizeValue={pageSize}
+        onPageSizeChange={(event) => setPageSize(Number(event.target.value))}
+        pageSizeOptions={PAGE_SIZE_OPTIONS}
+        showFilter={false}
+      />
 
-        <div className="community-active-matches__page-size">
-          <label htmlFor="active-matches-page-size">שורות בעמוד</label>
-          <select
-            id="active-matches-page-size"
-            value={pageSize}
-            onChange={(event) => setPageSize(Number(event.target.value))}
-          >
-            {PAGE_SIZE_OPTIONS.map((size) => (
-              <option key={size} value={size}>
-                {size}
-              </option>
-            ))}
-          </select>
-        </div>
-      </div>
-
-      <div className="community-active-matches__card">
+      <div className="community-staff-request-list community-active-matches__card">
         {filteredMatches.length === 0 ? (
-          <p className="community-active-matches__empty">
-            {matches.length === 0
-              ? "אין התאמות פעילות להצגה"
-              : "לא נמצאו תוצאות לפי החיפוש"}
-          </p>
+          <CommunityStaffEmptyState
+            icon={Link2}
+            message={
+              matches.length === 0
+                ? "אין נתונים להצגה כרגע"
+                : "לא נמצאו תוצאות לפי החיפוש"
+            }
+          />
         ) : (
           <ul className="community-staff-compact-list">
             {paginatedMatches.map((match) => (
@@ -138,12 +130,9 @@ function ActiveVolunteerMatchesTable({
                 key={match.id}
                 name={match.participantFullName}
                 phone={match.participantPhone}
-                status={
-                  <span className="community-volunteers-mgmt__status community-volunteers-mgmt__status--active">
-                    התאמה פעילה
-                  </span>
-                }
-                primaryLabel="ניהול התאמה"
+                status={<CommunityStaffMatchBadge />}
+                viewLabel="צפייה"
+                primaryLabel="ניהול"
                 onPrimaryClick={() => onManageMatch(match)}
                 onViewDetails={() => onViewDetails(match)}
               />
@@ -153,27 +142,14 @@ function ActiveVolunteerMatchesTable({
       </div>
 
       {filteredMatches.length > 0 && (
-        <div className="community-active-matches__pagination">
-          <button
-            type="button"
-            onClick={() => setCurrentPage((page) => Math.max(1, page - 1))}
-            disabled={currentPage === 1}
-          >
-            הקודם
-          </button>
-          <span>
-            עמוד {currentPage} מתוך {totalPages}
-          </span>
-          <button
-            type="button"
-            onClick={() =>
-              setCurrentPage((page) => Math.min(totalPages, page + 1))
-            }
-            disabled={currentPage === totalPages}
-          >
-            הבא
-          </button>
-        </div>
+        <CommunityStaffPagination
+          currentPage={currentPage}
+          totalPages={totalPages}
+          onPrevious={() => setCurrentPage((page) => Math.max(1, page - 1))}
+          onNext={() =>
+            setCurrentPage((page) => Math.min(totalPages, page + 1))
+          }
+        />
       )}
     </div>
   );

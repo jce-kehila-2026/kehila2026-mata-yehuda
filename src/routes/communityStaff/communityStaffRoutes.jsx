@@ -2,38 +2,44 @@ import CommunityStaffDashboardPage from "../../pages/communityStaff/CommunitySta
 import CommunityHelpRequestsPage from "../../pages/communityStaff/CommunityHelpRequestsPage";
 import CommunityJoinRequestsPage from "../../pages/communityStaff/CommunityJoinRequestsPage";
 import CommunityMembersPage from "../../pages/communityStaff/CommunityMembersPage";
+import CommunitySettingsPage from "../../pages/communityStaff/CommunitySettingsPage";
 import VolunteerRequestsPage from "../../pages/communityStaff/VolunteerRequestsPage";
 import VolunteersManagementPage from "../../pages/communityStaff/VolunteersManagementPage";
 import ActiveVolunteerMatchesPage from "../../pages/communityStaff/ActiveVolunteerMatchesPage";
+import { withStaffAuthGate } from "../../components/staff/StaffAuthGate";
 
 const communityStaffRoutes = [
   {
     path: "/community-staff",
-    element: <CommunityStaffDashboardPage />,
+    Component: withStaffAuthGate(CommunityStaffDashboardPage),
   },
   {
     path: "/community-staff/join-requests",
-    element: <CommunityJoinRequestsPage />,
+    Component: withStaffAuthGate(CommunityJoinRequestsPage),
   },
   {
     path: "/community-staff/members",
-    element: <CommunityMembersPage />,
+    Component: withStaffAuthGate(CommunityMembersPage),
   },
   {
     path: "/community-staff/volunteer-requests",
-    element: <VolunteerRequestsPage />,
+    Component: withStaffAuthGate(VolunteerRequestsPage),
   },
   {
     path: "/community-staff/volunteers",
-    element: <VolunteersManagementPage />,
+    Component: withStaffAuthGate(VolunteersManagementPage),
   },
   {
     path: "/community-staff/help-requests",
-    element: <CommunityHelpRequestsPage />,
+    Component: withStaffAuthGate(CommunityHelpRequestsPage),
   },
   {
     path: "/community-staff/active-matches",
-    element: <ActiveVolunteerMatchesPage />,
+    Component: withStaffAuthGate(ActiveVolunteerMatchesPage),
+  },
+  {
+    path: "/community-staff/settings",
+    Component: withStaffAuthGate(CommunitySettingsPage),
   },
 ];
 

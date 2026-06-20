@@ -30,6 +30,9 @@ function CommunityJoinRequestsPage() {
         <h1 className="community-join-requests-page__title page-title">
           בקשות הצטרפות לקהילה תומכת
         </h1>
+        <p className="community-staff-page-subtitle">
+          ניהול ואישור בקשות הצטרפות חדשות לקהילה התומכת
+        </p>
       </header>
 
       <CommunityStaffMessage message={message} onDismiss={clearMessage} />

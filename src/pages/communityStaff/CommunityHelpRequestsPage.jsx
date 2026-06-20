@@ -8,6 +8,9 @@ function CommunityHelpRequestsPage() {
         <h1 className="community-help-requests-page__title page-title">
           בקשות סיוע והתאמות
         </h1>
+        <p className="community-staff-page-subtitle">
+          ניהול בקשות סיוע והתאמת מתנדבים מתאימים
+        </p>
       </header>
 
       <CommunityHelpRequestsTable />
