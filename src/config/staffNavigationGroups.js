@@ -2,7 +2,7 @@
 export const STAFF_NAVIGATION_GROUPS = [
     {
         title: "ניהול תוכן",
-        itemIds: ["activities", "programs", "messages", "statistics"]
+        itemIds: ["activities", "programs", "dayCenterSchedule", "messages", "statistics"]
     },
     {
         title: "ניהול משתמשים",

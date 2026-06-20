@@ -2,6 +2,7 @@ import { useState, useEffect, useRef } from "react";
 import {
     Calendar,
     BarChart3,
+    CalendarDays,
     CheckCircle2,
     ClipboardList,
     FileText,
@@ -27,6 +28,7 @@ import SendMessages from "./SendMessages";
 import StaffStatistics from "./StaffStatistics";
 import AttendancePage from "../attendance/AttendancePage";
 import ManageDonations from "../staff/ManageDonations";
+import ManageDayCenterSchedule from "./ManageDayCenterSchedule";
 import RequestsPage from "../RespOneonRequest/RequestsPage";
 import DashboardControlPanels from "../../components/dashboard/DashboardControlPanels";
 import { fetchDashboardOverview } from "../../services/staffManegmentServices/dashboardService";
@@ -55,6 +57,7 @@ import { useMediaQuery } from "../../hooks/useMediaQuery";
 const DASHBOARD_ACTION_ICONS = {
     activities: Calendar,
     programs: ClipboardList,
+    dayCenterSchedule: CalendarDays,
     manageStaff: Users,
     manageParticipants: UserRound,
     messages: MessageCircle,
@@ -69,6 +72,11 @@ const DASHBOARD_ACTION_ICONS = {
 const DASHBOARD_ACTIONS = [
     { id: "activities", label: "פעילויות", page: "activities" },
     { id: "programs", label: "תוכניות", page: "programs" },
+    {
+        id: "dayCenterSchedule",
+        label: "לוח זמנים מרכז יום",
+        page: "dayCenterSchedule"
+    },
     { id: "manageStaff", label: "אנשי צוות", page: "manageStaff" },
     {
         id: "manageParticipants",
@@ -103,6 +111,7 @@ const SUBPAGE_TITLES = {
     activities: "ניהול פעילויות",
     manageStaff: "ניהול אנשי צוות",
     programs: "ניהול תוכניות",
+    dayCenterSchedule: "לוח זמנים מרכז יום",
     manageParticipants: "ניהול משתתפים",
     registrations: "צפייה בבקשות",
     inquiries: "ניהול פניות",
@@ -404,6 +413,13 @@ function StaffDashboard({ onLogout }) {
                             programView={getStaffView(currentPage, "list")}
                             onNavigate={goToPage}
                         />
+                    </div>
+                );
+            case "dayCenterSchedule":
+                return (
+                    <div data-dashboard-page="dayCenterSchedule">
+                        {renderSubpageToolbar(SUBPAGE_TITLES.dayCenterSchedule)}
+                        <ManageDayCenterSchedule />
                     </div>
                 );
             case "manageParticipants":
