@@ -6,8 +6,8 @@ import {
 } from "../../services/staffManegmentServices/imageUploadService";
 import { prepareProgramImageUrl } from "../../services/staffManegmentServices/programImageService";
 import {
-    fetchDayCenterScheduleImageUrl,
-    updateDayCenterScheduleImageUrl
+    fetchDayCenterLoozUrl,
+    updateDayCenterLoozUrl
 } from "../../services/staffManegmentServices/dayCenterScheduleService";
 
 function ManageDayCenterSchedule() {
@@ -37,7 +37,7 @@ function ManageDayCenterSchedule() {
         setError("");
 
         try {
-            const imageUrl = await fetchDayCenterScheduleImageUrl();
+            const imageUrl = await fetchDayCenterLoozUrl();
             setSavedImageUrl(imageUrl);
             setPreviewUrl(imageUrl);
             setImageFileName(imageUrl ? "תמונה שמורה" : "");
@@ -178,7 +178,7 @@ function ManageDayCenterSchedule() {
 
         try {
             const dataUrl = await prepareProgramImageUrl(selectedFile);
-            await updateDayCenterScheduleImageUrl(dataUrl);
+            await updateDayCenterLoozUrl(dataUrl);
 
             clearLocalPreview();
             setSavedImageUrl(dataUrl);
@@ -209,7 +209,7 @@ function ManageDayCenterSchedule() {
         setSuccess("");
 
         try {
-            await updateDayCenterScheduleImageUrl("");
+            await updateDayCenterLoozUrl("");
 
             clearLocalPreview();
             setSavedImageUrl("");
