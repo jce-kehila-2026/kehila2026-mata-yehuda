@@ -2,6 +2,7 @@ import CommunityStaffDashboardPage from "../../pages/communityStaff/CommunitySta
 import CommunityHelpRequestsPage from "../../pages/communityStaff/CommunityHelpRequestsPage";
 import CommunityJoinRequestsPage from "../../pages/communityStaff/CommunityJoinRequestsPage";
 import CommunityMembersPage from "../../pages/communityStaff/CommunityMembersPage";
+import CommunitySettingsPage from "../../pages/communityStaff/CommunitySettingsPage";
 import VolunteerRequestsPage from "../../pages/communityStaff/VolunteerRequestsPage";
 import VolunteersManagementPage from "../../pages/communityStaff/VolunteersManagementPage";
 import ActiveVolunteerMatchesPage from "../../pages/communityStaff/ActiveVolunteerMatchesPage";
@@ -34,6 +35,10 @@ const communityStaffRoutes = [
   {
     path: "/community-staff/active-matches",
     element: <ActiveVolunteerMatchesPage />,
+  },
+  {
+    path: "/community-staff/settings",
+    element: <CommunitySettingsPage />,
   },
 ];
 

@@ -96,7 +96,6 @@ function CreateVolunteerModal({ open, onClose, onSaved }) {
         address: form.address,
         languages: form.languages,
         help_types: form.help_types,
-        about: form.about,
         notes: form.notes,
       });
 
@@ -253,16 +252,6 @@ function CreateVolunteerModal({ open, onClose, onSaved }) {
                 variant="help-types"
                 loading={lookupsLoading}
                 loadingText="טוען סוגי עזרה..."
-              />
-            </div>
-
-            <div className="community-join-modal__field community-join-modal__field--full">
-              <label htmlFor="create-volunteer-about">זמינות *</label>
-              <textarea
-                id="create-volunteer-about"
-                value={form.about}
-                onChange={(event) => updateField("about", event.target.value)}
-                placeholder="לדוגמה: ימים ושעות בהן ניתן להתנדב"
               />
             </div>
 

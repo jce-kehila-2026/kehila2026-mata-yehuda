@@ -9,7 +9,10 @@ import Plus60Page from "./pages/HomePages/Plus60Page.jsx";
 import AboutPage from "./pages/HomePages/AboutPage.jsx";
 import ServicesPage from "./pages/HomePages/ServicesPage.jsx";
 import StaffLogin from "./pages/staffManegmentPages/StaffLogin";
+import StaffAreaSelectionPage from "./pages/staffManegmentPages/StaffAreaSelectionPage";
+import StaffDashboardRoute from "./pages/staffManegmentPages/StaffDashboardRoute";
 import StaffStatisticsRoute from "./pages/staffManegmentPages/StaffStatisticsRoute";
+import StaffAuthGate from "./components/staff/StaffAuthGate";
 import RegistrationLayout from "./components/Payment/RegistrationLayout";
 import PaymentPage from "./pages/Payment/PaymentPage";
 import PaymentSuccess from "./pages/Payment/PaymentSuccess";
@@ -30,7 +33,30 @@ function App() {
         <Route path="/about" element={<AboutPage />} />
         <Route path="/services" element={<ServicesPage />} />
         <Route path="/staff-login" element={<StaffLogin />} />
-        <Route path="/staff/statistics" element={<StaffStatisticsRoute />} />
+        <Route
+          path="/staff/area-selection"
+          element={
+            <StaffAuthGate>
+              <StaffAreaSelectionPage />
+            </StaffAuthGate>
+          }
+        />
+        <Route
+          path="/staff/dashboard"
+          element={
+            <StaffAuthGate>
+              <StaffDashboardRoute />
+            </StaffAuthGate>
+          }
+        />
+        <Route
+          path="/staff/statistics"
+          element={
+            <StaffAuthGate>
+              <StaffStatisticsRoute />
+            </StaffAuthGate>
+          }
+        />
         <Route path="/requests" element={<RequestsPage />} />
         <Route
           path="/pay"
@@ -70,7 +96,7 @@ function App() {
           <Route
             key={`cs-${route.path}`}
             path={route.path}
-            element={route.element}
+            element={<StaffAuthGate>{route.element}</StaffAuthGate>}
           />
         ))}
         {donationRoutes.map((route) => (

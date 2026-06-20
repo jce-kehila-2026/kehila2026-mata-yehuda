@@ -10,7 +10,6 @@ import CommunityStaffSubscriptionFormFields, {
 import {
   buildEmptyCommunityMemberForm,
   getEmergencyNumberError,
-  PAYMENT_METHOD_OPTIONS,
   splitCommunityMemberFormData,
   validateCommunityMemberParticipantForm,
 } from "./communityStaffFormUtils.js";
@@ -287,23 +286,6 @@ function CreateCommunityMemberModal({ open, onClose, onSaved }) {
                   {emergencyNumberError}
                 </span>
               )}
-            </div>
-
-            <div className="community-join-modal__field">
-              <label htmlFor="create-member-payment-method">אמצעי תשלום</label>
-              <select
-                id="create-member-payment-method"
-                value={form.payment_method}
-                onChange={(event) =>
-                  updateField("payment_method", event.target.value)
-                }
-              >
-                {PAYMENT_METHOD_OPTIONS.map((option) => (
-                  <option key={option.value || "empty"} value={option.value}>
-                    {option.label}
-                  </option>
-                ))}
-              </select>
             </div>
 
             <div className="community-join-modal__field community-join-modal__field--full">

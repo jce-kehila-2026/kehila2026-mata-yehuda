@@ -2,6 +2,7 @@ import {
   ClipboardList,
   Filter,
   Inbox,
+  Languages,
   Link2,
   List,
   Search,
@@ -399,4 +400,4 @@ export function CommunityStaffCompactCard({
   );
 }
 
-export { ClipboardList, Link2, Users };
+export { ClipboardList, Languages, Link2, Users };

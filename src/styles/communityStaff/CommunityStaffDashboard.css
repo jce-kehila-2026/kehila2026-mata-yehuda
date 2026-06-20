@@ -4154,3 +4154,127 @@
     text-align: center;
   }
 }
+
+/* ===== Community Settings page ===== */
+
+.community-settings-page {
+  padding: 1.25rem 1rem 2rem;
+  max-width: 1100px;
+  margin: 0 auto;
+}
+
+.community-settings-page__back {
+  display: inline-flex;
+  align-items: center;
+  margin-bottom: 0.5rem;
+  padding: 0;
+  border: none;
+  background: none;
+  color: #2f6f4f;
+  font-size: 0.88rem;
+  font-weight: 700;
+  cursor: pointer;
+}
+
+.community-settings-page__back:hover {
+  text-decoration: underline;
+}
+
+.community-settings-page__sections {
+  display: flex;
+  flex-direction: column;
+  gap: 2rem;
+}
+
+.community-settings-section {
+  display: flex;
+  flex-direction: column;
+  gap: 1rem;
+}
+
+.community-settings-section__header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 1rem;
+  flex-wrap: wrap;
+}
+
+.community-settings-section__title {
+  margin: 0;
+  font-size: 1.25rem;
+  font-weight: 800;
+  color: #1f2933;
+}
+
+.community-settings-section__action {
+  flex-shrink: 0;
+}
+
+.community-settings-section__list {
+  margin-top: 0.25rem;
+}
+
+.community-settings-section__loading,
+.community-settings-section__error {
+  margin: 0;
+  padding: 0.75rem 0;
+}
+
+.community-settings-section__error {
+  color: #b42318;
+}
+
+.community-settings-item-card__subtitle {
+  display: block;
+  margin-top: 0.2rem;
+  font-size: 0.82rem;
+  color: #5f6b76;
+  line-height: 1.45;
+}
+
+.community-settings-item-card__toggle-btn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  min-height: 2rem;
+  padding: 0.35rem 0.75rem;
+  border-radius: 6px;
+  border: 1px solid transparent;
+  font-size: 0.82rem;
+  font-weight: 700;
+  cursor: pointer;
+  white-space: nowrap;
+}
+
+.community-settings-item-card__toggle-btn--deactivate {
+  background: #fff5f5;
+  border-color: #f1c0c0;
+  color: #b42318;
+}
+
+.community-settings-item-card__toggle-btn--activate {
+  background: #f0faf4;
+  border-color: #b8dfc8;
+  color: #1f6b43;
+}
+
+.community-settings-item-card__toggle-btn:disabled {
+  opacity: 0.6;
+  cursor: not-allowed;
+}
+
+@media (max-width: 480px) {
+  .community-settings-page {
+    padding: 0.85rem 0.6rem 1.5rem;
+  }
+
+  .community-settings-section__header {
+    flex-direction: column;
+    align-items: stretch;
+  }
+
+  .community-settings-section__action {
+    width: 100%;
+  }
+}

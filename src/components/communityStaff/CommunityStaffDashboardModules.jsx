@@ -5,6 +5,7 @@ const MODULE_IMAGE_BY_ART = {
   volunteers: "/images/community-staff-dashboard/volunteer.png",
   matches: "/images/community-staff-dashboard/puzzle.png",
   support: "/images/community-staff-dashboard/megaphone.png",
+  settings: "/images/community-staff-dashboard/Settings.png",
 };
 
 const MODULE_CARDS = [
@@ -73,6 +74,15 @@ const MODULE_CARDS = [
     route: "/community-staff/help-requests",
     statKey: "pendingHelpRequests",
     badgeType: "requests",
+  },
+  {
+    id: "community-settings",
+    kind: "management",
+    title: "הגדרות קהילה",
+    description: "ניהול שפות וסוגי עזרה",
+    artClass: "settings",
+    isAvailable: true,
+    route: "/community-staff/settings",
   },
 ];
 

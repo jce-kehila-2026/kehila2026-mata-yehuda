@@ -3,14 +3,6 @@ import { buildSubscriptionFormValues } from "./CommunityStaffSubscriptionFormFie
 export const EMERGENCY_NUMBER_ERROR =
   "מספר חירום חייב להיות מספר טלפון נייד תקין המתחיל ב-05 ומכיל 10 ספרות";
 
-export const PAYMENT_METHOD_OPTIONS = [
-  { value: "", label: "בחר/י אמצעי תשלום" },
-  { value: "cash", label: "מזומן" },
-  { value: "bit", label: "Bit" },
-  { value: "credit card", label: "כרטיס אשראי" },
-  { value: "paypal", label: "PayPal" },
-];
-
 export function getEmergencyNumberError(value) {
   const trimmedValue = String(value || "").trim();
 
@@ -78,13 +70,6 @@ export function buildMemberMedicalNotes(form) {
     parts.push(`איש קשר לחירום: ${form.emergency_contact_name.trim()}`);
   }
 
-  if (form.payment_method) {
-    const paymentLabel =
-      PAYMENT_METHOD_OPTIONS.find((option) => option.value === form.payment_method)
-        ?.label || form.payment_method;
-    parts.push(`אמצעי תשלום: ${paymentLabel}`);
-  }
-
   if (form.medical_notes?.trim()) {
     parts.push(form.medical_notes.trim());
   }
@@ -128,7 +113,6 @@ export function buildEmptyCommunityMemberForm() {
     emergency_contact_name: "",
     emergency_number: "",
     medical_notes: "",
-    payment_method: "",
     marketing_consent: false,
     ...buildSubscriptionFormValues({}),
   };
@@ -167,10 +151,6 @@ export function validateCreateVolunteerForm(form) {
     return "נא לבחור לפחות סוג עזרה אחד";
   }
 
-  if (!form.about?.trim()) {
-    return "נא למלא זמינות";
-  }
-
   return "";
 }
 
@@ -184,7 +164,6 @@ export function buildEmptyVolunteerForm() {
     address: "",
     languages: [],
     help_types: [],
-    about: "",
     notes: "",
   };
 }

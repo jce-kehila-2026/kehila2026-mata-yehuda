@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import {
     CircleUserRound,
@@ -8,14 +8,13 @@ import {
     Lock,
     Mail
 } from "lucide-react";
-import { auth, db } from "../../config/firebase";
-import { signInWithEmailAndPassword, signOut } from "firebase/auth";
-import { doc, getDoc } from "firebase/firestore";
-import StaffDashboard from "./StaffDashboard";
 import {
-    STAFF_ROLE_SUPPORTIVE_COMMUNITY,
-    normalizeStaffRole
-} from "../../config/staffRoles";
+    onAuthStateChanged,
+    signInWithEmailAndPassword,
+    signOut
+} from "firebase/auth";
+import { auth } from "../../config/firebase";
+import { verifyActiveStaffUser } from "../../utils/staffManegmentUtils/staffAuth";
 
 function StaffLogin() {
     const navigate = useNavigate();
@@ -24,7 +23,22 @@ function StaffLogin() {
     const [showPassword, setShowPassword] = useState(false);
     const [error, setError] = useState("");
     const [loading, setLoading] = useState(false);
-    const [isLoggedIn, setisLoggedIn] = useState(false);
+    const [authReady, setAuthReady] = useState(false);
+
+    useEffect(() => {
+        let cancelled = false;
+
+        const unsubscribe = onAuthStateChanged(auth, () => {
+            if (!cancelled) {
+                setAuthReady(true);
+            }
+        });
+
+        return () => {
+            cancelled = true;
+            unsubscribe();
+        };
+    }, []);
 
     async function handleLogin(e) {
         e.preventDefault();
@@ -39,32 +53,22 @@ function StaffLogin() {
             );
             const user = userCredential.user;
 
-            const staffRef = doc(db, "staff", user.uid);
-            const staffSnap = await getDoc(staffRef);
+            const result = await verifyActiveStaffUser(user);
 
-            if (!staffSnap.exists()) {
-                setError("המשתמש אינו איש צוות");
+            if (!result.ok) {
+                if (result.reason === "not_staff") {
+                    setError("המשתמש אינו איש צוות");
+                } else if (result.reason === "inactive") {
+                    setError("איש צוות זה אינו פעיל");
+                } else {
+                    setError("אין הרשאת גישה לצוות");
+                }
+
                 await signOut(auth);
                 return;
             }
 
-            const staffData = staffSnap.data();
-
-            if (!staffData.is_active) {
-                setError("איש צוות זה אינו פעיל");
-                await signOut(auth);
-                return;
-            }
-
-            if (
-                normalizeStaffRole(staffData.role) ===
-                STAFF_ROLE_SUPPORTIVE_COMMUNITY
-            ) {
-                navigate("/community-staff");
-                return;
-            }
-
-            setisLoggedIn(true);
+            navigate("/staff/area-selection", { replace: true });
         } catch {
             setError("האימייל או הסיסמה שגויים");
         } finally {
@@ -72,17 +76,18 @@ function StaffLogin() {
         }
     }
 
-    if (isLoggedIn) {
+    if (!authReady) {
         return (
-            <StaffDashboard
-                onLogout={() => {
-                    setisLoggedIn(false);
-                    setEmail("");
-                    setPassword("");
-                    setError("");
-                    setShowPassword(false);
-                }}
-            />
+            <div className="staff-login-page" dir="rtl">
+                <div className="staff-auth-gate__state" role="status">
+                    <Loader2
+                        className="staff-auth-gate__spinner"
+                        strokeWidth={2}
+                        aria-hidden="true"
+                    />
+                    <p>טוען…</p>
+                </div>
+            </div>
         );
     }
 
@@ -92,7 +97,9 @@ function StaffLogin() {
         <div className="staff-login-page">
             <div className="staff-login-card">
                 <header className="staff-login-header">
-                    <p className="staff-login-header__brand">{"קהילה מטה יהודה"}</p>
+                    <p className="staff-login-header__brand">
+                        {["קהילה מטה ", "יהודה"].join("")}
+                    </p>
                     <h1 className="staff-login-header__title">כניסת צוות</h1>
                     <p className="staff-login-header__subtitle">
                         התחברות למערכת ניהול הקהילה
@@ -221,7 +228,7 @@ function StaffLogin() {
                         </button>
 
                         <p className="staff-login-footer">
-                            {"מערכת ניהול קהילה - מטה יהודה"}
+                            {["מערכת ניהול קהילה - מטה ", "יהודה"].join("")}
                         </p>
                     </form>
                 </div>
