@@ -1,8 +1,7 @@
 import { useState } from "react";
-import { registerToDayCenter } from "../../services/HomeServices/dayCenterService";
-import NotificationOptInFields from "../notifications/NotificationOptInFields";
+import { registerToProgram } from "../../services/HomeServices/programRegistrationService";
 
-function DayCenterRegisterForm({ onClose }) {
+function ProgramRegistrationForm({ onClose, program }) {
   const [firstName, setFirstName] = useState("");
   const [lastName, setLastName] = useState("");
   const [idNumber, setIdNumber] = useState("");
@@ -38,12 +37,15 @@ function DayCenterRegisterForm({ onClose }) {
       return;
     }
 
-    await registerToDayCenter({
-      firstName,
-      lastName,
-      idNumber,
-      phone,
-    });
+    await registerToProgram(
+    {
+        firstName,
+        lastName,
+        idNumber,
+        phone,
+    },
+    program
+    );
 
     setMessage("תודה שנרשמת. הצוות יחזור אליך בימים הקרובים");
     setMessageType("success");
@@ -58,7 +60,7 @@ function DayCenterRegisterForm({ onClose }) {
       <div className="form-box">
         <button onClick={onClose}>×</button>
 
-        <h2>הרשמה למרכז יום</h2>
+        <h2>הרשמה ל{program?.title}</h2>
 
         {message && (
           <div className={`form-message ${messageType}`}>
@@ -94,12 +96,10 @@ function DayCenterRegisterForm({ onClose }) {
           onChange={(e) => setPhone(e.target.value)}
         />
 
-        <NotificationOptInFields />
-
-        <button type="button" onClick={handleSubmit}>שליחה</button>
+        <button onClick={handleSubmit}>שליחה</button>
       </div>
     </div>
   );
 }
 
-export default DayCenterRegisterForm;
+export default ProgramRegistrationForm;

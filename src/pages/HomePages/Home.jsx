@@ -1,163 +1,179 @@
-import { useEffect, useRef ,useState } from "react";
+import { useEffect, useState } from "react";
+import { useNavigate } from "react-router-dom";
 import ProgramCard from "../../components/Homecomponents/ProgramCard";
 import { getAllPrograms } from "../../services/HomeServices/programService";
 import RequestBox from "../../components/Homecomponents/RequestBox";
 import DonationBox from "../../donations/components/DonationBox";
-import { useNavigate } from "react-router-dom";
+import HomeNavbar from "../../components/Homecomponents/HomeNavbar";
+import ContactFooter from "../../components/Homecomponents/ContactFooter";
 import DayCenterRegisterForm from "../../components/Homecomponents/DayCenterRegisterForm";
 import VolunteerForm from "../../components/Homecomponents/VolunteerForm";
+import ProgramRegistrationForm from "../../components/Homecomponents/ProgramRegistrationForm";
 
 import "../../styles/HomeStyle/Home.css";
 import "../../styles/HomeStyle/ProgramCard.css";
 import "../../styles/HomeStyle/RequestBox.css";
 import "../../styles/HomeStyle/Form.css";
 
+const HOME_PROGRAM_TITLES = {
+  day_center: "מרכז יום",
+  "60_plus_minus": "60+ מינוס",
+  supportive_community: "קהילה תומכת",
+};
+
+function scrollToSection(sectionId) {
+  const element = document.getElementById(sectionId);
+  if (!element) {
+    return;
+  }
+
+  element.scrollIntoView({ behavior: "smooth", block: "start" });
+  element.classList.add("section-highlight");
+
+  window.setTimeout(() => {
+    element.classList.remove("section-highlight");
+  }, 2000);
+}
+
 function Home() {
-  const [programs, setPrograms] = useState([]);
-  const [showLoginOptions ,setShowLoginOptions]=useState(false);
-  const [loading, setLoading] = useState(true);
   const navigate = useNavigate();
+  const [programs, setPrograms] = useState([]);
+  const [loading, setLoading] = useState(true);
   const [showDayCenterForm, setShowDayCenterForm] = useState(false);
   const [showVolunteerForm, setShowVolunteerForm] = useState(false);
-  const contactRef = useRef(null);
-  const donationsRef = useRef(null);
-
-  function scrollToContact() {
-  contactRef.current?.scrollIntoView({ behavior: "smooth" });
-  contactRef.current?.classList.add("contact-highlight");
-
-  setTimeout(() => {
-    contactRef.current?.classList.remove("contact-highlight");
-  }, 2000);
-  }
-
-  function scrollToDonations() {
-    donationsRef.current?.scrollIntoView({ behavior: "smooth" });
-    donationsRef.current?.classList.add("contact-highlight");
-
-    setTimeout(() => {
-      donationsRef.current?.classList.remove("contact-highlight");
-    }, 2000);
-  }
+  const [selectedProgram, setSelectedProgram] = useState(null);
 
   useEffect(() => {
     async function loadPrograms() {
       const data = await getAllPrograms();
 
       const order = {
-       day_center: 1,
-      "60_plus_minus": 2,
-      supportive_community: 3,
+        day_center: 1,
+        "60_plus_minus": 2,
+        supportive_community: 3,
       };
 
       const sortedData = data.sort((a, b) => {
-         return (order[a.id] || 99) - (order[b.id] || 99);
+        return (order[a.id] || 99) - (order[b.id] || 99);
       });
 
       setPrograms(sortedData);
-      
       setLoading(false);
-
     }
 
     loadPrograms();
   }, []);
 
+  useEffect(() => {
+    const hash = window.location.hash.replace("#", "");
+    if (!hash) {
+      return undefined;
+    }
+
+    const timer = window.setTimeout(() => {
+      scrollToSection(hash);
+      window.history.replaceState(null, "", window.location.pathname);
+    }, 150);
+
+    return () => window.clearTimeout(timer);
+  }, []);
+
   return (
-      <div className="home-page">
-      <header className="home-header">
-      <div className="brand-area">
-        <img src="/images/logo.png" alt="לוגו העמותה" className="brand-logo" />
-      </div>
+    <div className="home-page">
+      <HomeNavbar />
 
-      <nav className="top-nav">
-        <button onClick={() => navigate("/about")}>מי אנחנו</button>
-        <button onClick={() => navigate("/services")}>השירותים שלנו</button>
-        <button onClick={scrollToDonations}>תרומות</button>
-        <button onClick={scrollToContact}>צור קשר</button>
-      </nav>
+      <section className="hero-section">
+        <div className="hero-overlay">
+          <h1>הבית החם של ותיקי מטה יהודה</h1>
+          <p>
+            אנחנו כאן כדי להעניק לכם קהילה תומכת,
+            פעילויות עשירות וביטחון אישי.
+          </p>
+        </div>
+      </section>
 
-      <div className="login-area">
-        <button onClick={() => setShowLoginOptions(!showLoginOptions)}>
-          התחברות
-        </button>
+      <header id="services" className="home-services-header">
+        <div className="home-services-header__divider">
+          <span className="home-services-header__line" aria-hidden="true" />
+          <h2 className="home-services-header__title">השירותים שלנו</h2>
+          <span className="home-services-header__line" aria-hidden="true" />
+        </div>
+      </header>
 
-        {showLoginOptions && (
-          <div className="login-box">
-            <button onClick={() => navigate("/staff-login")}>מנהל</button>
-          </div>
-        )}
-      </div>
-    </header>
-    <section className="hero-section">
-      <div className="hero-overlay">
-        <h1>הבית החם של ותיקי מטה יהודה</h1>
-        <p>
-          אנחנו כאן כדי להעניק לכם קהילה תומכת,
-          פעילויות עשירות וביטחון אישי.
-        </p>
-      </div>
-    </section>
-        
       {loading && <p>טוען תוכניות...</p>}
-      
+
       <div className="programs-grid">
-      {programs.map((program) => {
-        let buttons;
+        {programs.map((program) => {
+          let buttons;
 
-         
-        if (program.id === "supportive_community") {
-          buttons = <button onClick={() => navigate("/supportive-community")}> מידע נוסף והרשמה</button>;
-        }
-        else if  (program.id === "60_plus_minus") {
-          buttons = <button onClick={()=> navigate("/plus60")}>הצג פעילויות</button>;
-        } 
-        else if (program.id === "day_center" ) {
-          buttons = (
-            <>
-              <div className="top-buttons">
-              <button onClick={() => setShowDayCenterForm(true)}>הרשמה</button>
+          if (program.id === "supportive_community") {
+            buttons = (
+              <button onClick={() => navigate("/supportive-community")}>
+                מידע נוסף והרשמה
+              </button>
+            );
+          } else if (program.id === "60_plus_minus") {
+            buttons = (
+              <button onClick={() => navigate("/plus60")}>הצג פעילויות</button>
+            );
+          } else if (program.id === "day_center") {
+            buttons = (
+              <div className="program-card__day-actions">
+                <button onClick={() => setShowDayCenterForm(true)}>
+                  הרשמה
+                </button>
+                <button
+                  className="volunteer-btn"
+                  onClick={() => setShowVolunteerForm(true)}
+                >
+                  התנדב
+                </button>
               </div>
-              <button  className="volunteer-btn"  onClick={()=> setShowVolunteerForm(true)}>התנדב</button>
-            </>
-          );
-        } else {
-          buttons = <button>הרשמה</button>;
-        }
+            );
+          } else {
+            buttons = <button onClick={() => setSelectedProgram(program)}>הרשמה</button>;
+          }
 
-        return (
-          <ProgramCard
-            key={program.id}
-            program={program}
-            buttons={buttons}
-          />
-        );
-      })}
+          return (
+            <ProgramCard
+              key={program.id}
+              program={{
+                ...program,
+                title: HOME_PROGRAM_TITLES[program.id] || program.title,
+              }}
+              buttons={buttons}
+            />
+          );
+        })}
       </div>
-      <RequestBox />
-      <div ref={donationsRef} className="home-donations-section">
-        <DonationBox />
+
+      <div className="home-action-cards">
+        <RequestBox />
+        <div className="home-donations-landscape">
+          <div id="donations" className="home-donations-section">
+            <DonationBox />
+          </div>
+        </div>
       </div>
 
       {showDayCenterForm && (
-         <DayCenterRegisterForm
-          onClose={() => setShowDayCenterForm(false)}
-         />
+        <DayCenterRegisterForm onClose={() => setShowDayCenterForm(false)} />
       )}
       {showVolunteerForm && (
-         <VolunteerForm
-          onClose={() => setShowVolunteerForm(false)}
+        <VolunteerForm onClose={() => setShowVolunteerForm(false)} />
+      )}
+      {selectedProgram && (
+        <ProgramRegistrationForm
+          program={{
+            ...selectedProgram,
+            title: HOME_PROGRAM_TITLES[selectedProgram.id] || selectedProgram.title,
+          }}
+          onClose={() => setSelectedProgram(null)}
         />
       )}
 
-      <footer className="footer-contact" ref={contactRef}>
-        <p>📞 04-1234567</p>
-        <p>✉️ info@shalva.org.il</p>
-        <p>📍 מטה יהודה</p>
-      </footer>
-
+      <ContactFooter />
     </div>
-    
   );
 }
 

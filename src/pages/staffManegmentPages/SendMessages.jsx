@@ -4,7 +4,8 @@ import NotificationRecentActivity from "../../components/messages/NotificationRe
 import NotificationStatsCards from "../../components/messages/NotificationStatsCards";
 import {
     formatNotificationSummary,
-    NOTIFICATION_BACKEND_REQUIRED_MESSAGE,
+    getNotificationBackendRequiredMessage,
+    NOTIFICATION_BACKEND_ERROR_NAME,
     NOTIFICATION_COMPLIANCE_NOTE,
     NOTIFICATION_NO_ACTIVE_DEVICES_MESSAGE,
     validateNotificationMessage
@@ -51,7 +52,21 @@ function SendMessages() {
     }, [loadDashboardData]);
 
     useEffect(() => {
-        checkNotificationBackendHealth();
+        let cancelled = false;
+
+        checkNotificationBackendHealth().then((health) => {
+            if (cancelled || health.ok) {
+                return;
+            }
+
+            setError(
+                getNotificationBackendRequiredMessage(health.apiBase || "")
+            );
+        });
+
+        return () => {
+            cancelled = true;
+        };
     }, []);
 
     async function handleSendNotification() {
@@ -93,7 +108,7 @@ function SendMessages() {
 
             if (err.message === "NOT_AUTHENTICATED") {
                 setError("יש להתחבר מחדש כדי לשלוח התראות");
-            } else if (err.message === NOTIFICATION_BACKEND_REQUIRED_MESSAGE) {
+            } else if (err.name === NOTIFICATION_BACKEND_ERROR_NAME) {
                 setError(err.message);
             } else if (err.status === 503) {
                 setError(
@@ -112,7 +127,7 @@ function SendMessages() {
         <div className="staff-page staff-page--messages">
             <header className="notifications-page-header staff-header">
                 <div className="notifications-page-header__inner">
-                    <h1>שליחת התראות</h1>
+                    <h1>שליחת הודעות ועדכונים</h1>
                     <p>
                         שליחת הודעות push למשתתפים שנרשמו לקבלת עדכונים בדפדפן
                     </p>

@@ -99,23 +99,7 @@ export async function saveNotificationToken({
         isActive: true
     };
 
-    console.info("[fcm] Writing notification_tokens document", {
-        docId: normalizedToken,
-        token: normalizedToken,
-        isActive: payload.isActive,
-        participantId: payload.participantId,
-        groups: payload.groups,
-        isUpdate: existingSnap.exists()
-    });
-
     await setDoc(tokenRef, payload, { merge: true });
-
-    console.info("[fcm] Token saved to Firestore", {
-        docId: normalizedToken,
-        isActive: true,
-        participantId: payload.participantId,
-        groups: payload.groups
-    });
 }
 
 /**
@@ -126,13 +110,8 @@ export async function touchNotificationToken(token) {
     const normalizedToken = String(token || "").trim();
 
     if (!normalizedToken) {
-        console.warn("[fcm] touchNotificationToken skipped: empty token");
         return;
     }
-
-    console.info("[fcm] Refreshing notification_tokens document", {
-        docId: normalizedToken
-    });
 
     const tokenRef = doc(db, "notification_tokens", normalizedToken);
     const existingSnap = await getDoc(tokenRef);
@@ -147,23 +126,7 @@ export async function touchNotificationToken(token) {
         ...(participantId ? { participantId } : {})
     };
 
-    console.info("[fcm] Writing notification_tokens touch payload", {
-        docId: normalizedToken,
-        token: normalizedToken,
-        isActive: payload.isActive,
-        participantId: payload.participantId || "",
-        groups: payload.groups,
-        isUpdate: existingSnap.exists()
-    });
-
     await setDoc(tokenRef, payload, { merge: true });
-
-    console.info("[fcm] notification_tokens document refreshed", {
-        docId: normalizedToken,
-        isActive: true,
-        participantId: payload.participantId || "",
-        groups: payload.groups
-    });
 }
 
 export function getStoredFcmToken() {
@@ -218,13 +181,8 @@ export function storeFcmTokenLocally(token) {
     try {
         if (token) {
             localStorage.setItem(storageKey, token);
-            console.info(`[fcm] Saved token to localStorage key "${storageKey}"`, {
-                token,
-                storedValue: localStorage.getItem(storageKey)
-            });
         } else {
             localStorage.removeItem(storageKey);
-            console.info(`[fcm] Removed localStorage key "${storageKey}"`);
         }
     } catch (error) {
         console.error(`[fcm] Failed to write localStorage key "${storageKey}"`, error);
