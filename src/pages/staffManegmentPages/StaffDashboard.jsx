@@ -5,6 +5,7 @@ import {
     CheckCircle2,
     ClipboardList,
     FileText,
+    HandCoins,
     Mail,
     Menu,
     MessageCircle,
@@ -25,6 +26,7 @@ import ManageCancellations from "./ManageCancellations";
 import SendMessages from "./SendMessages";
 import StaffStatistics from "./StaffStatistics";
 import AttendancePage from "../attendance/AttendancePage";
+import ManageDonations from "../staff/ManageDonations";
 import RequestsPage from "../RespOneonRequest/RequestsPage";
 import DashboardControlPanels from "../../components/dashboard/DashboardControlPanels";
 import { fetchDashboardOverview } from "../../services/staffManegmentServices/dashboardService";
@@ -60,7 +62,8 @@ const DASHBOARD_ACTION_ICONS = {
     registrations: FileText,
     inquiries: Mail,
     cancellations: Undo2,
-    attendance: CheckCircle2
+    attendance: CheckCircle2,
+    manageDonations: HandCoins
 };
 
 const DASHBOARD_ACTIONS = [
@@ -81,7 +84,8 @@ const DASHBOARD_ACTIONS = [
     },
     { id: "inquiries", label: "פניות", page: "inquiries" },
     { id: "cancellations", label: "ביטולים", page: "cancellations" },
-    { id: "attendance", label: "נוכחות", page: "attendance" }
+    { id: "attendance", label: "נוכחות", page: "attendance" },
+    { id: "manageDonations", label: "ניהול התרמות", page: "manageDonations" }
 ];
 
 const DASHBOARD_ACTIONS_BY_ID = Object.fromEntries(
@@ -105,7 +109,8 @@ const SUBPAGE_TITLES = {
     cancellations: "ניהול ביטולים",
     messages: "שליחת הודעות ועדכונים",
     statistics: "סטטיסטיקות",
-    attendance: "בדיקת נוכחות"
+    attendance: "בדיקת נוכחות",
+    manageDonations: "ניהול התרמות"
 };
 
 function StaffDashboard({ onLogout }) {
@@ -460,6 +465,13 @@ function StaffDashboard({ onLogout }) {
                 return (
                     <div data-dashboard-page="statistics">
                         <StaffStatistics onBack={goToDashboard} />
+                    </div>
+                );
+            case "manageDonations":
+                return (
+                    <div data-dashboard-page="manageDonations">
+                        {renderSubpageToolbar(SUBPAGE_TITLES.manageDonations)}
+                        <ManageDonations />
                     </div>
                 );
             case "dashboard":

@@ -9,6 +9,10 @@ export const STAFF_NAVIGATION_GROUPS = [
         itemIds: ["manageParticipants", "manageStaff"]
     },
     {
+        title: "ניהול כספים",
+        itemIds: ["manageDonations"]
+    },
+    {
         title: "בקשות ומעקב",
         itemIds: [
             "registrations",

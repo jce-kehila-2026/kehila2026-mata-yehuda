@@ -1,18 +1,27 @@
 import { auth } from "../../config/firebase";
 import {
-    NOTIFICATION_BACKEND_REQUIRED_MESSAGE
+    getNotificationBackendRequiredMessage,
+    NOTIFICATION_BACKEND_ERROR_NAME
 } from "../../components/messages/helpers/messageHelpers";
 
 const LOCAL_NOTIFICATION_SERVER_PATTERN =
     /^https?:\/\/(localhost|127\.0\.0\.1):3001\/?$/i;
 
+function normalizeConfiguredApiBase(value) {
+    return String(value ?? "")
+        .trim()
+        .replace(/^["']|["']$/g, "")
+        .replace(/\/$/, "");
+}
+
 function getConfiguredNotificationsApiBase() {
-    return import.meta.env.VITE_NOTIFICATIONS_API_URL?.trim().replace(/\/$/, "") || "";
+    return normalizeConfiguredApiBase(import.meta.env.VITE_NOTIFICATIONS_API_URL);
 }
 
 function getNotificationsApiBase() {
     const configured = getConfiguredNotificationsApiBase();
 
+    // Local dev: use Vite proxy unless a non-local remote URL is configured.
     if (
         import.meta.env.DEV &&
         (!configured || LOCAL_NOTIFICATION_SERVER_PATTERN.test(configured))
@@ -33,15 +42,53 @@ function getNotificationsHealthUrl() {
     return base ? `${base}/health` : "/health";
 }
 
+function createNotificationBackendError(cause) {
+    const apiBase = getNotificationsApiBase();
+    const error = new Error(getNotificationBackendRequiredMessage(apiBase));
+    error.name = NOTIFICATION_BACKEND_ERROR_NAME;
+
+    if (cause) {
+        error.cause = cause;
+    }
+
+    return error;
+}
+
+function logNotificationsApiResolution() {
+    const configured = getConfiguredNotificationsApiBase();
+    const resolved = getNotificationsApiBase();
+
+    console.log("[notifications] Resolved API base URL", {
+        rawEnv: import.meta.env.VITE_NOTIFICATIONS_API_URL ?? "(undefined)",
+        configuredApiBase: configured || "(not set)",
+        resolvedApiBase:
+            resolved ||
+            (import.meta.env.DEV
+                ? "(vite dev proxy → http://127.0.0.1:3001)"
+                : "(not set — missing from production build)"),
+        healthUrl: getNotificationsHealthUrl(),
+        sendUrl: getNotificationsSendUrl(),
+        mode: import.meta.env.MODE
+    });
+}
+
+logNotificationsApiResolution();
+
 export function getNotificationBackendUrls() {
     const configured = getConfiguredNotificationsApiBase();
     const apiBase = getNotificationsApiBase();
 
     return {
         configuredApiBase: configured || "(not set)",
-        resolvedApiBase: apiBase || "(vite dev proxy → http://127.0.0.1:3001)",
+        apiBase: apiBase || "",
+        resolvedApiBase:
+            apiBase ||
+            (import.meta.env.DEV
+                ? "(vite dev proxy → http://127.0.0.1:3001)"
+                : "(not set — missing from production build)"),
         healthUrl: getNotificationsHealthUrl(),
         sendUrl: getNotificationsSendUrl(),
+        usesRemoteApi: Boolean(apiBase),
         mode: import.meta.env.DEV ? "development" : "production"
     };
 }
@@ -62,13 +109,31 @@ function mapNotificationApiError(response, data) {
         );
     }
 
-    return data?.message || NOTIFICATION_BACKEND_REQUIRED_MESSAGE;
+    return (
+        data?.message ||
+        getNotificationBackendRequiredMessage(getNotificationsApiBase())
+    );
 }
 
 export async function checkNotificationBackendHealth() {
     const urls = getNotificationBackendUrls();
 
     console.info("[notifications] Checking backend health", urls);
+
+    if (!import.meta.env.DEV && !getNotificationsApiBase()) {
+        const result = {
+            ...urls,
+            ok: false,
+            status: 0,
+            missingBuildEnv: true,
+            error:
+                "VITE_NOTIFICATIONS_API_URL is not present in the production build"
+        };
+
+        console.warn("[notifications] Health check skipped", result);
+
+        return result;
+    }
 
     try {
         const response = await fetch(urls.healthUrl, {
@@ -106,7 +171,7 @@ async function assertNotificationBackendAvailable() {
     const health = await checkNotificationBackendHealth();
 
     if (!health.ok) {
-        throw new Error(NOTIFICATION_BACKEND_REQUIRED_MESSAGE);
+        throw createNotificationBackendError();
     }
 }
 
@@ -141,7 +206,7 @@ export async function sendPushNotification({
             })
         });
     } catch (error) {
-        throw new Error(NOTIFICATION_BACKEND_REQUIRED_MESSAGE, { cause: error });
+        throw createNotificationBackendError(error);
     }
 
     const data = await response.json().catch(() => ({}));
