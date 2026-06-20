@@ -96,3 +96,10 @@
   border-top: 1px solid #ececec;
   margin: 0.75rem 0;
 }
+
+.activity-card button:disabled {
+  opacity: 0.65;
+  cursor: not-allowed;
+  transform: none;
+  box-shadow: none;
+}

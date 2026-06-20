@@ -590,41 +590,43 @@
 
 @media (max-width: 640px) {
   .day-center-stats__grid {
-    grid-template-columns: 1fr;
+    grid-template-columns: repeat(3, minmax(0, 1fr));
     max-width: 100%;
-    gap: 0.6rem;
+    gap: clamp(0.3rem, 1.5vw, 0.45rem);
   }
 
   .day-center-stat-card {
-    width: 100%;
-    min-height: 84px;
-    padding: 0.55rem 0.75rem;
+    min-height: 72px;
+    padding: 0.35rem 0.2rem;
   }
 
   .day-center-stat-card__value {
-    font-size: 1.65rem;
+    font-size: clamp(0.95rem, 4vw, 1.2rem);
   }
 
   .day-center-stat-card__label {
-    font-size: 0.9rem;
+    font-size: clamp(0.68rem, 2.5vw, 0.82rem);
   }
 
   .day-center-stat-card__note {
-    font-size: 0.78rem;
+    font-size: clamp(0.58rem, 2vw, 0.68rem);
+    line-height: 1.2;
   }
 
   .day-center-gallery__grid {
-    flex-direction: column;
-    align-items: stretch;
+    flex-direction: row;
+    flex-wrap: nowrap;
     width: 100%;
     max-width: 100%;
-    gap: 1rem;
+    gap: clamp(0.35rem, 2vw, 0.6rem);
   }
 
   .day-center-gallery__card {
-    flex: 0 0 auto;
-    width: 100%;
-    max-width: 100%;
+    flex: 1 1 0;
+    min-width: 0;
+    width: auto;
+    max-width: none;
+    padding: 0.3rem;
   }
 
   .day-center-gallery__media,
@@ -632,7 +634,7 @@
   .day-center-gallery__card--portrait .day-center-gallery__media {
     width: 100%;
     max-width: 100%;
-    aspect-ratio: 16 / 10;
+    aspect-ratio: 3 / 4;
   }
 }
 

@@ -1,15 +1,39 @@
 import { useNavigate } from "react-router-dom";
+import { toActivityDate } from "../../utils/staffManegmentUtils/dateUtils";
+
+function isActivityExpired(activity, now = new Date()) {
+  const startDate = toActivityDate(activity?.start_date);
+
+  if (!startDate) {
+    return false;
+  }
+
+  return startDate.getTime() < now.getTime();
+}
+
+function isActivityFull(activity) {
+  const maxParticipants = Number(activity?.max_participants ?? 0);
+  const currentParticipants = Number(activity?.current_participants ?? 0);
+
+  if (!Number.isFinite(maxParticipants) || maxParticipants <= 0) {
+    return false;
+  }
+
+  return (
+    Number.isFinite(currentParticipants) &&
+    currentParticipants >= maxParticipants
+  );
+}
 
 function ActivityCard({ activity, programId = "" }) {
   const navigate = useNavigate();
 
   const resolvedProgramId =
     activity?.program_id || activity?.programId || programId || "";
-  const isOpenForRegistration = Boolean(activity?.is_open);
-  const hasPrice = Number(activity?.price) > 0;
+  const isClosed = isActivityExpired(activity) || isActivityFull(activity);
 
   const goToPayment = () => {
-    if (!isOpenForRegistration || !hasPrice) {
+    if (isClosed) {
       return;
     }
 
@@ -22,8 +46,8 @@ function ActivityCard({ activity, programId = "" }) {
 
   if (!activity) return null;
 
-  const startDate = activity.start_date?.toDate();
-  const endDate = activity.end_date?.toDate();
+  const startDate = toActivityDate(activity.start_date);
+  const endDate = toActivityDate(activity.end_date);
 
   return (
     <div className="activity-card">
@@ -32,8 +56,8 @@ function ActivityCard({ activity, programId = "" }) {
       )}
 
       <div className="activity-info">
-        <div className={activity.is_open ? "status open" : "status closed"}>
-          {activity.is_open ? "פתוח" : "סגור"}
+        <div className={isClosed ? "status closed" : "status open"}>
+          {isClosed ? "סגור" : "פתוח"}
         </div>
 
         <h2>{activity.name}</h2>
@@ -74,9 +98,9 @@ function ActivityCard({ activity, programId = "" }) {
         <button
           type="button"
           onClick={goToPayment}
-          disabled={!isOpenForRegistration || !hasPrice}
+          disabled={isClosed}
         >
-          {isOpenForRegistration && hasPrice ? "השתתף" : "סגור להרשמה"}
+          {isClosed ? "סגור להרשמה" : "השתתף"}
         </button>
       </div>
     </div>
