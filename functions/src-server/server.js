@@ -50,6 +50,82 @@ function isFirebaseCloudRuntime() {
   );
 }
 
+function normalizeFirebasePrivateKey(raw) {
+  if (!raw) return null;
+
+  let key = String(raw).trim();
+  if (
+    (key.startsWith('"') && key.endsWith('"')) ||
+    (key.startsWith("'") && key.endsWith("'"))
+  ) {
+    key = key.slice(1, -1).trim();
+  }
+
+  // Render / .env escaping: \\n and \n → real newlines
+  key = key.replace(/\\\\n/g, "\n").replace(/\\n/g, "\n");
+
+  const begin = "-----BEGIN PRIVATE KEY-----";
+  const end = "-----END PRIVATE KEY-----";
+
+  if (!key.includes(begin) || !key.includes(end)) {
+    return key;
+  }
+
+  const startIdx = key.indexOf(begin);
+  const endIdx = key.indexOf(end) + end.length;
+  key = key.slice(startIdx, endIdx);
+
+  const body = key.replace(begin, "").replace(end, "").replace(/\s/g, "");
+  if (!body) {
+    return key;
+  }
+
+  const wrapped = body.match(/.{1,64}/g)?.join("\n") || body;
+  return `${begin}\n${wrapped}\n${end}\n`;
+}
+
+function parseServiceAccountJson(raw) {
+  let json = String(raw).trim();
+  if (
+    (json.startsWith('"') && json.endsWith('"')) ||
+    (json.startsWith("'") && json.endsWith("'"))
+  ) {
+    json = json.slice(1, -1).trim();
+  }
+
+  const parsed = JSON.parse(json);
+  if (!parsed.client_email || !parsed.private_key) {
+    throw new Error("FIREBASE_SERVICE_ACCOUNT_JSON חסר client_email או private_key");
+  }
+
+  return {
+    projectId: parsed.project_id?.trim() || "",
+    clientEmail: parsed.client_email.trim(),
+    privateKey: normalizeFirebasePrivateKey(parsed.private_key),
+  };
+}
+
+function initializeFirebaseWithCert({ projectId, clientEmail, privateKey }) {
+  admin.initializeApp({
+    credential: admin.credential.cert({
+      projectId,
+      clientEmail,
+      privateKey: normalizeFirebasePrivateKey(privateKey),
+    }),
+  });
+}
+
+function reportFirebaseCredentialError(error) {
+  console.error(
+    "\n❌ Firebase Admin credentials לא תקינים.\n\n" +
+      "ב-Render (הכי פשוט): הוסיפי משתנה FIREBASE_SERVICE_ACCOUNT_JSON\n" +
+      "והדביקי את כל קובץ ה-JSON בשורה אחת (מקומית: node -e \"console.log(JSON.stringify(JSON.parse(require('fs').readFileSync('server/KEY.json','utf8'))))\").\n\n" +
+      "או השתמשי ב-FIREBASE_CLIENT_EMAIL + FIREBASE_PRIVATE_KEY (בלי גרשיים מסביב).\n\n" +
+      `פרטים: ${error.message}\n`
+  );
+  process.exit(1);
+}
+
 function initializePaymentFirebase() {
   if (admin.apps.length) {
     return;
@@ -65,6 +141,7 @@ function initializePaymentFirebase() {
 
   const clientEmail = process.env.FIREBASE_CLIENT_EMAIL?.trim();
   const privateKeyRaw = process.env.FIREBASE_PRIVATE_KEY;
+  const serviceAccountJson = process.env.FIREBASE_SERVICE_ACCOUNT_JSON?.trim();
 
   const credentialsPath = resolveGoogleApplicationCredentialsPath();
 
@@ -77,20 +154,38 @@ function initializePaymentFirebase() {
     return;
   }
 
+  if (serviceAccountJson) {
+    try {
+      const creds = parseServiceAccountJson(serviceAccountJson);
+      initializeFirebaseWithCert({
+        projectId: creds.projectId || projectId,
+        clientEmail: creds.clientEmail,
+        privateKey: creds.privateKey,
+      });
+    } catch (error) {
+      reportFirebaseCredentialError(error);
+    }
+    return;
+  }
+
   if (clientEmail && privateKeyRaw) {
-    admin.initializeApp({
-      credential: admin.credential.cert({
+    try {
+      initializeFirebaseWithCert({
         projectId,
         clientEmail,
-        privateKey: privateKeyRaw.replace(/\\n/g, "\n"),
-      }),
-    });
+        privateKey: privateKeyRaw,
+      });
+    } catch (error) {
+      reportFirebaseCredentialError(error);
+    }
     return;
   }
 
   console.error(
     "\n❌ Firebase Admin לא מוגדר — שרת התשלום לא יכול להתחיל.\n\n" +
       "צרו קובץ server/.env (או .env בשורש הפרויקט) עם:\n" +
+      "  FIREBASE_SERVICE_ACCOUNT_JSON={...}  (מומלץ ב-Render)\n" +
+      "או:\n" +
       "  FIREBASE_PROJECT_ID=matayehuda\n" +
       "  FIREBASE_CLIENT_EMAIL=...\n" +
       "  FIREBASE_PRIVATE_KEY=\"-----BEGIN PRIVATE KEY-----\\n...\\n-----END PRIVATE KEY-----\\n\"\n\n" +
@@ -109,7 +204,39 @@ app.use(cors());
 
 app.use(express.json());
 
-const PORT = 5001;
+function getFrontendUrl() {
+  return process.env.FRONTEND_URL?.trim() || "http://localhost:5173";
+}
+
+function redirectToFrontend(path) {
+  return (req, res) => {
+    const queryIndex = req.originalUrl.indexOf("?");
+    const query = queryIndex >= 0 ? req.originalUrl.slice(queryIndex) : "";
+    res.redirect(302, `${getFrontendUrl()}${path}${query}`);
+  };
+}
+
+app.get("/", (_req, res) => {
+  res.json({
+    ok: true,
+    service: "matayehuda-payment-api",
+    message: "זה שרת התשלומים (API). האתר נמצא בכתובת frontend.",
+    frontend: getFrontendUrl(),
+  });
+});
+
+[
+  "/donations",
+  "/donations/success",
+  "/donations/cancel",
+  "/payment-success",
+  "/payment-cancel",
+  "/pay",
+].forEach((path) => {
+  app.get(path, redirectToFrontend(path));
+});
+
+const PORT = Number(process.env.PORT) || 5001;
 
 const db = admin.firestore();
 
@@ -1178,6 +1305,396 @@ app.post("/save-bit-payment", async (req, res) => {
 });
 
 // =========================
+// Donations
+// =========================
+
+function parseDonationAmount(raw) {
+  const amount = Number(raw);
+  if (!Number.isFinite(amount) || amount <= 0) {
+    return null;
+  }
+  return Math.round(amount * 100) / 100;
+}
+
+const DONATION_PAYMENT_LABELS = {
+  cash: "מזומן",
+  bit: "Bit",
+  paypal: "PayPal",
+  "credit card": "כרטיס אשראי",
+  "PayPal/Credit Card": "כרטיס אשראי / PayPal",
+  PayPal: "PayPal",
+};
+
+function parseDonationMetadata(body = {}) {
+  const presetRaw = body.presetAmount;
+  const presetAmount =
+    presetRaw != null && presetRaw !== ""
+      ? parseDonationAmount(presetRaw)
+      : null;
+
+  return {
+    firstName: String(body.firstName || "").trim(),
+    phone: String(body.phone || "").trim(),
+    paymentMethod: String(body.paymentMethod || "").trim(),
+    source: String(body.source || "website").trim(),
+    channel: String(body.channel || "donations-page").trim(),
+    isCustomAmount: Boolean(body.isCustomAmount),
+    presetAmount,
+  };
+}
+
+function resolveDonationPaymentLabel(paymentMethod) {
+  const method = String(paymentMethod || "").trim();
+  return DONATION_PAYMENT_LABELS[method] || method || "לא ידוע";
+}
+
+function isDonationCompletedStatus(status) {
+  return status === "COMPLETED";
+}
+
+function buildDonationFirestorePayload({
+  metadata,
+  amount,
+  status,
+  extraFields = {},
+}) {
+  const parsedAmount = parseDonationAmount(amount);
+  if (!parsedAmount) {
+    throw new Error("INVALID_DONATION_AMOUNT");
+  }
+
+  const paymentMethod =
+    extraFields.paymentMethod || metadata.paymentMethod || "unknown";
+  const now = admin.firestore.FieldValue.serverTimestamp();
+
+  return {
+    firstName: metadata.firstName,
+    phone: metadata.phone,
+    amount: parsedAmount,
+    currency: "ILS",
+    isCustomAmount: metadata.isCustomAmount,
+    presetAmount: metadata.presetAmount,
+    paymentMethod,
+    paymentMethodLabel: resolveDonationPaymentLabel(paymentMethod),
+    status,
+    type: "donation",
+    source: metadata.source,
+    channel: metadata.channel,
+    ...extraFields,
+    updatedAt: now,
+    ...(isDonationCompletedStatus(status) ? { completedAt: now } : {}),
+  };
+}
+
+async function saveDonationRecord({ metadata, amount, status, extraFields = {} }) {
+  const donationRef = db.collection("donations").doc();
+  const payload = {
+    ...buildDonationFirestorePayload({ metadata, amount, status, extraFields }),
+    createdAt: admin.firestore.FieldValue.serverTimestamp(),
+  };
+
+  await withTimeout(
+    donationRef.set(payload),
+    FIRESTORE_TIMEOUT_MS,
+    "Firestore donation create timeout"
+  );
+
+  return { donationId: donationRef.id };
+}
+
+async function updateDonationRecord(donationId, updates) {
+  await withTimeout(
+    db
+      .collection("donations")
+      .doc(donationId)
+      .update({
+        ...updates,
+        updatedAt: admin.firestore.FieldValue.serverTimestamp(),
+      }),
+    FIRESTORE_TIMEOUT_MS,
+    "Firestore donation update timeout"
+  );
+}
+
+async function findDonationByPaypalOrderId(orderID) {
+  const snapshot = await db
+    .collection("donations")
+    .where("paypalOrderId", "==", orderID)
+    .limit(1)
+    .get();
+
+  if (snapshot.empty) {
+    return null;
+  }
+
+  const doc = snapshot.docs[0];
+  return { donationId: doc.id, ...doc.data() };
+}
+
+app.post("/donations/create-paypal-order", async (req, res) => {
+  try {
+    const metadata = parseDonationMetadata(req.body);
+    const amount = parseDonationAmount(req.body?.amount);
+    if (!amount) {
+      return res.status(400).json({
+        success: false,
+        message: "סכום תרומה לא תקין",
+      });
+    }
+
+    const accessToken = await generateAccessToken();
+    const frontendUrl =
+      process.env.FRONTEND_URL || "http://localhost:5173";
+
+    const response = await fetch(
+      `${process.env.PAYPAL_BASE_URL}/v2/checkout/orders`,
+      {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+          Authorization: `Bearer ${accessToken}`,
+        },
+        body: JSON.stringify({
+          intent: "CAPTURE",
+          purchase_units: [
+            {
+              amount: {
+                currency_code: "ILS",
+                value: formatPayPalAmount(amount),
+              },
+              description: "תרומה לעמותת ותיקי מטה יהודה",
+            },
+          ],
+          application_context: {
+            return_url: `${frontendUrl}/donations/success`,
+            cancel_url: `${frontendUrl}/donations/cancel`,
+            user_action: "PAY_NOW",
+          },
+        }),
+      }
+    );
+
+    const data = await response.json();
+
+    if (!response.ok) {
+      console.error("PayPal donation order failed:", data);
+      return res.status(500).json({
+        success: false,
+        message: "יצירת הזמנת PayPal לתרומה נכשלה",
+      });
+    }
+
+    const pendingRecord = await saveDonationRecord({
+      metadata: {
+        ...metadata,
+        paymentMethod: metadata.paymentMethod || "paypal",
+      },
+      amount,
+      status: "PENDING_PAYPAL",
+      extraFields: {
+        paymentMethod: metadata.paymentMethod || "paypal",
+        paypalOrderId: data.id,
+      },
+    });
+
+    res.json({ ...data, donationId: pendingRecord.donationId });
+  } catch (error) {
+    console.error(error);
+    return handlePaymentRouteError(res, error, "שגיאה ביצירת תשלום תרומה");
+  }
+});
+
+app.post("/donations/capture-paypal-order", async (req, res) => {
+  try {
+    const { orderID, amount, ...metadataBody } = req.body || {};
+    const metadata = parseDonationMetadata(metadataBody);
+
+    if (!orderID) {
+      return res.status(400).json({
+        success: false,
+        message: "Missing PayPal order ID",
+      });
+    }
+
+    const existingDonation = await findDonationByPaypalOrderId(orderID);
+    if (existingDonation?.status === "COMPLETED") {
+      return res.json({
+        success: true,
+        message: "Donation already saved",
+        donationId: existingDonation.donationId,
+        transactionId: existingDonation.transactionId || null,
+      });
+    }
+
+    const accessToken = await generateAccessToken();
+    const response = await fetch(
+      `${process.env.PAYPAL_BASE_URL}/v2/checkout/orders/${orderID}/capture`,
+      {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+          Authorization: `Bearer ${accessToken}`,
+        },
+      }
+    );
+
+    const data = await response.json();
+
+    const completeCapture = async (captureData) => {
+      const transactionId =
+        captureData.purchase_units?.[0]?.payments?.captures?.[0]?.id;
+      const capturedAmount =
+        parseDonationAmount(
+          captureData.purchase_units?.[0]?.payments?.captures?.[0]?.amount
+            ?.value
+        ) || parseDonationAmount(amount);
+
+      const resolvedPaymentMethod =
+        metadata.paymentMethod || existingDonation?.paymentMethod || "PayPal";
+      const now = admin.firestore.FieldValue.serverTimestamp();
+
+      if (existingDonation?.donationId) {
+        await updateDonationRecord(existingDonation.donationId, {
+          firstName: metadata.firstName || existingDonation.firstName || "",
+          phone: metadata.phone || existingDonation.phone || "",
+          amount: capturedAmount,
+          paymentMethod: resolvedPaymentMethod,
+          paymentMethodLabel: resolveDonationPaymentLabel(resolvedPaymentMethod),
+          status: "COMPLETED",
+          transactionId,
+          completedAt: now,
+        });
+
+        return res.json({
+          success: true,
+          message: "Donation completed and saved",
+          donationId: existingDonation.donationId,
+          transactionId,
+        });
+      }
+
+      const result = await saveDonationRecord({
+        metadata: {
+          ...metadata,
+          paymentMethod: resolvedPaymentMethod,
+        },
+        amount: capturedAmount,
+        status: "COMPLETED",
+        extraFields: {
+          paymentMethod: resolvedPaymentMethod,
+          paypalOrderId: orderID,
+          transactionId,
+        },
+      });
+
+      return res.json({
+        success: true,
+        message: "Donation completed and saved",
+        donationId: result.donationId,
+        transactionId,
+      });
+    };
+
+    if (data.status === "COMPLETED") {
+      return completeCapture(data);
+    }
+
+    if (isOrderAlreadyCapturedError(data)) {
+      const order = await getPayPalOrder(orderID, accessToken);
+      if (order.status === "COMPLETED") {
+        return completeCapture(order);
+      }
+    }
+
+    res.json({
+      success: false,
+      message: "Donation payment not completed",
+      paypalStatus: data.status,
+    });
+  } catch (error) {
+    console.error(error);
+    if (error.message === "INVALID_DONATION_AMOUNT") {
+      return res.status(400).json({
+        success: false,
+        message: "סכום תרומה לא תקין",
+      });
+    }
+    return handlePaymentRouteError(res, error, "שגיאה באישור תשלום תרומה");
+  }
+});
+
+app.post("/donations/save-cash-payment", async (req, res) => {
+  try {
+    const metadata = parseDonationMetadata(req.body);
+    const parsedAmount = parseDonationAmount(req.body?.amount);
+
+    if (!parsedAmount) {
+      return res.status(400).json({
+        success: false,
+        message: "סכום תרומה לא תקין",
+      });
+    }
+
+    const result = await saveDonationRecord({
+      metadata: {
+        ...metadata,
+        paymentMethod: metadata.paymentMethod || "cash",
+      },
+      amount: parsedAmount,
+      status: "PENDING_CASH_PAYMENT",
+      extraFields: {
+        paymentMethod: "cash",
+        staffNote: "ממתין לגביית מזומן מהתורם",
+      },
+    });
+
+    res.json({
+      success: true,
+      message: "Cash donation saved",
+      donationId: result.donationId,
+    });
+  } catch (error) {
+    console.error(error);
+    return handlePaymentRouteError(res, error, "שגיאה בשמירת תרומה במזומן");
+  }
+});
+
+app.post("/donations/save-bit-payment", async (req, res) => {
+  try {
+    const metadata = parseDonationMetadata(req.body);
+    const parsedAmount = parseDonationAmount(req.body?.amount);
+
+    if (!parsedAmount) {
+      return res.status(400).json({
+        success: false,
+        message: "סכום תרומה לא תקין",
+      });
+    }
+
+    const result = await saveDonationRecord({
+      metadata: {
+        ...metadata,
+        paymentMethod: metadata.paymentMethod || "bit",
+      },
+      amount: parsedAmount,
+      status: "WAITING_FOR_BIT_PAYMENT",
+      extraFields: {
+        paymentMethod: "bit",
+        staffNote: "ממתין להעברת Bit מהתורם",
+      },
+    });
+
+    res.json({
+      success: true,
+      donationId: result.donationId,
+    });
+  } catch (error) {
+    console.error(error);
+    return handlePaymentRouteError(res, error, "שגיאה בשמירת תרומה ב-Bit");
+  }
+});
+
+// =========================
 // Check participant by ID (registration start)
 // =========================
 
@@ -1569,7 +2086,7 @@ function isDirectExecution() {
 }
 
 if (isDirectExecution()) {
-  app.listen(PORT, () => {
+  app.listen(PORT, "0.0.0.0", () => {
     console.log(`Server running on http://localhost:${PORT}`);
   });
 }
