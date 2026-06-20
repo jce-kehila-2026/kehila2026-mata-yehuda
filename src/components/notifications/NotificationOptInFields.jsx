@@ -2,8 +2,6 @@ import { useState } from "react";
 import { useFcmTokenRegistrationContext } from "./FcmTokenRegistrationProvider";
 import "../../styles/notificationOptInFields.css";
 
-const OPT_IN_LOG = "[fcm opt-in]";
-const FCM_LOG = "[fcm]";
 const PERMISSION_DENIED_MESSAGE =
     "התראות חסומות בדפדפן. יש לאפשר התראות בהגדרות הדפדפן עבור אתר זה ולנסות שוב.";
 
@@ -26,11 +24,7 @@ async function requestPermissionInUserGesture() {
         return permission;
     }
 
-    console.info(`${FCM_LOG} before Notification.requestPermission()`);
-    permission = await Notification.requestPermission();
-    console.info(`${FCM_LOG} after Notification.requestPermission():`, permission);
-
-    return permission;
+    return Notification.requestPermission();
 }
 
 function NotificationOptInFields({ className = "" }) {
@@ -60,10 +54,7 @@ function NotificationOptInFields({ className = "" }) {
         event.preventDefault();
         event.stopPropagation();
 
-        console.info(`${OPT_IN_LOG} button clicked`);
-
         const permissionBefore = getNotificationPermission();
-        console.info(`${OPT_IN_LOG} permission before:`, permissionBefore);
 
         if (permissionBefore === "denied") {
             setLocalError(PERMISSION_DENIED_MESSAGE);
@@ -72,7 +63,7 @@ function NotificationOptInFields({ className = "" }) {
 
         if (typeof requestNotificationPermission !== "function") {
             console.error(
-                `${OPT_IN_LOG} requestNotificationPermission is not available from context`
+                "Notification opt-in: requestNotificationPermission is not available from context"
             );
             setLocalError("שגיאה בהפעלת התראות. נסו לרענן את הדף.");
             return;
@@ -95,16 +86,8 @@ function NotificationOptInFields({ className = "" }) {
                 return;
             }
 
-            console.info(
-                `${OPT_IN_LOG} continuing to existing FCM token flow (skipPermissionPrompt: true)`
-            );
             const nextToken = await requestNotificationPermission("", {
                 skipPermissionPrompt: true
-            });
-
-            console.info(`${OPT_IN_LOG} FCM flow returned`, {
-                hasToken: Boolean(nextToken),
-                permissionAfter: getNotificationPermission()
             });
 
             if (nextToken) {
@@ -116,7 +99,7 @@ function NotificationOptInFields({ className = "" }) {
                 setLocalError(PERMISSION_DENIED_MESSAGE);
             }
         } catch (activateError) {
-            console.error(`${OPT_IN_LOG} activation failed`, activateError);
+            console.error("Notification opt-in activation failed", activateError);
 
             if (getNotificationPermission() === "denied") {
                 setLocalError(PERMISSION_DENIED_MESSAGE);

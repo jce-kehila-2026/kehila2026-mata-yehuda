@@ -42,7 +42,7 @@ function StaffLogin() {
             const staffRef = doc(db, "staff", user.uid);
             const staffSnap = await getDoc(staffRef);
 
-            if (!staffSnap.exists()) {
+            if (!staffSnap.exists) {
                 setError("המשתמש אינו איש צוות");
                 await signOut(auth);
                 return;

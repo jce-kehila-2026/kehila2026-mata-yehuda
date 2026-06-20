@@ -14,7 +14,6 @@ import {
 } from "../services/staffManegmentServices/notificationTokenService";
 
 const LOG_PREFIX = "[fcm]";
-const FCM_TOKEN_STORAGE_KEY = "fcm_token";
 
 function getInitialGenerationStatus() {
     if (!isVapidKeyConfigured()) {
@@ -85,11 +84,7 @@ async function persistFcmToken({ token, participantId = "" }) {
         groups
     });
 
-    console.info(`${LOG_PREFIX} Token saved to Firestore`);
-
     storeFcmTokenLocally(token);
-
-    console.info(`${LOG_PREFIX} Token saved to localStorage`);
 }
 
 export function useFcmTokenRegistration({ enabled = true } = {}) {
@@ -107,18 +102,6 @@ export function useFcmTokenRegistration({ enabled = true } = {}) {
     const [lastFailure, setLastFailure] = useState(null);
 
     useEffect(() => {
-        console.info(`${LOG_PREFIX} hook mounted`, {
-            enabled,
-            permission:
-                typeof Notification !== "undefined"
-                    ? Notification.permission
-                    : "unavailable",
-            storedToken: getStoredFcmToken() || null,
-            vapidKeyConfigured: isVapidKeyConfigured()
-        });
-    }, [enabled]);
-
-    useEffect(() => {
         if (!enabled) {
             return undefined;
         }
@@ -132,8 +115,6 @@ export function useFcmTokenRegistration({ enabled = true } = {}) {
                 setGenerationStatus("missing_vapid_key");
                 return;
             }
-
-            console.info(`${LOG_PREFIX} VAPID key loaded`);
 
             const existingToken = getStoredFcmToken();
 

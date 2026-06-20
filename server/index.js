@@ -41,6 +41,11 @@ app.use(
 );
 app.use(express.json({ limit: "1mb" }));
 
+app.use((req, _res, next) => {
+    console.log("[notifications server]", req.method, req.url);
+    next();
+});
+
 app.get("/health", (_req, res) => {
     let firebaseConfigured = false;
 
@@ -61,23 +66,30 @@ app.get("/health", (_req, res) => {
 app.post("/api/notifications/send", async (req, res) => {
     const { targetGroup = "all", title = "", body = "" } = req.body || {};
 
-    console.log("[notifications/send] request received", {
+    console.log("[notifications/send] request received");
+    console.log("[notifications/send] Authorization:", req.headers.authorization ? "present" : "missing");
+    console.log("[notifications/send] payload:", {
         targetGroup,
-        hasTitle: Boolean(String(title).trim()),
-        hasBody: Boolean(String(body).trim())
+        title,
+        body
     });
 
     try {
+        console.log("[notifications/send] before verifyActiveStaffUser()");
         const staffUser = await verifyActiveStaffUser(req.headers.authorization);
+        console.log("[notifications/send] after verifyActiveStaffUser()", {
+            uid: staffUser.uid,
+            email: staffUser.email
+        });
 
+        console.log("[notifications/send] before sendFcmNotification()");
         const result = await sendFcmNotification({
             targetGroup,
             title,
             body,
             sentBy: staffUser.email || staffUser.uid
         });
-
-        console.log("[notifications/send] summary", result);
+        console.log("[notifications/send] after sendFcmNotification()", result);
 
         return res.json({
             ok: true,
