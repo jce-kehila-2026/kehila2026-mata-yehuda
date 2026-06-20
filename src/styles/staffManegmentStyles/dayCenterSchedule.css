@@ -37,9 +37,38 @@
 }
 
 .day-center-schedule__actions {
+  display: flex;
+  flex-direction: column;
+  align-items: stretch;
+  gap: 0.75rem;
   margin-top: 1rem;
 }
 
-.staff-page--day-center-schedule .staff-form__submit {
-  width: auto;
+.staff-page--day-center-schedule .staff-form__submit,
+.staff-page--day-center-schedule .day-center-schedule__delete-btn {
+  width: 100%;
+  max-width: 16rem;
+  min-width: 0;
+  margin-inline: auto;
+}
+
+.staff-page--day-center-schedule .day-center-schedule__delete-btn {
+  color: #b42318;
+  background: #ffffff;
+  border: 1.5px solid #b42318;
+  box-shadow: none;
+}
+
+.staff-page--day-center-schedule .day-center-schedule__delete-btn:hover:not(:disabled),
+.staff-page--day-center-schedule .day-center-schedule__delete-btn:active:not(:disabled) {
+  color: #8f1d14;
+  background: rgba(180, 35, 24, 0.06);
+  border-color: #8f1d14;
+  transform: none;
+  box-shadow: none;
+}
+
+.staff-page--day-center-schedule .day-center-schedule__delete-btn:disabled {
+  opacity: 0.45;
+  cursor: not-allowed;
 }
