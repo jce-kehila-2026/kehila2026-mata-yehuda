@@ -1,9 +1,7 @@
-import { useState } from "react";
 import { useLocation, useNavigate } from "react-router-dom";
 
 const NAV_ITEMS = [
   { id: "about", label: "מי אנחנו", type: "page", path: "/about" },
-  { id: "services", label: "השירותים שלנו", type: "section" },
   { id: "donations", label: "תרומות", type: "section" },
   { id: "contact", label: "יצירת קשר", type: "section" },
 ];
@@ -27,7 +25,6 @@ function scrollToHomeSection(sectionId) {
 function HomeNavbar() {
   const navigate = useNavigate();
   const location = useLocation();
-  const [showLoginOptions, setShowLoginOptions] = useState(false);
 
   const handleNavClick = (item) => {
     if (item.type === "page") {
@@ -82,18 +79,11 @@ function HomeNavbar() {
           <button
             type="button"
             className="home-navbar__login"
-            onClick={() => setShowLoginOptions((open) => !open)}
+            onClick={() => navigate("/staff-login")}
           >
             התחברות
           </button>
 
-          {showLoginOptions && (
-            <div className="home-navbar__login-menu">
-              <button type="button" onClick={() => navigate("/staff-login")}>
-                מנהל
-              </button>
-            </div>
-          )}
         </div>
       </div>
     </header>
