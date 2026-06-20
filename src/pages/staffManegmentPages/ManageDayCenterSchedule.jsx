@@ -19,6 +19,7 @@ function ManageDayCenterSchedule() {
     const [isDragOver, setIsDragOver] = useState(false);
     const [loading, setLoading] = useState(true);
     const [saving, setSaving] = useState(false);
+    const [deleting, setDeleting] = useState(false);
     const [error, setError] = useState("");
     const [success, setSuccess] = useState("");
     const fileInputRef = useRef(null);
@@ -94,7 +95,7 @@ function ManageDayCenterSchedule() {
     }
 
     function openFilePicker() {
-        if (saving) {
+        if (saving || deleting) {
             return;
         }
 
@@ -111,7 +112,7 @@ function ManageDayCenterSchedule() {
     }
 
     function handleDropZoneKeyDown(event) {
-        if (saving) {
+        if (saving || deleting) {
             return;
         }
 
@@ -125,7 +126,7 @@ function ManageDayCenterSchedule() {
         event.preventDefault();
         event.stopPropagation();
 
-        if (saving) {
+        if (saving || deleting) {
             return;
         }
 
@@ -153,7 +154,7 @@ function ManageDayCenterSchedule() {
         event.stopPropagation();
         setIsDragOver(false);
 
-        if (saving) {
+        if (saving || deleting) {
             return;
         }
 
@@ -193,8 +194,42 @@ function ManageDayCenterSchedule() {
         }
     }
 
+    async function handleDelete() {
+        if (!savedImageUrl) {
+            return;
+        }
+
+        const confirmed = window.confirm("האם למחוק את תמונת לוח הזמנים?");
+        if (!confirmed) {
+            return;
+        }
+
+        setDeleting(true);
+        setError("");
+        setSuccess("");
+
+        try {
+            await updateDayCenterScheduleImageUrl("");
+
+            clearLocalPreview();
+            setSavedImageUrl("");
+            setPreviewUrl("");
+            setSelectedFile(null);
+            setImageFileName("");
+            setImageError("");
+            setSuccess("התמונה נמחקה בהצלחה");
+        } catch (deleteError) {
+            console.error(deleteError);
+            setError(deleteError?.message || "שגיאה במחיקת התמונה");
+        } finally {
+            setDeleting(false);
+        }
+    }
+
     const hasPreview = Boolean(previewUrl);
     const hasPendingUpload = Boolean(selectedFile);
+    const hasSavedImage = Boolean(savedImageUrl);
+    const isBusy = saving || deleting;
 
     if (loading) {
         return (
@@ -231,7 +266,7 @@ function ManageDayCenterSchedule() {
                         className="form-image-upload__input"
                         accept={IMAGE_ACCEPT}
                         onChange={handleFileChange}
-                        disabled={saving}
+                        disabled={isBusy}
                     />
 
                     {!hasPreview ? (
@@ -241,14 +276,14 @@ function ManageDayCenterSchedule() {
                                 "day-center-schedule__dropzone",
                                 isDragOver && "form-image-upload__dropzone--active",
                                 imageError && "form-image-upload__dropzone--error",
-                                saving && "form-image-upload__dropzone--disabled"
+                                isBusy && "form-image-upload__dropzone--disabled"
                             ]
                                 .filter(Boolean)
                                 .join(" ")}
                             role="button"
-                            tabIndex={saving ? -1 : 0}
+                            tabIndex={isBusy ? -1 : 0}
                             aria-label="גרירת תמונה או בחירת קובץ"
-                            aria-disabled={saving}
+                            aria-disabled={isBusy}
                             onClick={handleDropZoneClick}
                             onKeyDown={handleDropZoneKeyDown}
                             onDragEnter={handleDragEnter}
@@ -305,7 +340,7 @@ function ManageDayCenterSchedule() {
                                         event.stopPropagation();
                                         openFilePicker();
                                     }}
-                                    disabled={saving}
+                                    disabled={isBusy}
                                     title="החלפת תמונה"
                                     aria-label="החלפת תמונה"
                                 >
@@ -336,9 +371,17 @@ function ManageDayCenterSchedule() {
                             type="button"
                             className="staff-button staff-form__submit"
                             onClick={handleSave}
-                            disabled={saving || !hasPendingUpload}
+                            disabled={isBusy || !hasPendingUpload}
                         >
                             {saving ? "שומר..." : "שמירת לוח זמנים"}
+                        </button>
+                        <button
+                            type="button"
+                            className="staff-button staff-button--secondary day-center-schedule__delete-btn"
+                            onClick={handleDelete}
+                            disabled={isBusy || !hasSavedImage}
+                        >
+                            {deleting ? "מוחק..." : "מחיקת תמונה"}
                         </button>
                     </div>
                 </section>
