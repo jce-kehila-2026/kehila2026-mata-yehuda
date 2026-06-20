@@ -112,7 +112,7 @@ function SendMessages() {
         <div className="staff-page staff-page--messages">
             <header className="notifications-page-header staff-header">
                 <div className="notifications-page-header__inner">
-                    <h1>שליחת התראות</h1>
+                    <h1>שליחת הודעות ועדכונים</h1>
                     <p>
                         שליחת הודעות push למשתתפים שנרשמו לקבלת עדכונים בדפדפן
                     </p>

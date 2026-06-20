@@ -2,6 +2,7 @@ import { useState } from "react";
 import { useNavigate } from "react-router-dom";
 import CancelRegistrationButton from "../CancelTheRegistration/CancelRegistrationButton";
 import PaymentSuccessMessage from "./PaymentSuccessMessage";
+import PaymentNotificationOptIn from "./PaymentNotificationOptIn";
 import RegistrationStepper, { REGISTRATION_STEPS } from "./RegistrationStepper";
 import {
   validateIsraeliId,
@@ -736,6 +737,8 @@ function PaymentForm({
                 inputMode="numeric"
               />
             </div>
+
+            <PaymentNotificationOptIn />
 
             <div className="community-actions form-actions form-actions--split">
               <button type="button" className="secondary-btn" onClick={goToIdCheckStep}>

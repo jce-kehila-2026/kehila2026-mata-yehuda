@@ -1,6 +1,5 @@
 import { useLocation } from "react-router-dom";
 import { FcmTokenRegistrationProvider } from "./FcmTokenRegistrationProvider";
-import NotificationOptIn from "./NotificationOptIn";
 
 const EXCLUDED_PATH_PREFIXES = ["/staff-login", "/community-staff", "/attendance"];
 
@@ -10,21 +9,16 @@ function isPublicParticipantPath(pathname) {
     );
 }
 
-function PublicNotificationRegistration() {
+function PublicNotificationRegistration({ children }) {
     const { pathname } = useLocation();
     const isPublicPath = isPublicParticipantPath(pathname);
 
     if (!isPublicPath) {
-        console.info("[fcm] registration skipped on non-public path", { pathname });
-        return null;
+        return children;
     }
 
-    console.info("[fcm] registration active on public path", { pathname });
-
     return (
-        <FcmTokenRegistrationProvider>
-            <NotificationOptIn />
-        </FcmTokenRegistrationProvider>
+        <FcmTokenRegistrationProvider>{children}</FcmTokenRegistrationProvider>
     );
 }
 
