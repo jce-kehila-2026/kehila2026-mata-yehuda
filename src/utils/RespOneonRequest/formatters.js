@@ -117,5 +117,51 @@ export function buildWhatsAppUrl(phone, message) {
   const normalized = normalizePhoneForWhatsApp(phone);
   if (!normalized) return null;
 
-  return `https://wa.me/${normalized}?text=${encodeURIComponent(message)}`;
+  const encodedMessage = encodeURIComponent(String(message ?? ""));
+  return `https://api.whatsapp.com/send?phone=${normalized}&text=${encodedMessage}`;
+}
+
+export async function openWhatsAppChat(phone, message) {
+  const url = buildWhatsAppUrl(phone, message);
+  if (!url) return { ok: false, reason: "invalid_phone" };
+
+  let copied = false;
+  try {
+    if (navigator.clipboard?.writeText) {
+      await navigator.clipboard.writeText(String(message ?? ""));
+      copied = true;
+    }
+  } catch {
+    copied = false;
+  }
+
+  const link = document.createElement("a");
+  link.href = url;
+  link.target = "_blank";
+  link.rel = "noopener noreferrer";
+  document.body.appendChild(link);
+  link.click();
+  document.body.removeChild(link);
+
+  return { ok: true, copied };
+}
+
+export const ORGANIZATION_NAME = "עמותת ותיקי מטה יהודה";
+
+export function buildStaffWhatsAppMessage({ answer, content, date }) {
+  const trimmedAnswer = String(answer ?? "").trim();
+  const trimmedContent = String(content ?? "").trim() || "—";
+  const requestDate = formatDisplayDate(date);
+
+  return [
+    "שלום,",
+    `תודה שפנית אל ${ORGANIZATION_NAME}.`,
+    `פנייתך התקבלה בתאריך ${requestDate}.`,
+    "תוכן הפנייה:",
+    trimmedContent,
+    "מענה:",
+    trimmedAnswer,
+    "בברכה,",
+    `${ORGANIZATION_NAME}.`,
+  ].join("\n");
 }
