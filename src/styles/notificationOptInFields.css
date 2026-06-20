@@ -1,0 +1,172 @@
+.notification-opt-in {
+  display: flex;
+  flex-direction: column;
+  align-items: stretch;
+  gap: 0.5rem;
+  margin-top: 0.25rem;
+  width: 100%;
+}
+
+.notification-opt-in__label {
+  display: flex;
+  flex-direction: row;
+  direction: rtl;
+  align-items: center;
+  justify-content: flex-start;
+  gap: 0.6rem;
+  width: 100%;
+  margin: 0;
+  padding: 0;
+  border: none;
+  background: transparent;
+  cursor: pointer;
+  font-size: 1rem;
+  font-weight: 400;
+  line-height: 1.4;
+  color: var(--color-text, #1f1f1f);
+  text-align: right;
+}
+
+.notification-opt-in__label span {
+  flex: 1 1 auto;
+  min-width: 0;
+  white-space: nowrap;
+}
+
+.notification-opt-in__checkbox {
+  appearance: auto;
+  -webkit-appearance: checkbox;
+  display: inline-block;
+  flex: 0 0 auto;
+  width: 1.125rem;
+  height: 1.125rem;
+  min-width: 1.125rem;
+  min-height: 1.125rem;
+  max-width: 1.125rem;
+  margin: 0;
+  padding: 0;
+  border: 1px solid #b8b8b8;
+  border-radius: 3px;
+  background: #fff;
+  box-sizing: border-box;
+  cursor: pointer;
+  accent-color: var(--color-primary, #2d7d46);
+  vertical-align: middle;
+}
+
+.notification-opt-in__activate {
+  align-self: flex-start;
+  width: auto;
+  min-height: 0;
+  margin-top: 0.15rem;
+  padding: 0.45rem 0.9rem;
+  font-size: 0.92rem;
+  font-weight: 600;
+  font-family: "Heebo", system-ui, sans-serif;
+  color: #fff;
+  background: var(--color-primary, #2d7d46);
+  border: none;
+  border-radius: 999px;
+  cursor: pointer;
+}
+
+.notification-opt-in__activate:hover:not(:disabled) {
+  background: var(--color-primary-hover, #236b38);
+}
+
+.notification-opt-in__activate:disabled {
+  opacity: 0.65;
+  cursor: not-allowed;
+}
+
+.notification-opt-in__success {
+  margin: 0;
+  padding: 0.55rem 0.75rem;
+  font-size: 0.95rem;
+  color: #166534;
+  background: #ecfdf3;
+  border: 1px solid #bbf7d0;
+  border-radius: 10px;
+}
+
+.notification-opt-in__error {
+  margin: 0;
+  padding: 0.55rem 0.75rem;
+  font-size: 0.95rem;
+  color: #991b1b;
+  background: #fef2f2;
+  border: 1px solid #fecaca;
+  border-radius: 10px;
+}
+
+/* Payment form (/pay) */
+.supportive-community-page .payment-form .notification-opt-in {
+  margin-top: 0;
+}
+
+.supportive-community-page .payment-form .notification-opt-in__label {
+  font-size: clamp(0.88rem, 0.84rem + 0.2vw, 1rem);
+}
+
+.supportive-community-page .payment-form .notification-opt-in__checkbox,
+.supportive-community-page .notification-opt-in input[type="checkbox"].notification-opt-in__checkbox {
+  appearance: auto;
+  -webkit-appearance: checkbox;
+  width: 1.125rem !important;
+  height: 1.125rem !important;
+  min-width: 1.125rem !important;
+  min-height: 1.125rem !important;
+  max-width: 1.125rem !important;
+  padding: 0 !important;
+  margin: 0 !important;
+  border: 1px solid #b8b8b8 !important;
+  border-radius: 3px !important;
+  background: #fff !important;
+  box-shadow: none !important;
+}
+
+.supportive-community-page .payment-form .notification-opt-in__activate {
+  width: auto;
+  min-height: 0;
+  border-radius: 999px;
+}
+
+/* Homepage modal */
+.form-box .notification-opt-in {
+  margin-top: 0;
+}
+
+.form-box .notification-opt-in__label {
+  font-size: 0.95rem;
+}
+
+.form-box .notification-opt-in__label span {
+  white-space: normal;
+}
+
+.form-box .notification-opt-in__checkbox,
+.form-box .notification-opt-in input[type="checkbox"].notification-opt-in__checkbox {
+  appearance: auto;
+  -webkit-appearance: checkbox;
+  width: 1.125rem !important;
+  height: 1.125rem !important;
+  min-width: 1.125rem !important;
+  min-height: 1.125rem !important;
+  max-width: 1.125rem !important;
+  padding: 0 !important;
+  border: 1px solid #b8b8b8 !important;
+  border-radius: 3px !important;
+  background: #fff !important;
+}
+
+.form-box .notification-opt-in__activate {
+  width: 100%;
+  text-align: center;
+  border-radius: var(--radius, 18px);
+}
+
+@media (max-width: 420px) {
+  .supportive-community-page .payment-form .notification-opt-in__label span {
+    white-space: normal;
+  }
+}
