@@ -2,21 +2,20 @@
 
 .take-attendance-page {
   direction: rtl;
-  min-height: 100vh;
-  background: #f0f2f1;
+  min-height: auto;
+  background: #f4faf5;
   color: #243029;
   font-family: "Heebo", system-ui, sans-serif;
   padding: 1.25rem 1rem 2rem;
 }
 
 .take-attendance-page__header {
-  max-width: 840px;
-  margin: 0 auto 0.75rem;
-  background: #ffffff;
-  border: 1px solid #d5ddd8;
-  border-right: 4px solid #2d7d46;
-  border-radius: 6px;
-  padding: 0.85rem 1rem;
+  max-width: 1000px;
+  margin: 0 auto 0.55rem;
+  background: transparent;
+  border: none;
+  border-radius: 0;
+  padding: 0.25rem 0 0;
 }
 
 .take-attendance-page__header-row {
@@ -28,7 +27,7 @@
 
 .take-attendance-page__title {
   margin: 0;
-  font-size: 1.65rem;
+  font-size: 1.6rem;
   font-weight: 700;
   color: #2d7d46;
   line-height: 1.35;
@@ -39,23 +38,24 @@
 }
 
 .take-attendance-page__content {
-  max-width: 840px;
+  max-width: 1000px;
   margin: 0 auto;
 }
 
 .take-attendance-page__search-wrap {
-  max-width: 720px;
-  margin: 0 auto 0.65rem;
+  max-width: none;
+  margin: 0 0 0.65rem;
 }
 
 .take-attendance-page__hint-card {
-  max-width: 720px;
-  margin: 0 auto 0.65rem;
-  background: #ffffff;
-  border: 1px dashed #d5ddd8;
-  border-radius: 6px;
-  padding: 0.75rem 0.85rem;
-  text-align: center;
+  max-width: none;
+  margin: 0 0 0.65rem;
+  background: linear-gradient(180deg, #ffffff 0%, #f6fbf8 100%);
+  border: 1px solid #d9e7dd;
+  border-radius: 14px;
+  padding: 0.9rem 1rem;
+  text-align: right;
+  box-shadow: 0 4px 16px rgba(36, 48, 41, 0.05);
 }
 
 .take-attendance-page__hint {
@@ -64,6 +64,22 @@
   font-weight: 600;
   color: #5a6660;
   line-height: 1.45;
+}
+
+.take-attendance-page__hint::before {
+  content: "i";
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 1.6rem;
+  height: 1.6rem;
+  margin-left: 0.6rem;
+  border-radius: 999px;
+  background: #ebf6ef;
+  border: 1px solid #cfe7d5;
+  color: #2d7d46;
+  font-weight: 800;
+  line-height: 1;
 }
 
 .take-attendance-page__section-title {
@@ -78,12 +94,13 @@
   display: grid;
   grid-template-columns: minmax(0, 1fr) 10.5rem max-content;
   align-items: end;
-  gap: 0.65rem;
+  gap: 0.75rem;
   margin-bottom: 0;
   background: #ffffff;
   border: 1px solid #d5ddd8;
-  border-radius: 6px;
-  padding: 0.65rem 0.85rem;
+  border-radius: 16px;
+  padding: 0.85rem 1rem;
+  box-shadow: 0 4px 18px rgba(36, 48, 41, 0.06);
 }
 
 .take-attendance-page__toolbar-title {
@@ -206,19 +223,19 @@
 }
 
 .attendance-table__col-name {
-  width: 30%;
+  width: 36%;
 }
 
 .attendance-table__col-phone {
-  width: 16%;
+  width: 14%;
 }
 
 .attendance-table__col-status {
-  width: 22%;
+  width: 26%;
 }
 
 .attendance-table__col-notes {
-  width: 32%;
+  width: 24%;
 }
 
 .attendance-table__col-activity {
@@ -312,7 +329,7 @@
 }
 
 .take-attendance-page__row:hover {
-  background: #fbfdfc;
+  background: #f3fbf6;
 }
 
 .take-attendance-page__row:last-child td {
@@ -375,13 +392,13 @@
   border: 1px solid #d5ddd8;
   border-right: 4px solid #2d7d46;
   border-radius: 6px;
-  padding: 0.65rem 0.85rem;
+  padding: 0.45rem 0.75rem;
 }
 
 .take-attendance-page__context-summary {
   display: flex;
   flex-direction: column;
-  gap: 0.15rem;
+  gap: 0.1rem;
 }
 
 .take-attendance-page__context-label {
@@ -406,6 +423,17 @@
   font-weight: 600;
   color: #243029;
   line-height: 1.35;
+}
+
+/* Table hierarchy polish */
+.take-attendance-page__table tbody td[data-label="שם המשתתף"] {
+  font-weight: 700;
+  color: #1f5c34;
+}
+
+.take-attendance-page__table tbody td[data-label="טלפון"] {
+  color: #6b776f;
+  font-weight: 600;
 }
 
 .take-attendance-page__actions {
