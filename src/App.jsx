@@ -23,7 +23,7 @@ import donationRoutes from "./donations/routes/donationRoutes";
 function App() {
   return (
     <BrowserRouter>
-      <PublicNotificationRegistration />
+      <PublicNotificationRegistration>
       <Routes>
         <Route path="/" element={<Home />} />
         <Route path="/plus60" element={<Plus60Page />} />
@@ -81,6 +81,7 @@ function App() {
           />
         ))}
       </Routes>
+      </PublicNotificationRegistration>
     </BrowserRouter>
   );
 }

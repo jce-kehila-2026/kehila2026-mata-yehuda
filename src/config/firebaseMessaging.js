@@ -51,9 +51,9 @@ export async function requestBrowserNotificationPermission({
     console.info(`${LOG_PREFIX} Notification permission status: ${permission}`);
 
     if (permission === "default" && promptIfNeeded) {
-        console.info(`${LOG_PREFIX} Requesting notification permission...`);
+        console.info(`${LOG_PREFIX} before Notification.requestPermission()`);
         permission = await Notification.requestPermission();
-        console.info(`${LOG_PREFIX} Permission request result: ${permission}`);
+        console.info(`${LOG_PREFIX} after Notification.requestPermission():`, permission);
     }
 
     if (permission !== "granted") {

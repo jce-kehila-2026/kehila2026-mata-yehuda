@@ -282,7 +282,10 @@ export function useFcmTokenRegistration({ enabled = true } = {}) {
         };
     }, [enabled, token]);
 
-    async function requestNotificationPermission(participantId = "") {
+    async function requestNotificationPermission(
+        participantId = "",
+        { skipPermissionPrompt = false } = {}
+    ) {
         setError("");
         setLastFailure(null);
 
@@ -295,7 +298,7 @@ export function useFcmTokenRegistration({ enabled = true } = {}) {
         setGenerationStatus("generating_token");
 
         const result = await acquireFcmTokenWithPermission({
-            requestPermission: true
+            requestPermission: !skipPermissionPrompt
         });
 
         const swRegistered = await checkServiceWorkerRegistered();
