@@ -8,6 +8,7 @@ import HomeNavbar from "../../components/Homecomponents/HomeNavbar";
 import ContactFooter from "../../components/Homecomponents/ContactFooter";
 import DayCenterRegisterForm from "../../components/Homecomponents/DayCenterRegisterForm";
 import VolunteerForm from "../../components/Homecomponents/VolunteerForm";
+import ProgramRegistrationForm from "../../components/Homecomponents/ProgramRegistrationForm";
 
 import "../../styles/HomeStyle/Home.css";
 import "../../styles/HomeStyle/ProgramCard.css";
@@ -40,6 +41,7 @@ function Home() {
   const [loading, setLoading] = useState(true);
   const [showDayCenterForm, setShowDayCenterForm] = useState(false);
   const [showVolunteerForm, setShowVolunteerForm] = useState(false);
+  const [selectedProgram, setSelectedProgram] = useState(null);
 
   useEffect(() => {
     async function loadPrograms() {
@@ -129,7 +131,7 @@ function Home() {
               </div>
             );
           } else {
-            buttons = <button>הרשמה</button>;
+            buttons = <button onClick={() => setSelectedProgram(program)}>הרשמה</button>;
           }
 
           return (
@@ -159,6 +161,15 @@ function Home() {
       )}
       {showVolunteerForm && (
         <VolunteerForm onClose={() => setShowVolunteerForm(false)} />
+      )}
+      {selectedProgram && (
+        <ProgramRegistrationForm
+          program={{
+            ...selectedProgram,
+            title: HOME_PROGRAM_TITLES[selectedProgram.id] || selectedProgram.title,
+          }}
+          onClose={() => setSelectedProgram(null)}
+        />
       )}
 
       <ContactFooter />
