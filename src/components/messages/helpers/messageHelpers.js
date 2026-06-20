@@ -1,8 +1,28 @@
 export const NOTIFICATION_COMPLIANCE_NOTE =
     "התראות נשלחות רק למשתתפים שנרשמו לקבלת עדכונים.";
 
+export const NOTIFICATION_BACKEND_ERROR_NAME = "NotificationBackendUnavailable";
+
+/** @deprecated Use getNotificationBackendRequiredMessage() for context-aware text. */
 export const NOTIFICATION_BACKEND_REQUIRED_MESSAGE =
     "שליחת התראות דורשת חיבור לשרת ההתראות. ודאו שהשרת רץ: cd server && npm start";
+
+export function getNotificationBackendRequiredMessage(apiBase = "") {
+    const normalizedBase = String(apiBase || "").trim();
+
+    if (import.meta.env.DEV && !normalizedBase) {
+        return NOTIFICATION_BACKEND_REQUIRED_MESSAGE;
+    }
+
+    if (normalizedBase) {
+        return `לא ניתן להתחבר לשרת ההתראות (${normalizedBase}). בדקו שהשירות פעיל וזמין.`;
+    }
+
+    return (
+        "שליחת התראות דורשת הגדרת VITE_NOTIFICATIONS_API_URL על שירות ה-frontend ב-Render, " +
+        "ואז פריסה מחדש (Manual Deploy) כדי שהערך ייכלל בבנייה."
+    );
+}
 
 export const NOTIFICATION_NO_ACTIVE_DEVICES_MESSAGE =
     "אין מכשירים פעילים לשליחת התראות. יש לבקש מהמשתתפים לאשר התראות בדפדפן.";
