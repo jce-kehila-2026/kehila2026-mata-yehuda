@@ -119,8 +119,8 @@ function Home() {
           } else if (program.id === "day_center") {
             buttons = (
               <div className="program-card__day-actions">
-                <button onClick={() => setShowDayCenterForm(true)}>
-                  הרשמה
+                <button onClick={() => navigate("/day-center")}>
+                  מידע נוסף והרשמה
                 </button>
                 <button
                   className="volunteer-btn"
