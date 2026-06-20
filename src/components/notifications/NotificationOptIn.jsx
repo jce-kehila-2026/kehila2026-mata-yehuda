@@ -33,6 +33,7 @@ function NotificationOptIn() {
     }
 
     async function handleApprove() {
+        dismissOptIn();
         setSubmitting(true);
 
         console.info("[fcm] Opt-in approve clicked", { permission });
@@ -42,19 +43,10 @@ function NotificationOptIn() {
 
             console.info("[fcm] Opt-in flow finished", {
                 success: Boolean(nextToken),
-                permission:
-                    typeof Notification !== "undefined"
-                        ? Notification.permission
-                        : "unavailable",
                 localStorageToken: localStorage.getItem("fcm_token")
             });
-
-            markNotificationOptInSeen();
-            setIsOpen(false);
         } catch (requestError) {
             console.error("[fcm] Opt-in flow failed", requestError);
-            markNotificationOptInSeen();
-            setIsOpen(false);
         } finally {
             setSubmitting(false);
         }

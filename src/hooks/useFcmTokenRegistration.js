@@ -182,11 +182,63 @@ export function useFcmTokenRegistration({ enabled = true } = {}) {
                 return;
             }
 
-            console.info(
-                `${LOG_PREFIX} Permission granted without stored token — skipping automatic getToken() (FCM optional)`
-            );
-            setGenerationStatus("optional_skipped");
-            return;
+            setGenerationStatus("generating_token");
+
+            try {
+                const result = await acquireFcmTokenWithPermission({
+                    requestPermission: false
+                });
+
+                const swRegistered = await checkServiceWorkerRegistered();
+
+                if (!cancelled) {
+                    setServiceWorkerRegistered(swRegistered);
+                }
+
+                if (cancelled) {
+                    return;
+                }
+
+                if (!result.ok) {
+                    setGenerationStatus(result.reason || "failed");
+                    setLastFailure(
+                        result.code
+                            ? {
+                                  code: result.code,
+                                  explanation: result.explanation
+                              }
+                            : null
+                    );
+                    console.error(`${LOG_PREFIX} Automatic token acquisition failed`, {
+                        reason: result.reason,
+                        permission: result.permission,
+                        code: result.code,
+                        explanation: result.explanation,
+                        message: result.error?.message
+                    });
+                    return;
+                }
+
+                await persistFcmToken({
+                    token: result.token,
+                    participantId: ""
+                });
+
+                if (!cancelled) {
+                    setToken(result.token);
+                    setPermission("granted");
+                    setGenerationStatus("success");
+                }
+            } catch (initError) {
+                console.error(
+                    `${LOG_PREFIX} Automatic token acquisition failed`,
+                    initError
+                );
+
+                if (!cancelled) {
+                    setGenerationStatus("failed");
+                }
+            }
         }
 
         initializeTokenRegistration();
@@ -204,38 +256,25 @@ export function useFcmTokenRegistration({ enabled = true } = {}) {
         let unsubscribe = () => {};
 
         (async () => {
-            try {
-                const messaging = await getFirebaseMessaging();
+            const messaging = await getFirebaseMessaging();
 
-                if (!messaging) {
-                    return;
-                }
-
-                unsubscribe = onMessage(messaging, (payload) => {
-                    console.info(`${LOG_PREFIX} Foreground message received`, payload);
-
-                    const title =
-                        payload.notification?.title || payload.data?.title || "מטה יהודה";
-                    const body =
-                        payload.notification?.body || payload.data?.body || "";
-
-                    if (Notification.permission === "granted") {
-                        console.info(`${LOG_PREFIX} Showing foreground browser notification`, {
-                            title,
-                            body
-                        });
-                        new Notification(title, {
-                            body,
-                            icon: "/favicon.svg"
-                        });
-                    }
-                });
-            } catch (onMessageError) {
-                console.warn(
-                    `${LOG_PREFIX} Foreground messaging unavailable — continuing without push`,
-                    onMessageError
-                );
+            if (!messaging) {
+                return;
             }
+
+            unsubscribe = onMessage(messaging, (payload) => {
+                const title =
+                    payload.notification?.title || payload.data?.title || "מטה יהודה";
+                const body =
+                    payload.notification?.body || payload.data?.body || "";
+
+                if (Notification.permission === "granted") {
+                    new Notification(title, {
+                        body,
+                        icon: "/favicon.svg"
+                    });
+                }
+            });
         })();
 
         return () => {

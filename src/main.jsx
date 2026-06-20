@@ -24,10 +24,9 @@ import "./styles/Payment/registration.css";
 
 import FirebaseConfigError from "./components/FirebaseConfigError.jsx";
 import { validateFirebaseEnvironmentAtStartup } from "./config/firebaseEnvironment";
-import { validateFcmEnvironmentAtStartup, validateFcmConfigConsistency } from "./config/fcmEnvironment";
+import { validateFcmEnvironmentAtStartup } from "./config/fcmEnvironment";
 
 const firebaseEnv = validateFirebaseEnvironmentAtStartup();
-validateFcmConfigConsistency(firebaseEnv.values);
 validateFcmEnvironmentAtStartup();
 
 const root = createRoot(document.getElementById("root"));

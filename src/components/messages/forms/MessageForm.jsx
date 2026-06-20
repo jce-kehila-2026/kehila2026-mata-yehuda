@@ -6,16 +6,13 @@ function MessageForm({
     body,
     targetGroup,
     complianceNote,
-    inactiveDevicesMessage,
     sending,
-    sendDisabled = false,
     onTitleChange,
     onBodyChange,
     onTargetGroupChange,
     onSubmit
 }) {
     const showGroupGrid = NOTIFICATION_TARGET_GROUPS.length > 1;
-    const formDisabled = sending || sendDisabled;
 
     return (
         <form
@@ -30,15 +27,6 @@ function MessageForm({
                 {complianceNote ? (
                     <p className="notifications-form__note">{complianceNote}</p>
                 ) : null}
-                {sendDisabled && inactiveDevicesMessage ? (
-                    <p
-                        className="notifications-form__note"
-                        role="status"
-                        style={{ color: "#664d03", background: "#fff3cd", padding: "0.75rem", borderRadius: "6px" }}
-                    >
-                        {inactiveDevicesMessage}
-                    </p>
-                ) : null}
             </div>
 
             <div className="notifications-form__fields-row">
@@ -51,7 +39,7 @@ function MessageForm({
                         placeholder="לדוגמה: מטה יהודה"
                         value={title}
                         onChange={(event) => onTitleChange(event.target.value)}
-                        disabled={formDisabled}
+                        disabled={sending}
                         autoComplete="off"
                     />
                 </div>
@@ -64,7 +52,7 @@ function MessageForm({
                         placeholder="כתבו כאן את תוכן ההודעה שתופיע במכשירי המשתתפים..."
                         value={body}
                         onChange={(event) => onBodyChange(event.target.value)}
-                        disabled={formDisabled}
+                        disabled={sending}
                         rows={5}
                     />
                 </div>
@@ -100,7 +88,7 @@ function MessageForm({
                                         onChange={(event) =>
                                             onTargetGroupChange(event.target.value)
                                         }
-                                        disabled={formDisabled}
+                                        disabled={sending}
                                     />
                                     <span>{group.label}</span>
                                 </label>
@@ -115,7 +103,7 @@ function MessageForm({
                         onChange={(event) =>
                             onTargetGroupChange(event.target.value)
                         }
-                        disabled={formDisabled}
+                        disabled={sending}
                         aria-labelledby="notification-target-group-label"
                     >
                         {NOTIFICATION_TARGET_GROUPS.map((group) => (
@@ -131,9 +119,8 @@ function MessageForm({
                 <button
                     type="submit"
                     className="staff-button notifications-form__submit"
-                    disabled={formDisabled}
+                    disabled={sending}
                     aria-busy={sending}
-                    aria-disabled={sendDisabled}
                 >
                     {sending ? (
                         <>

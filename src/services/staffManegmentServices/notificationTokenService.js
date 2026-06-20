@@ -93,7 +93,6 @@ export async function saveNotificationToken({
         groups,
         participantId: participantId || "",
         lastActive: serverTimestamp(),
-        updatedAt: serverTimestamp(),
         createdAt: existingSnap.exists()
             ? existingSnap.data().createdAt || serverTimestamp()
             : serverTimestamp(),
@@ -144,7 +143,6 @@ export async function touchNotificationToken(token) {
         token: normalizedToken,
         groups,
         lastActive: serverTimestamp(),
-        updatedAt: serverTimestamp(),
         isActive: true,
         ...(participantId ? { participantId } : {})
     };

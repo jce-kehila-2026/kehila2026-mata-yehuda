@@ -1,10 +1,17 @@
+import { FcmTokenRegistrationProvider } from "../components/notifications/FcmTokenRegistrationProvider";
+import NotificationOptIn from "../components/notifications/NotificationOptIn";
+
 /**
- * Wraps public participant-facing pages.
- * FCM registration and NotificationOptIn are handled globally by
- * PublicNotificationRegistration in App.jsx — do not duplicate providers here.
+ * Wraps public participant-facing pages with notification opt-in.
+ * Do not use on staff login, dashboard, or admin routes.
  */
 function PublicParticipantLayout({ children }) {
-    return children;
+    return (
+        <FcmTokenRegistrationProvider>
+            <NotificationOptIn />
+            {children}
+        </FcmTokenRegistrationProvider>
+    );
 }
 
 export default PublicParticipantLayout;
