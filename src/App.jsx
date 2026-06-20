@@ -15,6 +15,7 @@ import PaymentPage from "./pages/Payment/PaymentPage";
 import PaymentSuccess from "./pages/Payment/PaymentSuccess";
 import PaymentCancel from "./pages/CancelTheRegistration/PaymentCancel";
 import RequestsPage from "./pages/RespOneonRequest/RequestsPage";
+import FcmTestPage from "./pages/FcmTestPage.jsx";
 
 import supportiveCommunityRoutes from "./routes/supportive community/supportiveCommunityRoutes";
 import communityStaffRoutes from "./routes/communityStaff/communityStaffRoutes";
@@ -58,6 +59,7 @@ function App() {
         />
 
         <Route path="/attendance" element={<AttendancePage />} />
+        <Route path="/fcm-test" element={<FcmTestPage />} />
 
         {supportiveCommunityRoutes.map((route) => (
           <Route

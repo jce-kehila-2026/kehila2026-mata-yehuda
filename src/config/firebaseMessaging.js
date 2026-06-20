@@ -8,7 +8,10 @@ import {
 
 const LOG_PREFIX = "[fcm]";
 
+const GET_TOKEN_TIMEOUT_MS = 25000;
+
 let messagingInstance = null;
+let pendingTokenAcquisition = null;
 
 function logNoToken(reason, details = {}) {
     console.error(`${LOG_PREFIX} No FCM token: ${reason}`, details);
@@ -123,10 +126,17 @@ export async function fetchFcmToken(serviceWorkerRegistration) {
     }
 
     try {
-        const token = await getToken(messaging, {
-            vapidKey,
-            serviceWorkerRegistration: serviceWorkerRegistration || undefined
-        });
+        const token = await Promise.race([
+            getToken(messaging, {
+                vapidKey,
+                serviceWorkerRegistration: serviceWorkerRegistration || undefined
+            }),
+            new Promise((_, reject) => {
+                setTimeout(() => {
+                    reject(new Error("FCM_GET_TOKEN_TIMEOUT"));
+                }, GET_TOKEN_TIMEOUT_MS);
+            })
+        ]);
 
         if (!token) {
             logNoToken("getToken() returned an empty value");
@@ -158,29 +168,61 @@ export async function fetchFcmToken(serviceWorkerRegistration) {
 export async function acquireFcmTokenWithPermission({
     requestPermission = true
 } = {}) {
-    if (!isVapidKeyConfigured()) {
-        logNoToken("VITE_FIREBASE_VAPID_KEY is missing from environment");
-        return { ok: false, reason: "VAPID_KEY_MISSING" };
+    if (pendingTokenAcquisition) {
+        console.info(`${LOG_PREFIX} Reusing in-flight token acquisition request`);
+        return pendingTokenAcquisition;
     }
 
-    console.info(`${LOG_PREFIX} acquireFcmTokenWithPermission() started`, {
-        requestPermission,
-        vapidKeyConfigured: true
+    pendingTokenAcquisition = acquireFcmTokenWithPermissionInternal({
+        requestPermission
     });
 
-    const permissionResult = await requestBrowserNotificationPermission({
-        promptIfNeeded: requestPermission
-    });
-
-    if (!permissionResult.ok) {
-        return permissionResult;
+    try {
+        return await pendingTokenAcquisition;
+    } finally {
+        pendingTokenAcquisition = null;
     }
+}
 
-    const serviceWorkerResult = await registerMessagingServiceWorker();
+async function acquireFcmTokenWithPermissionInternal({
+    requestPermission = true
+} = {}) {
+    try {
+        if (!isVapidKeyConfigured()) {
+            logNoToken("VITE_FIREBASE_VAPID_KEY is missing from environment");
+            return { ok: false, reason: "VAPID_KEY_MISSING" };
+        }
 
-    if (!serviceWorkerResult.ok) {
-        return serviceWorkerResult;
+        console.info(`${LOG_PREFIX} acquireFcmTokenWithPermission() started`, {
+            requestPermission,
+            vapidKeyConfigured: true
+        });
+
+        const permissionResult = await requestBrowserNotificationPermission({
+            promptIfNeeded: requestPermission
+        });
+
+        if (!permissionResult.ok) {
+            return permissionResult;
+        }
+
+        const serviceWorkerResult = await registerMessagingServiceWorker();
+
+        if (!serviceWorkerResult.ok) {
+            return serviceWorkerResult;
+        }
+
+        return fetchFcmToken(serviceWorkerResult.registration);
+    } catch (error) {
+        const failure = explainGetTokenFailure(error);
+
+        logNoToken("acquireFcmTokenWithPermission() failed unexpectedly", failure);
+
+        return {
+            ok: false,
+            reason: "GET_TOKEN_FAILED",
+            error,
+            ...failure
+        };
     }
-
-    return fetchFcmToken(serviceWorkerResult.registration);
 }

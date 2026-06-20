@@ -5,7 +5,7 @@ export const NOTIFICATION_BACKEND_REQUIRED_MESSAGE =
     "שליחת התראות דורשת חיבור לשרת ההתראות. ודאו שהשרת רץ: cd server && npm start";
 
 export const NOTIFICATION_NO_ACTIVE_DEVICES_MESSAGE =
-    "אין מכשירים פעילים לשליחת התראות. יש לבקש מהמשתתפים לאשר התראות בדפדפן.";
+    "אין מכשירים רשומים לקבלת התראות. ניתן להשתמש באפשרות זו רק לאחר שמשתמשים מאשרים התראות בדפדפן.";
 
 export const NOTIFICATION_TARGET_GROUPS = [
     { value: "all", label: "כל המשתתפים" },
