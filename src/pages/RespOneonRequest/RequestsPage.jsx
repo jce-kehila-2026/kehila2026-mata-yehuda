@@ -5,6 +5,7 @@ import RequestListRow from "../../components/RespOneonRequest/RequestListRow";
 import {
   getAllRequests,
   markRequestAsAnswered,
+  markRequestAsAnsweredByPhone,
 } from "../../services/RespOneonRequest/requestsService";
 import "../../styles/RespOneonRequest/requests.css";
 import {
@@ -124,6 +125,39 @@ function RequestsPage() {
     setNoWhatsAppRequestId(null);
   };
 
+  const finishAnsweringRequest = async (requestId) => {
+    setAnswers((prev) => {
+      const next = { ...prev };
+      delete next[requestId];
+      return next;
+    });
+
+    await loadRequests();
+
+    setActiveTab(TAB.answered);
+    setSelectedId(requestId);
+    setMobileDetailOpen(true);
+    window.focus();
+  };
+
+  const handleMarkAnsweredByPhone = async (request) => {
+    const note = (answers[request.id] ?? "").trim();
+
+    setSendingId(request.id);
+    setError(null);
+    setNoWhatsAppRequestId(null);
+
+    try {
+      await markRequestAsAnsweredByPhone(request.id, note);
+      await finishAnsweringRequest(request.id);
+    } catch (err) {
+      console.error("Failed to mark request as answered by phone:", err);
+      setError("סימון הפנייה כנענתה נכשל. נסי שוב.");
+    } finally {
+      setSendingId(null);
+    }
+  };
+
   const handleSend = async (request) => {
     const answer = (answers[request.id] ?? "").trim();
     if (!answer) return;
@@ -156,20 +190,8 @@ function RequestsPage() {
     }
 
     try {
-      await markRequestAsAnswered(request.id, answer);
-
-      setAnswers((prev) => {
-        const next = { ...prev };
-        delete next[request.id];
-        return next;
-      });
-
-      await loadRequests();
-
-      setActiveTab(TAB.answered);
-      setSelectedId(request.id);
-      setMobileDetailOpen(true);
-      window.focus();
+      await markRequestAsAnswered(request.id, answer, { channel: "whatsapp" });
+      await finishAnsweringRequest(request.id);
     } catch (err) {
       console.error("Failed to mark request as answered:", err);
       setError("שליחת התשובה נכשלה. נסי שוב.");
@@ -284,6 +306,9 @@ function RequestsPage() {
                   handleAnswerChange(selectedRequest.id, value)
                 }
                 onSend={() => handleSend(selectedRequest)}
+                onMarkAnsweredByPhone={() =>
+                  handleMarkAnsweredByPhone(selectedRequest)
+                }
                 isSending={sendingId === selectedRequest.id}
                 showNoWhatsAppNotice={
                   noWhatsAppRequestId === selectedRequest.id
