@@ -14,7 +14,7 @@ export async function verifyActiveStaffUser(user) {
 
   const staffData = staffSnap.data();
 
-  if (!staffData.is_active) {
+  if (staffData.is_active !== true) {
     return { ok: false, reason: "inactive" };
   }
 

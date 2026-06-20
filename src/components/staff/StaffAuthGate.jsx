@@ -8,15 +8,13 @@ import { verifyActiveStaffUser } from "../../utils/staffManegmentUtils/staffAuth
 function StaffAuthGate({ children }) {
   const location = useLocation();
   const verifyGenerationRef = useRef(0);
-  const [state, setState] = useState({
-    authReady: false,
-    allowed: false,
-  });
+  const [accessState, setAccessState] = useState("loading");
 
   useEffect(() => {
     let cancelled = false;
+    let unsubscribeAuth = () => {};
 
-    const unsubscribe = onAuthStateChanged(auth, (user) => {
+    const handleAuthUser = (user) => {
       if (cancelled) {
         return;
       }
@@ -24,11 +22,11 @@ function StaffAuthGate({ children }) {
       const generation = ++verifyGenerationRef.current;
 
       if (!user) {
-        setState({ authReady: true, allowed: false });
+        setAccessState("denied");
         return;
       }
 
-      setState({ authReady: false, allowed: false });
+      setAccessState("loading");
 
       (async () => {
         try {
@@ -39,7 +37,7 @@ function StaffAuthGate({ children }) {
           }
 
           if (auth.currentUser?.uid !== user.uid) {
-            setState({ authReady: true, allowed: false });
+            setAccessState("denied");
             return;
           }
 
@@ -50,11 +48,11 @@ function StaffAuthGate({ children }) {
               return;
             }
 
-            setState({ authReady: true, allowed: false });
+            setAccessState("denied");
             return;
           }
 
-          setState({ authReady: true, allowed: true });
+          setAccessState("allowed");
         } catch (error) {
           console.error("Staff auth verification failed:", error);
 
@@ -72,19 +70,50 @@ function StaffAuthGate({ children }) {
             return;
           }
 
-          setState({ authReady: true, allowed: false });
+          setAccessState("denied");
         }
       })();
-    });
+    };
+
+    auth
+      .authStateReady()
+      .then(() => {
+        if (cancelled) {
+          return;
+        }
+
+        if (!auth.currentUser) {
+          setAccessState("denied");
+        }
+
+        unsubscribeAuth = onAuthStateChanged(auth, handleAuthUser);
+      })
+      .catch((error) => {
+        console.error("Staff auth initialization failed:", error);
+
+        if (!cancelled) {
+          setAccessState("denied");
+        }
+      });
 
     return () => {
       cancelled = true;
       verifyGenerationRef.current += 1;
-      unsubscribe();
+      unsubscribeAuth();
     };
   }, []);
 
-  if (!state.authReady) {
+  if (accessState === "denied") {
+    return (
+      <Navigate
+        to="/staff-login"
+        replace
+        state={{ from: location.pathname }}
+      />
+    );
+  }
+
+  if (accessState !== "allowed") {
     return (
       <div className="staff-auth-gate" dir="rtl">
         <div className="staff-auth-gate__state" role="status">
@@ -99,17 +128,27 @@ function StaffAuthGate({ children }) {
     );
   }
 
-  if (!state.allowed) {
+  return children ?? <Outlet />;
+}
+
+export function withStaffAuthGate(Component) {
+  function ProtectedStaffRoute() {
     return (
-      <Navigate
-        to="/staff-login"
-        replace
-        state={{ from: location.pathname }}
-      />
+      <StaffAuthGate>
+        <Component />
+      </StaffAuthGate>
     );
   }
 
-  return children ?? <Outlet />;
+  ProtectedStaffRoute.displayName = `ProtectedStaffRoute(${
+    Component.displayName || Component.name || "Component"
+  })`;
+
+  return ProtectedStaffRoute;
+}
+
+export function protectStaffRoute(element) {
+  return <StaffAuthGate>{element}</StaffAuthGate>;
 }
 
 export default StaffAuthGate;

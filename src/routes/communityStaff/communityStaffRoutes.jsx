@@ -6,39 +6,40 @@ import CommunitySettingsPage from "../../pages/communityStaff/CommunitySettingsP
 import VolunteerRequestsPage from "../../pages/communityStaff/VolunteerRequestsPage";
 import VolunteersManagementPage from "../../pages/communityStaff/VolunteersManagementPage";
 import ActiveVolunteerMatchesPage from "../../pages/communityStaff/ActiveVolunteerMatchesPage";
+import { withStaffAuthGate } from "../../components/staff/StaffAuthGate";
 
 const communityStaffRoutes = [
   {
     path: "/community-staff",
-    element: <CommunityStaffDashboardPage />,
+    Component: withStaffAuthGate(CommunityStaffDashboardPage),
   },
   {
     path: "/community-staff/join-requests",
-    element: <CommunityJoinRequestsPage />,
+    Component: withStaffAuthGate(CommunityJoinRequestsPage),
   },
   {
     path: "/community-staff/members",
-    element: <CommunityMembersPage />,
+    Component: withStaffAuthGate(CommunityMembersPage),
   },
   {
     path: "/community-staff/volunteer-requests",
-    element: <VolunteerRequestsPage />,
+    Component: withStaffAuthGate(VolunteerRequestsPage),
   },
   {
     path: "/community-staff/volunteers",
-    element: <VolunteersManagementPage />,
+    Component: withStaffAuthGate(VolunteersManagementPage),
   },
   {
     path: "/community-staff/help-requests",
-    element: <CommunityHelpRequestsPage />,
+    Component: withStaffAuthGate(CommunityHelpRequestsPage),
   },
   {
     path: "/community-staff/active-matches",
-    element: <ActiveVolunteerMatchesPage />,
+    Component: withStaffAuthGate(ActiveVolunteerMatchesPage),
   },
   {
     path: "/community-staff/settings",
-    element: <CommunitySettingsPage />,
+    Component: withStaffAuthGate(CommunitySettingsPage),
   },
 ];
 
