@@ -1,0 +1,45 @@
+.staff-page--day-center-schedule .staff-container--day-center-schedule {
+  padding-top: 0.5rem;
+}
+
+.day-center-schedule__header {
+  margin-bottom: 1.25rem;
+}
+
+.day-center-schedule__form {
+  margin-top: 0;
+}
+
+.day-center-schedule__dropzone {
+  max-width: 720px;
+}
+
+.day-center-schedule__preview-block {
+  max-width: 720px;
+}
+
+.day-center-schedule__preview-block--drag-over {
+  outline: 3px solid rgba(45, 125, 70, 0.28);
+  outline-offset: 4px;
+  border-radius: calc(var(--radius) * 0.75);
+}
+
+.day-center-schedule__preview {
+  object-fit: contain;
+  max-height: 520px;
+}
+
+.day-center-schedule__preview-hint {
+  margin: 0.75rem 0 0;
+  font-size: 0.88rem;
+  color: var(--color-muted);
+  text-align: center;
+}
+
+.day-center-schedule__actions {
+  margin-top: 1rem;
+}
+
+.staff-page--day-center-schedule .staff-form__submit {
+  width: auto;
+}
