@@ -96,12 +96,24 @@ app.post("/api/notifications/send", async (req, res) => {
             ...result
         });
     } catch (error) {
+        const authFailureReasons = {
+            MISSING_AUTH_TOKEN: "missing Authorization header",
+            INVALID_AUTH_TOKEN: "invalid Firebase token",
+            STAFF_NOT_FOUND: "no staff document",
+            STAFF_INACTIVE: "staff document inactive",
+            UNAUTHORIZED: "unauthorized staff user"
+        };
+
         console.error("[notifications/send] error", {
-            message: error.message
+            message: error.message,
+            reason: authFailureReasons[error.message] || "unexpected failure"
         });
 
         if (
             error.message === "MISSING_AUTH_TOKEN" ||
+            error.message === "INVALID_AUTH_TOKEN" ||
+            error.message === "STAFF_NOT_FOUND" ||
+            error.message === "STAFF_INACTIVE" ||
             error.message === "UNAUTHORIZED" ||
             error.message?.includes("auth")
         ) {

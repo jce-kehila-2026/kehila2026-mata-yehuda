@@ -184,21 +184,34 @@ export async function sendPushNotification({
 
     const currentUser = auth.currentUser;
 
+    console.log("[notifications/auth] currentUser exists:", Boolean(currentUser));
+    if (currentUser) {
+        console.log("[notifications/auth] currentUser.uid:", currentUser.uid);
+    }
+
     if (!currentUser) {
         throw new Error("NOT_AUTHENTICATED");
     }
 
-    const idToken = await currentUser.getIdToken();
+    const idToken = await currentUser.getIdToken(true);
+
+    console.log("[notifications/auth] ID token generated:", Boolean(idToken), {
+        tokenLength: idToken?.length ?? 0
+    });
+
+    const requestHeaders = {
+        "Content-Type": "application/json",
+        Authorization: `Bearer ${idToken}`
+    };
+
+    console.log("[notifications/auth] Authorization header included:", Boolean(requestHeaders.Authorization));
 
     let response;
 
     try {
         response = await fetch(getNotificationsSendUrl(), {
             method: "POST",
-            headers: {
-                "Content-Type": "application/json",
-                Authorization: `Bearer ${idToken}`
-            },
+            headers: requestHeaders,
             body: JSON.stringify({
                 targetGroup,
                 title: title?.trim() || "מטה יהודה",
