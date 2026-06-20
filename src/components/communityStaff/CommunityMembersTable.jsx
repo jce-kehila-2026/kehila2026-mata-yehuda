@@ -1,29 +1,21 @@
 import { useCallback, useEffect, useMemo, useState } from "react";
 import {
+  CommunityStaffCompactCard,
+  CommunityStaffActiveBadge,
+  CommunityStaffEmptyState,
+  CommunityStaffListToolbar,
+  CommunityStaffPagination,
+  CommunityStaffStatusOverview,
+  Users,
+  buildActiveInactiveOverviewItems,
+} from "./CommunityStaffListUi.jsx";
+import {
   getCommunityMembers,
   updateCommunityMemberSubscriptionStatus,
 } from "../../services/communityStaff/communityStaffService";
-import {
-  AdminTableActions,
-  AdminTableDeleteButton,
-  AdminTableEditButton,
-  AdminTableViewButton,
-} from "../admin/AdminTableActions.jsx";
 import CommunityStaffConfirmModal from "./CommunityStaffConfirmModal.jsx";
 
 const PAGE_SIZE_OPTIONS = [5, 10, 25];
-
-function getStatusLabel(status) {
-  if (status === "active") {
-    return "פעיל";
-  }
-
-  if (status === "inactive") {
-    return "לא פעיל";
-  }
-
-  return status || "—";
-}
 
 function matchesSearch(member, searchTerm) {
   if (!searchTerm) {
@@ -38,7 +30,7 @@ function matchesSearch(member, searchTerm) {
     member.requestedServicesDisplay,
     member.languagesDisplay,
     member.monthlyPriceDisplay,
-    getStatusLabel(member.status),
+    member.status,
   ];
 
   return searchableValues.some((value) =>
@@ -151,123 +143,75 @@ function CommunityMembersTable({
 
   return (
     <div className="community-members">
-      <div className="community-members__top-row">
-        <span className="community-members__badge">
-          חברי קהילה {members.length}
-        </span>
-      </div>
+      <CommunityStaffStatusOverview
+        items={buildActiveInactiveOverviewItems(
+          members,
+          (member) => member.status === "active"
+        )}
+      />
 
-      <div className="community-members__toolbar">
-        <div className="community-members__search">
-          <label htmlFor="community-members-search">חיפוש</label>
-          <input
-            id="community-members-search"
-            type="search"
-            value={searchTerm}
-            onChange={(event) => setSearchTerm(event.target.value)}
-            placeholder="חיפוש לפי שם, ת.ז., טלפון, שירות או שפה..."
-          />
-        </div>
+      <CommunityStaffListToolbar
+        searchId="community-members-search"
+        searchValue={searchTerm}
+        onSearchChange={(event) => setSearchTerm(event.target.value)}
+        searchPlaceholder="חיפוש לפי שם, ת.ז., טלפון, שירות או שפה..."
+        filterId="community-members-filter"
+        filterValue={statusFilter}
+        onFilterChange={(event) => setStatusFilter(event.target.value)}
+        filterLabel="סטטוס"
+        filterOptions={[
+          { value: "all", label: "הכל" },
+          { value: "active", label: "פעיל" },
+          { value: "inactive", label: "לא פעיל" },
+        ]}
+        pageSizeId="community-members-page-size"
+        pageSizeValue={pageSize}
+        onPageSizeChange={(event) => setPageSize(Number(event.target.value))}
+        pageSizeOptions={PAGE_SIZE_OPTIONS}
+      />
 
-        <div className="community-members__filter">
-          <label htmlFor="community-members-filter">סטטוס</label>
-          <select
-            id="community-members-filter"
-            value={statusFilter}
-            onChange={(event) => setStatusFilter(event.target.value)}
-          >
-            <option value="all">הכל</option>
-            <option value="active">פעיל</option>
-            <option value="inactive">לא פעיל</option>
-          </select>
-        </div>
-
-        <div className="community-members__page-size">
-          <label htmlFor="community-members-page-size">שורות בעמוד</label>
-          <select
-            id="community-members-page-size"
-            value={pageSize}
-            onChange={(event) => setPageSize(Number(event.target.value))}
-          >
-            {PAGE_SIZE_OPTIONS.map((size) => (
-              <option key={size} value={size}>
-                {size}
-              </option>
-            ))}
-          </select>
-        </div>
-      </div>
-
-      <div className="community-members__card">
+      <div className="community-staff-request-list community-members__card">
         {filteredMembers.length === 0 ? (
-          <p className="community-members__empty">
-            {members.length === 0
-              ? "אין חברי קהילה להצגה"
-              : "לא נמצאו תוצאות לפי החיפוש או הסינון"}
-          </p>
+          <CommunityStaffEmptyState
+            icon={Users}
+            message={
+              members.length === 0
+                ? "אין נתונים להצגה כרגע"
+                : "לא נמצאו תוצאות לפי החיפוש או הסינון"
+            }
+          />
         ) : (
-          <ul className="community-members__list">
+          <ul className="community-staff-compact-list">
             {paginatedMembers.map((member) => (
-              <li key={member.id} className="community-members__member-card">
-                <div className="community-members__member-card-info">
-                  <span className="community-members__member-card-name">
-                    {member.fullNameDisplay}
-                  </span>
-                  <span className="community-members__member-card-phone">
-                    {member.phone}
-                  </span>
-                  <span
-                    className={`community-members__status community-members__status--${member.status}`}
-                  >
-                    {getStatusLabel(member.status)}
-                  </span>
-                </div>
-
-                <div className="community-members__member-card-actions">
-                  <AdminTableActions>
-                    <AdminTableViewButton
-                      onClick={() => onViewDetails(member)}
-                      label="הצגת פרטים"
-                    />
-                    <AdminTableEditButton
-                      onClick={() => onEditMember(member)}
-                      label="עריכת פרטי חבר"
-                    />
-                    <AdminTableDeleteButton
-                      onClick={() => setPendingDeactivateMember(member)}
-                      label="השבתת חברות"
-                      disabled={member.status !== "active"}
-                    />
-                  </AdminTableActions>
-                </div>
-              </li>
+              <CommunityStaffCompactCard
+                key={member.id}
+                name={member.fullNameDisplay}
+                phone={member.phone}
+                status={
+                  <CommunityStaffActiveBadge isActive={member.status === "active"} />
+                }
+                viewLabel="צפייה"
+                primaryLabel="עריכה"
+                onPrimaryClick={() => onEditMember(member)}
+                onViewDetails={() => onViewDetails(member)}
+                onDeactivate={() => setPendingDeactivateMember(member)}
+                deactivateLabel="השבתה"
+                deactivateDisabled={member.status !== "active"}
+              />
             ))}
           </ul>
         )}
       </div>
 
       {filteredMembers.length > 0 && (
-        <div className="community-members__pagination">
-          <button
-            type="button"
-            onClick={() => setCurrentPage((page) => Math.max(1, page - 1))}
-            disabled={currentPage === 1}
-          >
-            הקודם
-          </button>
-          <span>
-            עמוד {currentPage} מתוך {totalPages}
-          </span>
-          <button
-            type="button"
-            onClick={() =>
-              setCurrentPage((page) => Math.min(totalPages, page + 1))
-            }
-            disabled={currentPage === totalPages}
-          >
-            הבא
-          </button>
-        </div>
+        <CommunityStaffPagination
+          currentPage={currentPage}
+          totalPages={totalPages}
+          onPrevious={() => setCurrentPage((page) => Math.max(1, page - 1))}
+          onNext={() =>
+            setCurrentPage((page) => Math.min(totalPages, page + 1))
+          }
+        />
       )}
 
       <CommunityStaffConfirmModal

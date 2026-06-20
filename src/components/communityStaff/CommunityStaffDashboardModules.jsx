@@ -1,12 +1,34 @@
+const MODULE_IMAGE_BY_ART = {
+  join: "/images/community-staff-dashboard/clipboard.png",
+  volunteer: "/images/community-staff-dashboard/hands-heart.png",
+  members: "/images/community-staff-dashboard/people.png",
+  volunteers: "/images/community-staff-dashboard/volunteer.png",
+  matches: "/images/community-staff-dashboard/puzzle.png",
+  support: "/images/community-staff-dashboard/megaphone.png",
+  settings: "/images/community-staff-dashboard/Settings.png",
+};
+
 const MODULE_CARDS = [
   {
     id: "join-requests",
     kind: "request",
-    title: "בקשות הצטרפות לקהילה תומכת",
+    title: "בקשות הצטרפות",
     description: "ניהול בקשות חדשות",
+    artClass: "join",
     isAvailable: true,
     route: "/community-staff/join-requests",
     statKey: "pendingJoinRequests",
+    badgeType: "requests",
+  },
+  {
+    id: "volunteer-requests",
+    kind: "request",
+    title: "בקשות התנדבות",
+    description: "ניהול בקשות מתנדבים חדשות",
+    artClass: "volunteer",
+    isAvailable: true,
+    route: "/community-staff/volunteer-requests",
+    statKey: "pendingVolunteerRequests",
     badgeType: "requests",
   },
   {
@@ -14,48 +36,53 @@ const MODULE_CARDS = [
     kind: "management",
     title: "חברי קהילה",
     description: "ניהול חברים פעילים ומושבתים",
+    artClass: "members",
     isAvailable: true,
     route: "/community-staff/members",
     statKey: "activeCommunityMembers",
     badgeType: "active-people",
   },
   {
-    id: "volunteer-requests",
-    kind: "request",
-    title: "בקשות התנדבות",
-    description: "ניהול בקשות חדשות",
-    isAvailable: true,
-    route: "/community-staff/volunteer-requests",
-  },
-  {
     id: "volunteers-management",
     kind: "management",
     title: "מתנדבים",
     description: "ניהול מתנדבים פעילים ולא פעילים",
+    artClass: "volunteers",
     isAvailable: true,
     route: "/community-staff/volunteers",
     statKey: "activeVolunteers",
     badgeType: "active-people",
   },
   {
+    id: "active-matches",
+    kind: "management",
+    title: "התאמות פעילות",
+    description: "ניהול התאמות שאושרו",
+    artClass: "matches",
+    isAvailable: true,
+    route: "/community-staff/active-matches",
+    statKey: "activeMatches",
+    badgeType: "matches",
+  },
+  {
     id: "support-requests",
     kind: "request",
     title: "בקשות סיוע והתאמות",
     description: "ניהול בקשות סיוע",
+    artClass: "support",
     isAvailable: true,
     route: "/community-staff/help-requests",
     statKey: "pendingHelpRequests",
     badgeType: "requests",
   },
   {
-    id: "active-matches",
+    id: "community-settings",
     kind: "management",
-    title: "התאמות פעילות",
-    description: "ניהול התאמות שאושרו",
+    title: "הגדרות קהילה",
+    description: "ניהול שפות וסוגי עזרה",
+    artClass: "settings",
     isAvailable: true,
-    route: "/community-staff/active-matches",
-    statKey: "activeMatches",
-    badgeType: "matches",
+    route: "/community-staff/settings",
   },
 ];
 
@@ -69,6 +96,10 @@ function getModuleBadgeText(count, badgeType) {
   }
 
   if (badgeType === "requests") {
+    if (count === 1) {
+      return "1 בקשה";
+    }
+
     return `${count} בקשות`;
   }
 
@@ -86,12 +117,7 @@ function CommunityStaffDashboardModules({
   onUnavailableClick,
 }) {
   return (
-    <section
-      className="community-staff-dashboard__section community-staff-dashboard__modules"
-      aria-label="מודולי מערכת"
-    >
-      <h2 className="community-staff-dashboard__section-title">מודולים</h2>
-
+    <section className="community-staff-dashboard__modules" aria-label="מודולי מערכת">
       <div className="community-staff-dashboard__module-grid">
         {MODULE_CARDS.map((card) => {
           const badgeText =
@@ -118,21 +144,32 @@ function CommunityStaffDashboardModules({
               }}
               aria-disabled={!card.isAvailable}
             >
-              <span className="community-staff-dashboard__module-card-main">
-                <span className="community-staff-dashboard__module-card-heading">
-                  <span className="community-staff-dashboard__module-card-title">
-                    {card.title}
-                  </span>
-                  {badgeText && (
-                    <span className="community-staff-dashboard__module-card-badge">
-                      {badgeText}
-                    </span>
-                  )}
+              <span className="community-staff-dashboard__module-card-header">
+                <span className="community-staff-dashboard__module-card-title">
+                  {card.title}
                 </span>
                 <span className="community-staff-dashboard__module-card-description">
                   {card.description}
                 </span>
               </span>
+
+              <span className="community-staff-dashboard__module-card-art" aria-hidden="true">
+                <img
+                  className="community-staff-dashboard__module-image"
+                  src={MODULE_IMAGE_BY_ART[card.artClass]}
+                  alt=""
+                  loading="lazy"
+                  decoding="async"
+                  draggable="false"
+                />
+              </span>
+
+              {badgeText && (
+                <span className="community-staff-dashboard__module-card-pill">
+                  {badgeText}
+                </span>
+              )}
+
               {!card.isAvailable && (
                 <span className="community-staff-dashboard__module-card-status">
                   לא זמין

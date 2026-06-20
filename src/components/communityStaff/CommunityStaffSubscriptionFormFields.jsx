@@ -1,3 +1,5 @@
+import CommunityStaffCheckboxGrid from "./CommunityStaffCheckboxGrid.jsx";
+
 export function toggleArrayValue(values, value) {
   if (values.includes(value)) {
     return values.filter((item) => item !== value);
@@ -73,32 +75,21 @@ function CommunityStaffSubscriptionFormFields({
 
       <div className="community-join-modal__field community-join-modal__field--full">
         <label>שירותים מבוקשים *</label>
-        {lookupsLoading ? (
-          <p className="community-volunteers-mgmt__lookup-loading">
-            טוען סוגי עזרה...
-          </p>
-        ) : (
-          <div className="community-volunteers-mgmt__options">
-            {lookups.helpTypes.map((helpType) => (
-              <label
-                key={helpType.id}
-                className="community-volunteers-mgmt__option"
-              >
-                <input
-                  type="checkbox"
-                  checked={form.requestedServices.includes(helpType.id)}
-                  onChange={() =>
-                    updateField(
-                      "requestedServices",
-                      toggleArrayValue(form.requestedServices, helpType.id)
-                    )
-                  }
-                />
-                {helpType.help_name}
-              </label>
-            ))}
-          </div>
-        )}
+        <CommunityStaffCheckboxGrid
+          items={lookups.helpTypes}
+          selectedValues={form.requestedServices}
+          onToggle={(id) =>
+            updateField(
+              "requestedServices",
+              toggleArrayValue(form.requestedServices, id)
+            )
+          }
+          getItemId={(helpType) => helpType.id}
+          getItemLabel={(helpType) => helpType.help_name}
+          variant="help-types"
+          loading={lookupsLoading}
+          loadingText="טוען סוגי עזרה..."
+        />
       </div>
 
       {form.requestedServices.includes("other") && (
@@ -116,30 +107,18 @@ function CommunityStaffSubscriptionFormFields({
 
       <div className="community-join-modal__field community-join-modal__field--full">
         <label>שפות *</label>
-        {lookupsLoading ? (
-          <p className="community-volunteers-mgmt__lookup-loading">טוען שפות...</p>
-        ) : (
-          <div className="community-volunteers-mgmt__options">
-            {lookups.languages.map((language) => (
-              <label
-                key={language.id}
-                className="community-volunteers-mgmt__option"
-              >
-                <input
-                  type="checkbox"
-                  checked={form.languages.includes(language.id)}
-                  onChange={() =>
-                    updateField(
-                      "languages",
-                      toggleArrayValue(form.languages, language.id)
-                    )
-                  }
-                />
-                {language.name}
-              </label>
-            ))}
-          </div>
-        )}
+        <CommunityStaffCheckboxGrid
+          items={lookups.languages}
+          selectedValues={form.languages}
+          onToggle={(id) =>
+            updateField("languages", toggleArrayValue(form.languages, id))
+          }
+          getItemId={(language) => language.id}
+          getItemLabel={(language) => language.name}
+          variant="languages"
+          loading={lookupsLoading}
+          loadingText="טוען שפות..."
+        />
       </div>
     </>
   );

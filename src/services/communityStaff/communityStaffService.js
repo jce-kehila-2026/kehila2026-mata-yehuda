@@ -6,6 +6,7 @@ import {
   getDocs,
   query,
   serverTimestamp,
+  setDoc,
   Timestamp,
   updateDoc,
   where,
@@ -1018,6 +1019,164 @@ export async function updateVolunteerDetails(volunteerDocId, volunteerData) {
     notes: volunteerData.notes?.trim() || "",
     phone: volunteerData.phone?.trim() || "",
   });
+}
+
+export const DUPLICATE_ID_NUMBER_ERROR =
+  "מספר תעודת הזהות כבר קיים במערכת";
+
+async function findParticipantByIdNumber(idNumber) {
+  const normalizedIdNumber = String(idNumber ?? "").trim();
+
+  if (!normalizedIdNumber) {
+    return null;
+  }
+
+  let participantsSnapshot = await getDocs(
+    query(
+      collection(db, "participants"),
+      where("id_number", "==", normalizedIdNumber)
+    )
+  );
+
+  if (participantsSnapshot.empty && /^\d+$/.test(normalizedIdNumber)) {
+    participantsSnapshot = await getDocs(
+      query(
+        collection(db, "participants"),
+        where("id_number", "==", Number(normalizedIdNumber))
+      )
+    );
+  }
+
+  if (participantsSnapshot.empty) {
+    return null;
+  }
+
+  const participantDoc = participantsSnapshot.docs[0];
+
+  return {
+    id: participantDoc.id,
+    ...participantDoc.data(),
+  };
+}
+
+async function findVolunteerByIdNumber(idNumber) {
+  const normalizedIdNumber = String(idNumber ?? "").trim();
+
+  if (!normalizedIdNumber) {
+    return null;
+  }
+
+  const volunteerSnapshot = await getDoc(
+    doc(db, "volunteers", normalizedIdNumber)
+  );
+
+  if (!volunteerSnapshot.exists()) {
+    return null;
+  }
+
+  return {
+    id: volunteerSnapshot.id,
+    ...volunteerSnapshot.data(),
+  };
+}
+
+export async function createCommunityMemberByStaff({
+  participantData,
+  subscriptionData = {},
+}) {
+  const idNumber = participantData.id_number?.trim();
+
+  if (!idNumber) {
+    throw new Error("Missing participant id number");
+  }
+
+  const existingParticipant = await findParticipantByIdNumber(idNumber);
+
+  if (existingParticipant) {
+    const duplicateError = new Error(DUPLICATE_ID_NUMBER_ERROR);
+    duplicateError.code = "duplicate-id-number";
+    throw duplicateError;
+  }
+
+  const subscriptionFields = buildSubscriptionUpdatePayload(subscriptionData);
+  const requestedHelpTypes = subscriptionFields.requestedServices;
+  const languages = subscriptionFields.languages;
+  const description = subscriptionFields.otherService;
+
+  const participantRef = await addDoc(collection(db, "participants"), {
+    first_name: participantData.first_name?.trim() || "",
+    last_name: participantData.last_name?.trim() || "",
+    id_number: idNumber,
+    phone: participantData.phone?.trim() || "",
+    birth_date: parseBirthDateForFirestore(participantData.birth_date),
+    gender: participantData.gender || "",
+    address: participantData.address?.trim() || "",
+    emergency_number: participantData.emergency_number?.trim() || "",
+    medical_notes: participantData.medical_notes?.trim() || "",
+    mobility_limitations: participantData.mobility_limitations?.trim() || "",
+    marketing_consent: Boolean(participantData.marketing_consent),
+    createdAt: serverTimestamp(),
+    updatedAt: serverTimestamp(),
+  });
+
+  const subscriptionRef = await addDoc(collection(db, "communitySubscriptions"), {
+    participant_ref: participantRef.id,
+    ...subscriptionFields,
+    status: "active",
+    createdAt: serverTimestamp(),
+    updatedAt: serverTimestamp(),
+  });
+
+  const homeHelpRequestRef = await addDoc(collection(db, "homeHelpRequests"), {
+    createdAt: serverTimestamp(),
+    description,
+    languages,
+    participant_ref: participantRef.id,
+    requestedHelpTypes,
+    status: "pending",
+  });
+
+  return {
+    participantDocId: participantRef.id,
+    subscriptionId: subscriptionRef.id,
+    homeHelpRequestId: homeHelpRequestRef.id,
+  };
+}
+
+export async function createVolunteerByStaff(idNumber, volunteerData) {
+  const normalizedIdNumber = String(idNumber ?? "").trim();
+
+  if (!normalizedIdNumber) {
+    throw new Error("Missing volunteer id number");
+  }
+
+  const existingVolunteer = await findVolunteerByIdNumber(normalizedIdNumber);
+
+  if (existingVolunteer) {
+    const duplicateError = new Error(DUPLICATE_ID_NUMBER_ERROR);
+    duplicateError.code = "duplicate-id-number";
+    throw duplicateError;
+  }
+
+  await setDoc(doc(db, "volunteers", normalizedIdNumber), {
+    first_name: volunteerData.first_name?.trim() || "",
+    last_name: volunteerData.last_name?.trim() || "",
+    phone: volunteerData.phone?.trim() || "",
+    gender: volunteerData.gender || "",
+    address: volunteerData.address?.trim() || "",
+    languages: normalizeStringArray(volunteerData.languages),
+    help_types: normalizeStringArray(volunteerData.help_types),
+    about: volunteerData.about?.trim() || "",
+    notes: volunteerData.notes?.trim() || "",
+    is_active: true,
+    status: "active",
+    createdAt: serverTimestamp(),
+    updatedAt: serverTimestamp(),
+  });
+
+  return {
+    volunteerId: normalizedIdNumber,
+  };
 }
 
 export async function getCommunityStaffDashboardStats() {

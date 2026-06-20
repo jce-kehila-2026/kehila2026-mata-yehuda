@@ -18,6 +18,9 @@ function ActiveVolunteerMatchesPage() {
     <div className="community-active-matches-page" dir="rtl">
       <header className="community-active-matches-page__header">
         <h1 className="community-active-matches-page__title page-title">התאמות פעילות</h1>
+        <p className="community-staff-page-subtitle">
+          ניהול והצגת התאמות פעילות בין משתתפים למתנדבים
+        </p>
       </header>
 
       <ActiveVolunteerMatchesTable

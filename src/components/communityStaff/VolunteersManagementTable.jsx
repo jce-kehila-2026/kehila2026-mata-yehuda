@@ -3,7 +3,16 @@ import {
   getAllVolunteers,
   updateVolunteerActiveStatus,
 } from "../../services/communityStaff/communityStaffService";
-import { CommunityStaffCompactCard } from "./CommunityStaffListUi.jsx";
+import {
+  CommunityStaffCompactCard,
+  CommunityStaffActiveBadge,
+  CommunityStaffEmptyState,
+  CommunityStaffListToolbar,
+  CommunityStaffPagination,
+  CommunityStaffStatusOverview,
+  Users,
+  buildActiveInactiveOverviewItems,
+} from "./CommunityStaffListUi.jsx";
 import CommunityStaffConfirmModal from "./CommunityStaffConfirmModal.jsx";
 
 const PAGE_SIZE_OPTIONS = [5, 10, 25];
@@ -144,60 +153,43 @@ function VolunteersManagementTable({
 
   return (
     <div className="community-volunteers-mgmt">
-      <div className="community-volunteers-mgmt__top-row">
-        <span className="community-volunteers-mgmt__badge">
-          מתנדבים {volunteers.length}
-        </span>
-      </div>
+      <CommunityStaffStatusOverview
+        items={buildActiveInactiveOverviewItems(
+          volunteers,
+          (volunteer) => volunteer.is_active === true
+        )}
+      />
 
-      <div className="community-volunteers-mgmt__toolbar">
-        <div className="community-volunteers-mgmt__search">
-          <label htmlFor="volunteers-mgmt-search">חיפוש</label>
-          <input
-            id="volunteers-mgmt-search"
-            type="search"
-            value={searchTerm}
-            onChange={(event) => setSearchTerm(event.target.value)}
-            placeholder="חיפוש לפי שם, טלפון או כתובת..."
-          />
-        </div>
+      <CommunityStaffListToolbar
+        searchId="volunteers-mgmt-search"
+        searchValue={searchTerm}
+        onSearchChange={(event) => setSearchTerm(event.target.value)}
+        searchPlaceholder="חיפוש לפי שם, טלפון או כתובת..."
+        filterId="volunteers-mgmt-filter"
+        filterValue={activeFilter}
+        onFilterChange={(event) => setActiveFilter(event.target.value)}
+        filterLabel="סטטוס"
+        filterOptions={[
+          { value: "all", label: "כל המתנדבים" },
+          { value: "active", label: "פעילים" },
+          { value: "inactive", label: "לא פעילים" },
+        ]}
+        pageSizeId="volunteers-mgmt-page-size"
+        pageSizeValue={pageSize}
+        onPageSizeChange={(event) => setPageSize(Number(event.target.value))}
+        pageSizeOptions={PAGE_SIZE_OPTIONS}
+      />
 
-        <div className="community-volunteers-mgmt__filter">
-          <label htmlFor="volunteers-mgmt-filter">סטטוס פעילות</label>
-          <select
-            id="volunteers-mgmt-filter"
-            value={activeFilter}
-            onChange={(event) => setActiveFilter(event.target.value)}
-          >
-            <option value="all">כל המתנדבים</option>
-            <option value="active">מתנדבים פעילים</option>
-            <option value="inactive">מתנדבים לא פעילים</option>
-          </select>
-        </div>
-
-        <div className="community-volunteers-mgmt__page-size">
-          <label htmlFor="volunteers-mgmt-page-size">שורות בעמוד</label>
-          <select
-            id="volunteers-mgmt-page-size"
-            value={pageSize}
-            onChange={(event) => setPageSize(Number(event.target.value))}
-          >
-            {PAGE_SIZE_OPTIONS.map((size) => (
-              <option key={size} value={size}>
-                {size}
-              </option>
-            ))}
-          </select>
-        </div>
-      </div>
-
-      <div className="community-volunteers-mgmt__card">
+      <div className="community-staff-request-list community-volunteers-mgmt__card">
         {filteredVolunteers.length === 0 ? (
-          <p className="community-volunteers-mgmt__empty">
-            {volunteers.length === 0
-              ? "אין מתנדבים להצגה"
-              : "לא נמצאו תוצאות לפי החיפוש או הסינון"}
-          </p>
+          <CommunityStaffEmptyState
+            icon={Users}
+            message={
+              volunteers.length === 0
+                ? "אין נתונים להצגה כרגע"
+                : "לא נמצאו תוצאות לפי החיפוש או הסינון"
+            }
+          />
         ) : (
           <ul className="community-staff-compact-list">
             {paginatedVolunteers.map((volunteer) => (
@@ -206,19 +198,14 @@ function VolunteersManagementTable({
                 name={volunteer.fullNameDisplay}
                 phone={volunteer.phoneDisplay}
                 status={
-                  <span
-                    className={`community-volunteers-mgmt__status community-volunteers-mgmt__status--${
-                      volunteer.is_active === true ? "active" : "inactive"
-                    }`}
-                  >
-                    {volunteer.activeStatusDisplay}
-                  </span>
+                  <CommunityStaffActiveBadge isActive={volunteer.is_active === true} />
                 }
-                primaryLabel="עריכת פרטים"
+                viewLabel="צפייה"
+                primaryLabel="עריכה"
                 onPrimaryClick={() => onEditVolunteer(volunteer)}
                 onViewDetails={() => onViewDetails(volunteer)}
                 onDeactivate={() => setPendingDeactivateVolunteer(volunteer)}
-                deactivateLabel="השבתת מתנדב"
+                deactivateLabel="השבתה"
                 deactivateDisabled={volunteer.is_active !== true}
               />
             ))}
@@ -227,27 +214,14 @@ function VolunteersManagementTable({
       </div>
 
       {filteredVolunteers.length > 0 && (
-        <div className="community-volunteers-mgmt__pagination">
-          <button
-            type="button"
-            onClick={() => setCurrentPage((page) => Math.max(1, page - 1))}
-            disabled={currentPage === 1}
-          >
-            הקודם
-          </button>
-          <span>
-            עמוד {currentPage} מתוך {totalPages}
-          </span>
-          <button
-            type="button"
-            onClick={() =>
-              setCurrentPage((page) => Math.min(totalPages, page + 1))
-            }
-            disabled={currentPage === totalPages}
-          >
-            הבא
-          </button>
-        </div>
+        <CommunityStaffPagination
+          currentPage={currentPage}
+          totalPages={totalPages}
+          onPrevious={() => setCurrentPage((page) => Math.max(1, page - 1))}
+          onNext={() =>
+            setCurrentPage((page) => Math.min(totalPages, page + 1))
+          }
+        />
       )}
 
       <CommunityStaffConfirmModal

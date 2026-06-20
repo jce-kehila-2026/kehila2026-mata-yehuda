@@ -2,7 +2,7 @@ import { useEffect, useState } from "react";
 
 import { useNavigate } from "react-router-dom";
 
-import { getCommunityStaffDashboardStats } from "../../services/communityStaff/communityStaffService";
+import { getCommunityStaffDashboardStats, getPendingVolunteerRequests } from "../../services/communityStaff/communityStaffService";
 
 import CommunityStaffDashboardSummary from "../../components/communityStaff/CommunityStaffDashboardSummary.jsx";
 
@@ -24,6 +24,7 @@ const EMPTY_STATS = {
   activeCommunityMembers: 0,
   activeVolunteers: 0,
   pendingJoinRequests: 0,
+  pendingVolunteerRequests: 0,
   pendingHelpRequests: 0,
   activeMatches: 0,
   unmatchedPendingRequests: 0,
@@ -61,13 +62,19 @@ function CommunityStaffDashboardPage() {
 
       try {
 
-        const dashboardStats = await getCommunityStaffDashboardStats();
+        const [dashboardStats, pendingVolunteers] = await Promise.all([
+          getCommunityStaffDashboardStats(),
+          getPendingVolunteerRequests(),
+        ]);
 
 
 
         if (isMounted) {
 
-          setStats(dashboardStats);
+          setStats({
+            ...dashboardStats,
+            pendingVolunteerRequests: pendingVolunteers.length,
+          });
 
         }
 
@@ -119,12 +126,12 @@ function CommunityStaffDashboardPage() {
 
         <header className="community-staff-dashboard__header">
 
-          <h1 className="community-staff-dashboard__title page-title">לוח בקרה — צוות קהילה</h1>
+          <h1 className="community-staff-dashboard__title page-title">
+            לוח בקרה — צוות קהילה
+          </h1>
 
           <p className="community-staff-dashboard__subtitle">
-
-            גישה לניהול בקשות ולטיפול שוטף בפעילות הקהילה התומכת
-
+            ניהול חברי קהילה, מתנדבים, התאמות ובקשות
           </p>
 
         </header>
@@ -181,6 +188,30 @@ function CommunityStaffDashboardPage() {
 
       </div>
 
+
+
+      <div className="community-staff-dashboard__landscape-wrap">
+
+        <img
+
+          className="community-staff-dashboard__landscape-image"
+
+          src="/images/community-staff-dashboard/landscape-footer.png"
+
+          alt=""
+
+          aria-hidden="true"
+
+          loading="lazy"
+
+          decoding="async"
+
+          draggable="false"
+
+        />
+
+      </div>
+
     </div>
 
   );
@@ -190,4 +221,3 @@ function CommunityStaffDashboardPage() {
 
 
 export default CommunityStaffDashboardPage;
-

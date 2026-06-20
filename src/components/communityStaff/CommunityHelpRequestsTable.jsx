@@ -1,4 +1,4 @@
-import { useCallback, useEffect, useState } from "react";
+import { useCallback, useEffect, useMemo, useState } from "react";
 import {
   approveHelpRequestMatch,
   getPendingHomeHelpRequests,
@@ -8,7 +8,16 @@ import CommunityStaffMessage, {
   useCommunityStaffMessage,
 } from "./CommunityStaffMessage";
 import CommunityStaffConfirmModal from "./CommunityStaffConfirmModal.jsx";
-import { CommunityStaffCompactCard } from "./CommunityStaffListUi.jsx";
+import {
+  CommunityStaffCompactCard,
+  CommunityStaffEmptyState,
+  CommunityStaffListToolbar,
+  CommunityStaffPagination,
+  CommunityStaffStatusBadge,
+  CommunityStaffStatusOverview,
+  Link2,
+  buildRequestStatusOverviewItems,
+} from "./CommunityStaffListUi.jsx";
 import CommunityHelpRequestDetailsModal from "./CommunityHelpRequestDetailsModal.jsx";
 
 function formatStringArray(value) {
@@ -236,9 +245,34 @@ function CommunityHelpRequestsTable() {
   const [requests, setRequests] = useState([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
+  const [searchTerm, setSearchTerm] = useState("");
+  const [pageSize, setPageSize] = useState(10);
+  const [currentPage, setCurrentPage] = useState(1);
   const [selectedRequest, setSelectedRequest] = useState(null);
   const [detailsRequest, setDetailsRequest] = useState(null);
   const { message, showSuccess, clearMessage } = useCommunityStaffMessage();
+
+  const PAGE_SIZE_OPTIONS = [5, 10, 25];
+
+  function matchesSearch(request, term) {
+    if (!term) {
+      return true;
+    }
+
+    const normalizedSearch = term.trim().toLowerCase();
+    const searchableValues = [
+      request.participantFullName,
+      request.participantPhone,
+      request.status,
+      request.description,
+    ];
+
+    return searchableValues.some((value) =>
+      String(value || "")
+        .toLowerCase()
+        .includes(normalizedSearch)
+    );
+  }
 
   const loadRequests = useCallback(async () => {
     setLoading(true);
@@ -271,6 +305,28 @@ function CommunityHelpRequestsTable() {
     setSelectedRequest(request);
   };
 
+  const filteredRequests = useMemo(() => {
+    return requests.filter((request) => matchesSearch(request, searchTerm));
+  }, [requests, searchTerm]);
+
+  const totalPages = Math.max(1, Math.ceil(filteredRequests.length / pageSize));
+
+  const paginatedRequests = useMemo(() => {
+    const safePage = Math.min(currentPage, totalPages);
+    const startIndex = (safePage - 1) * pageSize;
+    return filteredRequests.slice(startIndex, startIndex + pageSize);
+  }, [filteredRequests, currentPage, pageSize, totalPages]);
+
+  useEffect(() => {
+    setCurrentPage(1);
+  }, [searchTerm, pageSize]);
+
+  useEffect(() => {
+    if (currentPage > totalPages) {
+      setCurrentPage(totalPages);
+    }
+  }, [currentPage, totalPages]);
+
   if (loading) {
     return (
       <p className="community-help-requests__loading">טוען בקשות סיוע...</p>
@@ -283,31 +339,43 @@ function CommunityHelpRequestsTable() {
 
   return (
     <div className="community-help-requests">
-      <div className="community-help-requests__top-row">
-        <span className="community-help-requests__badge">
-          בקשות ממתינות {requests.length}
-        </span>
-      </div>
+      <CommunityStaffStatusOverview
+        items={buildRequestStatusOverviewItems(requests)}
+      />
 
       <CommunityStaffMessage message={message} onDismiss={clearMessage} />
 
-      <div className="community-help-requests__card">
-        {requests.length === 0 ? (
-          <p className="community-help-requests__empty">
-            אין בקשות סיוע ממתינות
-          </p>
+      <CommunityStaffListToolbar
+        searchId="help-requests-search"
+        searchValue={searchTerm}
+        onSearchChange={(event) => setSearchTerm(event.target.value)}
+        searchPlaceholder="חיפוש לפי שם, טלפון או תיאור..."
+        pageSizeId="help-requests-page-size"
+        pageSizeValue={pageSize}
+        onPageSizeChange={(event) => setPageSize(Number(event.target.value))}
+        pageSizeOptions={PAGE_SIZE_OPTIONS}
+        showFilter={false}
+      />
+
+      <div className="community-staff-request-list community-help-requests__card">
+        {filteredRequests.length === 0 ? (
+          <CommunityStaffEmptyState
+            icon={Link2}
+            message={
+              requests.length === 0
+                ? "אין בקשות ממתינות כרגע"
+                : "לא נמצאו בקשות התואמות לחיפוש"
+            }
+          />
         ) : (
           <ul className="community-staff-compact-list">
-            {requests.map((request) => (
+            {paginatedRequests.map((request) => (
               <CommunityStaffCompactCard
                 key={request.id}
                 name={request.participantFullName}
                 phone={request.participantPhone}
-                status={
-                  <span className="community-help-requests__status">
-                    {request.status || "—"}
-                  </span>
-                }
+                status={<CommunityStaffStatusBadge status={request.status} />}
+                viewLabel="צפייה"
                 primaryLabel="התאמה"
                 onPrimaryClick={() => handleOpenMatch(request)}
                 onViewDetails={() => setDetailsRequest(request)}
@@ -316,6 +384,17 @@ function CommunityHelpRequestsTable() {
           </ul>
         )}
       </div>
+
+      {filteredRequests.length > 0 && (
+        <CommunityStaffPagination
+          currentPage={currentPage}
+          totalPages={totalPages}
+          onPrevious={() => setCurrentPage((page) => Math.max(1, page - 1))}
+          onNext={() =>
+            setCurrentPage((page) => Math.min(totalPages, page + 1))
+          }
+        />
+      )}
 
       <CommunityHelpRequestDetailsModal
         request={detailsRequest}
