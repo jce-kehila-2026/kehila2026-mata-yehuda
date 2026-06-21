@@ -1,26 +1,32 @@
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import DayCenterRegisterForm from "../../components/Homecomponents/DayCenterRegisterForm";
+import { getProgramBYId } from "../../services/HomeServices/programService";
 
 import "../../styles/HomeStyle/DayCenterPage.css";
 import "../../styles/HomeStyle/Form.css";
 
-const GALLERY_IMAGES = [
-  {
-    src: "/images/daycenter1.png",
-    alt: "פעילות מוזיקלית וחברתית במרכז יום",
-    orientation: "portrait",
-  },
-  {
-    src: "/images/daycenter2.png",
-    alt: "חוג יצירה במרכז יום לותיק",
-    orientation: "portrait",
-  },
-  {
-    src: "/images/daycenter3.png",
-    alt: "פעילות גינון וקהילה במרכז יום",
-    orientation: "landscape",
-  },
-];
+const DAY_CENTER_IMAGES = {
+  hero: "/images/daycenter3.png",
+  gallery: [
+    {
+      src: "/images/daycenter1.png",
+      alt: "פעילות מוזיקלית וחברתית במרכז יום",
+      orientation: "portrait",
+    },
+    {
+      src: "/images/daycenter2.png",
+      alt: "חוג יצירה במרכז יום לותיק",
+      orientation: "portrait",
+    },
+    {
+      src: "/images/daycenter6.png",
+      alt: "פעילות גינון וקהילה במרכז יום",
+      orientation: "landscape",
+    },
+  ],
+};
+
+const GALLERY_IMAGES = DAY_CENTER_IMAGES.gallery;
 const STATS = [
   {
     value: "148",
@@ -194,6 +200,27 @@ const SECTIONS = [
 function DayCenterPage() {
   const [showDayCenterForm, setShowDayCenterForm] = useState(false);
   const [openSection, setOpenSection] = useState(null);
+  const [loozUrl, setLoozUrl] = useState("");
+  const [showScheduleModal, setShowScheduleModal] = useState(false);
+
+  useEffect(() => {
+    let cancelled = false;
+
+    async function loadDayCenterImage() {
+      const program = await getProgramBYId("day_center");
+      const url = program?.["schedule_image_url"];
+
+      if (!cancelled && typeof url === "string" && url.trim()) {
+        setLoozUrl(url.trim());
+      }
+    }
+
+    loadDayCenterImage();
+
+    return () => {
+      cancelled = true;
+    };
+  }, []);
 
   function toggleSection(sectionId) {
     setOpenSection((current) => (current === sectionId ? null : sectionId));
@@ -206,7 +233,7 @@ function DayCenterPage() {
           <div className="day-center-hero__banner">
             <img
               className="day-center-hero__image"
-              src="/images/daycenter3.png"
+              src={DAY_CENTER_IMAGES.hero}
               alt="מרכז יום לותיק מטה-יהודה"
               width={1400}
               height={520}
@@ -237,6 +264,54 @@ function DayCenterPage() {
       </header>
 
       <main className="day-center-main" aria-label="תוכן מרכז יום">
+        <section className="day-center-feature-image" aria-label="לוח שבועי">
+          <div className="day-center-section-header day-center-section-header--center">
+            <div className="day-center-feature-image__title-divider">
+              <span className="day-center-feature-image__title-line" aria-hidden="true" />
+              <h2 className="day-center-section-title">לוח שבועי</h2>
+              <span className="day-center-feature-image__title-line" aria-hidden="true" />
+            </div>
+          </div>
+          {loozUrl && (
+            <button
+              type="button"
+              className="day-center-feature-image__trigger"
+              onClick={() => setShowScheduleModal(true)}
+              aria-label="הגדלת לוח שבועי"
+            >
+              <img
+                src={loozUrl}
+                alt="לוח שבועי – מרכז יום לותיק מטה-יהודה"
+                loading="lazy"
+                decoding="async"
+              />
+            </button>
+          )}
+        </section>
+
+        {showScheduleModal && loozUrl && (
+          <div
+            className="day-center-schedule-modal"
+            role="presentation"
+            onClick={() => setShowScheduleModal(false)}
+          >
+            <button
+              type="button"
+              className="day-center-schedule-modal__close"
+              onClick={() => setShowScheduleModal(false)}
+              aria-label="סגירה"
+            >
+              ×
+            </button>
+            <img
+              className="day-center-schedule-modal__image"
+              src={loozUrl}
+              alt="לוח שבועי – מרכז יום לותיק מטה-יהודה"
+              onClick={(event) => event.stopPropagation()}
+            />
+          </div>
+        )}
+
         <section className="day-center-stats" aria-label="נתונים">
           <div className="day-center-stats__grid">
             {STATS.map((stat) => (
@@ -284,10 +359,7 @@ function DayCenterPage() {
         </section>
 
         <section className="day-center-gallery" aria-label="גלריית תמונות">
-          <div className="day-center-section-header">
-            <span className="day-center-eyebrow">מהמרכז</span>
-            <h2 className="day-center-section-title">רגעים מהמרכז</h2>
-          </div>
+          <h2 className="day-center-gallery__title">רגעים מהמרכז</h2>
           <div className="day-center-gallery__grid">
             {GALLERY_IMAGES.map((image) => (
               <figure
