@@ -24,10 +24,22 @@ export async function fetchWaitingRequests() {
   return requests.filter((request) => request.status === "waiting");
 }
 
-export async function markRequestAsAnswered(requestId, answer) {
+export async function markRequestAsAnswered(
+  requestId,
+  answer,
+  { channel = "whatsapp" } = {},
+) {
   await updateDoc(doc(db, REQUESTS_COLLECTION, requestId), {
     status: "answered",
     answer,
+    answerChannel: channel,
     answeredAt: new Date(),
   });
+}
+
+export async function markRequestAsAnsweredByPhone(requestId, note = "") {
+  const trimmedNote = String(note ?? "").trim();
+  const answer = trimmedNote || "נענה בשיחת טלפון";
+
+  await markRequestAsAnswered(requestId, answer, { channel: "phone" });
 }
