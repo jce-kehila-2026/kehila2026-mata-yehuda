@@ -13,11 +13,6 @@
 }
 
 .request-section-header__divider {
-.request-box {
-  background-color: var(--color-accent-light);
-  border: 1.5px solid var(--color-border);
-  border-radius: var(--radius);
-  padding: 1.5rem;
   display: flex;
   align-items: center;
   justify-content: center;
