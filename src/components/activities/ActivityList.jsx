@@ -1,5 +1,5 @@
 import { useCallback, useEffect, useMemo, useState } from "react";
-import { CalendarDays, Plus } from "lucide-react";
+import { CalendarDays, Plus, Archive } from "lucide-react";
 import ActivityCard from "./ActivityCard";
 import ActivityStatusBadge from "./ActivityStatusBadge";
 import AdminDataTable from "../admin/AdminDataTable";
@@ -35,7 +35,13 @@ const ACTIVITY_COLUMNS = [
     { key: "actions", label: "פעולות" }
 ];
 
-function ActivityList({ onDelete, onEdit, refreshKey = 0, onAddActivity }) {
+function ActivityList({
+    onDelete,
+    onEdit,
+    refreshKey = 0,
+    onAddActivity,
+    onViewArchive
+}) {
     const [sourceItems, setSourceItems] = useState([]);
     const [totalCount, setTotalCount] = useState(0);
     const [loading, setLoading] = useState(true);
@@ -133,20 +139,36 @@ function ActivityList({ onDelete, onEdit, refreshKey = 0, onAddActivity }) {
         <div className="staff-list-section admin-list-section admin-list-section--activities">
             <div className="admin-list-header admin-list-header--split">
                 <h2 className="admin-list-header__title">רשימת פעילויות</h2>
-                {onAddActivity ? (
-                    <button
-                        type="button"
-                        className="staff-button staff-button--small admin-list-header__action admin-list-header__action--compact"
-                        onClick={onAddActivity}
-                    >
-                        <Plus
-                            className="admin-list-header__action-icon"
-                            strokeWidth={2.25}
-                            aria-hidden="true"
-                        />
-                        <span>הוספת פעילות</span>
-                    </button>
-                ) : null}
+                <div className="admin-list-header__actions">
+                    {onViewArchive ? (
+                        <button
+                            type="button"
+                            className="staff-button staff-button--secondary staff-button--small admin-list-header__action admin-list-header__action--compact"
+                            onClick={onViewArchive}
+                        >
+                            <Archive
+                                className="admin-list-header__action-icon"
+                                strokeWidth={2.25}
+                                aria-hidden="true"
+                            />
+                            <span>צפייה בארכיון</span>
+                        </button>
+                    ) : null}
+                    {onAddActivity ? (
+                        <button
+                            type="button"
+                            className="staff-button staff-button--small admin-list-header__action admin-list-header__action--compact"
+                            onClick={onAddActivity}
+                        >
+                            <Plus
+                                className="admin-list-header__action-icon"
+                                strokeWidth={2.25}
+                                aria-hidden="true"
+                            />
+                            <span>הוספת פעילות</span>
+                        </button>
+                    ) : null}
+                </div>
             </div>
 
             <AdminListToolbar

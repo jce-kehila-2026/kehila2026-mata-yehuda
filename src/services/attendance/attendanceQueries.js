@@ -10,6 +10,7 @@ import {
 } from "firebase/firestore";
 
 import { db } from "../../config/firebase";
+import { isRecordActive } from "../../utils/staffManegmentUtils/archiveUtils";
 import {
   ACCEPTED_REGISTRATION_STATUSES,
   buildAttendanceByRegistrationIdFromDateRecords,
@@ -253,6 +254,7 @@ export const getAllActivities = async () => {
       id: document.id,
       ...document.data(),
     }))
+    .filter(isRecordActive)
     .sort((firstActivity, secondActivity) => {
       const firstDate = getActivityDate(firstActivity);
       const secondDate = getActivityDate(secondActivity);

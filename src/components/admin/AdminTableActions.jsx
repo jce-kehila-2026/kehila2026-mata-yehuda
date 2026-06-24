@@ -1,4 +1,4 @@
-import { CircleDollarSign, Eye, Pencil, Trash2 } from "lucide-react";
+import { CircleDollarSign, Eye, Pencil, Trash2, Undo2 } from "lucide-react";
 import ReactivateVolunteerButton, {
     REACTIVATE_LABEL
 } from "./ReactivateVolunteerButton.jsx";
@@ -70,6 +70,22 @@ export function AdminTableDeleteButton({
             icon={Trash2}
             label={label}
             variant="delete"
+            onClick={onClick}
+            disabled={disabled}
+        />
+    );
+}
+
+export function AdminTableRestoreButton({
+    onClick,
+    label = "שחזור",
+    disabled = false
+}) {
+    return (
+        <AdminTableIconButton
+            icon={Undo2}
+            label={label}
+            variant="reactivate"
             onClick={onClick}
             disabled={disabled}
         />
