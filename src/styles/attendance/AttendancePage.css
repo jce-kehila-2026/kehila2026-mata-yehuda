@@ -3,7 +3,7 @@
 .attendance-page {
   direction: rtl;
   min-height: auto;
-  background: #f4faf5;
+  background: #f1f8f3;
   color: #243029;
   font-family: "Heebo", system-ui, sans-serif;
   padding: 0.35rem 1.25rem 1.15rem;
@@ -180,27 +180,24 @@
   padding-bottom: 0.85rem;
 }
 
-/* Fix empty beige area under Attendance when embedded in StaffDashboard.
-   StaffDashboard root uses a beige background; when Attendance is compact,
-   that background shows below. We scope background + padding fixes to the
-   Attendance subpage only (no effect on other dashboard pages). */
+/* Fix empty area under Attendance when embedded in StaffDashboard. */
 .staff-dashboard-root:has([data-dashboard-page="attendance"]) {
-  background: #f4faf5;
+  background: #f1f8f3;
 }
 
-html:has([data-dashboard-page="attendance"]) body,
-html:has([data-dashboard-page="attendance"]) #root {
-  background: #f4faf5;
+html:has(.staff-dashboard-root [data-dashboard-page="attendance"]) body,
+html:has(.staff-dashboard-root [data-dashboard-page="attendance"]) #root {
+  background: #f1f8f3;
 }
 
 .staff-dashboard-root:has([data-dashboard-page="attendance"]) .staff-subpage {
-  background: #f4faf5;
+  background: #f1f8f3;
   padding-bottom: 0;
 }
 
 .staff-dashboard-root:has([data-dashboard-page="attendance"])
   [data-dashboard-page="attendance"] {
-  background: #f4faf5;
+  background: #f1f8f3;
 }
 
 @media (min-width: 900px) {
