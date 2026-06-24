@@ -1,7 +1,11 @@
 import { useEffect, useRef, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import DonationSuccessMessage from "../components/DonationSuccessMessage";
-import { DONATION_STORAGE_KEYS } from "../config/donations";
+import PaymentFlowActions from "../../components/Payment/PaymentFlowActions";
+import PaymentFlowShell from "../../components/Payment/PaymentFlowShell";
+import PaymentStepHeader from "../../components/Payment/PaymentStepHeader";
+import RegistrationStepper from "../../components/Payment/RegistrationStepper";
+import { DONATION_FLOW_STEPS, DONATION_STORAGE_KEYS } from "../config/donations";
 import { captureDonationPayPalOrder } from "../services/donationService";
 
 function DonationSuccessPage() {
@@ -66,36 +70,48 @@ function DonationSuccessPage() {
     captureDonation();
   }, []);
 
+  const headerTitle =
+    status === "loading"
+      ? "מאשרים תרומה"
+      : status === "success"
+        ? "תודה על תרומתכם"
+        : "התרומה לא הושלמה";
+
+  const headerHint =
+    status === "loading"
+      ? "אנא המתינו, התשלום נבדק..."
+      : status === "success"
+        ? "התרומה התקבלה בהצלחה"
+        : errorMessage;
+
   return (
-    <>
-      <header className="community-hero">
-        <span className="hero-icon" aria-hidden="true">
-          {status === "success" ? "✓" : status === "error" ? "!" : "⏳"}
-        </span>
-        <h1>
-          {status === "loading"
-            ? "מאשרים תרומה"
-            : status === "success"
-              ? "תודה על תרומתכם"
-              : "התרומה לא הושלמה"}
-        </h1>
-        {status === "loading" && <p>אנא המתינו, התשלום נבדק...</p>}
-      </header>
+    <PaymentFlowShell>
+      <RegistrationStepper
+        currentStep={status === "success" ? 3 : 2}
+        steps={DONATION_FLOW_STEPS}
+        ariaLabel="התקדמות תרומה"
+      />
 
-      <section className="community-section donation-flow">
-        {status === "success" && (
-          <DonationSuccessMessage paymentMethod={paymentMethod} />
-        )}
+      <PaymentStepHeader title={headerTitle} hint={headerHint} />
 
-        {status === "error" && (
-          <p className="lookup-error" role="alert">
-            {errorMessage}
-          </p>
-        )}
+      {status === "success" && (
+        <DonationSuccessMessage paymentMethod={paymentMethod} />
+      )}
 
-        <div className="community-actions">
+      {status === "error" && (
+        <p className="lookup-error" role="alert">
+          {errorMessage}
+        </p>
+      )}
+
+      {status !== "loading" && (
+        <PaymentFlowActions split={status === "error"}>
           {status === "success" && (
-            <button type="button" className="primary-btn" onClick={() => navigate("/")}>
+            <button
+              type="button"
+              className="primary-btn payment-flow-btn"
+              onClick={() => navigate("/")}
+            >
               חזרה למסך הראשי
             </button>
           )}
@@ -103,23 +119,26 @@ function DonationSuccessPage() {
             <>
               <button
                 type="button"
-                className="primary-btn"
-                onClick={() => navigate("/donations")}
-              >
-                נסו שוב
-              </button>
-              <button
-                type="button"
                 className="secondary-btn"
                 onClick={() => navigate("/")}
               >
                 חזרה למסך הראשי
               </button>
+              <button
+                type="button"
+                className="primary-btn payment-flow-btn"
+                onClick={() => navigate("/donations")}
+              >
+                נסו שוב
+                <span className="payment-flow-btn__chevron" aria-hidden="true">
+                  ‹
+                </span>
+              </button>
             </>
           )}
-        </div>
-      </section>
-    </>
+        </PaymentFlowActions>
+      )}
+    </PaymentFlowShell>
   );
 }
 
