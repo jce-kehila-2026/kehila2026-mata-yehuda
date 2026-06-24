@@ -4278,3 +4278,131 @@
     width: 100%;
   }
 }
+
+/* ===== Dashboard card surfaces — green palette ===== */
+
+.community-staff-dashboard,
+.community-join-requests-page,
+.community-volunteer-requests-page,
+.community-help-requests-page,
+.community-members-page,
+.community-volunteers-mgmt-page,
+.community-active-matches-page,
+.community-settings-page {
+  --cs-dashboard-page-bg: #f4faf5;
+  --cs-dashboard-card-bg: #fafcfb;
+  --cs-dashboard-card-bg-strong: #eef7f0;
+  --cs-dashboard-card-gradient: linear-gradient(180deg, #fafcfb 0%, #eef7f0 100%);
+  --cs-dashboard-input-bg: #ffffff;
+}
+
+.community-staff-dashboard__module-card,
+.community-staff-dashboard__summary-card,
+.community-staff-status-overview__card:not(
+    .community-staff-status-overview__card--pending
+  ):not(.community-staff-status-overview__card--approved):not(
+    .community-staff-status-overview__card--rejected
+  ):not(.community-staff-status-overview__card--active):not(
+    .community-staff-status-overview__card--inactive
+  ),
+.community-staff-request-toolbar,
+.community-staff-request-list,
+.community-staff-compact-card,
+.community-staff-confirm-modal,
+.community-staff-details-modal,
+.community-join-requests__toolbar,
+.community-join-requests__card,
+.community-volunteer-requests__card,
+.community-help-requests__card,
+.community-members__toolbar,
+.community-members__card,
+.community-volunteers-mgmt__toolbar,
+.community-volunteers-mgmt__card,
+.community-active-matches__toolbar,
+.community-active-matches__card,
+.community-volunteer-requests__modal,
+.community-help-requests__modal,
+.community-members__modal,
+.community-active-matches__modal,
+.community-join-modal__dialog {
+  background: var(--cs-dashboard-card-bg);
+  background-color: var(--cs-dashboard-card-bg);
+}
+
+.community-staff-dashboard__module-card--management {
+  background: var(--cs-dashboard-card-gradient);
+  background-color: var(--cs-dashboard-card-bg-strong);
+}
+
+.community-staff-dashboard .community-staff-dashboard__module-card:hover,
+.community-staff-dashboard .community-staff-dashboard__module-card:active,
+.community-staff-dashboard .community-staff-dashboard__module-card:focus-visible {
+  background: var(--cs-dashboard-card-bg);
+  background-color: var(--cs-dashboard-card-bg);
+}
+
+.community-staff-dashboard .community-staff-dashboard__module-card--management:hover,
+.community-staff-dashboard .community-staff-dashboard__module-card--management:active,
+.community-staff-dashboard .community-staff-dashboard__module-card--management:focus-visible {
+  background: linear-gradient(180deg, #fafcfb 0%, #f4faf7 100%);
+  background-color: #f4faf7;
+}
+
+.community-staff-dashboard .community-staff-dashboard__module-card--unavailable:hover,
+.community-staff-dashboard .community-staff-dashboard__module-card--unavailable:active,
+.community-staff-dashboard .community-staff-dashboard__module-card--unavailable:focus-visible {
+  background: var(--cs-dashboard-card-bg);
+  background-color: var(--cs-dashboard-card-bg);
+}
+
+.community-staff-dashboard .community-staff-dashboard__summary-card:hover,
+.community-staff-dashboard .community-staff-dashboard__summary-card:active,
+.community-staff-dashboard .community-staff-dashboard__summary-card:focus-visible {
+  background: var(--cs-dashboard-card-bg-strong);
+  background-color: var(--cs-dashboard-card-bg-strong);
+}
+
+.community-join-requests-page input,
+.community-join-requests-page select,
+.community-join-requests-page textarea,
+.community-volunteer-requests-page input,
+.community-volunteer-requests-page select,
+.community-help-requests-page input,
+.community-help-requests-page select,
+.community-members-page input,
+.community-members-page select,
+.community-volunteers-mgmt-page input,
+.community-volunteers-mgmt-page select,
+.community-active-matches-page input,
+.community-active-matches-page select,
+.community-active-matches-page textarea,
+.community-staff-request-toolbar input,
+.community-staff-request-toolbar select,
+.community-join-modal__field input,
+.community-join-modal__field select,
+.community-join-modal__field textarea,
+.community-active-matches__notes-form textarea {
+  background-color: var(--cs-dashboard-input-bg);
+}
+
+.community-join-requests__table tbody td,
+.community-volunteer-requests__table tbody td,
+.community-help-requests__table tbody td,
+.community-members__table tbody td,
+.community-volunteers-mgmt__table tbody td,
+.community-active-matches__table tbody td,
+.community-members__history-table tbody td {
+  background-color: var(--cs-dashboard-input-bg);
+}
+
+@media (max-width: 768px) {
+  .community-join-requests__row,
+  .community-volunteer-requests__row,
+  .community-help-requests__row,
+  .community-members__row,
+  .community-volunteers-mgmt__row,
+  .community-active-matches__row,
+  .community-members__history-table tbody tr {
+    background: var(--cs-dashboard-card-bg);
+  }
+}
