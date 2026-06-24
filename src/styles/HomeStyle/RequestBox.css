@@ -5,7 +5,7 @@
 }
 
 .request-box {
-  background: var(--color-accent-light);
+  background-color: var(--color-accent-light);
   border: 1.5px solid var(--color-border);
   border-radius: var(--radius);
   padding: 1.5rem;

@@ -47,7 +47,7 @@
 }
 
 .donation-box {
-  background: var(--color-accent-light, #faf4ec);
+  background-color: var(--color-accent-light);
   border: 1.5px solid var(--color-border, #e5c29f);
   border-radius: var(--radius, 18px);
   padding: 1.5rem;
