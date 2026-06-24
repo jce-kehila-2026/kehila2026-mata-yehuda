@@ -1,5 +1,6 @@
 import "./App.css";
 import { BrowserRouter, Routes, Route } from "react-router-dom";
+import ScrollToTop from "./components/ScrollToTop";
 import PublicNotificationRegistration from "./components/notifications/PublicNotificationRegistration";
 
 import AttendancePage from "./pages/attendance/AttendancePage";
@@ -27,6 +28,7 @@ import donationRoutes from "./donations/routes/donationRoutes";
 function App() {
   return (
     <BrowserRouter>
+      <ScrollToTop />
       <PublicNotificationRegistration>
       <Routes>
         <Route path="/" element={<Home />} />

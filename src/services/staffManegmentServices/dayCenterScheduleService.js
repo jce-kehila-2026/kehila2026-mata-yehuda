@@ -14,6 +14,9 @@ export async function fetchDayCenterScheduleImageUrl() {
     return snap.data()?.schedule_image_url || "";
 }
 
+/** @deprecated alias — same field as schedule_image_url on programs/day_center */
+export const fetchDayCenterLoozUrl = fetchDayCenterScheduleImageUrl;
+
 /** Updates only schedule_image_url on programs/day_center. */
 export async function updateDayCenterScheduleImageUrl(schedule_image_url) {
     const normalizedUrl =
@@ -23,3 +26,13 @@ export async function updateDayCenterScheduleImageUrl(schedule_image_url) {
         schedule_image_url: normalizedUrl
     });
 }
+
+/** @deprecated alias */
+export const updateDayCenterLoozUrl = updateDayCenterScheduleImageUrl;
+
+export async function deleteDayCenterScheduleImageUrl() {
+    await updateDayCenterScheduleImageUrl("");
+}
+
+/** @deprecated alias */
+export const deleteDayCenterLoozUrl = deleteDayCenterScheduleImageUrl;

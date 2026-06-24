@@ -82,7 +82,11 @@ function Plus60Page() {
         </div>
         
         <div className="plus60-title">
-            <h1>פעילויות</h1>
+            <div className="plus60-title__divider">
+              <span className="plus60-title__line" aria-hidden="true" />
+              <h1>פעילויות</h1>
+              <span className="plus60-title__line" aria-hidden="true" />
+            </div>
             <p>כל הפעילויות הזמינות במרכז</p>
         </div>
         </div>

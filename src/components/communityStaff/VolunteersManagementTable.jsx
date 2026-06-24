@@ -54,6 +54,22 @@ function matchesActiveFilter(volunteer, activeFilter) {
   return true;
 }
 
+function sortVolunteersActiveFirst(items) {
+  return [...items].sort((left, right) => {
+    const leftActive = left.is_active === true;
+    const rightActive = right.is_active === true;
+
+    if (leftActive !== rightActive) {
+      return leftActive ? -1 : 1;
+    }
+
+    return (left.fullNameDisplay || "").localeCompare(
+      right.fullNameDisplay || "",
+      "he"
+    );
+  });
+}
+
 function VolunteersManagementTable({
   refreshKey = 0,
   onEditVolunteer,
@@ -68,9 +84,9 @@ function VolunteersManagementTable({
   const [activeFilter, setActiveFilter] = useState("all");
   const [pageSize, setPageSize] = useState(10);
   const [currentPage, setCurrentPage] = useState(1);
-  const [pendingDeactivateVolunteer, setPendingDeactivateVolunteer] =
-    useState(null);
-  const [deactivating, setDeactivating] = useState(false);
+  const [pendingActionVolunteer, setPendingActionVolunteer] = useState(null);
+  const [pendingActionType, setPendingActionType] = useState(null);
+  const [isProcessing, setIsProcessing] = useState(false);
 
   const loadVolunteers = useCallback(async () => {
     setLoading(true);
@@ -92,13 +108,15 @@ function VolunteersManagementTable({
   }, [loadVolunteers, refreshKey]);
 
   const filteredVolunteers = useMemo(() => {
-    return volunteers.filter((volunteer) => {
+    const filtered = volunteers.filter((volunteer) => {
       if (!matchesSearch(volunteer, searchTerm)) {
         return false;
       }
 
       return matchesActiveFilter(volunteer, activeFilter);
     });
+
+    return sortVolunteersActiveFirst(filtered);
   }, [volunteers, searchTerm, activeFilter]);
 
   const totalPages = Math.max(1, Math.ceil(filteredVolunteers.length / pageSize));
@@ -119,25 +137,29 @@ function VolunteersManagementTable({
     }
   }, [currentPage, totalPages]);
 
-  const handleConfirmDeactivate = async () => {
-    if (!pendingDeactivateVolunteer) {
+  const handleConfirmAction = async () => {
+    if (!pendingActionVolunteer || !pendingActionType) {
       return;
     }
 
-    setDeactivating(true);
+    setIsProcessing(true);
 
     try {
-      await updateVolunteerActiveStatus(pendingDeactivateVolunteer.id, false);
+      const isActive = pendingActionType === "reactivate";
+      await updateVolunteerActiveStatus(pendingActionVolunteer.id, isActive);
       onVolunteerUpdated?.({
-        successMessage: "המתנדב הושבת בהצלחה",
+        successMessage: isActive
+          ? "המתנדב הופעל בהצלחה"
+          : "המתנדב הושבת בהצלחה",
       });
-      setPendingDeactivateVolunteer(null);
+      setPendingActionVolunteer(null);
+      setPendingActionType(null);
       await loadVolunteers();
     } catch (err) {
       console.error("Failed to update volunteer active status:", err);
       onShowError?.("אירעה שגיאה. נסה שוב.");
     } finally {
-      setDeactivating(false);
+      setIsProcessing(false);
     }
   };
 
@@ -192,23 +214,42 @@ function VolunteersManagementTable({
           />
         ) : (
           <ul className="community-staff-compact-list">
-            {paginatedVolunteers.map((volunteer) => (
+            {paginatedVolunteers.map((volunteer) => {
+              const isActive = volunteer.is_active === true;
+
+              return (
               <CommunityStaffCompactCard
                 key={volunteer.id}
                 name={volunteer.fullNameDisplay}
                 phone={volunteer.phoneDisplay}
+                inactive={!isActive}
                 status={
-                  <CommunityStaffActiveBadge isActive={volunteer.is_active === true} />
+                  <CommunityStaffActiveBadge isActive={isActive} />
                 }
                 viewLabel="צפייה"
                 primaryLabel="עריכה"
                 onPrimaryClick={() => onEditVolunteer(volunteer)}
                 onViewDetails={() => onViewDetails(volunteer)}
-                onDeactivate={() => setPendingDeactivateVolunteer(volunteer)}
+                onDeactivate={
+                  isActive
+                    ? () => {
+                        setPendingActionVolunteer(volunteer);
+                        setPendingActionType("deactivate");
+                      }
+                    : undefined
+                }
+                onReactivate={
+                  !isActive
+                    ? () => {
+                        setPendingActionVolunteer(volunteer);
+                        setPendingActionType("reactivate");
+                      }
+                    : undefined
+                }
                 deactivateLabel="השבתה"
-                deactivateDisabled={volunteer.is_active !== true}
               />
-            ))}
+              );
+            })}
           </ul>
         )}
       </div>
@@ -226,11 +267,20 @@ function VolunteersManagementTable({
 
       <CommunityStaffConfirmModal
         message={
-          pendingDeactivateVolunteer ? "להשבית את המתנדב/ה?" : null
+          pendingActionVolunteer
+            ? pendingActionType === "deactivate"
+              ? "להשבית את המתנדב/ה?"
+              : pendingActionType === "reactivate"
+                ? "להפעיל את המתנדב/ה מחדש?"
+                : null
+            : null
         }
-        onConfirm={handleConfirmDeactivate}
-        onCancel={() => setPendingDeactivateVolunteer(null)}
-        confirming={deactivating}
+        onConfirm={handleConfirmAction}
+        onCancel={() => {
+          setPendingActionVolunteer(null);
+          setPendingActionType(null);
+        }}
+        confirming={isProcessing}
       />
     </div>
   );
