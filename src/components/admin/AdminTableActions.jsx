@@ -1,4 +1,7 @@
 import { CircleDollarSign, Eye, Pencil, Trash2 } from "lucide-react";
+import ReactivateVolunteerButton, {
+    REACTIVATE_LABEL
+} from "./ReactivateVolunteerButton.jsx";
 
 function AdminTableIconButton({
     icon: Icon,
@@ -72,6 +75,23 @@ export function AdminTableDeleteButton({
         />
     );
 }
+
+export function AdminTableReactivateButton({
+    onClick,
+    label = REACTIVATE_LABEL,
+    disabled = false
+}) {
+    return (
+        <ReactivateVolunteerButton
+            onClick={onClick}
+            label={label}
+            disabled={disabled}
+        />
+    );
+}
+
+/** @deprecated Use AdminTableReactivateButton */
+export const AdminTableActivateButton = AdminTableReactivateButton;
 
 export function AdminTableProcessButton({
     onClick,

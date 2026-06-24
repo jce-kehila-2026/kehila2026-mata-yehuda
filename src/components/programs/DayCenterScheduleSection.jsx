@@ -6,11 +6,12 @@ import {
 } from "../../services/staffManegmentServices/imageUploadService";
 import { prepareProgramImageUrl } from "../../services/staffManegmentServices/programImageService";
 import {
+    deleteDayCenterScheduleImageUrl,
     fetchDayCenterScheduleImageUrl,
     updateDayCenterScheduleImageUrl
 } from "../../services/staffManegmentServices/dayCenterScheduleService";
 
-function ManageDayCenterSchedule() {
+function DayCenterScheduleSection({ disabled = false }) {
     const [savedImageUrl, setSavedImageUrl] = useState("");
     const [previewUrl, setPreviewUrl] = useState("");
     const [selectedFile, setSelectedFile] = useState(null);
@@ -95,7 +96,7 @@ function ManageDayCenterSchedule() {
     }
 
     function openFilePicker() {
-        if (saving || deleting) {
+        if (disabled || saving || deleting) {
             return;
         }
 
@@ -112,7 +113,7 @@ function ManageDayCenterSchedule() {
     }
 
     function handleDropZoneKeyDown(event) {
-        if (saving || deleting) {
+        if (disabled || saving || deleting) {
             return;
         }
 
@@ -126,7 +127,7 @@ function ManageDayCenterSchedule() {
         event.preventDefault();
         event.stopPropagation();
 
-        if (saving || deleting) {
+        if (disabled || saving || deleting) {
             return;
         }
 
@@ -154,7 +155,7 @@ function ManageDayCenterSchedule() {
         event.stopPropagation();
         setIsDragOver(false);
 
-        if (saving || deleting) {
+        if (disabled || saving || deleting) {
             return;
         }
 
@@ -209,7 +210,7 @@ function ManageDayCenterSchedule() {
         setSuccess("");
 
         try {
-            await updateDayCenterScheduleImageUrl("");
+            await deleteDayCenterScheduleImageUrl();
 
             clearLocalPreview();
             setSavedImageUrl("");
@@ -229,37 +230,31 @@ function ManageDayCenterSchedule() {
     const hasPreview = Boolean(previewUrl);
     const hasPendingUpload = Boolean(selectedFile);
     const hasSavedImage = Boolean(savedImageUrl);
-    const isBusy = saving || deleting;
-
-    if (loading) {
-        return (
-            <div className="staff-page staff-page--day-center-schedule">
-                <div className="staff-container">
-                    <p className="staff-loading">טוען...</p>
-                </div>
-            </div>
-        );
-    }
+    const isBusy = disabled || saving || deleting;
 
     return (
-        <div className="staff-page staff-page--day-center-schedule">
-            <div className="staff-container staff-container--day-center-schedule">
-                <header className="staff-header day-center-schedule__header">
-                    <h1>עדכון לוח זמנים למרכז יום</h1>
-                    <p>
-                        העלאת תמונת לוח הזמנים למרכז היום. התמונה נשמרת במערכת
-                        לשימוש עתידי, ללא שינוי בשדות התוכנית האחרים.
-                    </p>
-                </header>
+        <section
+            className="program-form__schedule-section day-center-schedule-section"
+            aria-labelledby="day-center-schedule-section-title"
+        >
+            <h3 id="day-center-schedule-section-title" className="program-form__section-title">
+                לוח זמנים מרכז יום
+            </h3>
+            <p className="program-form__section-hint">
+                העלאת תמונת לוח הזמנים שתוצג למשתתפים באתר.
+            </p>
 
-                {error ? (
-                    <p className="staff-alert staff-alert--error">{error}</p>
-                ) : null}
-                {success ? (
-                    <p className="staff-alert staff-alert--success">{success}</p>
-                ) : null}
+            {loading ? (
+                <p className="program-form__schedule-loading">טוען לוח זמנים...</p>
+            ) : (
+                <>
+                    {error ? (
+                        <p className="staff-alert staff-alert--error">{error}</p>
+                    ) : null}
+                    {success ? (
+                        <p className="staff-alert staff-alert--success">{success}</p>
+                    ) : null}
 
-                <section className="staff-section staff-section--form day-center-schedule__form">
                     <input
                         ref={fileInputRef}
                         type="file"
@@ -366,7 +361,7 @@ function ManageDayCenterSchedule() {
                         <p className="form-image-upload__error">{imageError}</p>
                     ) : null}
 
-                    <div className="staff-form__actions day-center-schedule__actions">
+                    <div className="day-center-schedule__actions">
                         <button
                             type="button"
                             className="staff-button staff-form__submit"
@@ -384,10 +379,10 @@ function ManageDayCenterSchedule() {
                             {deleting ? "מוחק..." : "מחיקת תמונה"}
                         </button>
                     </div>
-                </section>
-            </div>
-        </div>
+                </>
+            )}
+        </section>
     );
 }
 
-export default ManageDayCenterSchedule;
+export default DayCenterScheduleSection;

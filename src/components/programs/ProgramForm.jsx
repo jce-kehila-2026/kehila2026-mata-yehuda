@@ -1,8 +1,10 @@
 import { useEffect, useRef, useState } from "react";
 import FormImageUpload from "../shared/FormImageUpload";
 import FormActionRow from "../shared/FormActionRow";
+import DayCenterScheduleSection from "./DayCenterScheduleSection";
 import { prepareProgramImageUrl } from "../../services/staffManegmentServices/programImageService";
 import {
+    DAY_CENTER_ID,
     formatProgramTitle,
     isFixedProgramId
 } from "../../utils/staffManegmentUtils/programConstants";
@@ -23,6 +25,7 @@ function ProgramForm({
     const isFixedProgram = Boolean(
         editingProgram && isFixedProgramId(editingProgram.id)
     );
+    const isDayCenterProgram = editingProgram?.id === DAY_CENTER_ID;
 
     useEffect(() => {
         if (editingProgram) {
@@ -115,6 +118,10 @@ function ProgramForm({
                 allowManualUrl
                 onUpload={prepareProgramImageUrl}
             />
+
+            {isDayCenterProgram ? (
+                <DayCenterScheduleSection disabled={isUploading} />
+            ) : null}
 
             <FormActionRow
                 submitLabel={
