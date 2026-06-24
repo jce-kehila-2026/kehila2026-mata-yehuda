@@ -881,10 +881,40 @@ body:has(.staff-dashboard-root) {
 }
 
 .staff-dashboard-panel__item--with-action {
-  flex-direction: row;
-  align-items: center;
-  justify-content: space-between;
-  gap: 0.5rem;
+  flex-direction: column;
+  align-items: stretch;
+  gap: 0.55rem;
+}
+
+.staff-dashboard-panel__item-content--details {
+  gap: 0.28rem;
+}
+
+.staff-dashboard-panel__item-detail {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: baseline;
+  gap: 0.2rem 0.35rem;
+  line-height: 1.45;
+  min-width: 0;
+}
+
+.staff-dashboard-panel__item-label {
+  font-size: 0.78rem;
+  font-weight: 600;
+  color: var(--color-text-muted, #5c5c5c);
+  flex-shrink: 0;
+}
+
+.staff-dashboard-panel__item-value {
+  font-size: 0.88rem;
+  font-weight: 600;
+  color: var(--color-text);
+  line-height: 1.45;
+  word-break: break-word;
+  overflow-wrap: anywhere;
+  white-space: normal;
+  min-width: 0;
 }
 
 .staff-dashboard-panel__item-content {
@@ -897,17 +927,20 @@ body:has(.staff-dashboard-root) {
 
 .staff-dashboard-panel__item-action {
   flex-shrink: 0;
+  width: 100%;
+  align-self: stretch;
   font-family: var(--staff-font-family);
-  font-size: 0.75rem;
+  font-size: 0.8rem;
   font-weight: 600;
-  line-height: 1.2;
-  padding: 0.38rem 0.65rem;
+  line-height: 1.35;
+  padding: 0.45rem 0.75rem;
   border-radius: 999px;
   border: 1.5px solid var(--color-primary);
   background: transparent;
   color: var(--color-primary);
   cursor: pointer;
-  white-space: nowrap;
+  white-space: normal;
+  text-align: center;
   transition:
     background 0.15s ease,
     border-color 0.15s ease,
@@ -923,6 +956,24 @@ body:has(.staff-dashboard-root) {
 .staff-dashboard-panel__item-action:focus-visible {
   outline: 2px solid var(--color-border);
   outline-offset: 2px;
+}
+
+@media (min-width: 1024px) {
+  .staff-dashboard-panel__item--with-action {
+    flex-direction: row;
+    align-items: flex-start;
+    justify-content: space-between;
+    gap: 0.65rem;
+  }
+
+  .staff-dashboard-panel__item-action {
+    width: auto;
+    align-self: center;
+    white-space: nowrap;
+    font-size: 0.75rem;
+    line-height: 1.2;
+    padding: 0.38rem 0.65rem;
+  }
 }
 
 .staff-dashboard-panel--calendar .staff-dashboard-panel__body {
