@@ -3,13 +3,6 @@ import { getRequestProgramLabel } from "../../services/staffManegmentServices/da
 import { formatInquiryDate } from "../../services/staffManegmentServices/inquiryService";
 import { getStaffInquiriesRoute } from "../../config/staffInquiriesNavigation";
 import DashboardActivityCalendar from "./DashboardActivityCalendar";
-import ActivityDateDisplay from "../activities/ActivityDateDisplay";
-import {
-    buildRecentUpdates,
-    formatRelativeTimeHebrew,
-    getWeekActivities,
-    RECENT_UPDATES_PLACEHOLDERS
-} from "../../utils/staffManegmentUtils/dashboardDisplayHelpers";
 
 const PANEL_PREVIEW_LIMIT = 3;
 const PENDING_REQUESTS_PREVIEW_LIMIT = 2;
@@ -63,12 +56,6 @@ function DashboardControlPanels({
     );
     const inquiryCount = overview?.inquiryCount ?? recentInquiries.length;
     const inquiriesRoute = getStaffInquiriesRoute();
-    const recentUpdates = buildRecentUpdates(overview).slice(0, PANEL_PREVIEW_LIMIT);
-    const weekActivities = getWeekActivities(overview?.upcomingActivities ?? []).slice(
-        0,
-        PANEL_PREVIEW_LIMIT
-    );
-    const showPlaceholderUpdates = !loading && recentUpdates.length === 0;
 
     return (
         <div className="staff-dashboard-panels">
@@ -259,79 +246,6 @@ function DashboardControlPanels({
                         disabled={loading}
                     />
                 </section>
-            </div>
-
-            <div className="staff-dashboard-panels__mobile">
-                <section className="staff-dashboard-panel staff-dashboard-panel--updates staff-dashboard-panel--mobile-only">
-                    <h3 className="staff-dashboard-panel__title">עדכונים אחרונים</h3>
-                    <div className="staff-dashboard-panel__body">
-                        {loading ? (
-                            <p className="staff-dashboard-panel__loading">טוען…</p>
-                        ) : showPlaceholderUpdates ? (
-                            <ul className="staff-dashboard-updates">
-                                {RECENT_UPDATES_PLACEHOLDERS.map((item) => (
-                                    <li
-                                        key={item.id}
-                                        className="staff-dashboard-updates__item staff-dashboard-updates__item--placeholder"
-                                    >
-                                        <span className="staff-dashboard-updates__title">
-                                            {item.title}
-                                        </span>
-                                        <span className="staff-dashboard-updates__meta">
-                                            {item.timeLabel}
-                                        </span>
-                                    </li>
-                                ))}
-                            </ul>
-                        ) : (
-                            <ul className="staff-dashboard-updates">
-                                {recentUpdates.map((update) => (
-                                    <li key={update.id} className="staff-dashboard-updates__item">
-                                        <button
-                                            type="button"
-                                            className="staff-dashboard-updates__button"
-                                            onClick={() => onNavigate(update.page)}
-                                        >
-                                            <span className="staff-dashboard-updates__title">
-                                                {update.title}
-                                            </span>
-                                            <span className="staff-dashboard-updates__meta">
-                                                {formatRelativeTimeHebrew(update.timestamp)}
-                                            </span>
-                                        </button>
-                                    </li>
-                                ))}
-                            </ul>
-                        )}
-                    </div>
-                </section>
-
-                {!loading && weekActivities.length > 0 ? (
-                    <section className="staff-dashboard-panel staff-dashboard-panel--week staff-dashboard-panel--mobile-only">
-                        <h3 className="staff-dashboard-panel__title">פעילויות השבוע</h3>
-                        <div className="staff-dashboard-panel__body">
-                            <ul className="staff-dashboard-week">
-                                {weekActivities.map((activity) => (
-                                    <li key={activity.id} className="staff-dashboard-week__item">
-                                        <span className="staff-dashboard-week__name">
-                                            {activity.data?.name || "—"}
-                                        </span>
-                                        <span className="staff-dashboard-week__date">
-                                            <ActivityDateDisplay
-                                                startDate={activity.data?.start_date}
-                                            />
-                                        </span>
-                                    </li>
-                                ))}
-                            </ul>
-                        </div>
-                        <DashboardPanelLink
-                            label="צפייה בכל הפעילויות →"
-                            onClick={() => onNavigate("activities")}
-                            disabled={loading}
-                        />
-                    </section>
-                ) : null}
             </div>
         </div>
     );
