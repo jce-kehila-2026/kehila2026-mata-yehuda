@@ -16,7 +16,7 @@ html:has(.staff-page--dashboard.staff-dashboard-root) {
 }
 
 body:has(.staff-page--dashboard.staff-dashboard-root) {
-  background: #faf4ec;
+  background: #f1f8f3;
 }
 
 @media (max-width: 768px) {
@@ -59,6 +59,9 @@ body:has(.staff-page--dashboard.staff-dashboard-root) {
 
 .staff-page--dashboard.staff-dashboard-root {
   --staff-dashboard-header-height: 82px;
+  --staff-dashboard-btn-surface: #eef7f0;
+  --staff-dashboard-btn-surface-hover: #d8f0df;
+  --staff-dashboard-btn-border: rgba(45, 125, 70, 0.2);
   width: 100%;
   max-width: none;
   margin: 0;
@@ -68,7 +71,7 @@ body:has(.staff-page--dashboard.staff-dashboard-root) {
   overflow-y: auto;
   display: flex;
   flex-direction: column;
-  background: #faf4ec;
+  background: #f1f8f3;
   color: var(--color-text);
   box-sizing: border-box;
 }
@@ -84,8 +87,11 @@ body:has(.staff-page--dashboard.staff-dashboard-root) {
   overflow-y: auto;
   display: flex;
   flex-direction: column;
-  background: #faf4ec;
+  background: #f1f8f3;
   color: var(--color-text);
+  --staff-dashboard-btn-surface: #eef7f0;
+  --staff-dashboard-btn-surface-hover: #d8f0df;
+  --staff-dashboard-btn-border: rgba(45, 125, 70, 0.2);
 }
 
 .staff-page--dashboard .staff-subpage {
@@ -101,7 +107,7 @@ body:has(.staff-page--dashboard.staff-dashboard-root) {
   padding: 0;
   padding-top: 0;
   overflow-x: hidden;
-  background: #faf4ec;
+  background: #f1f8f3;
 }
 
 .staff-dashboard-page--home {
@@ -972,7 +978,7 @@ body:has(.staff-page--dashboard.staff-dashboard-root) {
 
 .staff-dashboard-activity-modal__close:hover,
 .staff-dashboard-activity-modal__close:focus-visible {
-  background: var(--color-accent-light);
+  background: var(--staff-dashboard-btn-surface, #eef7f0);
 }
 
 .staff-dashboard-activity-modal__body {
@@ -1103,7 +1109,7 @@ body:has(.staff-page--dashboard.staff-dashboard-root) {
   font-weight: 600;
   text-align: center;
   color: #2d7d46;
-  background: #faf4ec;
+  background: var(--staff-dashboard-btn-surface, #eef7f0);
   border: none;
   border-radius: 10px;
   padding: 0.48rem 0.65rem;
@@ -1113,7 +1119,7 @@ body:has(.staff-page--dashboard.staff-dashboard-root) {
 
 .staff-dashboard-panel__link:hover:not(:disabled),
 .staff-dashboard-panel__link:active:not(:disabled) {
-  background: #f3ebe0;
+  background: var(--staff-dashboard-btn-surface-hover, #d8f0df);
   color: #236b38;
 }
 
@@ -1125,6 +1131,13 @@ body:has(.staff-page--dashboard.staff-dashboard-root) {
 .staff-dashboard-panel__link:focus-visible {
   outline: 3px solid var(--color-border);
   outline-offset: 2px;
+}
+
+.staff-dashboard-root .staff-back-button:hover,
+.staff-dashboard-root .staff-back-button:active {
+  background: var(--staff-dashboard-btn-surface, #eef7f0);
+  border-color: var(--color-primary-hover);
+  color: var(--color-primary-hover);
 }
 
 .staff-dashboard-updates {
@@ -1148,9 +1161,9 @@ body:has(.staff-page--dashboard.staff-dashboard-root) {
   align-items: flex-start;
   gap: 0.15rem;
   padding: 0.55rem 0.65rem;
-  border: 1px solid var(--color-border);
+  border: 1px solid var(--staff-dashboard-btn-border, rgba(45, 125, 70, 0.2));
   border-radius: calc(var(--radius) * 0.65);
-  background: var(--color-accent-light);
+  background: var(--staff-dashboard-btn-surface, #eef7f0);
   font-family: var(--staff-font-family);
   text-align: right;
   cursor: pointer;
@@ -1242,8 +1255,8 @@ body:has(.staff-page--dashboard.staff-dashboard-root) {
   font-weight: 600;
   text-align: right;
   color: var(--color-text);
-  background: var(--color-accent-light);
-  border: 1.5px solid var(--color-border);
+  background: var(--staff-dashboard-btn-surface, #eef7f0);
+  border: 1.5px solid var(--staff-dashboard-btn-border, rgba(45, 125, 70, 0.2));
   border-radius: var(--radius);
   padding: 1rem 1.15rem;
   cursor: pointer;
