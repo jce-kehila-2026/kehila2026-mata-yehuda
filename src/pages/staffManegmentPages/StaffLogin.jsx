@@ -10,11 +10,33 @@ import {
 } from "lucide-react";
 import {
     onAuthStateChanged,
+    sendPasswordResetEmail,
     signInWithEmailAndPassword,
     signOut
 } from "firebase/auth";
 import { auth } from "../../config/firebase";
 import { verifyActiveStaffUser } from "../../utils/staffManegmentUtils/staffAuth";
+
+const PASSWORD_RESET_LOG_PREFIX = "[staff-login] sendPasswordResetEmail";
+
+function getPasswordResetErrorMessage(error) {
+    const code = error?.code ?? "";
+
+    switch (code) {
+        case "auth/invalid-email":
+            return "כתובת האימייל אינה תקינה";
+        case "auth/missing-email":
+            return "יש להזין כתובת אימייל תחילה";
+        case "auth/too-many-requests":
+            return "בוצעו יותר מדי ניסיונות. נסו שוב מאוחר יותר";
+        case "auth/network-request-failed":
+            return "שגיאת רשת. בדקו את החיבור לאינטרנט ונסו שוב";
+        case "auth/user-not-found":
+            return "לא נמצא משתמש עם כתובת אימייל זו במערכת";
+        default:
+            return "לא ניתן לשלוח קישור לאיפוס סיסמה. אנא בדקו את כתובת האימייל";
+    }
+}
 
 function StaffLogin() {
     const navigate = useNavigate();
@@ -22,7 +44,9 @@ function StaffLogin() {
     const [password, setPassword] = useState("");
     const [showPassword, setShowPassword] = useState(false);
     const [error, setError] = useState("");
+    const [resetSuccess, setResetSuccess] = useState("");
     const [loading, setLoading] = useState(false);
+    const [resetLoading, setResetLoading] = useState(false);
     const [authReady, setAuthReady] = useState(false);
 
     useEffect(() => {
@@ -40,9 +64,50 @@ function StaffLogin() {
         };
     }, []);
 
+    async function handleForgotPassword() {
+        setError("");
+        setResetSuccess("");
+
+        const trimmedEmail = email.trim();
+        if (!trimmedEmail) {
+            setError("יש להזין כתובת אימייל תחילה");
+            return;
+        }
+
+        setResetLoading(true);
+
+        console.log(`${PASSWORD_RESET_LOG_PREFIX}: start`, {
+            email: trimmedEmail,
+            projectId: auth.app?.options?.projectId,
+            authDomain: auth.app?.options?.authDomain,
+        });
+
+        try {
+            await sendPasswordResetEmail(auth, trimmedEmail);
+
+            console.log(`${PASSWORD_RESET_LOG_PREFIX}: success`, {
+                email: trimmedEmail,
+            });
+
+            setResetSuccess(
+                `נשלח קישור לאיפוס סיסמה לכתובת ${trimmedEmail}. אם לא התקבל תוך מספר דקות, בדקו בתיקיית דואר זבל וודאו שהאימייל רשום במערכת.`
+            );
+        } catch (resetError) {
+            console.error(`${PASSWORD_RESET_LOG_PREFIX}: failed`, {
+                email: trimmedEmail,
+                code: resetError?.code,
+                message: resetError?.message,
+            });
+            setError(getPasswordResetErrorMessage(resetError));
+        } finally {
+            setResetLoading(false);
+        }
+    }
+
     async function handleLogin(e) {
         e.preventDefault();
         setError("");
+        setResetSuccess("");
         setLoading(true);
 
         try {
@@ -92,6 +157,11 @@ function StaffLogin() {
     }
 
     const hasError = Boolean(error);
+    const formMessageId = error
+        ? "staff-login-error"
+        : resetSuccess
+          ? "staff-login-reset-success"
+          : undefined;
 
     return (
         <div className="staff-login-page">
@@ -139,12 +209,10 @@ function StaffLogin() {
                                 value={email}
                                 onChange={(event) => setEmail(event.target.value)}
                                 autoComplete="email"
-                                disabled={loading}
+                                disabled={loading || resetLoading}
                                 aria-label="אימייל"
                                 aria-invalid={hasError}
-                                aria-describedby={
-                                    hasError ? "staff-login-error" : undefined
-                                }
+                                aria-describedby={formMessageId}
                             />
                         </div>
 
@@ -169,12 +237,10 @@ function StaffLogin() {
                                     setPassword(event.target.value)
                                 }
                                 autoComplete="current-password"
-                                disabled={loading}
+                                disabled={loading || resetLoading}
                                 aria-label="סיסמה"
                                 aria-invalid={hasError}
-                                aria-describedby={
-                                    hasError ? "staff-login-error" : undefined
-                                }
+                                aria-describedby={formMessageId}
                             />
                             <button
                                 type="button"
@@ -185,7 +251,7 @@ function StaffLogin() {
                                 aria-label={
                                     showPassword ? "הסתר סיסמה" : "הצג סיסמה"
                                 }
-                                disabled={loading}
+                                disabled={loading || resetLoading}
                             >
                                 {showPassword ? (
                                     <EyeOff strokeWidth={2} aria-hidden="true" />
@@ -194,6 +260,16 @@ function StaffLogin() {
                                 )}
                             </button>
                         </div>
+
+                        <button
+                            type="button"
+                            className="staff-login-forgot-password"
+                            onClick={handleForgotPassword}
+                            disabled={loading || resetLoading}
+                            aria-busy={resetLoading}
+                        >
+                            {resetLoading ? "שולח..." : "שכחת סיסמה?"}
+                        </button>
 
                         {error ? (
                             <div
@@ -206,10 +282,21 @@ function StaffLogin() {
                             </div>
                         ) : null}
 
+                        {resetSuccess ? (
+                            <div
+                                id="staff-login-reset-success"
+                                className="staff-alert staff-alert--success staff-login-form__alert"
+                                role="status"
+                                aria-live="polite"
+                            >
+                                {resetSuccess}
+                            </div>
+                        ) : null}
+
                         <button
                             type="submit"
                             className="staff-button staff-login-submit"
-                            disabled={loading}
+                            disabled={loading || resetLoading}
                             aria-busy={loading}
                             aria-label={loading ? "מתחבר" : "התחברות"}
                         >
