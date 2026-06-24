@@ -11,6 +11,7 @@ import "./styles/staffManegmentStyles/dashboard.css";
 import "./styles/staffManegmentStyles/staffLogin.css";
 import "./styles/staffManegmentStyles/formImageUpload.css";
 import "./styles/staffManegmentStyles/activities.css";
+import "./styles/staffManegmentStyles/activitiesManagement.css";
 import "./styles/staffManegmentStyles/participants.css";
 import "./styles/staffManegmentStyles/staffManagement.css";
 import "./styles/staffManegmentStyles/programs.css";
