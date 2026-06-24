@@ -56,6 +56,7 @@ function DonationTable({
     loading = false,
     error = "",
     actionMessage = "",
+    hasPageFilters = false,
     onAddDonation,
     onEditDonation,
     onDeleteDonation
@@ -96,13 +97,17 @@ function DonationTable({
                 <AdminListEmptyState
                     icon={HandCoins}
                     title="לא נמצאו תוצאות"
-                    message="נסו לשנות את החיפוש כדי למצוא תרומות אחרות."
+                    message={
+                        hasPageFilters
+                            ? "נסו לשנות את הסינון כדי למצוא תרומות אחרות."
+                            : "נסו לשנות את החיפוש כדי למצוא תרומות אחרות."
+                    }
                 />
             );
         }
 
         return null;
-    }, [loading, donations.length, list.totalFiltered, onAddDonation]);
+    }, [loading, donations.length, hasPageFilters, list.totalFiltered, onAddDonation]);
 
     function renderDonationActions(donation) {
         return (

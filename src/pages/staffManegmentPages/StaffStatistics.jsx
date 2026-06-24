@@ -45,7 +45,7 @@ function StatisticsTooltip({ active, payload, label }) {
     );
 }
 
-function StaffStatistics({ onBack }) {
+function StaffStatistics() {
     const [loading, setLoading] = useState(true);
     const [error, setError] = useState("");
     const [stats, setStats] = useState(null);
@@ -105,15 +105,6 @@ function StaffStatistics({ onBack }) {
                         סקירה כללית של פעילות העמותה והרשמות המשתתפים
                     </p>
                 </div>
-                {onBack ? (
-                    <button
-                        type="button"
-                        className="staff-statistics-back"
-                        onClick={onBack}
-                    >
-                        ← חזרה ללוח הבקרה
-                    </button>
-                ) : null}
             </header>
 
             {loading ? (
