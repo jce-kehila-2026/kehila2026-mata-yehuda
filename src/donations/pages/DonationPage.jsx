@@ -24,19 +24,7 @@ function DonationPage() {
     [searchParams]
   );
 
-  return (
-    <>
-      <header className="community-hero">
-        <span className="hero-icon" aria-hidden="true">
-          ♥
-        </span>
-        <h1>תרומות לעמותה</h1>
-        <p>כל תרומה — קטנה כגדולה — מחזקת את הקהילה שלנו</p>
-      </header>
-
-      <DonationForm initialAmount={initialAmount} showBackToHome />
-    </>
-  );
+  return <DonationForm initialAmount={initialAmount} showBackToHome />;
 }
 
 export default DonationPage;

@@ -8,7 +8,8 @@
   box-sizing: border-box;
 }
 
-.home-section-anchor {
+.home-section-anchor,
+#contact {
   scroll-margin-top: clamp(5rem, 14vw, 6.5rem);
 }
 
