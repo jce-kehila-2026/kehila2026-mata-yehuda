@@ -1575,45 +1575,6 @@
   margin: 0;
   padding-inline: var(--app-padding-x, clamp(0.85rem, 3vw, 2rem));
   box-sizing: border-box;
-  position: relative;
-  z-index: 1;
-  border: 1.5px solid #e5c29f;
-  box-shadow: none;
-}
-
-.home-action-cards .home-donations-section .donation-amount-grid {
-  grid-template-columns: repeat(5, minmax(0, 1fr));
-  gap: 0.65rem;
-}
-
-.home-action-cards .home-donations-section .donation-amount-btn--other {
-  grid-column: auto;
-}
-
-.home-action-cards .home-donations-section .donation-box__submit {
-  max-width: 560px;
-  width: 100%;
-}
-
-.home-action-cards .home-donations-section .donation-box h2 {
-  font-size: 1.4rem;
-}
-
-.home-action-cards .home-donations-section .donation-box__intro {
-  max-width: none;
-  font-size: 1rem;
-}
-
-@media (max-width: 900px) {
-  .home-action-cards .contact-request-grid,
-  .home-action-cards .home-donations-section {
-    max-width: 78%;
-  }
-
-  .home-donations-landscape {
-    padding-bottom: clamp(140px, 22vw, 180px);
-    background-position: center calc(100% + 40px);
-  }
 }
 
 @media (max-width: 700px) {
