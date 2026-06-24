@@ -133,20 +133,47 @@ function Home() {
     <div className="home-page">
       <HomeNavbar />
 
-      <section className="hero-section">
-        <div className="hero-overlay">
-          <h1>הבית החם של ותיקי מטה יהודה</h1>
-          <p>
-            אנחנו כאן כדי להעניק לכם קהילה תומכת,
-            פעילויות עשירות וביטחון אישי.
-          </p>
+      <div className="home-hero-block">
+        <section className="hero-section">
+          <div className="hero-overlay">
+            <h1>הבית החם של ותיקי מטה יהודה</h1>
+            <p>
+              אנחנו כאן כדי להעניק לכם קהילה תומכת,
+              פעילויות עשירות וביטחון אישי.
+            </p>
+          </div>
+        </section>
+
+        <div className="home-hero-block__transition" aria-hidden="true">
+          <svg viewBox="0 0 1440 56" preserveAspectRatio="none" xmlns="http://www.w3.org/2000/svg">
+            <path d="M0,56 L0,40 C180,18 360,46 540,30 C720,14 900,42 1080,26 C1260,10 1320,34 1440,20 L1440,56 Z" />
+          </svg>
+          <img
+            src="/images/minitree.png"
+            alt=""
+            className="home-hero-block__minitree"
+          />
         </div>
-      </section>
+      </div>
 
       <header id="services" className="home-services-header">
         <div className="home-services-header__divider">
           <span className="home-services-header__line" aria-hidden="true" />
-          <h2 className="home-services-header__title">השירותים שלנו</h2>
+          <div className="home-services-header__core">
+            <img
+              src="/images/minitree.png"
+              alt=""
+              className="home-services-header__leaf"
+              aria-hidden="true"
+            />
+            <h2 className="home-services-header__title">השירותים שלנו</h2>
+            <img
+              src="/images/minitree.png"
+              alt=""
+              className="home-services-header__leaf home-services-header__leaf--flip"
+              aria-hidden="true"
+            />
+          </div>
           <span className="home-services-header__line" aria-hidden="true" />
         </div>
       </header>
@@ -191,11 +218,11 @@ function Home() {
       )}
 
       <div className="home-action-cards">
-        <RequestBox />
-        <div className="home-donations-landscape">
-          <div id="donations" className="home-donations-section">
-            <DonationBox />
-          </div>
+        <div id="requests" className="home-requests-wrap home-section-anchor">
+          <RequestBox />
+        </div>
+        <div id="donations" className="home-donations-wrap home-section-anchor">
+          <DonationBox />
         </div>
       </div>
 

@@ -2,6 +2,7 @@ import { useLocation, useNavigate } from "react-router-dom";
 
 const NAV_ITEMS = [
   { id: "about", label: "מי אנחנו", type: "page", path: "/about" },
+  { id: "requests", label: "פניות ובקשות", type: "section" },
   { id: "donations", label: "תרומות", type: "section" },
   { id: "contact", label: "יצירת קשר", type: "section" },
 ];
