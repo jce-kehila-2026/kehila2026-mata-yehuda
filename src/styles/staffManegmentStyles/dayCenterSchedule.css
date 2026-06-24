@@ -1,0 +1,74 @@
+.staff-page--day-center-schedule .staff-container--day-center-schedule {
+  padding-top: 0.5rem;
+}
+
+.day-center-schedule__header {
+  margin-bottom: 1.25rem;
+}
+
+.day-center-schedule__form {
+  margin-top: 0;
+}
+
+.day-center-schedule__dropzone {
+  max-width: 720px;
+}
+
+.day-center-schedule__preview-block {
+  max-width: 720px;
+}
+
+.day-center-schedule__preview-block--drag-over {
+  outline: 3px solid rgba(45, 125, 70, 0.28);
+  outline-offset: 4px;
+  border-radius: calc(var(--radius) * 0.75);
+}
+
+.day-center-schedule__preview {
+  object-fit: contain;
+  max-height: 520px;
+}
+
+.day-center-schedule__preview-hint {
+  margin: 0.75rem 0 0;
+  font-size: 0.88rem;
+  color: var(--color-muted);
+  text-align: center;
+}
+
+.day-center-schedule__actions {
+  display: flex;
+  flex-direction: column;
+  align-items: stretch;
+  gap: 0.75rem;
+  margin-top: 1rem;
+}
+
+.staff-page--day-center-schedule .staff-form__submit,
+.staff-page--day-center-schedule .day-center-schedule__delete-btn {
+  width: 100%;
+  max-width: 16rem;
+  min-width: 0;
+  margin-inline: auto;
+}
+
+.staff-page--day-center-schedule .day-center-schedule__delete-btn {
+  color: #b42318;
+  background: #ffffff;
+  border: 1.5px solid #b42318;
+  box-shadow: none;
+}
+
+.staff-page--day-center-schedule .day-center-schedule__delete-btn:hover:not(:disabled),
+.staff-page--day-center-schedule .day-center-schedule__delete-btn:active:not(:disabled) {
+  color: #8f1d14;
+  background: rgba(180, 35, 24, 0.06);
+  border-color: #8f1d14;
+  transform: none;
+  box-shadow: none;
+}
+
+.staff-page--day-center-schedule .day-center-schedule__delete-btn:disabled {
+  opacity: 0.45;
+  cursor: not-allowed;
+}

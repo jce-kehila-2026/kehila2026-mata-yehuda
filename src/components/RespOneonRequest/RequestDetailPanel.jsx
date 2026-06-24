@@ -1,6 +1,8 @@
 import {
+  buildStaffWhatsAppMessage,
   buildTelUrl,
   formatDisplayDate,
+  formatPhoneForDisplay,
   isWhatsAppCapablePhone,
 } from "../../utils/RespOneonRequest/formatters";
 
@@ -10,6 +12,7 @@ function RequestDetailPanel({
   answer,
   onAnswerChange,
   onSend,
+  onMarkAnsweredByPhone,
   onReportNoWhatsApp,
   isSending,
   showNoWhatsAppNotice,
@@ -19,6 +22,15 @@ function RequestDetailPanel({
   const telUrl = buildTelUrl(request.phone);
   const useCallInstead =
     mode === "waiting" && (!canUseWhatsApp || showNoWhatsAppNotice);
+  const whatsappPreview =
+    mode === "waiting" && !useCallInstead && answer.trim()
+      ? buildStaffWhatsAppMessage({
+          answer,
+          content: request.content,
+          date: request.date,
+        })
+      : null;
+  const answeredByPhone = request.answerChannel === "phone";
 
   return (
     <article className="inbox-detail">
@@ -37,7 +49,9 @@ function RequestDetailPanel({
           <h2 className="inbox-detail__title">{request.phone}</h2>
           <p className="inbox-detail__meta">
             {mode === "answered"
-              ? `נענתה: ${formatDisplayDate(request.answeredAt)}`
+              ? answeredByPhone
+                ? `נענתה בשיחה: ${formatDisplayDate(request.answeredAt)}`
+                : `נענתה: ${formatDisplayDate(request.answeredAt)}`
               : `פנייה: ${formatDisplayDate(request.date)}`}
           </p>
         </div>
@@ -56,55 +70,101 @@ function RequestDetailPanel({
 
         {mode === "answered" && (
           <section className="inbox-detail__message inbox-detail__message--answer">
-            <h3 className="inbox-detail__label">התשובה ששלחנו</h3>
+            <h3 className="inbox-detail__label">
+              {answeredByPhone ? "מענה בשיחת טלפון" : "התשובה ששלחנו"}
+            </h3>
             <p className="inbox-detail__text">{request.answer}</p>
           </section>
         )}
 
         {mode === "waiting" && (
           <section className="inbox-detail__reply">
+            {useCallInstead && (
+              <div className="inbox-detail__call-notice" role="status">
+                <p className="inbox-detail__call-notice-title">
+                  {canUseWhatsApp
+                    ? "למספר זה אין וואטסאפ — יש להשיב בשיחת טלפון"
+                    : "למספר זה יש להשיב בשיחת טלפון"}
+                </p>
+                {telUrl && (
+                  <a className="inbox-btn inbox-btn--call" href={telUrl}>
+                    התקשר/י ל-{formatPhoneForDisplay(request.phone)}
+                  </a>
+                )}
+              </div>
+            )}
+
             <label
               className="inbox-detail__label"
               htmlFor={`answer-${request.id}`}
             >
-              תשובה ללקוח
+              {useCallInstead ? "הערות על השיחה (אופציונלי)" : "תשובה ללקוח"}
             </label>
             <textarea
               id={`answer-${request.id}`}
               className="inbox-detail__textarea"
               value={answer}
-              placeholder="כתבי תשובה..."
+              placeholder={
+                useCallInstead
+                  ? "למשל: דיברנו והסברנו על השירות..."
+                  : "כתבי תשובה..."
+              }
               onChange={(e) => onAnswerChange(e.target.value)}
               rows={5}
-              disabled={isSending || useCallInstead}
+              disabled={isSending}
             />
 
-            <div className="inbox-detail__actions">
-              <button
-                type="button"
-                className="inbox-btn inbox-btn--primary"
-                onClick={onSend}
-                disabled={!answer.trim() || isSending || useCallInstead}
-              >
-                {isSending ? "שולח..." : "שלח תשובה"}
-              </button>
+            {whatsappPreview && (
+              <div className="inbox-detail__whatsapp-preview">
+                <h4 className="inbox-detail__label">
+                  כך תיראה ההודעה בוואטסאפ
+                </h4>
+                <pre className="inbox-detail__whatsapp-preview-text">
+                  {whatsappPreview}
+                </pre>
+              </div>
+            )}
 
-              {telUrl ? (
-                <a
-                  className="inbox-detail__call-link"
-                  href={telUrl}
-                  onClick={() => {
-                    if (canUseWhatsApp) {
-                      onReportNoWhatsApp?.();
-                    }
-                  }}
+            <div className="inbox-detail__actions">
+              {useCallInstead ? (
+                <button
+                  type="button"
+                  className="inbox-btn inbox-btn--primary"
+                  onClick={onMarkAnsweredByPhone}
+                  disabled={isSending}
                 >
-                  אין וואטסאפ למספר הזה? התקשר/י
-                </a>
+                  {isSending ? "שומר..." : "סמן כנענה בשיחת טלפון"}
+                </button>
               ) : (
-                <span className="inbox-detail__call-link inbox-detail__call-link--static">
-                  אין וואטסאפ למספר הזה? התקשר/י
-                </span>
+                <>
+                  <button
+                    type="button"
+                    className="inbox-btn inbox-btn--primary"
+                    onClick={onSend}
+                    disabled={!answer.trim() || isSending}
+                  >
+                    {isSending ? "שולח..." : "שלח תשובה"}
+                  </button>
+
+                  {telUrl ? (
+                    <a
+                      className="inbox-detail__call-link"
+                      href={telUrl}
+                      onClick={() => onReportNoWhatsApp?.()}
+                    >
+                      אין וואטסאפ למספר הזה? התקשר/י
+                    </a>
+                  ) : null}
+
+                  <button
+                    type="button"
+                    className="inbox-btn inbox-btn--ghost"
+                    onClick={onMarkAnsweredByPhone}
+                    disabled={isSending}
+                  >
+                    {isSending ? "שומר..." : "נענה בשיחת טלפון"}
+                  </button>
+                </>
               )}
             </div>
           </section>

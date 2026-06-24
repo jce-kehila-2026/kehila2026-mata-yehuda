@@ -334,6 +334,24 @@
   color: var(--inbox-muted);
 }
 
+.inbox-detail__whatsapp-preview {
+  margin-bottom: 0.75rem;
+  padding: 0.75rem;
+  border: 1px dashed var(--inbox-border-strong);
+  border-radius: 8px;
+  background: #f8fafc;
+}
+
+.inbox-detail__whatsapp-preview-text {
+  margin: 0.35rem 0 0;
+  padding: 0;
+  font-family: inherit;
+  font-size: 0.8125rem;
+  line-height: 1.55;
+  white-space: pre-wrap;
+  color: var(--inbox-text);
+}
+
 .inbox-detail__actions {
   display: flex;
   flex-wrap: wrap;
@@ -354,6 +372,36 @@
 
 .inbox-detail__call-link--static {
   color: var(--inbox-muted);
+}
+
+.inbox-detail__call-notice {
+  margin-bottom: 0.85rem;
+  padding: 0.85rem;
+  border: 1px solid #f9d48a;
+  border-radius: 8px;
+  background: #fff8e6;
+}
+
+.inbox-detail__call-notice-title {
+  margin: 0 0 0.65rem;
+  font-size: 0.875rem;
+  line-height: 1.5;
+  color: #7a4b00;
+}
+
+.inbox-btn--call {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  text-decoration: none;
+  color: #fff;
+  background: var(--inbox-accent);
+  border-color: var(--inbox-accent);
+}
+
+.inbox-btn--call:hover {
+  background: #1557b0;
+  border-color: #1557b0;
 }
 
 .inbox-btn {

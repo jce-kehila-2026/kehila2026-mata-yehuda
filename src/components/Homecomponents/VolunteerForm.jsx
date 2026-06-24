@@ -1,7 +1,7 @@
 import { useState } from "react";
-import { registerToDayCenter } from "../../services/HomeServices/dayCenterService";
+import { registerVolunteer } from "../../services/HomeServices/dayCenterVolunteerService";
 
-function DayCenterRegisterForm({ onClose }) {
+function VolunteerForm({ onClose }) {
   const [firstName, setFirstName] = useState("");
   const [lastName, setLastName] = useState("");
   const [idNumber, setIdNumber] = useState("");
@@ -37,14 +37,14 @@ function DayCenterRegisterForm({ onClose }) {
       return;
     }
 
-    await registerToDayCenter({
+    await registerVolunteer({
       firstName,
       lastName,
       idNumber,
       phone,
     });
 
-    setMessage("תודה שנרשמת. הצוות יחזור אליך בימים הקרובים");
+    setMessage("תודה על פנייתך להתנדבות. הצוות יחזור אליך בימים הקרובים");
     setMessageType("success");
 
     setTimeout(() => {
@@ -57,7 +57,7 @@ function DayCenterRegisterForm({ onClose }) {
       <div className="form-box">
         <button onClick={onClose}>×</button>
 
-        <h2>הרשמה למרכז יום</h2>
+        <h2>התנדבות במרכז יום</h2>
 
         {message && (
           <div className={`form-message ${messageType}`}>
@@ -93,10 +93,12 @@ function DayCenterRegisterForm({ onClose }) {
           onChange={(e) => setPhone(e.target.value)}
         />
 
-        <button onClick={handleSubmit}>שליחה</button>
+        <button type="button" onClick={handleSubmit}>
+          שליחה
+        </button>
       </div>
     </div>
   );
 }
 
-export default DayCenterRegisterForm;
+export default VolunteerForm;

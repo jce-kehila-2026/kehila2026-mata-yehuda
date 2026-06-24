@@ -5,12 +5,14 @@ import RequestListRow from "../../components/RespOneonRequest/RequestListRow";
 import {
   getAllRequests,
   markRequestAsAnswered,
+  markRequestAsAnsweredByPhone,
 } from "../../services/RespOneonRequest/requestsService";
 import "../../styles/RespOneonRequest/requests.css";
 import {
-  buildWhatsAppUrl,
+  buildStaffWhatsAppMessage,
   formatDisplayDate,
   isWhatsAppCapablePhone,
+  openWhatsAppChat,
   sortAnsweredRequests,
   sortWaitingRequests,
 } from "../../utils/RespOneonRequest/formatters";
@@ -123,6 +125,39 @@ function RequestsPage() {
     setNoWhatsAppRequestId(null);
   };
 
+  const finishAnsweringRequest = async (requestId) => {
+    setAnswers((prev) => {
+      const next = { ...prev };
+      delete next[requestId];
+      return next;
+    });
+
+    await loadRequests();
+
+    setActiveTab(TAB.answered);
+    setSelectedId(requestId);
+    setMobileDetailOpen(true);
+    window.focus();
+  };
+
+  const handleMarkAnsweredByPhone = async (request) => {
+    const note = (answers[request.id] ?? "").trim();
+
+    setSendingId(request.id);
+    setError(null);
+    setNoWhatsAppRequestId(null);
+
+    try {
+      await markRequestAsAnsweredByPhone(request.id, note);
+      await finishAnsweringRequest(request.id);
+    } catch (err) {
+      console.error("Failed to mark request as answered by phone:", err);
+      setError("סימון הפנייה כנענתה נכשל. נסי שוב.");
+    } finally {
+      setSendingId(null);
+    }
+  };
+
   const handleSend = async (request) => {
     const answer = (answers[request.id] ?? "").trim();
     if (!answer) return;
@@ -133,42 +168,30 @@ function RequestsPage() {
       return;
     }
 
-    const whatsappUrl = buildWhatsAppUrl(request.phone, answer);
-    if (!whatsappUrl) {
-      setNoWhatsAppRequestId(request.id);
-      setError(null);
-      return;
-    }
+    const whatsappMessage = buildStaffWhatsAppMessage({
+      answer,
+      content: request.content,
+      date: request.date,
+    });
 
     setSendingId(request.id);
     setError(null);
     setNoWhatsAppRequestId(null);
 
-    const whatsappWindow = window.open(
-      whatsappUrl,
-      "_blank",
-      "noopener,noreferrer",
+    const whatsappResult = await openWhatsAppChat(
+      request.phone,
+      whatsappMessage,
     );
 
-    if (whatsappWindow) {
-      whatsappWindow.opener = null;
+    if (!whatsappResult.ok) {
+      setNoWhatsAppRequestId(request.id);
+      setSendingId(null);
+      return;
     }
 
     try {
-      await markRequestAsAnswered(request.id, answer);
-
-      setAnswers((prev) => {
-        const next = { ...prev };
-        delete next[request.id];
-        return next;
-      });
-
-      await loadRequests();
-
-      setActiveTab(TAB.answered);
-      setSelectedId(request.id);
-      setMobileDetailOpen(true);
-      window.focus();
+      await markRequestAsAnswered(request.id, answer, { channel: "whatsapp" });
+      await finishAnsweringRequest(request.id);
     } catch (err) {
       console.error("Failed to mark request as answered:", err);
       setError("שליחת התשובה נכשלה. נסי שוב.");
@@ -283,6 +306,9 @@ function RequestsPage() {
                   handleAnswerChange(selectedRequest.id, value)
                 }
                 onSend={() => handleSend(selectedRequest)}
+                onMarkAnsweredByPhone={() =>
+                  handleMarkAnsweredByPhone(selectedRequest)
+                }
                 isSending={sendingId === selectedRequest.id}
                 showNoWhatsAppNotice={
                   noWhatsAppRequestId === selectedRequest.id

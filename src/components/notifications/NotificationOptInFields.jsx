@@ -3,7 +3,7 @@ import { useFcmTokenRegistrationContext } from "./FcmTokenRegistrationProvider";
 import "../../styles/notificationOptInFields.css";
 
 const PERMISSION_DENIED_MESSAGE =
-    "התראות חסומות בדפדפן. יש לאפשר התראות בהגדרות הדפדפן עבור אתר זה ולנסות שוב.";
+    "הודעות חסומות בדפדפן. יש לאפשר הודעות בהגדרות הדפדפן עבור אתר זה ולנסות שוב.";
 
 function getNotificationPermission() {
     if (typeof Notification === "undefined") {
@@ -65,7 +65,7 @@ function NotificationOptInFields({ className = "" }) {
             console.error(
                 "Notification opt-in: requestNotificationPermission is not available from context"
             );
-            setLocalError("שגיאה בהפעלת התראות. נסו לרענן את הדף.");
+            setLocalError("שגיאה בהפעלת הודעות. נסו לרענן את הדף.");
             return;
         }
 
@@ -82,7 +82,7 @@ function NotificationOptInFields({ className = "" }) {
             }
 
             if (permission !== "granted") {
-                setLocalError("הדפדפן אינו תומך בהתראות");
+                setLocalError("הדפדפן אינו תומך בהודעות");
                 return;
             }
 
@@ -105,7 +105,7 @@ function NotificationOptInFields({ className = "" }) {
                 setLocalError(PERMISSION_DENIED_MESSAGE);
             } else {
                 setLocalError(
-                    activateError?.message || "שגיאה בהפעלת התראות. נסו שוב."
+                    activateError?.message || "שגיאה בהפעלת הודעות. נסו שוב."
                 );
             }
         } finally {

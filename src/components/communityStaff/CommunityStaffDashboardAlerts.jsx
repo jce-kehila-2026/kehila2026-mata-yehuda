@@ -21,7 +21,7 @@ function CommunityStaffDashboardAlerts({
       </div>
 
       {loading && (
-        <p className="community-staff-dashboard__alerts-loading">טוען התראות...</p>
+        <p className="community-staff-dashboard__alerts-loading">טוען הודעות...</p>
       )}
 
       {error && (
