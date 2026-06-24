@@ -1,5 +1,5 @@
 import { useCallback, useEffect, useMemo, useState } from "react";
-import { ClipboardList, Plus } from "lucide-react";
+import { Archive, ClipboardList, Plus } from "lucide-react";
 import ProgramCard from "./ProgramCard";
 import AdminDataTable from "../admin/AdminDataTable";
 import AdminListEmptyState from "../admin/AdminListEmptyState";
@@ -51,7 +51,8 @@ function ProgramList({
     refreshKey = 0,
     onEdit,
     onDelete,
-    onAddProgram
+    onAddProgram,
+    onViewArchive
 }) {
     const [sourceItems, setSourceItems] = useState([]);
     const [totalCount, setTotalCount] = useState(0);
@@ -154,20 +155,36 @@ function ProgramList({
         <div className="staff-list-section admin-list-section admin-list-section--programs">
             <div className="admin-list-header admin-list-header--split">
                 <h2 className="admin-list-header__title">רשימת תוכניות</h2>
-                {onAddProgram ? (
-                    <button
-                        type="button"
-                        className="staff-button staff-button--small admin-list-header__action admin-list-header__action--compact"
-                        onClick={onAddProgram}
-                    >
-                        <Plus
-                            className="admin-list-header__action-icon"
-                            strokeWidth={2.25}
-                            aria-hidden="true"
-                        />
-                        <span>הוספת תוכנית</span>
-                    </button>
-                ) : null}
+                <div className="admin-list-header__actions">
+                    {onViewArchive ? (
+                        <button
+                            type="button"
+                            className="staff-button staff-button--secondary staff-button--small admin-list-header__action admin-list-header__action--compact"
+                            onClick={onViewArchive}
+                        >
+                            <Archive
+                                className="admin-list-header__action-icon"
+                                strokeWidth={2.25}
+                                aria-hidden="true"
+                            />
+                            <span>צפייה בארכיון</span>
+                        </button>
+                    ) : null}
+                    {onAddProgram ? (
+                        <button
+                            type="button"
+                            className="staff-button staff-button--small admin-list-header__action admin-list-header__action--compact"
+                            onClick={onAddProgram}
+                        >
+                            <Plus
+                                className="admin-list-header__action-icon"
+                                strokeWidth={2.25}
+                                aria-hidden="true"
+                            />
+                            <span>הוספת תוכנית</span>
+                        </button>
+                    ) : null}
+                </div>
             </div>
 
             <AdminListToolbar

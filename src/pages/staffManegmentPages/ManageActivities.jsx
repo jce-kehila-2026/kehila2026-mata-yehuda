@@ -5,15 +5,20 @@ import {
     updateActivity,
     deleteActivity
 } from "../../services/staffManegmentServices/activityService";
+import { ARCHIVE_CONFIRM_MESSAGE } from "../../utils/staffManegmentUtils/archiveUtils";
+import StaffConfirmModal from "../../components/staff/StaffConfirmModal";
 
 import ActivityForm from "../../components/activities/ActivityForm";
 import ActivityList from "../../components/activities/ActivityList";
+import ArchiveActivitiesList from "../../components/archive/ArchiveActivitiesList";
 
 function ManageActivities({ activityView, onNavigate }) {
     const [error, setError] = useState("");
     const [success, setSuccess] = useState("");
     const [editingActivity, setEditingActivity] = useState(null);
     const [listRefreshKey, setListRefreshKey] = useState(0);
+    const [pendingArchiveId, setPendingArchiveId] = useState(null);
+    const [archiving, setArchiving] = useState(false);
     const activityPage = activityView || "list";
 
     function refreshActivityList() {
@@ -45,6 +50,12 @@ function ManageActivities({ activityView, onNavigate }) {
     function handleAddActivityClick() {
         setEditingActivity(null);
         navigateToView("add");
+    }
+
+    function handleViewArchive() {
+        setError("");
+        setSuccess("");
+        navigateToView("archive");
     }
 
     useEffect(() => {
@@ -83,17 +94,38 @@ function ManageActivities({ activityView, onNavigate }) {
     }
 
     async function handleDeleteActivity(activityId) {
-        await deleteActivity(activityId);
-        refreshActivityList();
-        setSuccess("הפעילות נמחקה בהצלחה");
-        setError("");
+        setPendingArchiveId(activityId);
+    }
+
+    async function confirmArchiveActivity() {
+        if (!pendingArchiveId) {
+            return;
+        }
+
+        setArchiving(true);
+
+        try {
+            await deleteActivity(pendingArchiveId);
+            refreshActivityList();
+            setSuccess("הפעילות הועברה לארכיון בהצלחה");
+            setError("");
+        } catch (error) {
+            console.error("Activity archive failed:", error);
+            setError("אירעה שגיאה בהעברת הפעילות לארכיון");
+            setSuccess("");
+        } finally {
+            setArchiving(false);
+            setPendingArchiveId(null);
+        }
     }
 
     return (
         <div className="staff-page staff-page--activities">
             <div className="staff-container staff-container--activities">
-                {error && <p className="staff-alert staff-alert--error">{error}</p>}
-                {success && <p className="staff-alert staff-alert--success">{success}</p>}
+                {error ? <p className="staff-alert staff-alert--error">{error}</p> : null}
+                {success ? (
+                    <p className="staff-alert staff-alert--success">{success}</p>
+                ) : null}
 
                 {activityPage === "list" && (
                     <section className="staff-section staff-section--list staff-section--activities-list">
@@ -102,6 +134,20 @@ function ManageActivities({ activityView, onNavigate }) {
                             onDelete={handleDeleteActivity}
                             onEdit={handleEditActivity}
                             onAddActivity={handleAddActivityClick}
+                            onViewArchive={handleViewArchive}
+                        />
+                    </section>
+                )}
+
+                {activityPage === "archive" && (
+                    <section className="staff-section staff-section--list staff-section--activities-archive">
+                        <ArchiveActivitiesList
+                            refreshKey={listRefreshKey}
+                            onActionMessage={(message) => {
+                                setSuccess(message);
+                                setError("");
+                                refreshActivityList();
+                            }}
                         />
                     </section>
                 )}
@@ -137,6 +183,18 @@ function ManageActivities({ activityView, onNavigate }) {
                     </section>
                 )}
             </div>
+
+            <StaffConfirmModal
+                message={pendingArchiveId ? ARCHIVE_CONFIRM_MESSAGE : ""}
+                confirmLabel="העברה לארכיון"
+                confirming={archiving}
+                onConfirm={confirmArchiveActivity}
+                onCancel={() => {
+                    if (!archiving) {
+                        setPendingArchiveId(null);
+                    }
+                }}
+            />
         </div>
     );
 }

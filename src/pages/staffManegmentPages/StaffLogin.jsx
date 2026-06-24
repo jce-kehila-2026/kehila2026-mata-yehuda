@@ -19,6 +19,12 @@ import { verifyActiveStaffUser } from "../../utils/staffManegmentUtils/staffAuth
 
 const PASSWORD_RESET_LOG_PREFIX = "[staff-login] sendPasswordResetEmail";
 
+const PASSWORD_RESET_SUCCESS_MESSAGE = {
+    line1: "נשלח קישור לאיפוס סיסמה לכתובת האימייל שלך.",
+    line2:
+        "אם לא התקבל האימייל תוך מספר דקות, יש לבדוק גם בתיקיית דואר זבל (Spam).",
+};
+
 function getPasswordResetErrorMessage(error) {
     const code = error?.code ?? "";
 
@@ -44,7 +50,7 @@ function StaffLogin() {
     const [password, setPassword] = useState("");
     const [showPassword, setShowPassword] = useState(false);
     const [error, setError] = useState("");
-    const [resetSuccess, setResetSuccess] = useState("");
+    const [showResetSuccess, setShowResetSuccess] = useState(false);
     const [loading, setLoading] = useState(false);
     const [resetLoading, setResetLoading] = useState(false);
     const [authReady, setAuthReady] = useState(false);
@@ -66,7 +72,7 @@ function StaffLogin() {
 
     async function handleForgotPassword() {
         setError("");
-        setResetSuccess("");
+        setShowResetSuccess(false);
 
         const trimmedEmail = email.trim();
         if (!trimmedEmail) {
@@ -89,9 +95,7 @@ function StaffLogin() {
                 email: trimmedEmail,
             });
 
-            setResetSuccess(
-                `נשלח קישור לאיפוס סיסמה לכתובת ${trimmedEmail}. אם לא התקבל תוך מספר דקות, בדקו בתיקיית דואר זבל וודאו שהאימייל רשום במערכת.`
-            );
+            setShowResetSuccess(true);
         } catch (resetError) {
             console.error(`${PASSWORD_RESET_LOG_PREFIX}: failed`, {
                 email: trimmedEmail,
@@ -107,7 +111,7 @@ function StaffLogin() {
     async function handleLogin(e) {
         e.preventDefault();
         setError("");
-        setResetSuccess("");
+        setShowResetSuccess(false);
         setLoading(true);
 
         try {
@@ -159,7 +163,7 @@ function StaffLogin() {
     const hasError = Boolean(error);
     const formMessageId = error
         ? "staff-login-error"
-        : resetSuccess
+        : showResetSuccess
           ? "staff-login-reset-success"
           : undefined;
 
@@ -282,14 +286,16 @@ function StaffLogin() {
                             </div>
                         ) : null}
 
-                        {resetSuccess ? (
+                        {showResetSuccess ? (
                             <div
                                 id="staff-login-reset-success"
-                                className="staff-alert staff-alert--success staff-login-form__alert"
+                                className="staff-alert staff-alert--success staff-login-form__alert staff-login-form__alert--success"
                                 role="status"
                                 aria-live="polite"
+                                dir="rtl"
                             >
-                                {resetSuccess}
+                                <p>{PASSWORD_RESET_SUCCESS_MESSAGE.line1}</p>
+                                <p>{PASSWORD_RESET_SUCCESS_MESSAGE.line2}</p>
                             </div>
                         ) : null}
 
