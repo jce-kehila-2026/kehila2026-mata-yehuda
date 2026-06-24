@@ -2338,6 +2338,26 @@
   box-shadow: 0 3px 8px rgba(45, 125, 70, 0.12);
 }
 
+.community-join-requests-page .admin-table-action--reactivate:hover:not(:disabled),
+.community-volunteer-requests-page .admin-table-action--reactivate:hover:not(:disabled),
+.community-help-requests-page .admin-table-action--reactivate:hover:not(:disabled),
+.community-members-page .admin-table-action--reactivate:hover:not(:disabled),
+.community-volunteers-mgmt-page .admin-table-action--reactivate:hover:not(:disabled),
+.community-active-matches-page .admin-table-action--reactivate:hover:not(:disabled),
+.community-join-requests-page .admin-table-action--reactivate:active:not(:disabled),
+.community-volunteer-requests-page .admin-table-action--reactivate:active:not(:disabled),
+.community-help-requests-page .admin-table-action--reactivate:active:not(:disabled),
+.community-members-page .admin-table-action--reactivate:active:not(:disabled),
+.community-volunteers-mgmt-page .admin-table-action--reactivate:active:not(:disabled),
+.community-active-matches-page .admin-table-action--reactivate:active:not(:disabled) {
+  background: #eaf6ee;
+  background-color: #eaf6ee;
+  border-color: #9fd4ab;
+  color: #1a5230;
+  transform: translateY(-1px);
+  box-shadow: 0 3px 8px rgba(45, 125, 70, 0.12);
+}
+
 .community-join-requests-page .admin-table-action--delete:hover:not(:disabled),
 .community-volunteer-requests-page .admin-table-action--delete:hover:not(:disabled),
 .community-help-requests-page .admin-table-action--delete:hover:not(:disabled),
@@ -3186,6 +3206,24 @@
   border: 1px solid #d9e7dd;
   border-radius: 6px;
   overflow: hidden;
+}
+
+.community-volunteers-mgmt-page .community-staff-compact-card--inactive {
+  opacity: 0.72;
+  background: #f8faf9;
+}
+
+.community-volunteers-mgmt-page .community-staff-compact-card--inactive:hover {
+  opacity: 0.82;
+}
+
+.community-volunteers-mgmt-page
+  .community-staff-compact-card--inactive
+  .community-staff-compact-card__name,
+.community-volunteers-mgmt-page
+  .community-staff-compact-card--inactive
+  .community-staff-compact-card__phone {
+  color: #6b7770;
 }
 
 .community-volunteers-mgmt__table-wrapper {

@@ -1,6 +1,7 @@
 import { useState } from "react";
 import { updateVolunteerActiveStatus } from "../../services/communityStaff/communityStaffService";
 import { AdminTableDeleteButton } from "../admin/AdminTableActions.jsx";
+import ReactivateVolunteerButton from "../admin/ReactivateVolunteerButton.jsx";
 import CommunityStaffConfirmModal from "./CommunityStaffConfirmModal.jsx";
 import {
   CommunityStaffDetailItem,
@@ -73,14 +74,10 @@ function VolunteerManagementDetailsModal({
                 label="השבתת מתנדב"
               />
             ) : (
-              <button
-                type="button"
-                className="community-volunteers-mgmt__action-btn"
+              <ReactivateVolunteerButton
                 onClick={() => setPendingAction({ isActive: true })}
                 disabled={updatingStatus}
-              >
-                הפעלת מתנדב
-              </button>
+              />
             )}
           </>
         }

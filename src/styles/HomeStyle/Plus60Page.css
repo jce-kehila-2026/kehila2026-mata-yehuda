@@ -4,6 +4,8 @@
   margin: 0;
   padding: var(--app-padding-y, 1.8rem) var(--app-padding-x, 3rem);
   box-sizing: border-box;
+  background: linear-gradient(180deg, #f7fcf8 0%, #eef7f0 100%);
+  min-height: 100vh;
 }
 
 .plus60-header {
@@ -11,16 +13,18 @@
   justify-content: center;
   align-items: flex-start;
   position: relative;
-  min-height: 135px;
+  min-height: 155px;
   margin-bottom: 2rem;
 }
 
 .header-buttons {
   position: absolute;
   left: 0;
-  top: 0;
+  bottom: 0;
+  top: auto;
   display: flex;
-  flex-direction: column;
+  flex-direction: row;
+  align-items: center;
   gap: 12px;
 }
 
@@ -46,13 +50,34 @@
 }
 
 .plus60-title {
+  width: 100%;
+  max-width: min(100%, 720px);
   text-align: center;
 }
 
+.plus60-title__divider {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: clamp(0.85rem, 2.5vw, 1.35rem);
+  width: 100%;
+}
+
+.plus60-title__line {
+  flex: 1 1 0;
+  height: 2px;
+  min-width: 1.5rem;
+  background: var(--color-primary, #2d7d46);
+  border-radius: 999px;
+}
+
 .plus60-title h1 {
+  margin: 0;
+  flex-shrink: 0;
   color: var(--color-primary);
   font-size: clamp(1.5rem, 4vw, 2.5rem);
-  margin: 0;
+  font-weight: 700;
+  line-height: 1.25;
 }
 
 .plus60-title p {
@@ -114,12 +139,10 @@
 
   .header-buttons {
     position: static;
-
     display: flex;
     flex-direction: row;
     justify-content: center;
     gap: 8px;
-
     margin-bottom: 12px;
   }
 
