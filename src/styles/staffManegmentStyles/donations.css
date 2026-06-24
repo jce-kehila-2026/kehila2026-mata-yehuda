@@ -81,6 +81,87 @@
   font-size: 0.8125rem;
 }
 
+.donations-filters {
+  display: flex;
+  flex-direction: column;
+  gap: 0.75rem;
+  padding: 1rem 1.1rem;
+  border-radius: calc(var(--staff-radius) * 0.65);
+  background: #ffffff;
+  box-shadow: 0 8px 24px rgba(0, 0, 0, 0.05);
+  border: 1px solid #e8f5e9;
+}
+
+.donations-filters__title {
+  margin: 0;
+  font-size: 1rem;
+  font-weight: 700;
+  color: var(--staff-color-primary, #2d7d46);
+}
+
+.donations-filters__grid {
+  display: grid;
+  grid-template-columns: repeat(6, minmax(0, 1fr));
+  gap: 0.75rem;
+  align-items: end;
+  margin: 0;
+}
+
+.donations-filters__field {
+  display: flex;
+  flex-direction: column;
+  gap: 0.35rem;
+  min-width: 0;
+}
+
+.donations-filters__field--wide {
+  grid-column: span 2;
+}
+
+.donations-filters__field label {
+  margin: 0;
+  font-size: 0.8125rem;
+  font-weight: 600;
+  color: #6b7280;
+}
+
+.donations-filters__field input,
+.donations-filters__field select {
+  width: 100%;
+  min-height: 2.5rem;
+  padding: 0.5rem 0.65rem;
+  border: 1px solid #d1d5db;
+  border-radius: 0.5rem;
+  background: #ffffff;
+  font-family: inherit;
+  font-size: 0.875rem;
+  color: var(--staff-color-text, #1f2937);
+}
+
+.donations-filters__field input:focus-visible,
+.donations-filters__field select:focus-visible {
+  outline: 2px solid #c8e6c9;
+  outline-offset: 1px;
+  border-color: var(--staff-color-primary, #2d7d46);
+}
+
+.donations-filters__actions {
+  display: flex;
+  align-items: flex-end;
+  justify-content: flex-start;
+}
+
+.donations-filters__clear {
+  width: 100%;
+  min-height: 2.5rem;
+  white-space: nowrap;
+}
+
+.donations-filters__clear:disabled {
+  opacity: 0.55;
+  cursor: not-allowed;
+}
+
 .donations-table-section {
   background: #ffffff;
   border-radius: calc(var(--staff-radius) * 0.65);
@@ -229,11 +310,36 @@
   .donations-summary__cards {
     grid-template-columns: repeat(2, minmax(0, 1fr));
   }
+
+  .donations-filters__grid {
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+  }
+
+  .donations-filters__field--wide {
+    grid-column: span 3;
+  }
+
+  .donations-filters__actions {
+    grid-column: 1 / -1;
+  }
 }
 
 @media (max-width: 640px) {
   .donations-summary__cards {
     grid-template-columns: 1fr;
+  }
+
+  .donations-filters {
+    padding: 0.85rem;
+  }
+
+  .donations-filters__grid {
+    grid-template-columns: 1fr;
+  }
+
+  .donations-filters__field--wide,
+  .donations-filters__actions {
+    grid-column: auto;
   }
 
   .donations-table-section {

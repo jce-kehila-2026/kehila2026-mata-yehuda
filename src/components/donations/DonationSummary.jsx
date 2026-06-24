@@ -37,10 +37,10 @@ function DonationChartTooltip({ active, payload, label }) {
     );
 }
 
-function DonationSummary({ donations = [] }) {
+function DonationSummary({ donations = [], filtersPanel, chartFilters = {} }) {
     const stats = useMemo(
-        () => getDonationStatistics(donations),
-        [donations]
+        () => getDonationStatistics(donations, chartFilters),
+        [donations, chartFilters]
     );
 
     const summaryCards = [
@@ -93,6 +93,8 @@ function DonationSummary({ donations = [] }) {
                     </article>
                 ))}
             </div>
+
+            {filtersPanel}
 
             <article className="donations-summary__chart-card">
                 <h3 className="donations-summary__chart-title">
