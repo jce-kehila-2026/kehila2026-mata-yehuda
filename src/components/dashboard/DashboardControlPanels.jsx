@@ -4,6 +4,7 @@ import { formatInquiryDate } from "../../services/staffManegmentServices/inquiry
 import { getStaffInquiriesRoute } from "../../config/staffInquiriesNavigation";
 import DashboardActivityCalendar from "./DashboardActivityCalendar";
 import ActivityDateDisplay from "../activities/ActivityDateDisplay";
+import { formatDate } from "../../utils/staffManegmentUtils/dateUtils";
 import {
     buildRecentUpdates,
     formatRelativeTimeHebrew,
@@ -14,6 +15,65 @@ import {
 const PANEL_PREVIEW_LIMIT = 3;
 const PENDING_REQUESTS_PREVIEW_LIMIT = 2;
 const INQUIRIES_PREVIEW_LIMIT = 2;
+
+function getRegistrationActivityLabel(request) {
+    const activityName = String(request?.activity_name ?? "").trim();
+
+    if (activityName) {
+        return activityName;
+    }
+
+    const programTitle = String(request?.program_title ?? "").trim();
+
+    if (programTitle) {
+        return programTitle;
+    }
+
+    return getRequestProgramLabel(request) || "—";
+}
+
+function getCancellationActivityLabel(item) {
+    const activityName = String(item?.activityName ?? "").trim();
+
+    if (activityName) {
+        return activityName;
+    }
+
+    const programTitle = String(item?.programTitle ?? "").trim();
+
+    return programTitle || "—";
+}
+
+function DashboardPanelRequestDetails({
+    activityLabel,
+    participantName,
+    dateLabel
+}) {
+    return (
+        <div className="staff-dashboard-panel__item-content staff-dashboard-panel__item-content--details">
+            <div className="staff-dashboard-panel__item-detail">
+                <span className="staff-dashboard-panel__item-label">פעילות:</span>
+                <span className="staff-dashboard-panel__item-value">
+                    {activityLabel || "—"}
+                </span>
+            </div>
+            <div className="staff-dashboard-panel__item-detail">
+                <span className="staff-dashboard-panel__item-label">משתתף/ת:</span>
+                <span className="staff-dashboard-panel__item-value">
+                    {participantName || "—"}
+                </span>
+            </div>
+            {dateLabel ? (
+                <div className="staff-dashboard-panel__item-detail">
+                    <span className="staff-dashboard-panel__item-label">תאריך:</span>
+                    <span className="staff-dashboard-panel__item-value">
+                        {dateLabel}
+                    </span>
+                </div>
+            ) : null}
+        </div>
+    );
+}
 
 function DashboardPanelEmpty({ message }) {
     return (
@@ -153,8 +213,9 @@ function DashboardControlPanels({
                             ) : (
                                 <ul className="staff-dashboard-panel__list">
                                     {pendingRequests.map((request) => {
-                                        const programLabel =
-                                            getRequestProgramLabel(request);
+                                        const registrationDate = formatDate(
+                                            request.registered_at
+                                        );
 
                                         return (
                                             <li
@@ -165,16 +226,15 @@ function DashboardControlPanels({
                                                 }
                                                 className="staff-dashboard-panel__item staff-dashboard-panel__item--with-action"
                                             >
-                                                <div className="staff-dashboard-panel__item-content">
-                                                    <span className="staff-dashboard-panel__item-name">
-                                                        {request.full_name || "—"}
-                                                    </span>
-                                                    {programLabel ? (
-                                                        <span className="staff-dashboard-panel__item-meta">
-                                                            {programLabel}
-                                                        </span>
-                                                    ) : null}
-                                                </div>
+                                                <DashboardPanelRequestDetails
+                                                    activityLabel={getRegistrationActivityLabel(
+                                                        request
+                                                    )}
+                                                    participantName={
+                                                        request.full_name
+                                                    }
+                                                    dateLabel={registrationDate}
+                                                />
                                                 <button
                                                     type="button"
                                                     className="staff-dashboard-panel__item-action"
@@ -220,32 +280,42 @@ function DashboardControlPanels({
                                 {cancellationCount} ביטולים
                             </p>
                             <ul className="staff-dashboard-panel__list">
-                                {recentCancellations.map((item) => (
-                                    <li
-                                        key={item.cancellation.id}
-                                        className="staff-dashboard-panel__item staff-dashboard-panel__item--with-action"
-                                    >
-                                        <div className="staff-dashboard-panel__item-content">
-                                            <span className="staff-dashboard-panel__item-name">
-                                                {item.participantFullName || "—"}
-                                            </span>
-                                            <span className="staff-dashboard-panel__item-meta">
-                                                {formatCancellationDate(
-                                                    item.cancellation.cancelled_at
-                                                )}
-                                            </span>
-                                        </div>
-                                        <button
-                                            type="button"
-                                            className="staff-dashboard-panel__item-action"
-                                            onClick={() =>
-                                                onManageCancellation?.(item)
-                                            }
+                                {recentCancellations.map((item) => {
+                                    const cancellationDate = formatCancellationDate(
+                                        item.cancellation.cancelled_at
+                                    );
+                                    const dateLabel =
+                                        cancellationDate &&
+                                        cancellationDate !== "—"
+                                            ? cancellationDate
+                                            : "";
+
+                                    return (
+                                        <li
+                                            key={item.cancellation.id}
+                                            className="staff-dashboard-panel__item staff-dashboard-panel__item--with-action"
                                         >
-                                            ניהול ביטול
-                                        </button>
-                                    </li>
-                                ))}
+                                            <DashboardPanelRequestDetails
+                                                activityLabel={getCancellationActivityLabel(
+                                                    item
+                                                )}
+                                                participantName={
+                                                    item.participantFullName
+                                                }
+                                                dateLabel={dateLabel}
+                                            />
+                                            <button
+                                                type="button"
+                                                className="staff-dashboard-panel__item-action"
+                                                onClick={() =>
+                                                    onManageCancellation?.(item)
+                                                }
+                                            >
+                                                ניהול ביטול
+                                            </button>
+                                        </li>
+                                    );
+                                })}
                             </ul>
                         </>
                     )}
