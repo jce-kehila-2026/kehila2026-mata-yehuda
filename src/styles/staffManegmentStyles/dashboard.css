@@ -148,10 +148,12 @@ body:has(.staff-dashboard-root) {
 
 .staff-dashboard-root .staff-statistics-page {
   --stats-bg: var(--staff-dashboard-page-bg);
+  --stats-card-bg: var(--staff-dashboard-card-bg);
 }
 
 .staff-dashboard-root .requests-inbox {
   --inbox-bg: var(--staff-dashboard-page-bg);
+  --inbox-surface: var(--staff-dashboard-card-bg);
   min-height: auto;
 }
 
@@ -304,6 +306,150 @@ body:has(.staff-dashboard-root) {
   color: var(--dashboard-color-text);
   --stats-text: var(--dashboard-color-text);
   --stats-text-secondary: var(--dashboard-color-muted);
+}
+
+/* Dashboard card & container surfaces — green palette */
+.staff-dashboard-root .staff-dashboard-summary-card,
+.staff-dashboard-root .staff-dashboard-panel,
+.staff-dashboard-root .staff-card,
+.staff-dashboard-root .staff-section--accent,
+.staff-dashboard-root .staff-section--filters,
+.staff-dashboard-root .program-card,
+.staff-dashboard-root .donations-summary__card,
+.staff-dashboard-root .donations-summary__chart-card,
+.staff-dashboard-root .donations-table-section,
+.staff-dashboard-root .donations-card,
+.staff-dashboard-root .donations-modal,
+.staff-dashboard-root .staff-statistics-summary-card,
+.staff-dashboard-root .staff-statistics-highlight-card,
+.staff-dashboard-root .staff-statistics-card,
+.staff-dashboard-root .admin-data-table-wrap,
+.staff-dashboard-root .admin-list-empty,
+.staff-dashboard-root .staff-subpage-toolbar,
+.staff-dashboard-root .staff-dashboard-activity-modal__panel,
+.staff-dashboard-root .staff-dashboard-activity-modal__card,
+.staff-dashboard-root .staff-dashboard-calendar__next-item,
+.staff-dashboard-root .notifications-stats__card,
+.staff-dashboard-root .notifications-card,
+.staff-dashboard-root .notifications-activity,
+.staff-dashboard-root .attendance-page__card,
+.staff-dashboard-root .attendance-page__card--records,
+.staff-dashboard-root .attendance-records-page__hint-card,
+.staff-dashboard-root .attendance-records-page__toolbar,
+.staff-dashboard-root .attendance-records-page__card,
+.staff-dashboard-root .take-attendance-page__hint-card,
+.staff-dashboard-root .take-attendance-page__toolbar,
+.staff-dashboard-root .take-attendance-page__card,
+.staff-dashboard-root .attendance-records-page__daily-activity-block,
+.staff-dashboard-root .attendance-records-page__top-card,
+.staff-dashboard-root .attendance-records-page__activity-info,
+.staff-dashboard-root .attendance-records-page__insight-card,
+.staff-dashboard-root .form-image-upload__preview-block {
+  background: var(--staff-dashboard-card-bg);
+}
+
+.staff-dashboard-root
+  .attendance-records-page__summary-card:not(
+    .attendance-records-page__summary-card--present
+  ):not(.attendance-records-page__summary-card--absent):not(
+    .attendance-records-page__summary-card--rate
+  ) {
+  background: var(--staff-dashboard-card-bg);
+}
+
+.staff-dashboard-root .attendance-records-page__top-card:hover,
+.staff-dashboard-root .attendance-records-page__top-card:focus-visible,
+.staff-dashboard-root .attendance-records-page__top-card--rank-1:hover,
+.staff-dashboard-root .attendance-records-page__top-card--rank-1:focus-visible,
+.staff-dashboard-root .attendance-records-page__top-card--zero:hover,
+.staff-dashboard-root .attendance-records-page__top-card--zero:focus-visible {
+  background: var(--staff-dashboard-card-bg);
+}
+
+.staff-dashboard-root .program-card--fixed,
+.staff-dashboard-root .staff-card--highlight,
+.staff-dashboard-root .staff-dashboard-week__item,
+.staff-dashboard-root .donations-card {
+  background: var(--staff-dashboard-card-bg-strong);
+}
+
+.staff-dashboard-root .attendance-page__card--take {
+  background: var(--staff-dashboard-card-gradient);
+}
+
+.staff-dashboard-root .attendance-page .attendance-page__card--take:hover,
+.staff-dashboard-root .attendance-page .attendance-page__card--take:active,
+.staff-dashboard-root .attendance-page .attendance-page__card--take:focus-visible {
+  background: linear-gradient(180deg, #fafcfb 0%, #f4faf7 100%);
+  background-color: #f4faf7;
+}
+
+.staff-dashboard-root .attendance-page .attendance-page__card--records:hover,
+.staff-dashboard-root .attendance-page .attendance-page__card--records:active,
+.staff-dashboard-root .attendance-page .attendance-page__card--records:focus-visible {
+  background: var(--staff-dashboard-card-bg);
+  background-color: var(--staff-dashboard-card-bg);
+}
+
+.staff-dashboard-root .admin-data-table thead {
+  background: var(--staff-dashboard-card-bg-strong);
+}
+
+.staff-dashboard-root .admin-data-table tbody td {
+  background-color: var(--staff-dashboard-input-bg);
+}
+
+.staff-dashboard-root .admin-data-table tbody tr:hover {
+  background: transparent;
+}
+
+.staff-dashboard-root .admin-data-table tbody tr:hover td {
+  background-color: #f7fcf8;
+}
+
+.staff-dashboard-root .staff-statistics-table th {
+  background: var(--staff-dashboard-card-bg-strong);
+}
+
+.staff-dashboard-root .staff-statistics-table tbody td {
+  background-color: var(--staff-dashboard-input-bg);
+}
+
+.staff-dashboard-root .attendance-records-page__table tbody td,
+.staff-dashboard-root .take-attendance-page__table tbody td {
+  background-color: var(--staff-dashboard-input-bg);
+}
+
+.staff-dashboard-root .inbox-row:hover {
+  background: var(--staff-dashboard-card-bg-strong);
+  box-shadow: inset 1px 0 0 var(--staff-dashboard-divider),
+    inset -1px 0 0 var(--staff-dashboard-divider);
+}
+
+.staff-dashboard-root input:not([type="checkbox"]):not([type="radio"]):not([type="button"]):not([type="submit"]):not([type="reset"]):not([type="image"]):not([type="hidden"]),
+.staff-dashboard-root select,
+.staff-dashboard-root textarea,
+.staff-dashboard-root .staff-form input,
+.staff-dashboard-root .staff-form select,
+.staff-dashboard-root .staff-form textarea,
+.staff-dashboard-root .staff-section--form input,
+.staff-dashboard-root .staff-section--form select,
+.staff-dashboard-root .staff-section--form textarea,
+.staff-dashboard-root .admin-list-toolbar input,
+.staff-dashboard-root .admin-list-toolbar select,
+.staff-dashboard-root .staff-list-filters input,
+.staff-dashboard-root .staff-list-filters select,
+.staff-dashboard-root .requests-inbox input,
+.staff-dashboard-root .requests-inbox select,
+.staff-dashboard-root .attendance-records-page__field input,
+.staff-dashboard-root .attendance-records-page__field select,
+.staff-dashboard-root .take-attendance-page__field input,
+.staff-dashboard-root .take-attendance-page__field select,
+.staff-dashboard-root .notifications-form input,
+.staff-dashboard-root .notifications-form select,
+.staff-dashboard-root .notifications-form textarea,
+.staff-dashboard-root .notifications-form__audience-chip {
+  background-color: var(--staff-dashboard-input-bg);
 }
 
 .staff-dashboard-root .staff-back-button,
@@ -1027,6 +1173,8 @@ body:has(.staff-dashboard-root) {
 
 .staff-dashboard-panel__item-action {
   flex-shrink: 0;
+  width: 100%;
+  align-self: stretch;
   font-family: var(--staff-font-family);
   font-size: 0.8rem;
   font-weight: 600;
@@ -1056,6 +1204,24 @@ body:has(.staff-dashboard-root) {
 .staff-dashboard-panel__item-action:focus-visible {
   outline: 2px solid var(--color-border);
   outline-offset: 2px;
+}
+
+@media (min-width: 1024px) {
+  .staff-dashboard-panel__item--with-action {
+    flex-direction: row;
+    align-items: flex-start;
+    justify-content: space-between;
+    gap: 0.65rem;
+  }
+
+  .staff-dashboard-panel__item-action {
+    width: auto;
+    align-self: center;
+    white-space: nowrap;
+    font-size: 0.75rem;
+    line-height: 1.2;
+    padding: 0.38rem 0.65rem;
+  }
 }
 
 .staff-dashboard-panel--calendar .staff-dashboard-panel__body {
@@ -1414,7 +1580,7 @@ body:has(.staff-dashboard-root) {
   padding: 0.75rem 0.8rem;
   border: 1px solid var(--color-border);
   border-radius: 12px;
-  background: #ffffff;
+  background: var(--staff-dashboard-card-bg-strong, #eef7f0);
   box-shadow: 0 1px 4px rgba(15, 23, 42, 0.04);
 }
 

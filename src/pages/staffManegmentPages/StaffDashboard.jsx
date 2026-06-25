@@ -31,6 +31,7 @@ import ManageDonations from "../staff/ManageDonations";
 import ManageDayCenterVolunteers from "../staff/ManageDayCenterVolunteers";
 import RequestsPage from "../RespOneonRequest/RequestsPage";
 import DashboardControlPanels from "../../components/dashboard/DashboardControlPanels";
+import StaffSubpageToolbar from "../../components/dashboard/StaffSubpageToolbar";
 import { fetchDashboardOverview } from "../../services/staffManegmentServices/dashboardService";
 import {
     buildInquiryNavigationState,
@@ -364,19 +365,7 @@ function StaffDashboard({ onLogout }) {
 
     function renderSubpageToolbar(pageTitle) {
         return (
-            <div className="staff-subpage-toolbar">
-                <h2 className="staff-subpage-title">{pageTitle}</h2>
-                <button
-                    type="button"
-                    className="staff-back-button"
-                    onClick={goToDashboard}
-                >
-                    <span className="staff-back-button__icon" aria-hidden="true">
-                        →
-                    </span>
-                    חזרה ללוח הבקרה
-                </button>
-            </div>
+            <StaffSubpageToolbar title={pageTitle} onBack={goToDashboard} />
         );
     }
 
@@ -494,7 +483,8 @@ function StaffDashboard({ onLogout }) {
             case "statistics":
                 return (
                     <div data-dashboard-page="statistics">
-                        <StaffStatistics onBack={goToDashboard} />
+                        {renderSubpageToolbar(SUBPAGE_TITLES.statistics)}
+                        <StaffStatistics />
                     </div>
                 );
             case "manageDonations":

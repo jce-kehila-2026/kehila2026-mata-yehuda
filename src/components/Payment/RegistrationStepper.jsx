@@ -6,13 +6,17 @@ export const REGISTRATION_STEPS = [
   { id: "success", label: "סיום" },
 ];
 
-function RegistrationStepper({ currentStep }) {
-  const totalSteps = REGISTRATION_STEPS.length;
+function RegistrationStepper({
+  currentStep,
+  steps = REGISTRATION_STEPS,
+  ariaLabel = "התקדמות הרשמה",
+}) {
+  const totalSteps = steps.length;
 
   return (
-    <nav className="registration-stepper" aria-label="התקדמות הרשמה">
+    <nav className="registration-stepper" aria-label={ariaLabel}>
       <ol className="registration-stepper__list">
-        {REGISTRATION_STEPS.map((step, index) => {
+        {steps.map((step, index) => {
           const stepNumber = index + 1;
           const isComplete =
             stepNumber < currentStep ||

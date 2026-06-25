@@ -8,7 +8,10 @@ import {
     XAxis,
     YAxis
 } from "recharts";
-import { getDonationStatistics } from "../../services/donationService";
+import {
+    getDonationChartTitle,
+    getDonationStatistics
+} from "../../services/donationService";
 
 const CHART_COLOR = "#2E7D32";
 
@@ -37,10 +40,14 @@ function DonationChartTooltip({ active, payload, label }) {
     );
 }
 
-function DonationSummary({ donations = [] }) {
+function DonationSummary({ donations = [], periodFilter }) {
     const stats = useMemo(
-        () => getDonationStatistics(donations),
-        [donations]
+        () => getDonationStatistics(donations, periodFilter),
+        [donations, periodFilter]
+    );
+    const chartTitle = useMemo(
+        () => getDonationChartTitle(periodFilter),
+        [periodFilter]
     );
 
     const summaryCards = [
@@ -96,7 +103,7 @@ function DonationSummary({ donations = [] }) {
 
             <article className="donations-summary__chart-card">
                 <h3 className="donations-summary__chart-title">
-                    תרומות לפי חודש
+                    {chartTitle}
                 </h3>
                 <div className="donations-summary__chart-wrap">
                     <ResponsiveContainer width="100%" height="100%">

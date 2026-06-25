@@ -1,5 +1,5 @@
 import { useCallback, useEffect, useMemo, useState } from "react";
-import { CalendarDays, ClipboardList, Plus, Users } from "lucide-react";
+import { CalendarDays, Plus, Archive } from "lucide-react";
 import ActivityCard from "./ActivityCard";
 import ActivityStatusBadge from "./ActivityStatusBadge";
 import AdminDataTable from "../admin/AdminDataTable";
@@ -37,7 +37,13 @@ const ACTIVITY_COLUMNS = [
     { key: "actions", label: "פעולות" }
 ];
 
-function ActivityList({ onDelete, onEdit, refreshKey = 0, onAddActivity, onBack }) {
+function ActivityList({
+    onDelete,
+    onEdit,
+    refreshKey = 0,
+    onAddActivity,
+    onViewArchive
+}) {
     const [sourceItems, setSourceItems] = useState([]);
     const [totalCount, setTotalCount] = useState(0);
     const [loading, setLoading] = useState(true);

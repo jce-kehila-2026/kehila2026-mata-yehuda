@@ -2,6 +2,82 @@
   background: #f7f8f3;
 }
 
+/* Period filter on donations — stats CSS variables exist only under .staff-statistics-page */
+.staff-page--donations .staff-statistics-filter-card {
+  --stats-primary: #2e7d32;
+  --stats-primary-dark: #1b5e20;
+  --stats-primary-light: #e8f5e9;
+  --stats-border: #c8e6c9;
+  --stats-text-secondary: #6b7280;
+  --stats-card-bg: #ffffff;
+  --stats-text: #1f2937;
+  --stats-shadow: 0 2px 10px rgba(46, 125, 50, 0.07);
+  --stats-radius: 16px;
+}
+
+.staff-page--donations .staff-statistics-filter-card button {
+  width: auto;
+  min-height: 0;
+  opacity: 1;
+}
+
+.staff-page--donations .staff-statistics-view-toggle {
+  background: #e8f5e9;
+  border-color: #c8e6c9;
+}
+
+.staff-page--donations .staff-statistics-view-toggle__btn {
+  background: #e8f5e9;
+  color: #1b5e20;
+  opacity: 1;
+}
+
+.staff-page--donations .staff-statistics-view-toggle__btn:hover,
+.staff-page--donations .staff-statistics-view-toggle__btn:focus-visible {
+  background: #dff0e1;
+  color: #1b5e20;
+}
+
+.staff-page--donations .staff-statistics-view-toggle__btn--active,
+.staff-page--donations .staff-statistics-view-toggle__btn--active:hover,
+.staff-page--donations .staff-statistics-view-toggle__btn--active:focus-visible {
+  background: #2e7d32;
+  color: #ffffff;
+}
+
+.staff-page--donations .staff-statistics-month-filter__submit,
+.staff-page--donations .staff-statistics-month-filter__submit:hover,
+.staff-page--donations .staff-statistics-month-filter__submit:focus-visible {
+  background: #2e7d32;
+  color: #ffffff;
+  opacity: 1;
+  border: none;
+}
+
+.staff-page--donations .staff-statistics-month-filter__submit:hover,
+.staff-page--donations .staff-statistics-month-filter__submit:focus-visible {
+  background: #1b5e20;
+}
+
+.staff-page--donations .staff-statistics-month-filter__reset {
+  background: #ffffff;
+  color: #1b5e20;
+  border: 1.5px solid #2e7d32;
+  opacity: 1;
+}
+
+.staff-page--donations .staff-statistics-month-filter__reset:hover,
+.staff-page--donations .staff-statistics-month-filter__reset:focus-visible {
+  background: #e8f5e9;
+  border-color: #2e7d32;
+  color: #1b5e20;
+}
+
+.staff-page--donations .staff-statistics-month-filter__reset:disabled {
+  opacity: 0.55;
+  cursor: not-allowed;
+}
+
 .staff-container--donations {
   display: flex;
   flex-direction: column;
@@ -79,6 +155,87 @@
   border: 1px solid #c8e6c9;
   box-shadow: 0 4px 12px rgba(0, 0, 0, 0.08);
   font-size: 0.8125rem;
+}
+
+.donations-filters {
+  display: flex;
+  flex-direction: column;
+  gap: 0.75rem;
+  padding: 1rem 1.1rem;
+  border-radius: calc(var(--staff-radius) * 0.65);
+  background: #ffffff;
+  box-shadow: 0 8px 24px rgba(0, 0, 0, 0.05);
+  border: 1px solid #e8f5e9;
+}
+
+.donations-filters__title {
+  margin: 0;
+  font-size: 1rem;
+  font-weight: 700;
+  color: var(--staff-color-primary, #2d7d46);
+}
+
+.donations-filters__grid {
+  display: grid;
+  grid-template-columns: repeat(6, minmax(0, 1fr));
+  gap: 0.75rem;
+  align-items: end;
+  margin: 0;
+}
+
+.donations-filters__field {
+  display: flex;
+  flex-direction: column;
+  gap: 0.35rem;
+  min-width: 0;
+}
+
+.donations-filters__field--wide {
+  grid-column: span 2;
+}
+
+.donations-filters__field label {
+  margin: 0;
+  font-size: 0.8125rem;
+  font-weight: 600;
+  color: #6b7280;
+}
+
+.donations-filters__field input,
+.donations-filters__field select {
+  width: 100%;
+  min-height: 2.5rem;
+  padding: 0.5rem 0.65rem;
+  border: 1px solid #d1d5db;
+  border-radius: 0.5rem;
+  background: #ffffff;
+  font-family: inherit;
+  font-size: 0.875rem;
+  color: var(--staff-color-text, #1f2937);
+}
+
+.donations-filters__field input:focus-visible,
+.donations-filters__field select:focus-visible {
+  outline: 2px solid #c8e6c9;
+  outline-offset: 1px;
+  border-color: var(--staff-color-primary, #2d7d46);
+}
+
+.donations-filters__actions {
+  display: flex;
+  align-items: flex-end;
+  justify-content: flex-start;
+}
+
+.donations-filters__clear {
+  width: 100%;
+  min-height: 2.5rem;
+  white-space: nowrap;
+}
+
+.donations-filters__clear:disabled {
+  opacity: 0.55;
+  cursor: not-allowed;
 }
 
 .donations-table-section {
@@ -229,11 +386,36 @@
   .donations-summary__cards {
     grid-template-columns: repeat(2, minmax(0, 1fr));
   }
+
+  .donations-filters__grid {
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+  }
+
+  .donations-filters__field--wide {
+    grid-column: span 3;
+  }
+
+  .donations-filters__actions {
+    grid-column: 1 / -1;
+  }
 }
 
 @media (max-width: 640px) {
   .donations-summary__cards {
     grid-template-columns: 1fr;
+  }
+
+  .donations-filters {
+    padding: 0.85rem;
+  }
+
+  .donations-filters__grid {
+    grid-template-columns: 1fr;
+  }
+
+  .donations-filters__field--wide,
+  .donations-filters__actions {
+    grid-column: auto;
   }
 
   .donations-table-section {

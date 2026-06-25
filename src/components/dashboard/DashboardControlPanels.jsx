@@ -3,10 +3,77 @@ import { getRequestProgramLabel } from "../../services/staffManegmentServices/da
 import { formatInquiryDate } from "../../services/staffManegmentServices/inquiryService";
 import { getStaffInquiriesRoute } from "../../config/staffInquiriesNavigation";
 import DashboardActivityCalendar from "./DashboardActivityCalendar";
+import ActivityDateDisplay from "../activities/ActivityDateDisplay";
+import { formatDate } from "../../utils/staffManegmentUtils/dateUtils";
+import {
+    buildRecentUpdates,
+    formatRelativeTimeHebrew,
+    getWeekActivities,
+    RECENT_UPDATES_PLACEHOLDERS
+} from "../../utils/staffManegmentUtils/dashboardDisplayHelpers";
 
 const PANEL_PREVIEW_LIMIT = 3;
 const PENDING_REQUESTS_PREVIEW_LIMIT = 2;
 const INQUIRIES_PREVIEW_LIMIT = 2;
+
+function getRegistrationActivityLabel(request) {
+    const activityName = String(request?.activity_name ?? "").trim();
+
+    if (activityName) {
+        return activityName;
+    }
+
+    const programTitle = String(request?.program_title ?? "").trim();
+
+    if (programTitle) {
+        return programTitle;
+    }
+
+    return getRequestProgramLabel(request) || "—";
+}
+
+function getCancellationActivityLabel(item) {
+    const activityName = String(item?.activityName ?? "").trim();
+
+    if (activityName) {
+        return activityName;
+    }
+
+    const programTitle = String(item?.programTitle ?? "").trim();
+
+    return programTitle || "—";
+}
+
+function DashboardPanelRequestDetails({
+    activityLabel,
+    participantName,
+    dateLabel
+}) {
+    return (
+        <div className="staff-dashboard-panel__item-content staff-dashboard-panel__item-content--details">
+            <div className="staff-dashboard-panel__item-detail">
+                <span className="staff-dashboard-panel__item-label">פעילות:</span>
+                <span className="staff-dashboard-panel__item-value">
+                    {activityLabel || "—"}
+                </span>
+            </div>
+            <div className="staff-dashboard-panel__item-detail">
+                <span className="staff-dashboard-panel__item-label">משתתף/ת:</span>
+                <span className="staff-dashboard-panel__item-value">
+                    {participantName || "—"}
+                </span>
+            </div>
+            {dateLabel ? (
+                <div className="staff-dashboard-panel__item-detail">
+                    <span className="staff-dashboard-panel__item-label">תאריך:</span>
+                    <span className="staff-dashboard-panel__item-value">
+                        {dateLabel}
+                    </span>
+                </div>
+            ) : null}
+        </div>
+    );
+}
 
 function DashboardPanelEmpty({ message }) {
     return (
