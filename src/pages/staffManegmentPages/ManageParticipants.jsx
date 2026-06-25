@@ -57,7 +57,29 @@ function ManageParticipants({ participantView, onNavigate }) {
     }
 
     return (
-        <div className="staff-page staff-page--participants">
+        <div
+            className="staff-page staff-page--participants participants-mgmt-page"
+            dir="rtl"
+        >
+            <img
+                src="/images/minitree.png"
+                alt=""
+                aria-hidden="true"
+                className="participants-mgmt-decoration participants-mgmt-decoration--top"
+            />
+            <img
+                src="/images/minitree.png"
+                alt=""
+                aria-hidden="true"
+                className="participants-mgmt-decoration participants-mgmt-decoration--left"
+            />
+            <img
+                src="/images/minitree.png"
+                alt=""
+                aria-hidden="true"
+                className="participants-mgmt-decoration participants-mgmt-decoration--bottom"
+            />
+
             <div className="staff-container staff-container--participants">
                 {success && (participantPage === "list" || participantPage === "archive") ? (
                     <p className="staff-alert staff-alert--success">{success}</p>
@@ -70,12 +92,31 @@ function ManageParticipants({ participantView, onNavigate }) {
                             onEditParticipant={handleEditParticipant}
                             onAddParticipant={handleAddParticipantClick}
                             onViewArchive={handleViewArchive}
+                            onBack={() => onNavigate("dashboard")}
                         />
                     </section>
                 )}
 
                 {participantPage === "archive" && (
                     <section className="staff-section staff-section--list staff-section--participants-archive">
+                        <div className="participants-mgmt-archive-toolbar">
+                            <button
+                                type="button"
+                                className="staff-back-button"
+                                onClick={goBackToList}
+                            >
+                                <span
+                                    className="staff-back-button__icon"
+                                    aria-hidden="true"
+                                >
+                                    →
+                                </span>
+                                <span className="staff-back-button__label">
+                                    חזרה לרשימת משתתפים
+                                </span>
+                            </button>
+                        </div>
+
                         <ArchiveParticipantsList
                             refreshKey={listRefreshKey}
                             onActionMessage={(message) => {

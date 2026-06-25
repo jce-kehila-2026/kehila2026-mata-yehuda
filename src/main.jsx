@@ -13,6 +13,7 @@ import "./styles/staffManegmentStyles/formImageUpload.css";
 import "./styles/staffManegmentStyles/activities.css";
 import "./styles/staffManegmentStyles/activitiesManagement.css";
 import "./styles/staffManegmentStyles/participants.css";
+import "./styles/staffManegmentStyles/participantsManagement.css";
 import "./styles/staffManegmentStyles/staffManagement.css";
 import "./styles/staffManegmentStyles/programs.css";
 import "./styles/staffManegmentStyles/programsManagement.css";
