@@ -4,8 +4,6 @@ import ActivityCard from "./ActivityCard";
 import ActivityStatusBadge from "./ActivityStatusBadge";
 import AdminDataTable from "../admin/AdminDataTable";
 import AdminListEmptyState from "../admin/AdminListEmptyState";
-import AdminListPagination from "../admin/AdminListPagination";
-import AdminListSummary from "../admin/AdminListSummary";
 import AdminListToolbar from "../admin/AdminListToolbar";
 import AdminResponsiveList from "../admin/AdminResponsiveList";
 import { useAdminList } from "../../hooks/useAdminList";
@@ -16,6 +14,10 @@ import {
     formatActivityOccupancy,
     getActivitySortValue
 } from "../../services/staffManegmentServices/activityService";
+import {
+    ACTIVITY_DISPLAY_STATUS,
+    getActivityDisplayStatus
+} from "../../utils/staffManegmentUtils/activityStatus";
 import {
     AdminTableActions,
     AdminTableDeleteButton,
@@ -105,6 +107,29 @@ function ActivityList({
         </>
     );
 
+    const activityStats = useMemo(() => {
+        const now = new Date();
+        let open = 0;
+        let participants = 0;
+
+        sourceItems.forEach((activity) => {
+            const data = activity.data || {};
+            const { status } = getActivityDisplayStatus(data, now);
+
+            if (status === ACTIVITY_DISPLAY_STATUS.OPEN) {
+                open += 1;
+            }
+
+            const current = Number(data.current_participants ?? 0);
+
+            if (Number.isFinite(current)) {
+                participants += current;
+            }
+        });
+
+        return { total: sourceItems.length, open, participants };
+    }, [sourceItems]);
+
     const emptyState = useMemo(() => {
         if (loading) {
             return null;
@@ -137,39 +162,95 @@ function ActivityList({
 
     return (
         <div className="staff-list-section admin-list-section admin-list-section--activities">
-            <div className="admin-list-header admin-list-header--split">
-                <h2 className="admin-list-header__title">רשימת פעילויות</h2>
-                <div className="admin-list-header__actions">
-                    {onViewArchive ? (
-                        <button
-                            type="button"
-                            className="staff-button staff-button--secondary staff-button--small admin-list-header__action admin-list-header__action--compact"
-                            onClick={onViewArchive}
-                        >
-                            <Archive
-                                className="admin-list-header__action-icon"
-                                strokeWidth={2.25}
-                                aria-hidden="true"
-                            />
-                            <span>צפייה בארכיון</span>
-                        </button>
-                    ) : null}
+            <header className="activities-mgmt-page__header">
+                <div className="activities-mgmt-page__header-main">
+                    <h2 className="activities-mgmt-page__title">ניהול פעילויות</h2>
+                    <p className="activities-mgmt-page__subtitle">
+                        ניהול, צפייה וחיפוש של כל הפעילויות במערכת
+                    </p>
+                </div>
+                <div className="activities-mgmt-page__actions">
                     {onAddActivity ? (
                         <button
                             type="button"
-                            className="staff-button staff-button--small admin-list-header__action admin-list-header__action--compact"
+                            className="activities-mgmt-page__action"
                             onClick={onAddActivity}
                         >
                             <Plus
-                                className="admin-list-header__action-icon"
+                                className="activities-mgmt-page__action-icon"
                                 strokeWidth={2.25}
                                 aria-hidden="true"
                             />
                             <span>הוספת פעילות</span>
                         </button>
                     ) : null}
+                    {onBack ? (
+                        <button
+                            type="button"
+                            className="staff-back-button"
+                            onClick={onBack}
+                        >
+                            <span
+                                className="staff-back-button__icon"
+                                aria-hidden="true"
+                            >
+                                →
+                            </span>
+                            חזרה ללוח הבקרה
+                        </button>
+                    ) : null}
                 </div>
-            </div>
+            </header>
+
+            {!loading && !loadError ? (
+                <section
+                    className="activities-mgmt-summary"
+                    aria-label="סיכום פעילויות"
+                >
+                    <div className="activities-mgmt-summary__card activities-mgmt-summary__card--neutral">
+                        <span className="activities-mgmt-summary__icon">
+                            <CalendarDays size={22} strokeWidth={2} aria-hidden="true" />
+                        </span>
+                        <span className="activities-mgmt-summary__value">
+                            {activityStats.total}
+                        </span>
+                        <span className="activities-mgmt-summary__label">
+                            סה״כ פעילויות
+                        </span>
+                        <span className="activities-mgmt-summary__hint">
+                            כל הפעילויות במערכת
+                        </span>
+                    </div>
+                    <div className="activities-mgmt-summary__card activities-mgmt-summary__card--open">
+                        <span className="activities-mgmt-summary__icon">
+                            <ClipboardList size={22} strokeWidth={2} aria-hidden="true" />
+                        </span>
+                        <span className="activities-mgmt-summary__value">
+                            {activityStats.open}
+                        </span>
+                        <span className="activities-mgmt-summary__label">
+                            פעילויות פתוחות
+                        </span>
+                        <span className="activities-mgmt-summary__hint">
+                            פעילויות בהרשמה
+                        </span>
+                    </div>
+                    <div className="activities-mgmt-summary__card activities-mgmt-summary__card--participants">
+                        <span className="activities-mgmt-summary__icon">
+                            <Users size={22} strokeWidth={2} aria-hidden="true" />
+                        </span>
+                        <span className="activities-mgmt-summary__value">
+                            {activityStats.participants}
+                        </span>
+                        <span className="activities-mgmt-summary__label">
+                            סה״כ משתתפים רשומים
+                        </span>
+                        <span className="activities-mgmt-summary__hint">
+                            בכל הפעילויות
+                        </span>
+                    </div>
+                </section>
+            ) : null}
 
             <AdminListToolbar
                 searchId="activity-search"
@@ -183,25 +264,19 @@ function ActivityList({
                 pageSizeLabel="מספר פעילויות בעמוד"
             />
 
-            <AdminListSummary
-                totalCount={list.totalCount}
-                totalFiltered={list.totalFiltered}
-                pageCount={list.pageCount}
-                page={list.page}
-                totalPages={list.totalPages}
-                showAll={list.showAll}
-            />
-
             {loadError ? (
                 <p className="staff-alert staff-alert--error">{loadError}</p>
             ) : null}
 
-            {loading ? <p>טוען...</p> : null}
+            {loading ? <p className="activities-mgmt-loading">טוען...</p> : null}
 
-            {!loading && emptyState}
+            {!loading && list.totalFiltered === 0 ? (
+                <div className="activities-mgmt-list">{emptyState}</div>
+            ) : null}
 
             {!loading && list.totalFiltered > 0 ? (
                 <>
+                    <div className="activities-mgmt-list">
                     <AdminResponsiveList
                         desktopTable={
                             <AdminDataTable
@@ -255,12 +330,29 @@ function ActivityList({
                             </div>
                         }
                     />
+                    </div>
 
-                    <AdminListPagination
-                        page={list.page}
-                        totalPages={list.totalPages}
-                        onPageChange={list.setPage}
-                    />
+                    <div className="activities-mgmt-pagination">
+                        <button
+                            type="button"
+                            className="activities-mgmt-pagination__btn"
+                            onClick={() => list.setPage(list.page - 1)}
+                            disabled={list.page <= 1}
+                        >
+                            הקודם
+                        </button>
+                        <span className="activities-mgmt-pagination__label">
+                            עמוד {list.page} מתוך {list.totalPages}
+                        </span>
+                        <button
+                            type="button"
+                            className="activities-mgmt-pagination__btn"
+                            onClick={() => list.setPage(list.page + 1)}
+                            disabled={list.page >= list.totalPages}
+                        >
+                            הבא
+                        </button>
+                    </div>
                 </>
             ) : null}
         </div>

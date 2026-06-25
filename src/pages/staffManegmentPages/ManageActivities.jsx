@@ -120,7 +120,25 @@ function ManageActivities({ activityView, onNavigate }) {
     }
 
     return (
-        <div className="staff-page staff-page--activities">
+        <div className="staff-page staff-page--activities activities-mgmt-page" dir="rtl">
+            <img
+                src="/images/minitree.png"
+                alt=""
+                aria-hidden="true"
+                className="activities-mgmt-decoration activities-mgmt-decoration--top"
+            />
+            <img
+                src="/images/minitree.png"
+                alt=""
+                aria-hidden="true"
+                className="activities-mgmt-decoration activities-mgmt-decoration--left"
+            />
+            <img
+                src="/images/minitree.png"
+                alt=""
+                aria-hidden="true"
+                className="activities-mgmt-decoration activities-mgmt-decoration--bottom"
+            />
             <div className="staff-container staff-container--activities">
                 {error ? <p className="staff-alert staff-alert--error">{error}</p> : null}
                 {success ? (

@@ -35,8 +35,8 @@ svg:not(:root) {
   max-width: 100%;
 }
 
-/* Dashboard panel rows — details wrap; action stacks below content on narrow viewports */
-@media (max-width: 1023px) {
+/* Dashboard panel rows — stack on mobile for tap-friendly actions */
+@media (max-width: 768px) {
   .staff-dashboard-panel__item--with-action {
     flex-direction: column;
     align-items: stretch;
@@ -45,6 +45,7 @@ svg:not(:root) {
 
   .staff-dashboard-panel__item-action {
     width: 100%;
+    min-height: 44px;
     text-align: center;
     white-space: normal;
   }
