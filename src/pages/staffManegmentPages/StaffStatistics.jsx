@@ -69,7 +69,7 @@ function StatisticsTooltip({ active, payload, label }) {
     );
 }
 
-function StaffStatistics() {
+function StaffStatistics({ onBack }) {
     const [loading, setLoading] = useState(true);
     const [error, setError] = useState("");
     const [stats, setStats] = useState(null);
@@ -232,16 +232,57 @@ function StaffStatistics() {
 
     return (
         <div className="staff-statistics-page" dir="rtl">
-            <header className="staff-statistics-header">
-                <div className="staff-statistics-header__intro">
-                    <h1 className="staff-statistics-header__title">סטטיסטיקות</h1>
-                    <p className="staff-statistics-header__subtitle">
-                        סקירת פעילות, הרשמות וביטולים לפי תקופה
-                    </p>
-                </div>
-            </header>
+            <img
+                src="/images/minitree.png"
+                alt=""
+                aria-hidden="true"
+                className="staff-statistics-decoration staff-statistics-decoration--top"
+            />
+            <img
+                src="/images/minitree.png"
+                alt=""
+                aria-hidden="true"
+                className="staff-statistics-decoration staff-statistics-decoration--left"
+            />
+            <img
+                src="/images/minitree.png"
+                alt=""
+                aria-hidden="true"
+                className="staff-statistics-decoration staff-statistics-decoration--bottom"
+            />
 
-            <div className="staff-statistics-content">
+            <div className="staff-statistics-container">
+                <header className="staff-statistics-header">
+                    <div className="staff-statistics-header__intro">
+                        <h1 className="staff-statistics-header__title">
+                            סטטיסטיקות
+                        </h1>
+                        <p className="staff-statistics-header__subtitle">
+                            סקירת פעילות, הרשמות וביטולים לפי תקופה
+                        </p>
+                    </div>
+                    {onBack ? (
+                        <div className="staff-statistics-header__actions">
+                            <button
+                                type="button"
+                                className="staff-back-button"
+                                onClick={onBack}
+                            >
+                                <span
+                                    className="staff-back-button__icon"
+                                    aria-hidden="true"
+                                >
+                                    →
+                                </span>
+                                <span className="staff-back-button__label">
+                                    חזרה ללוח הבקרה
+                                </span>
+                            </button>
+                        </div>
+                    ) : null}
+                </header>
+
+                <div className="staff-statistics-content">
                 <StaffPeriodFilter
                     viewMode={viewMode}
                     fromValue={fromValue}
@@ -636,6 +677,7 @@ function StaffStatistics() {
                         </div>
                     </div>
                 ) : null}
+                </div>
             </div>
         </div>
     );
