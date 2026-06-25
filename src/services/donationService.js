@@ -12,6 +12,10 @@ import {
     updateDoc
 } from "firebase/firestore";
 import { normalizeSearchQuery } from "../utils/staffManegmentUtils/adminListUtils";
+import {
+    resolveStatisticsFilter,
+    STATISTICS_VIEW_MODE
+} from "./staffManegmentServices/statisticsService";
 
 const donationsCollection = collection(db, "donations");
 const ADMIN_QUERY_LIMIT = 2000;
@@ -330,79 +334,108 @@ function getMonthKey(date) {
     return `${date.getFullYear()}-${String(date.getMonth() + 1).padStart(2, "0")}`;
 }
 
-function buildMonthlyChartData(donations, chartFilters = {}) {
-    const year = chartFilters.year ? Number(chartFilters.year) : null;
-    const month = chartFilters.month ? Number(chartFilters.month) : null;
+export const DEFAULT_DONATION_PERIOD_FILTER = {
+    mode: STATISTICS_VIEW_MODE.MONTHLY,
+    from: "",
+    to: ""
+};
 
-    if (year && month) {
-        const monthDate = new Date(year, month - 1, 1);
-        const key = getMonthKey(monthDate);
-        const bucket = {
-            key,
-            label: `${HEBREW_MONTHS[month - 1]} ${year}`,
-            amount: 0
-        };
+export function hasCustomDonationPeriodFilter(
+    periodFilter = DEFAULT_DONATION_PERIOD_FILTER
+) {
+    return Boolean(periodFilter?.from || periodFilter?.to);
+}
 
-        donations.forEach((donation) => {
-            const date = timestampToDate(donation.donation_date);
+export function filterDonationsByPeriod(
+    donations,
+    periodFilter = DEFAULT_DONATION_PERIOD_FILTER
+) {
+    const resolved = resolveStatisticsFilter(
+        periodFilter.mode,
+        periodFilter.from,
+        periodFilter.to
+    );
 
-            if (date && getMonthKey(date) === key) {
-                bucket.amount += donation.amount;
-            }
-        });
-
-        return [{ label: bucket.label, amount: bucket.amount }];
+    if (!resolved.range || resolved.error) {
+        return [];
     }
 
-    if (year) {
-        const buckets = [];
+    const rangeStart = resolved.range.start.getTime();
+    const rangeEnd = resolved.range.end.getTime();
 
-        for (let monthIndex = 0; monthIndex < 12; monthIndex += 1) {
-            const monthDate = new Date(year, monthIndex, 1);
+    return donations.filter((donation) => {
+        const date = timestampToDate(donation.donation_date);
 
-            buckets.push({
-                key: getMonthKey(monthDate),
-                label: HEBREW_MONTHS[monthIndex],
-                amount: 0
-            });
+        if (!date) {
+            return false;
         }
 
-        const bucketMap = Object.fromEntries(
-            buckets.map((bucket) => [bucket.key, bucket])
-        );
+        const time = date.getTime();
+        return time >= rangeStart && time <= rangeEnd;
+    });
+}
 
-        donations.forEach((donation) => {
-            const date = timestampToDate(donation.donation_date);
-
-            if (!date || date.getFullYear() !== year) {
-                return;
-            }
-
-            const bucket = bucketMap[getMonthKey(date)];
-
-            if (bucket) {
-                bucket.amount += donation.amount;
-            }
-        });
-
-        return buckets.map(({ label, amount }) => ({ label, amount }));
-    }
-
-    const now = new Date();
-    const monthsBack = 6;
+function buildDonationMonthlyBuckets(dateRange) {
     const buckets = [];
+    const cursor = new Date(
+        dateRange.start.getFullYear(),
+        dateRange.start.getMonth(),
+        1
+    );
+    const endMonth = new Date(
+        dateRange.end.getFullYear(),
+        dateRange.end.getMonth(),
+        1
+    );
 
-    for (let index = monthsBack - 1; index >= 0; index -= 1) {
-        const monthDate = new Date(now.getFullYear(), now.getMonth() - index, 1);
-        const key = getMonthKey(monthDate);
+    while (cursor <= endMonth) {
+        const key = getMonthKey(cursor);
 
         buckets.push({
             key,
-            label: `${HEBREW_MONTHS[monthDate.getMonth()]} ${monthDate.getFullYear()}`,
+            label: `${HEBREW_MONTHS[cursor.getMonth()]} ${cursor.getFullYear()}`,
+            amount: 0
+        });
+        cursor.setMonth(cursor.getMonth() + 1);
+    }
+
+    return buckets;
+}
+
+function buildDonationYearlyBuckets(dateRange) {
+    const buckets = [];
+    const startYear = dateRange.start.getFullYear();
+    const endYear = dateRange.end.getFullYear();
+
+    for (let year = startYear; year <= endYear; year += 1) {
+        buckets.push({
+            key: String(year),
+            label: String(year),
             amount: 0
         });
     }
 
+    return buckets;
+}
+
+function buildDonationPeriodChartData(
+    donations,
+    periodFilter = DEFAULT_DONATION_PERIOD_FILTER
+) {
+    const resolved = resolveStatisticsFilter(
+        periodFilter.mode,
+        periodFilter.from,
+        periodFilter.to
+    );
+
+    if (!resolved.range || resolved.error) {
+        return [];
+    }
+
+    const buckets =
+        periodFilter.mode === STATISTICS_VIEW_MODE.YEARLY
+            ? buildDonationYearlyBuckets(resolved.range)
+            : buildDonationMonthlyBuckets(resolved.range);
     const bucketMap = Object.fromEntries(
         buckets.map((bucket) => [bucket.key, bucket])
     );
@@ -414,7 +447,10 @@ function buildMonthlyChartData(donations, chartFilters = {}) {
             return;
         }
 
-        const key = getMonthKey(date);
+        const key =
+            periodFilter.mode === STATISTICS_VIEW_MODE.YEARLY
+                ? String(date.getFullYear())
+                : getMonthKey(date);
         const bucket = bucketMap[key];
 
         if (bucket) {
@@ -423,6 +459,16 @@ function buildMonthlyChartData(donations, chartFilters = {}) {
     });
 
     return buckets.map(({ label, amount }) => ({ label, amount }));
+}
+
+export function getDonationChartTitle(
+    periodFilter = DEFAULT_DONATION_PERIOD_FILTER
+) {
+    if (periodFilter.mode === STATISTICS_VIEW_MODE.YEARLY) {
+        return "תרומות לפי שנה";
+    }
+
+    return "תרומות לפי חודש";
 }
 
 function getTopDonor(donations) {
@@ -451,7 +497,10 @@ function getTopDonor(donations) {
     return topDonor;
 }
 
-export function getDonationStatistics(donations = [], filters = {}) {
+export function getDonationStatistics(
+    donations = [],
+    periodFilter = DEFAULT_DONATION_PERIOD_FILTER
+) {
     const totalAmount = donations.reduce(
         (sum, donation) => sum + donation.amount,
         0
@@ -495,6 +544,6 @@ export function getDonationStatistics(donations = [], filters = {}) {
         largestDonation,
         monthlyTotal,
         topDonor: getTopDonor(donations),
-        monthlyChartData: buildMonthlyChartData(donations, filters)
+        monthlyChartData: buildDonationPeriodChartData(donations, periodFilter)
     };
 }

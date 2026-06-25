@@ -1,17 +1,22 @@
 import { useCallback, useEffect, useMemo, useState } from "react";
-import DonationFilters from "../../components/donations/DonationFilters";
+import StaffPeriodFilter from "../../components/staff/StaffPeriodFilter";
 import DonationForm from "../../components/donations/DonationForm";
 import DonationSummary from "../../components/donations/DonationSummary";
 import DonationTable from "../../components/donations/DonationTable";
 import {
     addDonation,
+    DEFAULT_DONATION_PERIOD_FILTER,
     deleteDonation,
-    DONATION_EMPTY_FILTERS,
-    filterDonationsByCriteria,
+    filterDonationsByPeriod,
     getDonations,
-    hasActiveDonationFilters,
+    hasCustomDonationPeriodFilter,
     updateDonation
 } from "../../services/donationService";
+import {
+    getStatisticsRangeValidationMessage,
+    isInvalidStatisticsRange,
+    STATISTICS_VIEW_MODE
+} from "../../services/staffManegmentServices/statisticsService";
 
 function ManageDonations() {
     const [donations, setDonations] = useState([]);
@@ -21,22 +26,28 @@ function ManageDonations() {
     const [isFormOpen, setIsFormOpen] = useState(false);
     const [editingDonation, setEditingDonation] = useState(null);
     const [isSubmitting, setIsSubmitting] = useState(false);
-    const [filters, setFilters] = useState(DONATION_EMPTY_FILTERS);
+    const [viewMode, setViewMode] = useState(STATISTICS_VIEW_MODE.MONTHLY);
+    const [fromValue, setFromValue] = useState("");
+    const [toValue, setToValue] = useState("");
+    const [appliedFilter, setAppliedFilter] = useState(
+        DEFAULT_DONATION_PERIOD_FILTER
+    );
+    const [rangeValidationError, setRangeValidationError] = useState("");
+
+    const inputValidationError = useMemo(() => {
+        if (isInvalidStatisticsRange(viewMode, fromValue, toValue)) {
+            return getStatisticsRangeValidationMessage(viewMode);
+        }
+
+        return "";
+    }, [viewMode, fromValue, toValue]);
 
     const filteredDonations = useMemo(
-        () => filterDonationsByCriteria(donations, filters),
-        [donations, filters]
+        () => filterDonationsByPeriod(donations, appliedFilter),
+        [donations, appliedFilter]
     );
 
-    const chartFilters = useMemo(
-        () => ({
-            month: filters.month,
-            year: filters.year
-        }),
-        [filters.month, filters.year]
-    );
-
-    const hasPageFilters = hasActiveDonationFilters(filters);
+    const hasPageFilters = hasCustomDonationPeriodFilter(appliedFilter);
 
     const loadDonations = useCallback(async () => {
         setLoading(true);
@@ -57,6 +68,32 @@ function ManageDonations() {
     useEffect(() => {
         loadDonations();
     }, [loadDonations]);
+
+    function handleApplyFilter() {
+        if (inputValidationError) {
+            setRangeValidationError(inputValidationError);
+            return;
+        }
+
+        setRangeValidationError("");
+        setAppliedFilter({ mode: viewMode, from: fromValue, to: toValue });
+    }
+
+    function handleResetFilter() {
+        setViewMode(STATISTICS_VIEW_MODE.MONTHLY);
+        setFromValue("");
+        setToValue("");
+        setAppliedFilter(DEFAULT_DONATION_PERIOD_FILTER);
+        setRangeValidationError("");
+    }
+
+    function handleViewModeChange(mode) {
+        setViewMode(mode);
+        setFromValue("");
+        setToValue("");
+        setAppliedFilter({ mode, from: "", to: "" });
+        setRangeValidationError("");
+    }
 
     function handleAddClick() {
         setEditingDonation(null);
@@ -119,24 +156,33 @@ function ManageDonations() {
         }
     }
 
-    function handleClearFilters() {
-        setFilters(DONATION_EMPTY_FILTERS);
-    }
+    const displayValidationError =
+        inputValidationError || rangeValidationError;
 
     return (
-        <div className="staff-page staff-page--donations">
+        <div className="staff-page staff-page--donations" dir="rtl">
             <div className="staff-container staff-container--donations">
+                <StaffPeriodFilter
+                    viewMode={viewMode}
+                    fromValue={fromValue}
+                    toValue={toValue}
+                    validationError={displayValidationError}
+                    onViewModeChange={handleViewModeChange}
+                    onFromChange={(value) => {
+                        setFromValue(value);
+                        setRangeValidationError("");
+                    }}
+                    onToChange={(value) => {
+                        setToValue(value);
+                        setRangeValidationError("");
+                    }}
+                    onApply={handleApplyFilter}
+                    onReset={handleResetFilter}
+                />
+
                 <DonationSummary
                     donations={filteredDonations}
-                    chartFilters={chartFilters}
-                    filtersPanel={
-                        <DonationFilters
-                            donations={donations}
-                            filters={filters}
-                            onFilterChange={setFilters}
-                            onClearFilters={handleClearFilters}
-                        />
-                    }
+                    periodFilter={appliedFilter}
                 />
 
                 <section className="staff-section staff-section--list staff-section--donations-list">
