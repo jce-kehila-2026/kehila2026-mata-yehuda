@@ -477,7 +477,7 @@ function StaffDashboard({ onLogout }) {
                 return (
                     <div data-dashboard-page="messages">
                         {renderSubpageToolbar(SUBPAGE_TITLES.messages)}
-                        <SendMessages />
+                        <SendMessages onBack={goToDashboard} />
                     </div>
                 );
             case "attendance":
