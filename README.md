@@ -40,14 +40,7 @@ This project was collaboratively designed and developed by a team of four Softwa
 | **Doha Abdelnabi** | GitHub: [@doha-abdelnabi](https://github.com/doha-abdelnabi) |
 | **Widad Rajabi** | GitHub: [@WidadRajabi](https://github.com/WidadRajabi) |
 
-### Team roles
-
-| Role | Responsibility |
-|------|----------------|
-| **Team Lead** | Coordination, task distribution, and final decisions |
-| **Backend Developer** | Server-side logic, APIs, and data management |
-| **Frontend Developer** | User interface, UX, and client-side features |
-| **Documentation** | README, wiki, and project documentation |
+All team members contributed collaboratively to the design, implementation, testing, and documentation of the system. While individual responsibilities varied throughout the project, development was carried out as a joint team effort.
 
 ---
 
