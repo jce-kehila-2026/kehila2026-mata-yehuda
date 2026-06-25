@@ -436,31 +436,36 @@
   flex-direction: row;
   align-items: center;
   justify-content: space-between;
-  gap: 1rem;
+  gap: 0.75rem;
   padding: 0.75rem clamp(1rem, 3vw, 2rem);
   background: var(--color-bg);
   border-bottom: 1.5px solid var(--color-card-border);
   box-shadow: 0 1px 4px rgba(0, 0, 0, 0.04);
+  direction: ltr;
 }
 
 .staff-subpage-title {
-  margin: 0;
+  margin: 0 0 0 auto;
+  flex: 1 1 auto;
+  min-width: 0;
   font-size: 1.25rem;
   font-weight: 700;
   line-height: 1.3;
   color: var(--color-primary);
   text-align: right;
+  direction: rtl;
 }
 
 .staff-back-button {
-  flex-shrink: 0;
+  flex: 0 0 auto;
   display: inline-flex;
   align-items: center;
-  gap: 0.4rem;
+  gap: 0.35rem;
+  max-width: min(100%, 15rem);
   font-family: var(--staff-font-family);
   font-size: 0.95rem;
   font-weight: 600;
-  line-height: 1.3;
+  line-height: 1.35;
   color: var(--color-primary);
   background: var(--color-bg);
   border: 1.5px solid var(--color-primary);
@@ -469,6 +474,7 @@
   min-height: unset;
   width: auto;
   cursor: pointer;
+  white-space: nowrap;
   transition:
     background 0.2s ease,
     border-color 0.2s ease,
@@ -490,6 +496,12 @@
 .staff-back-button__icon {
   font-size: 1.1rem;
   line-height: 1;
+  flex-shrink: 0;
+}
+
+.staff-back-button__label {
+  min-width: 0;
+  line-height: 1.35;
 }
 
 .staff-actions--inline {
@@ -616,22 +628,31 @@
   }
 
   .staff-subpage-toolbar {
-    flex-direction: column;
-    align-items: stretch;
-    padding: 0.75rem 1rem;
-    gap: 0.65rem;
+    flex-direction: row;
+    align-items: center;
+    justify-content: space-between;
+    padding: 0.65rem 0.85rem;
+    gap: 0.5rem;
   }
 
   .staff-subpage-title {
-    font-size: 1.15rem;
-    text-align: center;
-    order: 1;
+    font-size: 1.05rem;
+    text-align: right;
+    margin-left: auto;
   }
 
   .staff-back-button {
-    width: 100%;
-    justify-content: center;
-    order: 2;
+    max-width: min(52%, 11.5rem);
+    padding: 0.4rem 0.6rem;
+    font-size: 0.82rem;
+    white-space: normal;
+    text-align: right;
+    flex: 0 0 auto;
+  }
+
+  .staff-back-button__label {
+    overflow-wrap: anywhere;
+    word-break: break-word;
   }
 
   .staff-toolbar {

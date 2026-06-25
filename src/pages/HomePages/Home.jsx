@@ -9,6 +9,7 @@ import ContactFooter from "../../components/Homecomponents/ContactFooter";
 import DayCenterRegisterForm from "../../components/Homecomponents/DayCenterRegisterForm";
 import VolunteerForm from "../../components/Homecomponents/VolunteerForm";
 import ProgramRegistrationForm from "../../components/Homecomponents/ProgramRegistrationForm";
+import { scrollToHomeSection } from "../../utils/homeSectionScroll";
 
 import "../../styles/HomeStyle/Home.css";
 import "../../styles/HomeStyle/ProgramCard.css";
@@ -22,20 +23,6 @@ const HOME_PROGRAM_TITLES = {
 };
 
 const PROGRAMS_PAGE_SIZE = 3;
-
-function scrollToSection(sectionId) {
-  const element = document.getElementById(sectionId);
-  if (!element) {
-    return;
-  }
-
-  element.scrollIntoView({ behavior: "smooth", block: "start" });
-  element.classList.add("section-highlight");
-
-  window.setTimeout(() => {
-    element.classList.remove("section-highlight");
-  }, 2000);
-}
 
 function Home() {
   const navigate = useNavigate();
@@ -74,9 +61,9 @@ function Home() {
     }
 
     const timer = window.setTimeout(() => {
-      scrollToSection(hash);
+      scrollToHomeSection(hash);
       window.history.replaceState(null, "", window.location.pathname);
-    }, 150);
+    }, 200);
 
     return () => window.clearTimeout(timer);
   }, []);

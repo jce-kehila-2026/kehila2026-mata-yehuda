@@ -39,6 +39,14 @@ body {
   border: none;
 }
 
+#root:has(.staff-dashboard-root) {
+  width: 100%;
+  max-width: none;
+  margin: 0;
+  padding: 0;
+  border: none;
+}
+
 .visually-hidden {
   position: absolute;
   width: 1px;

@@ -50,6 +50,13 @@
   flex-shrink: 0;
 }
 
+.admin-list-header__actions {
+  display: inline-flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 0.5rem;
+}
+
 .staff-page .admin-list-header__action.staff-button {
   width: auto;
   min-height: 1.95rem;

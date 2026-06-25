@@ -1,13 +1,22 @@
-import { useCallback, useEffect, useState } from "react";
+import { useCallback, useEffect, useMemo, useState } from "react";
+import StaffPeriodFilter from "../../components/staff/StaffPeriodFilter";
 import DonationForm from "../../components/donations/DonationForm";
 import DonationSummary from "../../components/donations/DonationSummary";
 import DonationTable from "../../components/donations/DonationTable";
 import {
     addDonation,
+    DEFAULT_DONATION_PERIOD_FILTER,
     deleteDonation,
+    filterDonationsByPeriod,
     getDonations,
+    hasCustomDonationPeriodFilter,
     updateDonation
 } from "../../services/donationService";
+import {
+    getStatisticsRangeValidationMessage,
+    isInvalidStatisticsRange,
+    STATISTICS_VIEW_MODE
+} from "../../services/staffManegmentServices/statisticsService";
 
 function ManageDonations() {
     const [donations, setDonations] = useState([]);
@@ -17,6 +26,28 @@ function ManageDonations() {
     const [isFormOpen, setIsFormOpen] = useState(false);
     const [editingDonation, setEditingDonation] = useState(null);
     const [isSubmitting, setIsSubmitting] = useState(false);
+    const [viewMode, setViewMode] = useState(STATISTICS_VIEW_MODE.MONTHLY);
+    const [fromValue, setFromValue] = useState("");
+    const [toValue, setToValue] = useState("");
+    const [appliedFilter, setAppliedFilter] = useState(
+        DEFAULT_DONATION_PERIOD_FILTER
+    );
+    const [rangeValidationError, setRangeValidationError] = useState("");
+
+    const inputValidationError = useMemo(() => {
+        if (isInvalidStatisticsRange(viewMode, fromValue, toValue)) {
+            return getStatisticsRangeValidationMessage(viewMode);
+        }
+
+        return "";
+    }, [viewMode, fromValue, toValue]);
+
+    const filteredDonations = useMemo(
+        () => filterDonationsByPeriod(donations, appliedFilter),
+        [donations, appliedFilter]
+    );
+
+    const hasPageFilters = hasCustomDonationPeriodFilter(appliedFilter);
 
     const loadDonations = useCallback(async () => {
         setLoading(true);
@@ -37,6 +68,32 @@ function ManageDonations() {
     useEffect(() => {
         loadDonations();
     }, [loadDonations]);
+
+    function handleApplyFilter() {
+        if (inputValidationError) {
+            setRangeValidationError(inputValidationError);
+            return;
+        }
+
+        setRangeValidationError("");
+        setAppliedFilter({ mode: viewMode, from: fromValue, to: toValue });
+    }
+
+    function handleResetFilter() {
+        setViewMode(STATISTICS_VIEW_MODE.MONTHLY);
+        setFromValue("");
+        setToValue("");
+        setAppliedFilter(DEFAULT_DONATION_PERIOD_FILTER);
+        setRangeValidationError("");
+    }
+
+    function handleViewModeChange(mode) {
+        setViewMode(mode);
+        setFromValue("");
+        setToValue("");
+        setAppliedFilter({ mode, from: "", to: "" });
+        setRangeValidationError("");
+    }
 
     function handleAddClick() {
         setEditingDonation(null);
@@ -99,14 +156,39 @@ function ManageDonations() {
         }
     }
 
+    const displayValidationError =
+        inputValidationError || rangeValidationError;
+
     return (
-        <div className="staff-page staff-page--donations">
+        <div className="staff-page staff-page--donations" dir="rtl">
             <div className="staff-container staff-container--donations">
-                <DonationSummary donations={donations} />
+                <StaffPeriodFilter
+                    viewMode={viewMode}
+                    fromValue={fromValue}
+                    toValue={toValue}
+                    validationError={displayValidationError}
+                    onViewModeChange={handleViewModeChange}
+                    onFromChange={(value) => {
+                        setFromValue(value);
+                        setRangeValidationError("");
+                    }}
+                    onToChange={(value) => {
+                        setToValue(value);
+                        setRangeValidationError("");
+                    }}
+                    onApply={handleApplyFilter}
+                    onReset={handleResetFilter}
+                />
+
+                <DonationSummary
+                    donations={filteredDonations}
+                    periodFilter={appliedFilter}
+                />
 
                 <section className="staff-section staff-section--list staff-section--donations-list">
                     <DonationTable
-                        donations={donations}
+                        donations={filteredDonations}
+                        hasPageFilters={hasPageFilters}
                         loading={loading}
                         error={error}
                         actionMessage={actionMessage}

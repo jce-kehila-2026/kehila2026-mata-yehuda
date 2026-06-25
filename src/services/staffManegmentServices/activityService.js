@@ -2,9 +2,7 @@ import { db } from "../../config/firebase";
 import {
     addDoc,
     collection,
-    getCountFromServer,
     getDocs,
-    deleteDoc,
     doc,
     updateDoc,
     query,
@@ -12,6 +10,15 @@ import {
     limit
 } from "firebase/firestore";
 import { normalizeSearchQuery } from "../../utils/staffManegmentUtils/adminListUtils";
+import {
+    filterActiveRecords,
+    filterArchivedRecords
+} from "../../utils/staffManegmentUtils/archiveUtils";
+import {
+    archiveDocument,
+    permanentlyDeleteDocument,
+    restoreDocument
+} from "./archiveService";
 import { getActivityWeekdaySortValue } from "../../utils/staffManegmentUtils/dateUtils";
 import {
     getActivityStatusSortValue,
@@ -81,15 +88,22 @@ export function getActivitySortValue(activity, sortField) {
 }
 
 export async function countActivitiesRecords() {
-    const snapshot = await getCountFromServer(query(activitiesCollection));
-    return snapshot.data().count;
+    const activities = await fetchActivitiesForAdminList();
+    return activities.length;
 }
 
 export async function fetchActivitiesForAdminList() {
     const constraints = [orderBy("name"), limit(ADMIN_QUERY_LIMIT)];
 
     const snapshot = await getDocs(query(activitiesCollection, ...constraints));
-    return snapshot.docs.map(mapActivityDoc);
+    return filterActiveRecords(snapshot.docs.map(mapActivityDoc));
+}
+
+export async function fetchArchivedActivitiesForAdminList() {
+    const constraints = [orderBy("name"), limit(ADMIN_QUERY_LIMIT)];
+
+    const snapshot = await getDocs(query(activitiesCollection, ...constraints));
+    return filterArchivedRecords(snapshot.docs.map(mapActivityDoc));
 }
 
 export async function fetchActivityTypes() {
@@ -102,7 +116,7 @@ export async function fetchActivityTypes() {
 
 export async function fetchActivities() {
     const docs = await getDocs(activitiesCollection);
-    return docs.docs.map(mapActivityDoc);
+    return filterActiveRecords(docs.docs.map(mapActivityDoc));
 }
 
 export async function addActivity(activityData) {
@@ -115,5 +129,13 @@ export async function updateActivity(activityId, activityData) {
 }
 
 export async function deleteActivity(activityId) {
-    return deleteDoc(doc(db, "activities", activityId));
+    return archiveDocument("activities", activityId);
+}
+
+export async function restoreActivity(activityId) {
+    return restoreDocument("activities", activityId);
+}
+
+export async function permanentlyDeleteActivity(activityId) {
+    return permanentlyDeleteDocument("activities", activityId);
 }

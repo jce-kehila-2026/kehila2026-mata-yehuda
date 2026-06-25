@@ -35,20 +35,33 @@ svg:not(:root) {
   max-width: 100%;
 }
 
-/* Dashboard panel rows — stack on narrow / zoomed */
-@media (max-width: 640px) {
+/* Dashboard panel rows — stack on mobile for tap-friendly actions */
+@media (max-width: 768px) {
   .staff-dashboard-panel__item--with-action {
     flex-direction: column;
     align-items: stretch;
-    gap: 0.45rem;
+    gap: 0.55rem;
   }
 
   .staff-dashboard-panel__item-action {
     width: 100%;
+    min-height: 44px;
     text-align: center;
     white-space: normal;
   }
 
+  .staff-dashboard-panel__item-name,
+  .staff-dashboard-panel__item-meta,
+  .staff-dashboard-panel__item-value {
+    overflow: visible;
+    text-overflow: unset;
+    white-space: normal;
+    word-break: break-word;
+    overflow-wrap: anywhere;
+  }
+}
+
+@media (max-width: 640px) {
   .staff-dashboard-hero__bar {
     flex-wrap: wrap;
     gap: 0.5rem;

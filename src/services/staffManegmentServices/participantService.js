@@ -2,16 +2,23 @@ import { db } from "../../config/firebase";
 import {
     addDoc,
     collection,
-    getCountFromServer,
     getDocs,
     doc,
     updateDoc,
-    deleteDoc,
     query,
     orderBy,
     limit
 } from "firebase/firestore";
 import { normalizeSearchQuery } from "../../utils/staffManegmentUtils/adminListUtils";
+import {
+    filterActiveRecords,
+    filterArchivedRecords
+} from "../../utils/staffManegmentUtils/archiveUtils";
+import {
+    archiveDocument,
+    permanentlyDeleteDocument,
+    restoreDocument
+} from "./archiveService";
 import { resolveCanonicalProgramId } from "../../utils/staffManegmentUtils/programConstants";
 import { toSafeString, matchesPaymentStatusFilter, matchesRegistrationStatusFilter } from "../../utils/staffManegmentUtils/participantStatusLabels";
 import { shouldShowParticipantAsInitialRequest } from "../../utils/staffManegmentUtils/initialRequestFilters";
@@ -149,28 +156,47 @@ function mergeParticipantRegistrations(participants, registrations) {
 }
 
 export async function countParticipantRecords() {
-    const snapshot = await getCountFromServer(query(participantsCollection));
-    return snapshot.data().count;
+    const participants = await fetchParticipantsForAdminList();
+    return participants.length;
 }
 
-export async function fetchParticipantsForAdminList() {
-    const [participantSnapshot, registrations] = await Promise.all([
-        getDocs(
-            query(
-                participantsCollection,
-                orderBy("last_name"),
-                limit(ADMIN_QUERY_LIMIT)
-            )
-        ),
-        fetchRegistrations()
-    ]);
+async function fetchAllParticipantsOrdered() {
+    const participantSnapshot = await getDocs(
+        query(
+            participantsCollection,
+            orderBy("last_name"),
+            limit(ADMIN_QUERY_LIMIT)
+        )
+    );
 
-    const participants = participantSnapshot.docs.map((participantDoc) => ({
+    return participantSnapshot.docs.map((participantDoc) => ({
         id: participantDoc.id,
         ...participantDoc.data()
     }));
+}
 
-    return mergeParticipantRegistrations(participants, registrations);
+export async function fetchParticipantsForAdminList() {
+    const [participants, registrations] = await Promise.all([
+        fetchAllParticipantsOrdered(),
+        fetchRegistrations()
+    ]);
+
+    return mergeParticipantRegistrations(
+        filterActiveRecords(participants),
+        registrations
+    );
+}
+
+export async function fetchArchivedParticipantsForAdminList() {
+    const [participants, registrations] = await Promise.all([
+        fetchAllParticipantsOrdered(),
+        fetchRegistrations()
+    ]);
+
+    return mergeParticipantRegistrations(
+        filterArchivedRecords(participants),
+        registrations
+    );
 }
 
 export {
@@ -210,10 +236,12 @@ function buildRegistrationSyncData(participantId, participantData) {
 export async function fetchParticipants() {
     const snapshot = await getDocs(participantsCollection);
 
-    return snapshot.docs.map((participantDoc) => ({
-        id: participantDoc.id,
-        ...participantDoc.data()
-    }));
+    return filterActiveRecords(
+        snapshot.docs.map((participantDoc) => ({
+            id: participantDoc.id,
+            ...participantDoc.data()
+        }))
+    );
 }
 
 export async function fetchParticipantsWithRegistrations() {
@@ -285,5 +313,13 @@ export async function updateParticipant(participantId, participantData) {
 }
 
 export async function deleteParticipant(participantId) {
-    return deleteDoc(doc(db, "participants", participantId));
+    return archiveDocument("participants", participantId);
+}
+
+export async function restoreParticipant(participantId) {
+    return restoreDocument("participants", participantId);
+}
+
+export async function permanentlyDeleteParticipant(participantId) {
+    return permanentlyDeleteDocument("participants", participantId);
 }

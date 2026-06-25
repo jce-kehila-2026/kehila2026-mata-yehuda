@@ -1,5 +1,5 @@
 import { useCallback, useEffect, useMemo, useState } from "react";
-import { Plus, UserRound } from "lucide-react";
+import { Archive, Plus, UserRound } from "lucide-react";
 import ParticipantCard from "./ParticipantCard";
 import ParticipantStatusBadge from "../ParticipantStatusBadge";
 import {
@@ -40,6 +40,8 @@ import {
     REGISTRATION_STATUS_FILTER_OPTIONS,
     toSafeString
 } from "../../../utils/staffManegmentUtils/participantStatusLabels";
+import { ARCHIVE_CONFIRM_MESSAGE } from "../../../utils/staffManegmentUtils/archiveUtils";
+import StaffConfirmModal from "../../staff/StaffConfirmModal";
 import { hasFormattedDisplay, hasValue } from "../../../utils/staffManegmentUtils/hasValue";
 
 const PARTICIPANT_COLUMNS = [
@@ -82,7 +84,8 @@ function getProgramLabel(participant, programs = []) {
 function ParticipantList({
     refreshKey = 0,
     onEditParticipant,
-    onAddParticipant
+    onAddParticipant,
+    onViewArchive
 }) {
     const [sourceItems, setSourceItems] = useState([]);
     const [programs, setPrograms] = useState([]);
@@ -90,6 +93,8 @@ function ParticipantList({
     const [loading, setLoading] = useState(true);
     const [error, setError] = useState("");
     const [actionMessage, setActionMessage] = useState("");
+    const [pendingArchiveParticipant, setPendingArchiveParticipant] = useState(null);
+    const [archiving, setArchiving] = useState(false);
 
     const filterItems = useCallback(
         (items, searchQuery, filters) =>
@@ -143,21 +148,26 @@ function ParticipantList({
     }, [refreshKey]);
 
     async function handleDeleteParticipant(participant) {
-        const confirmDelete = window.confirm(
-            "האם אתה בטוח שברצונך למחוק משתתף זה?"
-        );
+        setPendingArchiveParticipant(participant);
+    }
 
-        if (!confirmDelete) {
+    async function confirmArchiveParticipant() {
+        if (!pendingArchiveParticipant) {
             return;
         }
 
+        setArchiving(true);
+
         try {
-            await deleteParticipant(participant.id);
-            setActionMessage("המשתתף נמחק בהצלחה");
+            await deleteParticipant(pendingArchiveParticipant.id);
+            setActionMessage("המשתתף הועבר לארכיון בהצלחה");
             await loadParticipants();
         } catch (err) {
             console.error(err);
-            setError("שגיאה במחיקת המשתתף");
+            setError("שגיאה בהעברת המשתתף לארכיון");
+        } finally {
+            setArchiving(false);
+            setPendingArchiveParticipant(null);
         }
     }
 
@@ -277,20 +287,36 @@ function ParticipantList({
         <div className="staff-list-section admin-list-section admin-list-section--participants">
             <div className="admin-list-header admin-list-header--split">
                 <h2 className="admin-list-header__title">רשימת משתתפים</h2>
-                {onAddParticipant ? (
-                    <button
-                        type="button"
-                        className="staff-button staff-button--small admin-list-header__action admin-list-header__action--compact"
-                        onClick={onAddParticipant}
-                    >
-                        <Plus
-                            className="admin-list-header__action-icon"
-                            strokeWidth={2.25}
-                            aria-hidden="true"
-                        />
-                        <span>הוספת משתתף</span>
-                    </button>
-                ) : null}
+                <div className="admin-list-header__actions">
+                    {onViewArchive ? (
+                        <button
+                            type="button"
+                            className="staff-button staff-button--secondary staff-button--small admin-list-header__action admin-list-header__action--compact"
+                            onClick={onViewArchive}
+                        >
+                            <Archive
+                                className="admin-list-header__action-icon"
+                                strokeWidth={2.25}
+                                aria-hidden="true"
+                            />
+                            <span>צפייה בארכיון</span>
+                        </button>
+                    ) : null}
+                    {onAddParticipant ? (
+                        <button
+                            type="button"
+                            className="staff-button staff-button--small admin-list-header__action admin-list-header__action--compact"
+                            onClick={onAddParticipant}
+                        >
+                            <Plus
+                                className="admin-list-header__action-icon"
+                                strokeWidth={2.25}
+                                aria-hidden="true"
+                            />
+                            <span>הוספת משתתף</span>
+                        </button>
+                    ) : null}
+                </div>
             </div>
 
             <AdminListToolbar
@@ -418,6 +444,18 @@ function ParticipantList({
                     />
                 </>
             ) : null}
+
+            <StaffConfirmModal
+                message={pendingArchiveParticipant ? ARCHIVE_CONFIRM_MESSAGE : ""}
+                confirmLabel="העברה לארכיון"
+                confirming={archiving}
+                onConfirm={confirmArchiveParticipant}
+                onCancel={() => {
+                    if (!archiving) {
+                        setPendingArchiveParticipant(null);
+                    }
+                }}
+            />
         </div>
     );
 }
