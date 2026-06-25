@@ -143,10 +143,41 @@
   cursor: not-allowed;
 }
 
+/* Archive action ("צפייה בארכיון") — outlined red so it reads as a distinct,
+   non-primary "view archive" action rather than an add action. */
+.programs-mgmt-page__action--archive {
+  color: #b42318;
+  background: #ffffff;
+  background-color: #ffffff;
+  border-color: #f3c4bf;
+  box-shadow: none;
+}
+
+.programs-mgmt-page__action--archive:hover:not(:disabled),
+.programs-mgmt-page__action--archive:active:not(:disabled) {
+  color: #912018;
+  background: #fdf3f2;
+  background-color: #fdf3f2;
+  border-color: #e8a59d;
+  box-shadow: none;
+  transform: none;
+}
+
 .programs-mgmt-page__action-icon {
   width: 1rem;
   height: 1rem;
   flex-shrink: 0;
+}
+
+/* ===== Archive view back-to-list navigation ===== */
+
+.programs-mgmt-page .programs-mgmt-archive-toolbar {
+  position: relative;
+  z-index: 1;
+  display: flex;
+  /* RTL flex-end aligns the button to the left edge of the page */
+  justify-content: flex-end;
+  margin-bottom: 1rem;
 }
 
 /* ===== Summary statistics cards (larger, icon in soft green circle) ===== */

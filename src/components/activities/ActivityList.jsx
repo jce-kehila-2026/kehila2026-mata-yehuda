@@ -1,5 +1,5 @@
 import { useCallback, useEffect, useMemo, useState } from "react";
-import { CalendarDays, ClipboardList, Plus, Users } from "lucide-react";
+import { Archive, CalendarDays, ClipboardList, Plus, Users } from "lucide-react";
 import ActivityCard from "./ActivityCard";
 import ActivityStatusBadge from "./ActivityStatusBadge";
 import AdminDataTable from "../admin/AdminDataTable";
@@ -37,7 +37,14 @@ const ACTIVITY_COLUMNS = [
     { key: "actions", label: "פעולות" }
 ];
 
-function ActivityList({ onDelete, onEdit, refreshKey = 0, onAddActivity, onBack }) {
+function ActivityList({
+    onDelete,
+    onEdit,
+    refreshKey = 0,
+    onAddActivity,
+    onViewArchive,
+    onBack
+}) {
     const [sourceItems, setSourceItems] = useState([]);
     const [totalCount, setTotalCount] = useState(0);
     const [loading, setLoading] = useState(true);
@@ -176,6 +183,20 @@ function ActivityList({ onDelete, onEdit, refreshKey = 0, onAddActivity, onBack 
                                 aria-hidden="true"
                             />
                             <span>הוספת פעילות</span>
+                        </button>
+                    ) : null}
+                    {onViewArchive ? (
+                        <button
+                            type="button"
+                            className="activities-mgmt-page__action activities-mgmt-page__action--archive"
+                            onClick={onViewArchive}
+                        >
+                            <Archive
+                                className="activities-mgmt-page__action-icon"
+                                strokeWidth={2.25}
+                                aria-hidden="true"
+                            />
+                            <span>צפייה בארכיון</span>
                         </button>
                     ) : null}
                     {onBack ? (
