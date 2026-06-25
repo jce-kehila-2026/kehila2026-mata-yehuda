@@ -39,7 +39,7 @@ export function explainGetTokenFailure(error) {
         "messaging/permission-blocked":
             "Browser notification permission is blocked. Allow notifications for this site in browser settings.",
         "messaging/permission-default":
-            "Notification permission was not granted yet. Click the opt-in button and allow notifications.",
+            "Notification permission was not granted yet. Check the opt-in checkbox and allow notifications when prompted.",
         "messaging/failed-service-worker-registration":
             "The Firebase messaging service worker could not register. Check /firebase-messaging-sw.js and hard-refresh the page.",
         "messaging/invalid-vapid-key":
