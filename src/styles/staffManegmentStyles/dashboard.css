@@ -1,9 +1,9 @@
 /* StaffDashboard — portal home, summary, control panels */
 
-/* Override global #root centering/padding (Payment/global.css) on dashboard home only */
-html:has(.staff-page--dashboard.staff-dashboard-root),
-body:has(.staff-page--dashboard.staff-dashboard-root),
-#root:has(.staff-page--dashboard.staff-dashboard-root) {
+/* Override global #root centering/padding (Payment/global.css) on dashboard shell */
+html:has(.staff-dashboard-root),
+body:has(.staff-dashboard-root),
+#root:has(.staff-dashboard-root) {
   width: 100%;
   max-width: none;
   margin: 0;
@@ -11,16 +11,16 @@ body:has(.staff-page--dashboard.staff-dashboard-root),
   box-sizing: border-box;
 }
 
-html:has(.staff-page--dashboard.staff-dashboard-root) {
+html:has(.staff-dashboard-root) {
   --staff-dashboard-header-height: 82px;
 }
 
-body:has(.staff-page--dashboard.staff-dashboard-root) {
-  background: #faf4ec;
+body:has(.staff-dashboard-root) {
+  background: #f1f8f3;
 }
 
 @media (max-width: 768px) {
-  html:has(.staff-page--dashboard.staff-dashboard-root) {
+  html:has(.staff-dashboard-root) {
     --staff-dashboard-header-height: 72px;
   }
 }
@@ -59,6 +59,12 @@ body:has(.staff-page--dashboard.staff-dashboard-root) {
 
 .staff-page--dashboard.staff-dashboard-root {
   --staff-dashboard-header-height: 82px;
+  --staff-dashboard-btn-surface: #eef7f0;
+  --staff-dashboard-btn-surface-hover: #d8f0df;
+  --staff-dashboard-btn-border: rgba(45, 125, 70, 0.28);
+  --staff-dashboard-divider: rgba(45, 125, 70, 0.24);
+  --color-border: rgba(45, 125, 70, 0.35);
+  --color-card-border: rgba(45, 125, 70, 0.24);
   width: 100%;
   max-width: none;
   margin: 0;
@@ -68,7 +74,7 @@ body:has(.staff-page--dashboard.staff-dashboard-root) {
   overflow-y: auto;
   display: flex;
   flex-direction: column;
-  background: #faf4ec;
+  background: #f1f8f3;
   color: var(--color-text);
   box-sizing: border-box;
 }
@@ -84,8 +90,367 @@ body:has(.staff-page--dashboard.staff-dashboard-root) {
   overflow-y: auto;
   display: flex;
   flex-direction: column;
-  background: #faf4ec;
+  background: #f1f8f3;
   color: var(--color-text);
+  --staff-dashboard-btn-surface: #eef7f0;
+  --staff-dashboard-btn-surface-hover: #d8f0df;
+  --staff-dashboard-btn-border: rgba(45, 125, 70, 0.28);
+  --staff-dashboard-divider: rgba(45, 125, 70, 0.24);
+  --color-border: rgba(45, 125, 70, 0.35);
+  --color-card-border: rgba(45, 125, 70, 0.24);
+}
+
+.staff-dashboard-root {
+  --staff-dashboard-page-bg: #f1f8f3;
+  --staff-dashboard-card-bg: #fafcfb;
+  --staff-dashboard-card-bg-strong: #eef7f0;
+  --staff-dashboard-card-gradient: linear-gradient(180deg, #fafcfb 0%, #eef7f0 100%);
+  --staff-dashboard-input-bg: #ffffff;
+  --staff-dashboard-divider: rgba(45, 125, 70, 0.24);
+  --color-border: rgba(45, 125, 70, 0.35);
+  --color-card-border: rgba(45, 125, 70, 0.24);
+  --color-bg: var(--staff-dashboard-card-bg);
+  --staff-color-bg: var(--staff-dashboard-card-bg);
+  --dashboard-font-family: "Heebo", system-ui, sans-serif;
+  --dashboard-font-size-body: 1.05rem;
+  --dashboard-line-height-body: 1.8;
+  --dashboard-line-height-title: 1.25;
+  --dashboard-letter-spacing-title: -0.02em;
+  --dashboard-letter-spacing-eyebrow: 0.02em;
+  --dashboard-font-weight-title: 700;
+  --dashboard-font-weight-label: 600;
+  --dashboard-font-weight-button: 700;
+  --dashboard-color-text: var(--color-text, #1f1f1f);
+  --dashboard-color-muted: var(--color-muted, #444444);
+  --staff-font-family: var(--dashboard-font-family);
+  background: var(--staff-dashboard-page-bg);
+  min-height: 100dvh;
+  font-family: var(--dashboard-font-family);
+  font-size: var(--dashboard-font-size-body);
+  line-height: var(--dashboard-line-height-body);
+  color: var(--dashboard-color-text);
+}
+
+.staff-page.staff-dashboard-root,
+.staff-dashboard-root .staff-subpage,
+.staff-dashboard-root .staff-page,
+.staff-dashboard-root .staff-statistics-page,
+.staff-dashboard-root .staff-page--donations,
+.staff-dashboard-root .attendance-page,
+.staff-dashboard-root .requests-inbox,
+.staff-dashboard-root [data-dashboard-page] {
+  background: var(--staff-dashboard-page-bg);
+}
+
+.staff-dashboard-root .staff-statistics-page {
+  --stats-bg: var(--staff-dashboard-page-bg);
+  --stats-card-bg: var(--staff-dashboard-card-bg);
+}
+
+.staff-dashboard-root .requests-inbox {
+  --inbox-bg: var(--staff-dashboard-page-bg);
+  --inbox-surface: var(--staff-dashboard-card-bg);
+  min-height: auto;
+}
+
+/* Dashboard typography — aligned with Home Page */
+.staff-dashboard-root .staff-page,
+.staff-dashboard-root .staff-subpage,
+.staff-dashboard-root .staff-container,
+.staff-dashboard-root .staff-statistics-page,
+.staff-dashboard-root .attendance-page,
+.staff-dashboard-root .requests-inbox,
+.staff-dashboard-root [data-dashboard-page] {
+  font-family: var(--dashboard-font-family);
+  font-size: var(--dashboard-font-size-body);
+  line-height: var(--dashboard-line-height-body);
+}
+
+.staff-dashboard-root button,
+.staff-dashboard-root input,
+.staff-dashboard-root select,
+.staff-dashboard-root textarea,
+.staff-dashboard-root .staff-button,
+.staff-dashboard-root .inbox-btn {
+  font-family: var(--dashboard-font-family);
+}
+
+.staff-dashboard-root h1,
+.staff-dashboard-root h2,
+.staff-dashboard-root .staff-section h2,
+.staff-dashboard-root .staff-subpage-title,
+.staff-dashboard-root .admin-list-header__title,
+.staff-dashboard-root .requests-inbox__page-title,
+.staff-dashboard-root .staff-statistics-header__title,
+.staff-dashboard-root .staff-statistics-card__title,
+.staff-dashboard-root .staff-dashboard-panel__title,
+.staff-dashboard-root .staff-header h1 {
+  font-family: var(--dashboard-font-family);
+  font-weight: var(--dashboard-font-weight-title);
+  line-height: var(--dashboard-line-height-title);
+  letter-spacing: var(--dashboard-letter-spacing-title);
+}
+
+.staff-dashboard-root h3,
+.staff-dashboard-root .staff-section h3 {
+  font-family: var(--dashboard-font-family);
+  font-weight: var(--dashboard-font-weight-title);
+  line-height: var(--dashboard-line-height-title);
+}
+
+.staff-dashboard-root .staff-dashboard-section-title {
+  font-family: var(--dashboard-font-family);
+  font-size: clamp(1.15rem, 2.6vw, 1.4rem);
+  font-weight: var(--dashboard-font-weight-title);
+  line-height: var(--dashboard-line-height-title);
+  letter-spacing: var(--dashboard-letter-spacing-title);
+}
+
+.staff-dashboard-root .staff-subpage-title {
+  font-size: clamp(1.25rem, 2.8vw, 1.5rem);
+}
+
+.staff-dashboard-root .staff-section h2 {
+  font-size: clamp(1.4rem, 3.2vw, 1.65rem);
+}
+
+.staff-dashboard-root .admin-list-header__title {
+  font-size: clamp(1.25rem, 2.8vw, 1.4rem);
+}
+
+.staff-dashboard-root label,
+.staff-dashboard-root .staff-form label,
+.staff-dashboard-root .staff-section--form label {
+  font-family: var(--dashboard-font-family);
+  font-size: var(--dashboard-font-size-body);
+  font-weight: var(--dashboard-font-weight-label);
+  line-height: var(--dashboard-line-height-body);
+}
+
+.staff-dashboard-root .staff-form input,
+.staff-dashboard-root .staff-form textarea,
+.staff-dashboard-root .staff-form select,
+.staff-dashboard-root .staff-section--form input,
+.staff-dashboard-root .staff-section--form textarea,
+.staff-dashboard-root .staff-section--form select {
+  font-family: var(--dashboard-font-family);
+  font-size: var(--dashboard-font-size-body);
+  line-height: var(--dashboard-line-height-body);
+}
+
+.staff-dashboard-root .staff-button,
+.staff-dashboard-root .staff-page button.staff-button {
+  font-size: 1.1rem;
+  font-weight: var(--dashboard-font-weight-button);
+  line-height: var(--dashboard-line-height-title);
+}
+
+.staff-dashboard-root .staff-button--small,
+.staff-dashboard-root .staff-button--compact,
+.staff-dashboard-root .admin-list-header__action--compact,
+.staff-dashboard-root .staff-page .admin-list-header__action.staff-button {
+  font-weight: var(--dashboard-font-weight-label);
+}
+
+.staff-dashboard-root .admin-data-table {
+  font-family: var(--dashboard-font-family);
+  line-height: var(--dashboard-line-height-body);
+}
+
+.staff-dashboard-root .admin-data-table th {
+  font-weight: var(--dashboard-font-weight-label);
+}
+
+.staff-dashboard-root p,
+.staff-dashboard-root .staff-card p,
+.staff-dashboard-root .staff-card-body p,
+.staff-dashboard-root .staff-statistics-header__subtitle,
+.staff-dashboard-root .requests-inbox__page-subtitle,
+.staff-dashboard-root .staff-dashboard-summary-card__label,
+.staff-dashboard-root .staff-dashboard-panel__item-meta,
+.staff-dashboard-root .staff-dashboard-panel__empty-text {
+  font-family: var(--dashboard-font-family);
+  line-height: var(--dashboard-line-height-body);
+}
+
+.staff-dashboard-root .staff-statistics-header__subtitle,
+.staff-dashboard-root .requests-inbox__page-subtitle,
+.staff-dashboard-root .staff-dashboard-summary-card__label,
+.staff-dashboard-root .staff-dashboard-panel__item-meta {
+  font-size: 0.95rem;
+  color: var(--dashboard-color-muted);
+}
+
+.staff-dashboard-root .requests-inbox__page-title {
+  font-size: clamp(1.25rem, 2.8vw, 1.4rem);
+}
+
+.staff-dashboard-root .staff-dashboard-summary-card__value {
+  font-family: var(--dashboard-font-family);
+  letter-spacing: var(--dashboard-letter-spacing-title);
+}
+
+.staff-dashboard-root .staff-dashboard-summary-card__label {
+  font-weight: 500;
+}
+
+.staff-dashboard-root .staff-statistics-page {
+  color: var(--dashboard-color-text);
+  --stats-text: var(--dashboard-color-text);
+  --stats-text-secondary: var(--dashboard-color-muted);
+}
+
+/* Dashboard card & container surfaces — green palette */
+.staff-dashboard-root .staff-dashboard-summary-card,
+.staff-dashboard-root .staff-dashboard-panel,
+.staff-dashboard-root .staff-card,
+.staff-dashboard-root .staff-section--accent,
+.staff-dashboard-root .staff-section--filters,
+.staff-dashboard-root .program-card,
+.staff-dashboard-root .donations-summary__card,
+.staff-dashboard-root .donations-summary__chart-card,
+.staff-dashboard-root .donations-table-section,
+.staff-dashboard-root .donations-card,
+.staff-dashboard-root .donations-modal,
+.staff-dashboard-root .staff-statistics-summary-card,
+.staff-dashboard-root .staff-statistics-highlight-card,
+.staff-dashboard-root .staff-statistics-card,
+.staff-dashboard-root .admin-data-table-wrap,
+.staff-dashboard-root .admin-list-empty,
+.staff-dashboard-root .staff-subpage-toolbar,
+.staff-dashboard-root .staff-dashboard-activity-modal__panel,
+.staff-dashboard-root .staff-dashboard-activity-modal__card,
+.staff-dashboard-root .staff-dashboard-calendar__next-item,
+.staff-dashboard-root .notifications-stats__card,
+.staff-dashboard-root .notifications-card,
+.staff-dashboard-root .notifications-activity,
+.staff-dashboard-root .attendance-page__card,
+.staff-dashboard-root .attendance-page__card--records,
+.staff-dashboard-root .attendance-records-page__hint-card,
+.staff-dashboard-root .attendance-records-page__toolbar,
+.staff-dashboard-root .attendance-records-page__card,
+.staff-dashboard-root .take-attendance-page__hint-card,
+.staff-dashboard-root .take-attendance-page__toolbar,
+.staff-dashboard-root .take-attendance-page__card,
+.staff-dashboard-root .attendance-records-page__daily-activity-block,
+.staff-dashboard-root .attendance-records-page__top-card,
+.staff-dashboard-root .attendance-records-page__activity-info,
+.staff-dashboard-root .attendance-records-page__insight-card,
+.staff-dashboard-root .form-image-upload__preview-block {
+  background: var(--staff-dashboard-card-bg);
+}
+
+.staff-dashboard-root
+  .attendance-records-page__summary-card:not(
+    .attendance-records-page__summary-card--present
+  ):not(.attendance-records-page__summary-card--absent):not(
+    .attendance-records-page__summary-card--rate
+  ) {
+  background: var(--staff-dashboard-card-bg);
+}
+
+.staff-dashboard-root .attendance-records-page__top-card:hover,
+.staff-dashboard-root .attendance-records-page__top-card:focus-visible,
+.staff-dashboard-root .attendance-records-page__top-card--rank-1:hover,
+.staff-dashboard-root .attendance-records-page__top-card--rank-1:focus-visible,
+.staff-dashboard-root .attendance-records-page__top-card--zero:hover,
+.staff-dashboard-root .attendance-records-page__top-card--zero:focus-visible {
+  background: var(--staff-dashboard-card-bg);
+}
+
+.staff-dashboard-root .program-card--fixed,
+.staff-dashboard-root .staff-card--highlight,
+.staff-dashboard-root .staff-dashboard-week__item,
+.staff-dashboard-root .donations-card {
+  background: var(--staff-dashboard-card-bg-strong);
+}
+
+.staff-dashboard-root .attendance-page__card--take {
+  background: var(--staff-dashboard-card-gradient);
+}
+
+.staff-dashboard-root .attendance-page .attendance-page__card--take:hover,
+.staff-dashboard-root .attendance-page .attendance-page__card--take:active,
+.staff-dashboard-root .attendance-page .attendance-page__card--take:focus-visible {
+  background: linear-gradient(180deg, #fafcfb 0%, #f4faf7 100%);
+  background-color: #f4faf7;
+}
+
+.staff-dashboard-root .attendance-page .attendance-page__card--records:hover,
+.staff-dashboard-root .attendance-page .attendance-page__card--records:active,
+.staff-dashboard-root .attendance-page .attendance-page__card--records:focus-visible {
+  background: var(--staff-dashboard-card-bg);
+  background-color: var(--staff-dashboard-card-bg);
+}
+
+.staff-dashboard-root .admin-data-table thead {
+  background: var(--staff-dashboard-card-bg-strong);
+}
+
+.staff-dashboard-root .admin-data-table tbody td {
+  background-color: var(--staff-dashboard-input-bg);
+}
+
+.staff-dashboard-root .admin-data-table tbody tr:hover {
+  background: transparent;
+}
+
+.staff-dashboard-root .admin-data-table tbody tr:hover td {
+  background-color: #f7fcf8;
+}
+
+.staff-dashboard-root .staff-statistics-table th {
+  background: var(--staff-dashboard-card-bg-strong);
+}
+
+.staff-dashboard-root .staff-statistics-table tbody td {
+  background-color: var(--staff-dashboard-input-bg);
+}
+
+.staff-dashboard-root .attendance-records-page__table tbody td,
+.staff-dashboard-root .take-attendance-page__table tbody td {
+  background-color: var(--staff-dashboard-input-bg);
+}
+
+.staff-dashboard-root .inbox-row:hover {
+  background: var(--staff-dashboard-card-bg-strong);
+  box-shadow: inset 1px 0 0 var(--staff-dashboard-divider),
+    inset -1px 0 0 var(--staff-dashboard-divider);
+}
+
+.staff-dashboard-root input:not([type="checkbox"]):not([type="radio"]):not([type="button"]):not([type="submit"]):not([type="reset"]):not([type="image"]):not([type="hidden"]),
+.staff-dashboard-root select,
+.staff-dashboard-root textarea,
+.staff-dashboard-root .staff-form input,
+.staff-dashboard-root .staff-form select,
+.staff-dashboard-root .staff-form textarea,
+.staff-dashboard-root .staff-section--form input,
+.staff-dashboard-root .staff-section--form select,
+.staff-dashboard-root .staff-section--form textarea,
+.staff-dashboard-root .admin-list-toolbar input,
+.staff-dashboard-root .admin-list-toolbar select,
+.staff-dashboard-root .staff-list-filters input,
+.staff-dashboard-root .staff-list-filters select,
+.staff-dashboard-root .requests-inbox input,
+.staff-dashboard-root .requests-inbox select,
+.staff-dashboard-root .attendance-records-page__field input,
+.staff-dashboard-root .attendance-records-page__field select,
+.staff-dashboard-root .take-attendance-page__field input,
+.staff-dashboard-root .take-attendance-page__field select,
+.staff-dashboard-root .notifications-form input,
+.staff-dashboard-root .notifications-form select,
+.staff-dashboard-root .notifications-form textarea,
+.staff-dashboard-root .notifications-form__audience-chip {
+  background-color: var(--staff-dashboard-input-bg);
+}
+
+.staff-dashboard-root .staff-back-button,
+.staff-dashboard-root .staff-dashboard-nav-item,
+.staff-dashboard-root .staff-mobile-menu-item,
+.staff-dashboard-root .staff-dashboard-sidebar-item,
+.staff-dashboard-root .staff-dashboard-panel__link,
+.staff-dashboard-root .staff-dashboard-list__button {
+  font-family: var(--dashboard-font-family);
 }
 
 .staff-page--dashboard .staff-subpage {
@@ -101,7 +466,7 @@ body:has(.staff-page--dashboard.staff-dashboard-root) {
   padding: 0;
   padding-top: 0;
   overflow-x: hidden;
-  background: #faf4ec;
+  background: #f1f8f3;
 }
 
 .staff-dashboard-page--home {
@@ -135,6 +500,7 @@ body:has(.staff-page--dashboard.staff-dashboard-root) {
 }
 
 .staff-dashboard-hero__bar {
+  position: relative;
   width: 100%;
   max-width: 1270px;
   height: 100%;
@@ -154,9 +520,23 @@ body:has(.staff-page--dashboard.staff-dashboard-root) {
   justify-content: flex-start;
   gap: 0.65rem;
   min-width: 0;
-  max-width: calc(100% - 8rem);
   direction: rtl;
   z-index: 2;
+}
+
+.staff-dashboard-hero__title-wrap {
+  position: absolute;
+  left: 50%;
+  top: 50%;
+  transform: translate(-50%, -50%);
+  z-index: 1;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: max-content;
+  max-width: min(calc(100% - 10rem), 24rem);
+  padding: 0 0.5rem;
+  pointer-events: none;
 }
 
 .staff-dashboard-logout--hero {
@@ -170,16 +550,40 @@ body:has(.staff-page--dashboard.staff-dashboard-root) {
 }
 
 .staff-dashboard-title {
-  font-size: clamp(1.15rem, 2.2vw, 1.45rem);
-  font-weight: 700;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 0.35rem;
+  font-family: var(--dashboard-font-family, "Heebo", system-ui, sans-serif);
+  font-size: clamp(1.25rem, 2.4vw, 1.5rem);
+  font-weight: var(--dashboard-font-weight-title, 700);
   margin: 0;
   padding: 0;
-  line-height: 1.2;
+  line-height: var(--dashboard-line-height-title, 1.25);
   color: #ffffff;
+  letter-spacing: var(--dashboard-letter-spacing-title, -0.02em);
+  text-align: center;
   min-width: 0;
+}
+
+.staff-dashboard-title__text {
+  display: block;
+  font-family: inherit;
+  font-weight: inherit;
+  letter-spacing: inherit;
+  line-height: inherit;
   white-space: nowrap;
   overflow: hidden;
   text-overflow: ellipsis;
+  max-width: 100%;
+}
+
+.staff-dashboard-title__line {
+  display: block;
+  width: clamp(2.25rem, 10vw, 3.5rem);
+  height: 2px;
+  border-radius: 999px;
+  background: rgba(255, 255, 255, 0.42);
 }
 
 .staff-dashboard-hero .staff-dashboard-title {
@@ -467,8 +871,8 @@ body:has(.staff-page--dashboard.staff-dashboard-root) {
   justify-content: flex-start;
   gap: 0.2rem;
   min-height: 100px;
-  background: #ffffff;
-  border: 1px solid #e8e8e8;
+  background: var(--staff-dashboard-card-bg, #fafcfb);
+  border: 1px solid var(--staff-dashboard-divider, rgba(45, 125, 70, 0.24));
   border-radius: 14px;
   padding: 16px 20px;
   box-shadow: 0 2px 10px rgba(0, 0, 0, 0.06);
@@ -549,8 +953,8 @@ body:has(.staff-page--dashboard.staff-dashboard-root) {
   width: 100%;
   max-width: 100%;
   box-sizing: border-box;
-  background: #ffffff;
-  border: 1px solid #e8e8e8;
+  background: var(--staff-dashboard-card-bg, #fafcfb);
+  border: 1px solid var(--staff-dashboard-divider, rgba(45, 125, 70, 0.24));
   border-radius: 14px;
   padding: 0.85rem 1rem;
   box-shadow: 0 2px 10px rgba(0, 0, 0, 0.06);
@@ -571,7 +975,7 @@ body:has(.staff-page--dashboard.staff-dashboard-root) {
   margin: 0 0 0.45rem;
   line-height: 1.25;
   padding-bottom: 0.4rem;
-  border-bottom: 1px solid #e8e8e8;
+  border-bottom: 1px solid var(--staff-dashboard-divider, rgba(45, 125, 70, 0.24));
   flex-shrink: 0;
 }
 
@@ -909,7 +1313,7 @@ body:has(.staff-page--dashboard.staff-dashboard-root) {
   gap: 0.05rem;
   margin-top: 0.15rem;
   padding-top: 0.35rem;
-  border-top: 1px solid #e8e8e8;
+  border-top: 1px solid var(--staff-dashboard-divider, rgba(45, 125, 70, 0.24));
 }
 
 .staff-dashboard-calendar__next-label {
@@ -948,7 +1352,7 @@ body:has(.staff-page--dashboard.staff-dashboard-root) {
   padding: 0.45rem 0.55rem;
   border: 1px solid var(--color-border);
   border-radius: 10px;
-  background: #ffffff;
+  background: var(--staff-dashboard-card-bg, #fafcfb);
   text-align: right;
   cursor: pointer;
   transition:
@@ -1023,7 +1427,7 @@ body:has(.staff-page--dashboard.staff-dashboard-root) {
 
 .staff-dashboard-activity-modal__close:hover,
 .staff-dashboard-activity-modal__close:focus-visible {
-  background: var(--color-accent-light);
+  background: var(--staff-dashboard-btn-surface, #eef7f0);
 }
 
 .staff-dashboard-activity-modal__body {
@@ -1038,7 +1442,7 @@ body:has(.staff-page--dashboard.staff-dashboard-root) {
   padding: 0.75rem 0.8rem;
   border: 1px solid var(--color-border);
   border-radius: 12px;
-  background: #ffffff;
+  background: var(--staff-dashboard-card-bg-strong, #eef7f0);
   box-shadow: 0 1px 4px rgba(15, 23, 42, 0.04);
 }
 
@@ -1154,7 +1558,7 @@ body:has(.staff-page--dashboard.staff-dashboard-root) {
   font-weight: 600;
   text-align: center;
   color: #2d7d46;
-  background: #faf4ec;
+  background: var(--staff-dashboard-btn-surface, #eef7f0);
   border: none;
   border-radius: 10px;
   padding: 0.48rem 0.65rem;
@@ -1164,7 +1568,7 @@ body:has(.staff-page--dashboard.staff-dashboard-root) {
 
 .staff-dashboard-panel__link:hover:not(:disabled),
 .staff-dashboard-panel__link:active:not(:disabled) {
-  background: #f3ebe0;
+  background: var(--staff-dashboard-btn-surface-hover, #d8f0df);
   color: #236b38;
 }
 
@@ -1176,6 +1580,13 @@ body:has(.staff-page--dashboard.staff-dashboard-root) {
 .staff-dashboard-panel__link:focus-visible {
   outline: 3px solid var(--color-border);
   outline-offset: 2px;
+}
+
+.staff-dashboard-root .staff-back-button:hover,
+.staff-dashboard-root .staff-back-button:active {
+  background: var(--staff-dashboard-btn-surface, #eef7f0);
+  border-color: var(--color-primary-hover);
+  color: var(--color-primary-hover);
 }
 
 .staff-dashboard-updates {
@@ -1199,9 +1610,9 @@ body:has(.staff-page--dashboard.staff-dashboard-root) {
   align-items: flex-start;
   gap: 0.15rem;
   padding: 0.55rem 0.65rem;
-  border: 1px solid var(--color-border);
+  border: 1px solid var(--staff-dashboard-btn-border, rgba(45, 125, 70, 0.2));
   border-radius: calc(var(--radius) * 0.65);
-  background: var(--color-accent-light);
+  background: var(--staff-dashboard-btn-surface, #eef7f0);
   font-family: var(--staff-font-family);
   text-align: right;
   cursor: pointer;
@@ -1293,8 +1704,8 @@ body:has(.staff-page--dashboard.staff-dashboard-root) {
   font-weight: 600;
   text-align: right;
   color: var(--color-text);
-  background: var(--color-accent-light);
-  border: 1.5px solid var(--color-border);
+  background: var(--staff-dashboard-btn-surface, #eef7f0);
+  border: 1.5px solid var(--staff-dashboard-btn-border, rgba(45, 125, 70, 0.2));
   border-radius: var(--radius);
   padding: 1rem 1.15rem;
   cursor: pointer;
@@ -1870,7 +2281,7 @@ body:has(.staff-page--dashboard.staff-dashboard-root) {
     align-items: center;
     justify-content: space-between;
     gap: 0.75rem;
-    border-bottom: 1px solid #e5e7eb;
+    border-bottom: 1px solid var(--staff-dashboard-divider, rgba(45, 125, 70, 0.24));
     padding-bottom: 0.75rem;
     margin-bottom: 0.5rem;
     flex-shrink: 0;
@@ -1921,7 +2332,7 @@ body:has(.staff-page--dashboard.staff-dashboard-root) {
   .staff-dashboard-sidebar-section-title {
     margin: 0.55rem 0 0.25rem;
     padding-bottom: 0.25rem;
-    border-bottom: 1px solid #e5e7eb;
+    border-bottom: 1px solid var(--staff-dashboard-divider, rgba(45, 125, 70, 0.24));
     font-size: 0.75rem;
     font-weight: 700;
     letter-spacing: 0.01em;
@@ -2134,7 +2545,10 @@ body:has(.staff-page--dashboard.staff-dashboard-root) {
   .staff-dashboard-hero__brand,
   .staff-dashboard-hero__start {
     right: 1rem;
-    max-width: calc(100% - 5rem);
+  }
+
+  .staff-dashboard-hero__title-wrap {
+    max-width: min(calc(100% - 7.5rem), 20rem);
   }
 
   .staff-dashboard-content {
@@ -2203,17 +2617,18 @@ body:has(.staff-page--dashboard.staff-dashboard-root) {
     flex-wrap: nowrap;
   }
 
-  .staff-dashboard-title {
+  .staff-dashboard-title__text {
     white-space: nowrap;
     text-overflow: ellipsis;
   }
 }
 
 /* RequestsPage embedded in staff inquiries subpage */
-[data-dashboard-page="inquiries"] .requests-inbox {
+.staff-dashboard-root [data-dashboard-page="inquiries"] .requests-inbox {
   min-height: auto;
   background: transparent;
-  font-size: 14px;
+  font-size: var(--dashboard-font-size-body, 1.05rem);
+  line-height: var(--dashboard-line-height-body, 1.8);
 }
 
 [data-dashboard-page="inquiries"] .requests-inbox__page-header {

@@ -589,8 +589,16 @@ function StaffDashboard({ onLogout }) {
                                         onNavigate={handleDashboardAction}
                                     />
                                 </div>
+                            </div>
+                            <div className="staff-dashboard-hero__title-wrap">
                                 <h1 className="staff-dashboard-title">
-                                    לוח בקרה לצוות
+                                    <span className="staff-dashboard-title__text">
+                                        לוח בקרה לצוות
+                                    </span>
+                                    <span
+                                        className="staff-dashboard-title__line"
+                                        aria-hidden="true"
+                                    />
                                 </h1>
                             </div>
                             <button

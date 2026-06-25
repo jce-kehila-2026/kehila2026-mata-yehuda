@@ -1,26 +1,12 @@
 import { useLocation, useNavigate } from "react-router-dom";
+import { scrollToHomeSection } from "../../utils/homeSectionScroll";
 
 const NAV_ITEMS = [
   { id: "about", label: "מי אנחנו", type: "page", path: "/about" },
+  { id: "requests", label: "פניות ובקשות", type: "section" },
   { id: "donations", label: "תרומות", type: "section" },
   { id: "contact", label: "יצירת קשר", type: "section" },
 ];
-
-function scrollToHomeSection(sectionId) {
-  const element = document.getElementById(sectionId);
-  if (!element) {
-    return false;
-  }
-
-  element.scrollIntoView({ behavior: "smooth", block: "start" });
-  element.classList.add("section-highlight");
-
-  window.setTimeout(() => {
-    element.classList.remove("section-highlight");
-  }, 2000);
-
-  return true;
-}
 
 function HomeNavbar() {
   const navigate = useNavigate();

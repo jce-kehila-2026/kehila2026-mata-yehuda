@@ -14,3 +14,9 @@ export const DONATION_STORAGE_KEYS = {
   paymentMethod: "donationPaymentMethod",
   donationId: "donationId",
 };
+
+export const DONATION_FLOW_STEPS = [
+  { id: "amount", label: "סכום" },
+  { id: "details", label: "פרטים" },
+  { id: "success", label: "סיום" },
+];
