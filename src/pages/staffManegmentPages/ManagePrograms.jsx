@@ -10,19 +10,14 @@ import {
     getProgramUpdateSuccessMessage,
     isFixedProgramId
 } from "../../utils/staffManegmentUtils/programConstants";
-import { ARCHIVE_CONFIRM_MESSAGE } from "../../utils/staffManegmentUtils/archiveUtils";
-import StaffConfirmModal from "../../components/staff/StaffConfirmModal";
 import ProgramForm from "../../components/programs/ProgramForm";
 import ProgramList from "../../components/programs/ProgramList";
-import ArchiveProgramsList from "../../components/archive/ArchiveProgramsList";
 
 function ManagePrograms({ programView, onNavigate }) {
     const [editingProgram, setEditingProgram] = useState(null);
     const [listRefreshKey, setListRefreshKey] = useState(0);
     const [error, setError] = useState("");
     const [success, setSuccess] = useState("");
-    const [pendingArchiveId, setPendingArchiveId] = useState(null);
-    const [archiving, setArchiving] = useState(false);
     const programPage = programView || "list";
 
     function refreshProgramList() {
@@ -47,13 +42,6 @@ function ManagePrograms({ programView, onNavigate }) {
         setError("");
         setSuccess("");
         navigateToView("add");
-    }
-
-    function handleViewArchive() {
-        setEditingProgram(null);
-        setError("");
-        setSuccess("");
-        navigateToView("archive");
     }
 
     function handleEdit(program) {
@@ -105,33 +93,25 @@ function ManagePrograms({ programView, onNavigate }) {
             return;
         }
 
-        setPendingArchiveId(programId);
-    }
-
-    async function confirmArchiveProgram() {
-        if (!pendingArchiveId) {
+        const confirmed = window.confirm("האם למחוק תוכנית זו?");
+        if (!confirmed) {
             return;
         }
 
-        setArchiving(true);
-
         try {
-            await deleteProgram(pendingArchiveId);
+            await deleteProgram(programId);
 
-            if (editingProgram?.id === pendingArchiveId) {
+            if (editingProgram?.id === programId) {
                 setEditingProgram(null);
                 goBackToList();
             }
 
             refreshProgramList();
-            setSuccess("התוכנית הועברה לארכיון בהצלחה");
+            setSuccess("התוכנית נמחקה בהצלחה");
             setError("");
         } catch (err) {
             console.error(err);
-            setError("שגיאה בהעברת התוכנית לארכיון");
-        } finally {
-            setArchiving(false);
-            setPendingArchiveId(null);
+            setError("שגיאה במחיקת התוכנית");
         }
     }
 
@@ -156,10 +136,10 @@ function ManagePrograms({ programView, onNavigate }) {
                 className="programs-mgmt-decoration programs-mgmt-decoration--bottom"
             />
             <div className="staff-container staff-container--programs">
-                {error && (programPage === "list" || programPage === "archive") ? (
+                {error && programPage === "list" ? (
                     <p className="staff-alert staff-alert--error">{error}</p>
                 ) : null}
-                {success && (programPage === "list" || programPage === "archive") ? (
+                {success && programPage === "list" ? (
                     <p className="staff-alert staff-alert--success">{success}</p>
                 ) : null}
 
@@ -170,20 +150,7 @@ function ManagePrograms({ programView, onNavigate }) {
                             onEdit={handleEdit}
                             onDelete={handleDelete}
                             onAddProgram={handleAddProgramClick}
-                            onViewArchive={handleViewArchive}
-                        />
-                    </section>
-                )}
-
-                {programPage === "archive" && (
-                    <section className="staff-section staff-section--list staff-section--programs-archive">
-                        <ArchiveProgramsList
-                            refreshKey={listRefreshKey}
-                            onActionMessage={(message) => {
-                                setSuccess(message);
-                                setError("");
-                                refreshProgramList();
-                            }}
+                            onBack={() => onNavigate("dashboard")}
                         />
                     </section>
                 )}
@@ -218,18 +185,6 @@ function ManagePrograms({ programView, onNavigate }) {
                     </section>
                 )}
             </div>
-
-            <StaffConfirmModal
-                message={pendingArchiveId ? ARCHIVE_CONFIRM_MESSAGE : ""}
-                confirmLabel="העברה לארכיון"
-                confirming={archiving}
-                onConfirm={confirmArchiveProgram}
-                onCancel={() => {
-                    if (!archiving) {
-                        setPendingArchiveId(null);
-                    }
-                }}
-            />
         </div>
     );
 }

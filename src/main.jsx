@@ -24,7 +24,6 @@ import "./styles/staffManegmentStyles/cancellations.css";
 import "./styles/staffManegmentStyles/messages.css";
 import "./styles/staffManegmentStyles/staffStatistics.css";
 import "./styles/staffManegmentStyles/donations.css";
-import "./styles/staffManegmentStyles/archive.css";
 import "./styles/Payment/global.css";
 import "./styles/Payment/registration.css";
 
