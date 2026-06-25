@@ -40,7 +40,7 @@ svg:not(:root) {
   .staff-dashboard-panel__item--with-action {
     flex-direction: column;
     align-items: stretch;
-    gap: 0.55rem;
+    gap: 0.45rem;
   }
 
   .staff-dashboard-panel__item-action {
@@ -50,18 +50,6 @@ svg:not(:root) {
     white-space: normal;
   }
 
-  .staff-dashboard-panel__item-name,
-  .staff-dashboard-panel__item-meta,
-  .staff-dashboard-panel__item-value {
-    overflow: visible;
-    text-overflow: unset;
-    white-space: normal;
-    word-break: break-word;
-    overflow-wrap: anywhere;
-  }
-}
-
-@media (max-width: 640px) {
   .staff-dashboard-hero__bar {
     flex-wrap: wrap;
     gap: 0.5rem;

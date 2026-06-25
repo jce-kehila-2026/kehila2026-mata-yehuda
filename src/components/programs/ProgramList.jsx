@@ -1,5 +1,5 @@
 import { useCallback, useEffect, useMemo, useState } from "react";
-import { Archive, ClipboardList, Plus } from "lucide-react";
+import { ClipboardList, Plus } from "lucide-react";
 import ProgramCard from "./ProgramCard";
 import AdminDataTable from "../admin/AdminDataTable";
 import AdminListEmptyState from "../admin/AdminListEmptyState";
@@ -50,7 +50,7 @@ function ProgramList({
     onEdit,
     onDelete,
     onAddProgram,
-    onViewArchive
+    onBack
 }) {
     const [sourceItems, setSourceItems] = useState([]);
     const [totalCount, setTotalCount] = useState(0);
