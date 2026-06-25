@@ -56,25 +56,25 @@ function ParticipantListStats({ stats }) {
     }
 
     return (
-        <div className="participant-list-stats" aria-label="סיכום משתתפים">
+        <div className="list-mgmt-summary" aria-label="סיכום משתתפים">
             {items.map((item) => {
                 const Icon = STAT_ICONS[item.key] || ClipboardList;
 
                 return (
-                    <div key={item.key} className="participant-list-stats__item">
+                    <div key={item.key} className="list-mgmt-summary__item">
                         <span
-                            className="participant-list-stats__icon"
+                            className="list-mgmt-summary__icon"
                             aria-hidden="true"
                         >
                             <Icon
-                                className="participant-list-stats__icon-glyph"
+                                className="list-mgmt-summary__icon-glyph"
                                 strokeWidth={2}
                             />
                         </span>
-                        <span className="participant-list-stats__value">
+                        <span className="list-mgmt-summary__value">
                             {item.value}
                         </span>
-                        <span className="participant-list-stats__label">
+                        <span className="list-mgmt-summary__label">
                             {item.ltr ? (
                                 <ProgramDisplayName title={item.label} />
                             ) : (

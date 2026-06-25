@@ -1,22 +1,28 @@
-/* ManageParticipants — aligned to the "ניהול פעילויות" (Activities) design system.
-   Same layout, spacing, typography, colors, radii, shadows, and component styles.
-   Scoped under .participants-mgmt-page so no other page is affected.
-   UI only: no functionality, data, routes, or markup behavior changes. */
+/* Shared "list management" design system — used by both ניהול משתתפים
+   (Participants) and ניהול אנשי צוות (Staff), aligned to the Activities page.
 
-/* The full-width subpage strip is removed for this page — the back button now
-   lives in the header action area next to "+ הוספת משתתף". */
-[data-dashboard-page="manageParticipants"] > .staff-subpage-toolbar {
+   This is the single source of truth for the management list template:
+   header, summary cards, search/filter toolbar, table card, pagination,
+   empty/loading states, decorative leaves and responsive behavior.
+
+   Any page using this template adds the `list-mgmt-page` class to its root.
+   UI only: no functionality/data/markup-behavior changes. */
+
+/* The full-width subpage strip is removed for these pages — the back button
+   lives in the header action area instead. */
+[data-dashboard-page="manageParticipants"] > .staff-subpage-toolbar,
+[data-dashboard-page="manageStaff"] > .staff-subpage-toolbar {
   display: none;
 }
 
-.participants-mgmt-page {
+.list-mgmt-page {
   position: relative;
   width: 100%;
   overflow: hidden;
 }
 
 /* Centered content with the same max-width as the Activities page */
-.participants-mgmt-page .staff-container--participants {
+.list-mgmt-page .staff-container {
   position: relative;
   z-index: 1;
   width: 100%;
@@ -28,7 +34,7 @@
 
 /* ===== Decorative leaves (subtle, behind content) ===== */
 
-.participants-mgmt-decoration {
+.list-mgmt-decoration {
   position: absolute;
   height: auto;
   opacity: 0.12;
@@ -37,20 +43,20 @@
   z-index: 0;
 }
 
-.participants-mgmt-decoration--top {
+.list-mgmt-decoration--top {
   top: -0.75rem;
   right: -0.75rem;
   width: clamp(120px, 14vw, 180px);
 }
 
-.participants-mgmt-decoration--left {
+.list-mgmt-decoration--left {
   top: 38%;
   left: -2rem;
   width: clamp(120px, 14vw, 185px);
   transform: translateY(-50%) rotate(-12deg);
 }
 
-.participants-mgmt-decoration--bottom {
+.list-mgmt-decoration--bottom {
   bottom: -0.75rem;
   left: -0.75rem;
   width: clamp(120px, 14vw, 185px);
@@ -59,7 +65,7 @@
 
 /* ===== Header (title + subtitle + actions) ===== */
 
-.participants-mgmt-page__header {
+.list-mgmt-page__header {
   display: flex;
   align-items: flex-start;
   justify-content: space-between;
@@ -68,12 +74,12 @@
   margin: 0 0 1.85rem;
 }
 
-.participants-mgmt-page__header-main {
+.list-mgmt-page__header-main {
   flex: 1;
   min-width: 0;
 }
 
-.participants-mgmt-page .participants-mgmt-page__title {
+.list-mgmt-page .list-mgmt-page__title {
   margin: 0;
   font-family: "Heebo", system-ui, sans-serif;
   font-size: clamp(1.6rem, 4vw, 2.1rem);
@@ -85,7 +91,7 @@
   padding-bottom: 0;
 }
 
-.participants-mgmt-page__subtitle {
+.list-mgmt-page__subtitle {
   margin: 0.5rem 0 0;
   max-width: 38rem;
   font-size: 0.95rem;
@@ -94,7 +100,7 @@
   line-height: 1.5;
 }
 
-.participants-mgmt-page__actions {
+.list-mgmt-page__actions {
   flex-shrink: 0;
   align-self: flex-start;
   margin-top: 0.2rem;
@@ -104,7 +110,7 @@
   gap: 0.6rem;
 }
 
-.participants-mgmt-page__action {
+.list-mgmt-page__action {
   flex-shrink: 0;
   display: inline-flex;
   align-items: center;
@@ -127,8 +133,8 @@
     border-color 0.15s ease;
 }
 
-.participants-mgmt-page__action:hover:not(:disabled),
-.participants-mgmt-page__action:active:not(:disabled) {
+.list-mgmt-page__action:hover:not(:disabled),
+.list-mgmt-page__action:active:not(:disabled) {
   background: #1a6a36;
   background-color: #1a6a36;
   border-color: #155c2f;
@@ -137,13 +143,13 @@
   box-shadow: 0 5px 16px rgba(31, 122, 63, 0.22);
 }
 
-.participants-mgmt-page__action:disabled {
+.list-mgmt-page__action:disabled {
   opacity: 0.65;
   cursor: not-allowed;
 }
 
 /* Archive action ("צפייה בארכיון") — outlined red, distinct from the add action */
-.participants-mgmt-page__action--archive {
+.list-mgmt-page__action--archive {
   color: #b42318;
   background: #ffffff;
   background-color: #ffffff;
@@ -151,8 +157,8 @@
   box-shadow: none;
 }
 
-.participants-mgmt-page__action--archive:hover:not(:disabled),
-.participants-mgmt-page__action--archive:active:not(:disabled) {
+.list-mgmt-page__action--archive:hover:not(:disabled),
+.list-mgmt-page__action--archive:active:not(:disabled) {
   color: #912018;
   background: #fdf3f2;
   background-color: #fdf3f2;
@@ -161,7 +167,7 @@
   transform: none;
 }
 
-.participants-mgmt-page__action-icon {
+.list-mgmt-page__action-icon {
   width: 1rem;
   height: 1rem;
   flex-shrink: 0;
@@ -169,7 +175,7 @@
 
 /* ===== Archive view back-to-list navigation ===== */
 
-.participants-mgmt-page .participants-mgmt-archive-toolbar {
+.list-mgmt-page .list-mgmt-archive-toolbar {
   position: relative;
   z-index: 1;
   display: flex;
@@ -180,14 +186,14 @@
 
 /* ===== Summary statistics cards (match Activities summary cards) ===== */
 
-.participants-mgmt-page .participant-list-stats {
+.list-mgmt-page .list-mgmt-summary {
   display: grid;
   grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
   gap: 1rem;
   margin: 0 0 1.85rem;
 }
 
-.participants-mgmt-page .participant-list-stats__item {
+.list-mgmt-page .list-mgmt-summary__item {
   position: relative;
   display: flex;
   flex-direction: column;
@@ -203,7 +209,7 @@
   text-align: center;
 }
 
-.participants-mgmt-page .participant-list-stats__icon {
+.list-mgmt-page .list-mgmt-summary__icon {
   position: absolute;
   top: 1rem;
   left: 1rem;
@@ -218,12 +224,12 @@
   box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.7);
 }
 
-.participants-mgmt-page .participant-list-stats__icon-glyph {
+.list-mgmt-page .list-mgmt-summary__icon-glyph {
   width: 1.2rem;
   height: 1.2rem;
 }
 
-.participants-mgmt-page .participant-list-stats__value {
+.list-mgmt-page .list-mgmt-summary__value {
   font-size: clamp(2.2rem, 3.8vw, 2.85rem);
   font-weight: 800;
   line-height: 1;
@@ -231,18 +237,20 @@
   color: #1f5c34;
 }
 
-.participants-mgmt-page .participant-list-stats__label {
+.list-mgmt-page .list-mgmt-summary__label {
   font-size: 1rem;
   font-weight: 700;
   color: #2d7d46;
 }
 
-/* ===== Search & filters toolbar (white rounded card like Activities) ===== */
+/* ===== Search & filters toolbar (white rounded card like Activities) =====
+   A flexible row that adapts to any number of filters (works for the
+   participants page with 3 filters and the staff page with 1). */
 
-.participants-mgmt-page .admin-list-section--participants .admin-list-toolbar.staff-form.staff-list-filters {
-  display: grid;
-  grid-template-columns: minmax(220px, 2fr) 1fr 1fr 1fr auto;
-  align-items: end;
+.list-mgmt-page .admin-list-section .admin-list-toolbar.staff-form.staff-list-filters {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: flex-end;
   gap: 0.85rem;
   margin: 0 0 1.6rem;
   padding: 1rem 1.15rem;
@@ -252,17 +260,42 @@
   box-shadow: 0 3px 14px rgba(36, 48, 41, 0.05);
 }
 
-.participants-mgmt-page .admin-list-section--participants .admin-list-toolbar label {
+.list-mgmt-page .admin-list-section .admin-list-toolbar .admin-list-toolbar__search {
+  display: flex;
+  flex-direction: column;
+  gap: 0.4rem;
+  flex: 1 1 240px;
+  min-width: 0;
+}
+
+.list-mgmt-page .admin-list-section .admin-list-toolbar .admin-list-toolbar__filter-item {
+  display: flex;
+  flex-direction: column;
+  gap: 0.4rem;
+  flex: 1 1 170px;
+  min-width: 150px;
+}
+
+.list-mgmt-page .admin-list-section .admin-list-toolbar .admin-list-toolbar__page-size {
+  display: flex;
+  flex-direction: column;
+  gap: 0.4rem;
+  flex: 0 0 auto;
+  min-width: 130px;
+}
+
+.list-mgmt-page .admin-list-section .admin-list-toolbar label {
   display: inline-flex;
   align-items: center;
   gap: 0.35rem;
+  margin: 0;
   font-size: 0.82rem;
   font-weight: 700;
   color: #5a6a60;
 }
 
-.participants-mgmt-page .admin-list-section--participants .admin-list-toolbar input,
-.participants-mgmt-page .admin-list-section--participants .admin-list-toolbar select {
+.list-mgmt-page .admin-list-section .admin-list-toolbar input,
+.list-mgmt-page .admin-list-section .admin-list-toolbar select {
   width: 100%;
   min-width: 0;
   min-height: 0;
@@ -277,8 +310,8 @@
   padding: 0.7rem 0.9rem;
 }
 
-.participants-mgmt-page .admin-list-section--participants .admin-list-toolbar input:focus,
-.participants-mgmt-page .admin-list-section--participants .admin-list-toolbar select:focus {
+.list-mgmt-page .admin-list-section .admin-list-toolbar input:focus,
+.list-mgmt-page .admin-list-section .admin-list-toolbar select:focus {
   outline: none;
   border-color: #9fd4ab;
   background: #ffffff;
@@ -287,7 +320,7 @@
 
 /* ===== List / table container ===== */
 
-.participants-mgmt-list {
+.list-mgmt-list {
   background: #ffffff;
   border: 1px solid #e8efe9;
   border-radius: 16px;
@@ -295,66 +328,66 @@
   overflow: hidden;
 }
 
-.participants-mgmt-page .participants-mgmt-list .admin-data-table-wrap {
+.list-mgmt-page .list-mgmt-list .admin-data-table-wrap {
   border: none;
   border-radius: 0;
   background: transparent;
   box-shadow: none;
 }
 
-.participants-mgmt-page .participants-mgmt-list .admin-data-table thead {
+.list-mgmt-page .list-mgmt-list .admin-data-table thead {
   background: #f3f9f4;
 }
 
-.participants-mgmt-page .participants-mgmt-list .admin-data-table th {
+.list-mgmt-page .list-mgmt-list .admin-data-table th {
   color: #1f5c34;
   font-size: 0.9rem;
 }
 
 /* Taller, cleaner rows (override shared compact padding within this card only) */
-.participants-mgmt-page .participants-mgmt-list .admin-data-table th,
-.participants-mgmt-page .participants-mgmt-list .admin-data-table td,
-.participants-mgmt-page .participants-mgmt-list .admin-data-table--compact th,
-.participants-mgmt-page .participants-mgmt-list .admin-data-table--compact td {
+.list-mgmt-page .list-mgmt-list .admin-data-table th,
+.list-mgmt-page .list-mgmt-list .admin-data-table td,
+.list-mgmt-page .list-mgmt-list .admin-data-table--compact th,
+.list-mgmt-page .list-mgmt-list .admin-data-table--compact td {
   padding: 1.05rem 1.15rem;
   border-bottom-color: #eef3ef;
 }
 
-.participants-mgmt-page .participants-mgmt-list .admin-data-table--compact td {
+.list-mgmt-page .list-mgmt-list .admin-data-table--compact td {
   font-size: 0.95rem;
 }
 
-.participants-mgmt-page .participants-mgmt-list .admin-data-table tbody tr:last-child td {
+.list-mgmt-page .list-mgmt-list .admin-data-table tbody tr:last-child td {
   border-bottom: none;
 }
 
-.participants-mgmt-page .participants-mgmt-list .admin-data-table tbody tr:hover {
+.list-mgmt-page .list-mgmt-list .admin-data-table tbody tr:hover {
   background: #f7fbf8;
 }
 
-.participants-mgmt-page .participants-mgmt-list .admin-data-table__name-cell {
+.list-mgmt-page .list-mgmt-list .admin-data-table__name-cell {
   font-weight: 700;
   color: #243029;
 }
 
-/* Keep all row actions (view / edit / delete) on a single line — the actions
-   column sizes to its content and the table scrolls horizontally if needed. */
-.participants-mgmt-page .participants-mgmt-list .admin-data-table {
+/* Keep all row actions on a single line — the actions column sizes to its
+   content and the table scrolls horizontally if needed. */
+.list-mgmt-page .list-mgmt-list .admin-data-table {
   min-width: 940px;
 }
 
-.participants-mgmt-page .participants-mgmt-list .admin-data-table th:last-child,
-.participants-mgmt-page .participants-mgmt-list .admin-data-table td:last-child {
+.list-mgmt-page .list-mgmt-list .admin-data-table th:last-child,
+.list-mgmt-page .list-mgmt-list .admin-data-table td:last-child {
   width: 1%;
   white-space: nowrap;
 }
 
-.participants-mgmt-page .participants-mgmt-list .admin-data-table__actions {
+.list-mgmt-page .list-mgmt-list .admin-data-table__actions {
   flex-wrap: nowrap;
 }
 
 /* Action buttons (style existing view/edit/delete actions like the reference) */
-.participants-mgmt-page .participants-mgmt-list .admin-table-action {
+.list-mgmt-page .list-mgmt-list .admin-table-action {
   width: 2.3rem;
   height: 2.3rem;
   border-radius: 10px;
@@ -362,47 +395,47 @@
   background: #ffffff;
 }
 
-.participants-mgmt-page .participants-mgmt-list .admin-table-action:hover:not(:disabled),
-.participants-mgmt-page .participants-mgmt-list .admin-table-action:active:not(:disabled) {
+.list-mgmt-page .list-mgmt-list .admin-table-action:hover:not(:disabled),
+.list-mgmt-page .list-mgmt-list .admin-table-action:active:not(:disabled) {
   background: #f3f9f4;
 }
 
-.participants-mgmt-page .participants-mgmt-list .admin-table-action--delete {
+.list-mgmt-page .list-mgmt-list .admin-table-action--delete {
   color: #d64545;
   border-color: #f0d9d9;
 }
 
-.participants-mgmt-page .participants-mgmt-list .admin-table-action--delete:hover:not(:disabled),
-.participants-mgmt-page .participants-mgmt-list .admin-table-action--delete:active:not(:disabled) {
+.list-mgmt-page .list-mgmt-list .admin-table-action--delete:hover:not(:disabled),
+.list-mgmt-page .list-mgmt-list .admin-table-action--delete:active:not(:disabled) {
   background: #fdecec;
   border-color: #f0c4c4;
 }
 
 /* ===== Empty / loading states (match Activities) ===== */
 
-.participants-mgmt-page .admin-list-empty {
+.list-mgmt-page .admin-list-empty {
   border: none;
   border-radius: 0;
   background: transparent;
   padding: 2.75rem 1.25rem;
 }
 
-.participants-mgmt-page .admin-list-empty__icon {
+.list-mgmt-page .admin-list-empty__icon {
   width: 4rem;
   height: 4rem;
   background: #eef8f1;
   color: #1f7a3f;
 }
 
-.participants-mgmt-page .admin-list-empty__title {
+.list-mgmt-page .admin-list-empty__title {
   color: #243029;
 }
 
-.participants-mgmt-page .admin-list-empty__message {
+.list-mgmt-page .admin-list-empty__message {
   color: #6b7770;
 }
 
-.participants-mgmt-loading {
+.list-mgmt-loading {
   margin: 0;
   padding: 2rem 1rem;
   text-align: center;
@@ -412,7 +445,7 @@
 
 /* ===== Pagination — identical to the Activities page ===== */
 
-.participants-mgmt-page .participants-mgmt-pagination {
+.list-mgmt-page .list-mgmt-pagination {
   display: flex;
   align-items: center;
   justify-content: center;
@@ -422,7 +455,7 @@
   padding: 0.25rem 0;
 }
 
-.participants-mgmt-page .participants-mgmt-pagination__btn {
+.list-mgmt-page .list-mgmt-pagination__btn {
   font-family: inherit;
   font-size: 0.88rem;
   font-weight: 600;
@@ -440,8 +473,8 @@
     transform 0.15s ease;
 }
 
-.participants-mgmt-page .participants-mgmt-pagination__btn:hover:not(:disabled),
-.participants-mgmt-page .participants-mgmt-pagination__btn:active:not(:disabled) {
+.list-mgmt-page .list-mgmt-pagination__btn:hover:not(:disabled),
+.list-mgmt-page .list-mgmt-pagination__btn:active:not(:disabled) {
   background: #fbfdfb;
   background-color: #fbfdfb;
   border-color: #b8dfc4;
@@ -449,12 +482,12 @@
   transform: translateY(-1px);
 }
 
-.participants-mgmt-page .participants-mgmt-pagination__btn:disabled {
+.list-mgmt-page .list-mgmt-pagination__btn:disabled {
   opacity: 0.55;
   cursor: not-allowed;
 }
 
-.participants-mgmt-page .participants-mgmt-pagination__label {
+.list-mgmt-page .list-mgmt-pagination__label {
   font-size: 0.88rem;
   font-weight: 600;
   color: #5a6a60;
@@ -463,36 +496,32 @@
 /* ===== Responsive ===== */
 
 @media (max-width: 768px) {
-  .participants-mgmt-page .staff-container--participants {
+  .list-mgmt-page .staff-container {
     padding: 1.1rem 0.9rem 2rem;
   }
 
-  .participants-mgmt-page__header {
+  .list-mgmt-page__header {
     gap: 0.75rem;
     margin-bottom: 1.35rem;
   }
 
-  .participants-mgmt-page__actions {
+  .list-mgmt-page__actions {
     width: 100%;
   }
 
-  .participants-mgmt-page__action {
+  .list-mgmt-page__action {
     flex: 1;
     justify-content: center;
   }
 
-  .participants-mgmt-page .participant-list-stats {
+  .list-mgmt-page .list-mgmt-summary {
     gap: 0.75rem;
     margin-bottom: 1.35rem;
   }
 
-  .participants-mgmt-page .admin-list-section--participants .admin-list-toolbar.staff-form.staff-list-filters {
-    grid-template-columns: 1fr;
-  }
-
-  /* Mobile shows participant cards (already styled) — drop the wrapper chrome
+  /* Mobile shows the cards layout (already styled) — drop the wrapper chrome
      so the cards are not nested inside a second card. */
-  .participants-mgmt-list {
+  .list-mgmt-list {
     background: transparent;
     border: none;
     border-radius: 0;
@@ -500,7 +529,7 @@
     overflow: visible;
   }
 
-  .participants-mgmt-decoration {
+  .list-mgmt-decoration {
     opacity: 0.08;
   }
 }

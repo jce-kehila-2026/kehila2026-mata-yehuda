@@ -284,22 +284,22 @@ function ParticipantList({
 
     return (
         <div className="staff-list-section admin-list-section admin-list-section--participants">
-            <header className="participants-mgmt-page__header">
-                <div className="participants-mgmt-page__header-main">
-                    <h2 className="participants-mgmt-page__title">רשימת משתתפים</h2>
-                    <p className="participants-mgmt-page__subtitle">
+            <header className="list-mgmt-page__header">
+                <div className="list-mgmt-page__header-main">
+                    <h2 className="list-mgmt-page__title">רשימת משתתפים</h2>
+                    <p className="list-mgmt-page__subtitle">
                         ניהול, צפייה וחיפוש של כל המשתתפים במערכת
                     </p>
                 </div>
-                <div className="participants-mgmt-page__actions">
+                <div className="list-mgmt-page__actions">
                     {onAddParticipant ? (
                         <button
                             type="button"
-                            className="participants-mgmt-page__action"
+                            className="list-mgmt-page__action"
                             onClick={onAddParticipant}
                         >
                             <Plus
-                                className="participants-mgmt-page__action-icon"
+                                className="list-mgmt-page__action-icon"
                                 strokeWidth={2.25}
                                 aria-hidden="true"
                             />
@@ -309,11 +309,11 @@ function ParticipantList({
                     {onViewArchive ? (
                         <button
                             type="button"
-                            className="participants-mgmt-page__action participants-mgmt-page__action--archive"
+                            className="list-mgmt-page__action list-mgmt-page__action--archive"
                             onClick={onViewArchive}
                         >
                             <Archive
-                                className="participants-mgmt-page__action-icon"
+                                className="list-mgmt-page__action-icon"
                                 strokeWidth={2.25}
                                 aria-hidden="true"
                             />
@@ -366,14 +366,14 @@ function ParticipantList({
             ) : null}
 
             {loading ? (
-                <p className="participants-mgmt-loading">טוען...</p>
+                <p className="list-mgmt-loading">טוען...</p>
             ) : null}
 
             {!loading && emptyState}
 
             {!loading && list.totalFiltered > 0 ? (
                 <>
-                    <div className="participants-mgmt-list">
+                    <div className="list-mgmt-list">
                     <AdminResponsiveList
                         desktopTable={
                             <AdminDataTable
@@ -454,21 +454,21 @@ function ParticipantList({
                     />
                     </div>
 
-                    <div className="participants-mgmt-pagination">
+                    <div className="list-mgmt-pagination">
                         <button
                             type="button"
-                            className="participants-mgmt-pagination__btn"
+                            className="list-mgmt-pagination__btn"
                             onClick={() => list.setPage(list.page - 1)}
                             disabled={list.page <= 1}
                         >
                             הקודם
                         </button>
-                        <span className="participants-mgmt-pagination__label">
+                        <span className="list-mgmt-pagination__label">
                             עמוד {list.page} מתוך {list.totalPages}
                         </span>
                         <button
                             type="button"
-                            className="participants-mgmt-pagination__btn"
+                            className="list-mgmt-pagination__btn"
                             onClick={() => list.setPage(list.page + 1)}
                             disabled={list.page >= list.totalPages}
                         >

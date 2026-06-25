@@ -58,26 +58,26 @@ function ManageParticipants({ participantView, onNavigate }) {
 
     return (
         <div
-            className="staff-page staff-page--participants participants-mgmt-page"
+            className="staff-page staff-page--participants list-mgmt-page"
             dir="rtl"
         >
             <img
                 src="/images/minitree.png"
                 alt=""
                 aria-hidden="true"
-                className="participants-mgmt-decoration participants-mgmt-decoration--top"
+                className="list-mgmt-decoration list-mgmt-decoration--top"
             />
             <img
                 src="/images/minitree.png"
                 alt=""
                 aria-hidden="true"
-                className="participants-mgmt-decoration participants-mgmt-decoration--left"
+                className="list-mgmt-decoration list-mgmt-decoration--left"
             />
             <img
                 src="/images/minitree.png"
                 alt=""
                 aria-hidden="true"
-                className="participants-mgmt-decoration participants-mgmt-decoration--bottom"
+                className="list-mgmt-decoration list-mgmt-decoration--bottom"
             />
 
             <div className="staff-container staff-container--participants">
@@ -99,7 +99,7 @@ function ManageParticipants({ participantView, onNavigate }) {
 
                 {participantPage === "archive" && (
                     <section className="staff-section staff-section--list staff-section--participants-archive">
-                        <div className="participants-mgmt-archive-toolbar">
+                        <div className="list-mgmt-archive-toolbar">
                             <button
                                 type="button"
                                 className="staff-back-button"
