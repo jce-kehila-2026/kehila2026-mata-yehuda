@@ -15,6 +15,7 @@ import "./styles/staffManegmentStyles/activitiesManagement.css";
 import "./styles/staffManegmentStyles/participants.css";
 import "./styles/staffManegmentStyles/staffManagement.css";
 import "./styles/staffManegmentStyles/programs.css";
+import "./styles/staffManegmentStyles/programsManagement.css";
 import "./styles/staffManegmentStyles/dayCenterSchedule.css";
 import "./styles/staffManegmentStyles/dayCenterVolunteers.css";
 import "./styles/staffManegmentStyles/registrations.css";

@@ -116,7 +116,25 @@ function ManagePrograms({ programView, onNavigate }) {
     }
 
     return (
-        <div className="staff-page staff-page--programs">
+        <div className="staff-page staff-page--programs programs-mgmt-page" dir="rtl">
+            <img
+                src="/images/minitree.png"
+                alt=""
+                aria-hidden="true"
+                className="programs-mgmt-decoration programs-mgmt-decoration--top"
+            />
+            <img
+                src="/images/minitree.png"
+                alt=""
+                aria-hidden="true"
+                className="programs-mgmt-decoration programs-mgmt-decoration--left"
+            />
+            <img
+                src="/images/minitree.png"
+                alt=""
+                aria-hidden="true"
+                className="programs-mgmt-decoration programs-mgmt-decoration--bottom"
+            />
             <div className="staff-container staff-container--programs">
                 {error && programPage === "list" ? (
                     <p className="staff-alert staff-alert--error">{error}</p>
@@ -132,6 +150,7 @@ function ManagePrograms({ programView, onNavigate }) {
                             onEdit={handleEdit}
                             onDelete={handleDelete}
                             onAddProgram={handleAddProgramClick}
+                            onBack={() => onNavigate("dashboard")}
                         />
                     </section>
                 )}

@@ -3,8 +3,6 @@ import { ClipboardList, Plus } from "lucide-react";
 import ProgramCard from "./ProgramCard";
 import AdminDataTable from "../admin/AdminDataTable";
 import AdminListEmptyState from "../admin/AdminListEmptyState";
-import AdminListPagination from "../admin/AdminListPagination";
-import AdminListSummary from "../admin/AdminListSummary";
 import AdminListToolbar from "../admin/AdminListToolbar";
 import AdminResponsiveList from "../admin/AdminResponsiveList";
 import {
@@ -51,7 +49,8 @@ function ProgramList({
     refreshKey = 0,
     onEdit,
     onDelete,
-    onAddProgram
+    onAddProgram,
+    onBack
 }) {
     const [sourceItems, setSourceItems] = useState([]);
     const [totalCount, setTotalCount] = useState(0);
@@ -152,23 +151,45 @@ function ProgramList({
 
     return (
         <div className="staff-list-section admin-list-section admin-list-section--programs">
-            <div className="admin-list-header admin-list-header--split">
-                <h2 className="admin-list-header__title">רשימת תוכניות</h2>
-                {onAddProgram ? (
-                    <button
-                        type="button"
-                        className="staff-button staff-button--small admin-list-header__action admin-list-header__action--compact"
-                        onClick={onAddProgram}
-                    >
-                        <Plus
-                            className="admin-list-header__action-icon"
-                            strokeWidth={2.25}
-                            aria-hidden="true"
-                        />
-                        <span>הוספת תוכנית</span>
-                    </button>
-                ) : null}
-            </div>
+            <header className="programs-mgmt-page__header">
+                <div className="programs-mgmt-page__header-main">
+                    <h2 className="programs-mgmt-page__title">ניהול תוכניות</h2>
+                    <p className="programs-mgmt-page__subtitle">
+                        ניהול, צפייה וחיפוש של כל התוכניות במערכת
+                    </p>
+                </div>
+                <div className="programs-mgmt-page__actions">
+                    {onAddProgram ? (
+                        <button
+                            type="button"
+                            className="programs-mgmt-page__action"
+                            onClick={onAddProgram}
+                        >
+                            <Plus
+                                className="programs-mgmt-page__action-icon"
+                                strokeWidth={2.25}
+                                aria-hidden="true"
+                            />
+                            <span>הוספת תוכנית</span>
+                        </button>
+                    ) : null}
+                    {onBack ? (
+                        <button
+                            type="button"
+                            className="staff-back-button"
+                            onClick={onBack}
+                        >
+                            <span
+                                className="staff-back-button__icon"
+                                aria-hidden="true"
+                            >
+                                →
+                            </span>
+                            חזרה ללוח הבקרה
+                        </button>
+                    ) : null}
+                </div>
+            </header>
 
             <AdminListToolbar
                 searchId="program-search"
@@ -178,27 +199,22 @@ function ProgramList({
                 onSearchChange={list.setSearchQuery}
                 pageSize={list.pageSize}
                 onPageSizeChange={list.setPageSize}
-            />
-
-            <AdminListSummary
-                totalCount={list.totalCount}
-                totalFiltered={list.totalFiltered}
-                pageCount={list.pageCount}
-                page={list.page}
-                totalPages={list.totalPages}
-                showAll={list.showAll}
+                pageSizeLabel="מספר תוכניות בעמוד"
             />
 
             {loadError ? (
                 <p className="staff-alert staff-alert--error">{loadError}</p>
             ) : null}
 
-            {loading ? <p>טוען...</p> : null}
+            {loading ? <p className="programs-mgmt-loading">טוען...</p> : null}
 
-            {!loading && emptyState}
+            {!loading && list.totalFiltered === 0 ? (
+                <div className="programs-mgmt-list">{emptyState}</div>
+            ) : null}
 
             {!loading && list.totalFiltered > 0 ? (
                 <>
+                    <div className="programs-mgmt-list">
                     <AdminResponsiveList
                         desktopTable={
                             <AdminDataTable
@@ -254,12 +270,29 @@ function ProgramList({
                             </div>
                         }
                     />
+                    </div>
 
-                    <AdminListPagination
-                        page={list.page}
-                        totalPages={list.totalPages}
-                        onPageChange={list.setPage}
-                    />
+                    <div className="programs-mgmt-pagination">
+                        <button
+                            type="button"
+                            className="programs-mgmt-pagination__btn"
+                            onClick={() => list.setPage(list.page - 1)}
+                            disabled={list.page <= 1}
+                        >
+                            הקודם
+                        </button>
+                        <span className="programs-mgmt-pagination__label">
+                            עמוד {list.page} מתוך {list.totalPages}
+                        </span>
+                        <button
+                            type="button"
+                            className="programs-mgmt-pagination__btn"
+                            onClick={() => list.setPage(list.page + 1)}
+                            disabled={list.page >= list.totalPages}
+                        >
+                            הבא
+                        </button>
+                    </div>
                 </>
             ) : null}
         </div>
