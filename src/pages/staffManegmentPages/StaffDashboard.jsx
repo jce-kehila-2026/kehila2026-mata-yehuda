@@ -463,7 +463,7 @@ function StaffDashboard({ onLogout }) {
                 return (
                     <div data-dashboard-page="cancellations">
                         {renderSubpageToolbar(SUBPAGE_TITLES.cancellations)}
-                        <ManageCancellations />
+                        <ManageCancellations onNavigate={goToPage} />
                     </div>
                 );
             case "inquiries":
