@@ -1,4 +1,5 @@
 import { useState } from "react";
+import { useNavigate } from "react-router-dom";
 import CommunityJoinRequestsTable from "../../components/communityStaff/CommunityJoinRequestsTable.jsx";
 import CompleteCommunityJoinModal from "../../components/communityStaff/CompleteCommunityJoinModal.jsx";
 import CommunityJoinRequestDetailsModal from "../../components/communityStaff/CommunityJoinRequestDetailsModal.jsx";
@@ -8,6 +9,7 @@ import CommunityStaffMessage, {
 import "../../styles/communityStaff/CommunityStaffDashboard.css";
 
 function CommunityJoinRequestsPage() {
+  const navigate = useNavigate();
   const [selectedRequest, setSelectedRequest] = useState(null);
   const [detailsRequest, setDetailsRequest] = useState(null);
   const [refreshKey, setRefreshKey] = useState(0);
@@ -57,6 +59,18 @@ function CommunityJoinRequestsPage() {
             <p className="activities-mgmt-page__subtitle">
               ניהול ואישור בקשות הצטרפות חדשות לקהילה התומכת
             </p>
+          </div>
+          <div className="activities-mgmt-page__actions">
+            <button
+              type="button"
+              className="staff-back-button"
+              onClick={() => navigate("/community-staff")}
+            >
+              <span className="staff-back-button__icon" aria-hidden="true">
+                →
+              </span>
+              חזרה ללוח הבקרה
+            </button>
           </div>
         </header>
 
