@@ -25,23 +25,49 @@ function CommunityJoinRequestsPage() {
   };
 
   return (
-    <div className="community-join-requests-page" dir="rtl">
-      <header className="community-join-requests-page__header">
-        <h1 className="community-join-requests-page__title page-title">
-          בקשות הצטרפות לקהילה תומכת
-        </h1>
-        <p className="community-staff-page-subtitle">
-          ניהול ואישור בקשות הצטרפות חדשות לקהילה התומכת
-        </p>
-      </header>
-
-      <CommunityStaffMessage message={message} onDismiss={clearMessage} />
-
-      <CommunityJoinRequestsTable
-        refreshKey={refreshKey}
-        onCompleteRegistration={handleCompleteRegistration}
-        onViewDetails={setDetailsRequest}
+    <div
+      className="community-join-requests-page activities-mgmt-page"
+      dir="rtl"
+    >
+      <img
+        src="/images/minitree.png"
+        alt=""
+        aria-hidden="true"
+        className="activities-mgmt-decoration activities-mgmt-decoration--top"
       />
+      <img
+        src="/images/minitree.png"
+        alt=""
+        aria-hidden="true"
+        className="activities-mgmt-decoration activities-mgmt-decoration--left"
+      />
+      <img
+        src="/images/minitree.png"
+        alt=""
+        aria-hidden="true"
+        className="activities-mgmt-decoration activities-mgmt-decoration--bottom"
+      />
+
+      <div className="staff-container staff-container--activities">
+        <header className="activities-mgmt-page__header">
+          <div className="activities-mgmt-page__header-main">
+            <h1 className="activities-mgmt-page__title">
+              בקשות הצטרפות לקהילה תומכת
+            </h1>
+            <p className="activities-mgmt-page__subtitle">
+              ניהול ואישור בקשות הצטרפות חדשות לקהילה התומכת
+            </p>
+          </div>
+        </header>
+
+        <CommunityStaffMessage message={message} onDismiss={clearMessage} />
+
+        <CommunityJoinRequestsTable
+          refreshKey={refreshKey}
+          onCompleteRegistration={handleCompleteRegistration}
+          onViewDetails={setDetailsRequest}
+        />
+      </div>
 
       <CommunityJoinRequestDetailsModal
         request={detailsRequest}
