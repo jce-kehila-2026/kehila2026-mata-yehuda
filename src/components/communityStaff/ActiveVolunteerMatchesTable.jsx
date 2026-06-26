@@ -1,6 +1,9 @@
 import { useCallback, useEffect, useMemo, useState } from "react";
 import { Link2, Users, UserCheck } from "lucide-react";
-import { getActiveVolunteerMatches } from "../../services/communityStaff/communityStaffService";
+import {
+  getActiveVolunteerMatches,
+  getPendingHomeHelpRequests,
+} from "../../services/communityStaff/communityStaffService";
 import {
   CommunityStaffCompactCard,
   CommunityStaffEmptyState,
@@ -36,6 +39,7 @@ function ActiveVolunteerMatchesTable({
   onViewDetails,
 }) {
   const [matches, setMatches] = useState([]);
+  const [pendingMatchCount, setPendingMatchCount] = useState(0);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
   const [searchTerm, setSearchTerm] = useState("");
@@ -47,8 +51,12 @@ function ActiveVolunteerMatchesTable({
     setError(null);
 
     try {
-      const activeMatches = await getActiveVolunteerMatches();
+      const [activeMatches, pendingRequests] = await Promise.all([
+        getActiveVolunteerMatches(),
+        getPendingHomeHelpRequests(),
+      ]);
       setMatches(activeMatches);
+      setPendingMatchCount(pendingRequests.length);
     } catch (err) {
       console.error("Failed to load active volunteer matches:", err);
       setError("שגיאה בטעינת התאמות פעילות");
@@ -84,31 +92,14 @@ function ActiveVolunteerMatchesTable({
   }, [currentPage, totalPages]);
 
   const matchStats = useMemo(() => {
-    const participants = new Set();
-    const volunteers = new Set();
-
-    matches.forEach((match) => {
-      const participantKey =
-        match.participantIdNumber || match.participantFullName;
-      const volunteerKey = `${match.volunteerFullName || ""}|${
-        match.volunteerPhone || ""
-      }`;
-
-      if (participantKey) {
-        participants.add(participantKey);
-      }
-
-      if (match.volunteerFullName || match.volunteerPhone) {
-        volunteers.add(volunteerKey);
-      }
-    });
+    const active = matches.length;
 
     return {
-      total: matches.length,
-      participants: participants.size,
-      volunteers: volunteers.size,
+      total: active + pendingMatchCount,
+      active,
+      pending: pendingMatchCount,
     };
-  }, [matches]);
+  }, [matches, pendingMatchCount]);
 
   const safePage = Math.min(currentPage, totalPages);
 
@@ -130,7 +121,7 @@ function ActiveVolunteerMatchesTable({
               סה״כ התאמות
             </span>
             <span className="activities-mgmt-summary__hint">
-              התאמות פעילות במערכת
+              כלל ההתאמות והבקשות במערכת
             </span>
           </div>
           <div className="activities-mgmt-summary__card activities-mgmt-summary__card--participants">
@@ -138,13 +129,13 @@ function ActiveVolunteerMatchesTable({
               <Users size={22} strokeWidth={2} aria-hidden="true" />
             </span>
             <span className="activities-mgmt-summary__value">
-              {matchStats.participants}
+              {matchStats.active}
             </span>
             <span className="activities-mgmt-summary__label">
-              משתתפים מותאמים
+              התאמות פעילות
             </span>
             <span className="activities-mgmt-summary__hint">
-              משתתפים עם התאמה פעילה
+              התאמות פעילות כרגע
             </span>
           </div>
           <div className="activities-mgmt-summary__card activities-mgmt-summary__card--open">
@@ -152,13 +143,13 @@ function ActiveVolunteerMatchesTable({
               <UserCheck size={22} strokeWidth={2} aria-hidden="true" />
             </span>
             <span className="activities-mgmt-summary__value">
-              {matchStats.volunteers}
+              {matchStats.pending}
             </span>
             <span className="activities-mgmt-summary__label">
-              מתנדבים מותאמים
+              התאמות ממתינות
             </span>
             <span className="activities-mgmt-summary__hint">
-              מתנדבים עם התאמה פעילה
+              בקשות הממתינות להתאמה
             </span>
           </div>
         </section>
