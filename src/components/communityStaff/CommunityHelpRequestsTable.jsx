@@ -1,6 +1,7 @@
 import { useCallback, useEffect, useMemo, useState } from "react";
 import {
   approveHelpRequestMatch,
+  getHelpRequestStatistics,
   getPendingHomeHelpRequests,
   getSuggestedVolunteersForRequest,
 } from "../../services/communityStaff/communityStaffService";
@@ -239,6 +240,11 @@ function MatchModal({
 
 function CommunityHelpRequestsTable() {
   const [requests, setRequests] = useState([]);
+  const [requestStats, setRequestStats] = useState({
+    total: 0,
+    pending: 0,
+    matched: 0,
+  });
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
   const [searchTerm, setSearchTerm] = useState("");
@@ -275,8 +281,12 @@ function CommunityHelpRequestsTable() {
     setError(null);
 
     try {
-      const pendingRequests = await getPendingHomeHelpRequests();
+      const [pendingRequests, statistics] = await Promise.all([
+        getPendingHomeHelpRequests(),
+        getHelpRequestStatistics(),
+      ]);
       setRequests(pendingRequests);
+      setRequestStats(statistics);
     } catch (err) {
       console.error("Failed to load home help requests:", err);
       setError("שגיאה בטעינת בקשות הסיוע");
@@ -323,30 +333,6 @@ function CommunityHelpRequestsTable() {
     }
   }, [currentPage, totalPages]);
 
-  const requestStats = useMemo(() => {
-    const helpTypeSet = new Set();
-    const languageSet = new Set();
-
-    requests.forEach((request) => {
-      const helpTypes = request.requestedHelpTypes ?? request.requestedServices;
-      if (Array.isArray(helpTypes)) {
-        helpTypes.forEach((type) => type && helpTypeSet.add(type));
-      }
-
-      if (Array.isArray(request.languages)) {
-        request.languages.forEach(
-          (language) => language && languageSet.add(language)
-        );
-      }
-    });
-
-    return {
-      total: requests.length,
-      helpTypes: helpTypeSet.size,
-      languages: languageSet.size,
-    };
-  }, [requests]);
-
   const safePage = Math.min(currentPage, totalPages);
 
   return (
@@ -367,7 +353,7 @@ function CommunityHelpRequestsTable() {
             </span>
             <span className="activities-mgmt-summary__label">סה״כ בקשות</span>
             <span className="activities-mgmt-summary__hint">
-              בקשות סיוע הממתינות להתאמה
+              כל בקשות הסיוע במערכת
             </span>
           </div>
           <div className="activities-mgmt-summary__card activities-mgmt-summary__card--participants">
@@ -375,13 +361,13 @@ function CommunityHelpRequestsTable() {
               <HeartHandshake size={22} strokeWidth={2} aria-hidden="true" />
             </span>
             <span className="activities-mgmt-summary__value">
-              {requestStats.helpTypes}
+              {requestStats.pending}
             </span>
             <span className="activities-mgmt-summary__label">
-              סוגי עזרה מבוקשים
+              בקשות ממתינות
             </span>
             <span className="activities-mgmt-summary__hint">
-              סוגי עזרה שונים בבקשות
+              ממתינות להתאמת מתנדב
             </span>
           </div>
           <div className="activities-mgmt-summary__card activities-mgmt-summary__card--open">
@@ -389,11 +375,13 @@ function CommunityHelpRequestsTable() {
               <Languages size={22} strokeWidth={2} aria-hidden="true" />
             </span>
             <span className="activities-mgmt-summary__value">
-              {requestStats.languages}
+              {requestStats.matched}
             </span>
-            <span className="activities-mgmt-summary__label">שפות נדרשות</span>
+            <span className="activities-mgmt-summary__label">
+              בקשות מותאמות
+            </span>
             <span className="activities-mgmt-summary__hint">
-              שפות שונות בבקשות הסיוע
+              בקשות עם התאמה פעילה
             </span>
           </div>
         </section>

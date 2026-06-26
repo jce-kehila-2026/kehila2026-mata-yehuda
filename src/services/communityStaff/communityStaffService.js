@@ -422,6 +422,30 @@ export async function approveVolunteer(volunteerId) {
   });
 }
 
+// Operational statistics for the "בקשות סיוע והתאמה" page, read straight from
+// the `homeHelpRequests` collection so the numbers always reflect Firestore:
+//   - total  : every home help request.
+//   - pending: requests still waiting for a volunteer match (status "pending").
+//   - matched: requests that already have an active match (status "matched").
+export async function getHelpRequestStatistics() {
+  const snapshot = await getDocs(collection(db, "homeHelpRequests"));
+
+  let pending = 0;
+  let matched = 0;
+
+  snapshot.docs.forEach((requestDoc) => {
+    const status = requestDoc.data().status;
+
+    if (status === "pending") {
+      pending += 1;
+    } else if (status === "matched") {
+      matched += 1;
+    }
+  });
+
+  return { total: snapshot.size, pending, matched };
+}
+
 export async function getPendingHomeHelpRequests() {
   const requestsRef = collection(db, "homeHelpRequests");
   const pendingQuery = query(requestsRef, where("status", "==", "pending"));
