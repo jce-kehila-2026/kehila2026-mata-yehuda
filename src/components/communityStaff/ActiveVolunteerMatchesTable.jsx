@@ -1,17 +1,13 @@
 import { useCallback, useEffect, useMemo, useState } from "react";
+import { Link2, Users, UserCheck } from "lucide-react";
 import { getActiveVolunteerMatches } from "../../services/communityStaff/communityStaffService";
 import {
   CommunityStaffCompactCard,
   CommunityStaffEmptyState,
-  CommunityStaffListToolbar,
   CommunityStaffMatchBadge,
-  CommunityStaffPagination,
-  CommunityStaffStatusOverview,
-  Link2,
-  buildMatchesOverviewItems,
 } from "./CommunityStaffListUi.jsx";
 
-const PAGE_SIZE_OPTIONS = [5, 10, 25];
+const PAGE_SIZE_OPTIONS = [5, 10, 20];
 
 function matchesSearch(match, searchTerm) {
   if (!searchTerm) {
@@ -87,33 +83,125 @@ function ActiveVolunteerMatchesTable({
     }
   }, [currentPage, totalPages]);
 
-  if (loading) {
-    return (
-      <p className="community-active-matches__loading">טוען התאמות פעילות...</p>
-    );
-  }
+  const matchStats = useMemo(() => {
+    const participants = new Set();
+    const volunteers = new Set();
 
-  if (error) {
-    return <p className="community-active-matches__error">{error}</p>;
-  }
+    matches.forEach((match) => {
+      const participantKey =
+        match.participantIdNumber || match.participantFullName;
+      const volunteerKey = `${match.volunteerFullName || ""}|${
+        match.volunteerPhone || ""
+      }`;
+
+      if (participantKey) {
+        participants.add(participantKey);
+      }
+
+      if (match.volunteerFullName || match.volunteerPhone) {
+        volunteers.add(volunteerKey);
+      }
+    });
+
+    return {
+      total: matches.length,
+      participants: participants.size,
+      volunteers: volunteers.size,
+    };
+  }, [matches]);
+
+  const safePage = Math.min(currentPage, totalPages);
 
   return (
     <div className="community-active-matches">
-      <CommunityStaffStatusOverview items={buildMatchesOverviewItems(matches)} />
+      {!loading && !error ? (
+        <section
+          className="activities-mgmt-summary"
+          aria-label="סיכום התאמות פעילות"
+        >
+          <div className="activities-mgmt-summary__card activities-mgmt-summary__card--neutral">
+            <span className="activities-mgmt-summary__icon">
+              <Link2 size={22} strokeWidth={2} aria-hidden="true" />
+            </span>
+            <span className="activities-mgmt-summary__value">
+              {matchStats.total}
+            </span>
+            <span className="activities-mgmt-summary__label">
+              סה״כ התאמות
+            </span>
+            <span className="activities-mgmt-summary__hint">
+              התאמות פעילות במערכת
+            </span>
+          </div>
+          <div className="activities-mgmt-summary__card activities-mgmt-summary__card--participants">
+            <span className="activities-mgmt-summary__icon">
+              <Users size={22} strokeWidth={2} aria-hidden="true" />
+            </span>
+            <span className="activities-mgmt-summary__value">
+              {matchStats.participants}
+            </span>
+            <span className="activities-mgmt-summary__label">
+              משתתפים מותאמים
+            </span>
+            <span className="activities-mgmt-summary__hint">
+              משתתפים עם התאמה פעילה
+            </span>
+          </div>
+          <div className="activities-mgmt-summary__card activities-mgmt-summary__card--open">
+            <span className="activities-mgmt-summary__icon">
+              <UserCheck size={22} strokeWidth={2} aria-hidden="true" />
+            </span>
+            <span className="activities-mgmt-summary__value">
+              {matchStats.volunteers}
+            </span>
+            <span className="activities-mgmt-summary__label">
+              מתנדבים מותאמים
+            </span>
+            <span className="activities-mgmt-summary__hint">
+              מתנדבים עם התאמה פעילה
+            </span>
+          </div>
+        </section>
+      ) : null}
 
-      <CommunityStaffListToolbar
-        searchId="active-matches-search"
-        searchValue={searchTerm}
-        onSearchChange={(event) => setSearchTerm(event.target.value)}
-        searchPlaceholder="חיפוש לפי שם או טלפון של משתתף/מתנדב..."
-        pageSizeId="active-matches-page-size"
-        pageSizeValue={pageSize}
-        onPageSizeChange={(event) => setPageSize(Number(event.target.value))}
-        pageSizeOptions={PAGE_SIZE_OPTIONS}
-        showFilter={false}
-      />
+      <div className="admin-list-toolbar staff-form staff-list-filters">
+        <div className="admin-list-toolbar__search">
+          <label htmlFor="active-matches-search">חיפוש</label>
+          <input
+            id="active-matches-search"
+            type="search"
+            value={searchTerm}
+            onChange={(event) => setSearchTerm(event.target.value)}
+            placeholder="חיפוש לפי שם או טלפון של משתתף/מתנדב..."
+          />
+        </div>
 
-      <div className="community-staff-request-list community-active-matches__card">
+        <div className="admin-list-toolbar__page-size">
+          <label htmlFor="active-matches-page-size">מספר התאמות בעמוד</label>
+          <select
+            id="active-matches-page-size"
+            value={pageSize}
+            onChange={(event) => setPageSize(Number(event.target.value))}
+          >
+            {PAGE_SIZE_OPTIONS.map((size) => (
+              <option key={size} value={size}>
+                {size}
+              </option>
+            ))}
+          </select>
+        </div>
+      </div>
+
+      {error ? (
+        <p className="staff-alert staff-alert--error">{error}</p>
+      ) : null}
+
+      {loading ? (
+        <p className="activities-mgmt-loading">טוען התאמות פעילות...</p>
+      ) : null}
+
+      {!loading && !error ? (
+        <div className="community-staff-request-list community-active-matches__card">
         {filteredMatches.length === 0 ? (
           <CommunityStaffEmptyState
             icon={Link2}
@@ -139,18 +227,34 @@ function ActiveVolunteerMatchesTable({
             ))}
           </ul>
         )}
-      </div>
+        </div>
+      ) : null}
 
-      {filteredMatches.length > 0 && (
-        <CommunityStaffPagination
-          currentPage={currentPage}
-          totalPages={totalPages}
-          onPrevious={() => setCurrentPage((page) => Math.max(1, page - 1))}
-          onNext={() =>
-            setCurrentPage((page) => Math.min(totalPages, page + 1))
-          }
-        />
-      )}
+      {!loading && !error && filteredMatches.length > 0 ? (
+        <div className="activities-mgmt-pagination">
+          <button
+            type="button"
+            className="activities-mgmt-pagination__btn"
+            onClick={() => setCurrentPage((page) => Math.max(1, page - 1))}
+            disabled={safePage <= 1}
+          >
+            הקודם
+          </button>
+          <span className="activities-mgmt-pagination__label">
+            עמוד {safePage} מתוך {totalPages}
+          </span>
+          <button
+            type="button"
+            className="activities-mgmt-pagination__btn"
+            onClick={() =>
+              setCurrentPage((page) => Math.min(totalPages, page + 1))
+            }
+            disabled={safePage >= totalPages}
+          >
+            הבא
+          </button>
+        </div>
+      ) : null}
     </div>
   );
 }
