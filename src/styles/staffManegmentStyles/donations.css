@@ -85,6 +85,89 @@
   padding-block: 0.5rem 1.5rem;
 }
 
+/* ===== Donations page aligned to the shared Management (list-mgmt) template =====
+   The page reuses the shared list-mgmt header, summary cards, toolbar, table and
+   pagination styling; these rules only adapt the donation-specific pieces. */
+
+/* The back button now lives in the page header (like the Participants page). */
+[data-dashboard-page="manageDonations"] > .staff-subpage-toolbar {
+  display: none;
+}
+
+/* Vertical rhythm comes from the container's flex gap. */
+.staff-page--donations .list-mgmt-page__header,
+.staff-page--donations .list-mgmt-summary {
+  margin-bottom: 0;
+}
+
+/* The table section is a transparent wrapper — the toolbar and table render as
+   their own cards (like the Participants page), not nested inside an outer card. */
+.list-mgmt-page .donations-table-section {
+  background: transparent;
+  border: none;
+  box-shadow: none;
+  padding: 0;
+}
+
+/* Summary cards hold currency amounts and long labels (e.g. a top-donor name),
+   so give them more width and lay the content out top-to-bottom with enough
+   clearance below the corner icon — nothing overlaps and heights stay equal. */
+.list-mgmt-page .donations-summary .donations-summary__cards.list-mgmt-summary {
+  grid-template-columns: repeat(auto-fit, minmax(240px, 1fr));
+}
+
+.list-mgmt-page .donations-summary .list-mgmt-summary__item {
+  justify-content: flex-start;
+  /* top padding clears the absolutely-positioned corner icon */
+  padding: 3.75rem 1.2rem 1.2rem;
+  min-height: 150px;
+  height: 100%;
+  text-align: center;
+}
+
+/* Currency / text values: keep the shared card chrome but size them so long
+   amounts stay readable, on their own line(s), separate from the label. */
+.list-mgmt-page .donations-summary .list-mgmt-summary__value {
+  width: 100%;
+  font-size: clamp(1.15rem, 2.2vw, 1.6rem);
+  line-height: 1.25;
+  letter-spacing: normal;
+  word-break: break-word;
+}
+
+.list-mgmt-page .donations-summary .list-mgmt-summary__label {
+  width: 100%;
+  white-space: normal;
+  word-break: break-word;
+  line-height: 1.35;
+}
+
+/* Search + "rows per page" on a single clean row, like the Participants page. */
+.list-mgmt-page
+  .donations-table-section
+  .admin-list-toolbar.staff-form.staff-list-filters {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) auto;
+  gap: 0.85rem;
+  align-items: end;
+}
+
+.list-mgmt-page .donations-table-section .admin-list-toolbar__search,
+.list-mgmt-page .donations-table-section .admin-list-toolbar__page-size {
+  display: flex;
+  flex-direction: column;
+  gap: 0.4rem;
+  min-width: 0;
+}
+
+@media (max-width: 768px) {
+  .list-mgmt-page
+    .donations-table-section
+    .admin-list-toolbar.staff-form.staff-list-filters {
+    grid-template-columns: 1fr;
+  }
+}
+
 .donations-summary {
   display: flex;
   flex-direction: column;

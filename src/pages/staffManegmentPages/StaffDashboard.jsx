@@ -501,7 +501,7 @@ function StaffDashboard({ onLogout }) {
                 return (
                     <div data-dashboard-page="manageDonations">
                         {renderSubpageToolbar(SUBPAGE_TITLES.manageDonations)}
-                        <ManageDonations />
+                        <ManageDonations onNavigate={goToPage} />
                     </div>
                 );
             case "dashboard":
