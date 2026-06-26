@@ -488,6 +488,7 @@ function StaffDashboard({ onLogout }) {
                             onNavigate={(view) =>
                                 goToPage(buildStaffPage("attendance", view))
                             }
+                            onBackToDashboard={goToDashboard}
                         />
                     </div>
                 );
