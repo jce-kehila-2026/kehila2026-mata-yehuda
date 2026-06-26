@@ -4846,6 +4846,80 @@
   margin-top: 0.25rem;
 }
 
+/* ===== Search/filter toolbar — identical to the Community Join Requests
+   page so the settings sections share the same table/list controls. ===== */
+.community-settings-page .admin-list-toolbar,
+.community-settings-page .admin-list-toolbar.staff-form.staff-list-filters {
+  display: grid !important;
+  grid-template-columns: minmax(240px, 1fr) auto auto !important;
+  align-items: end;
+  gap: 0.85rem;
+  width: 100% !important;
+  max-width: none !important;
+  margin: 0 0 1.2rem !important;
+  padding: 1rem 1.15rem;
+  background: #ffffff;
+  border: 1px solid #e8efe9;
+  border-radius: 16px;
+  box-shadow: 0 3px 14px rgba(36, 48, 41, 0.05);
+  box-sizing: border-box;
+  text-align: right;
+}
+
+.community-settings-page .admin-list-toolbar__search,
+.community-settings-page .admin-list-toolbar__page-size,
+.community-settings-page .admin-list-toolbar__filters {
+  display: flex;
+  flex-direction: column;
+  gap: 0.4rem;
+  min-width: 0;
+}
+
+.community-settings-page .admin-list-toolbar__filters > div {
+  display: flex;
+  flex-direction: column;
+  gap: 0.4rem;
+  min-width: 150px;
+}
+
+.community-settings-page .admin-list-toolbar label {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.35rem;
+  font-size: 0.82rem;
+  font-weight: 700;
+  color: #5a6a60;
+}
+
+.community-settings-page .admin-list-toolbar input,
+.community-settings-page .admin-list-toolbar select {
+  width: 100%;
+  min-width: 0;
+  font-family: inherit;
+  font-size: 0.92rem;
+  font-weight: 500;
+  color: #243029;
+  background: #fbfdfb;
+  border: 1px solid #dce8df;
+  border-radius: 12px;
+  padding: 0.7rem 0.9rem;
+}
+
+.community-settings-page .admin-list-toolbar input:focus,
+.community-settings-page .admin-list-toolbar select:focus {
+  outline: none;
+  border-color: #9fd4ab;
+  background: #ffffff;
+  box-shadow: 0 0 0 3px rgba(45, 125, 70, 0.1);
+}
+
+@media (max-width: 768px) {
+  .community-settings-page .admin-list-toolbar,
+  .community-settings-page .admin-list-toolbar.staff-form.staff-list-filters {
+    grid-template-columns: 1fr !important;
+  }
+}
+
 .community-settings-section__loading,
 .community-settings-section__error {
   margin: 0;
