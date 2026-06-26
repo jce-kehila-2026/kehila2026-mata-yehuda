@@ -271,7 +271,7 @@
 .admin-data-table {
   width: 100%;
   border-collapse: collapse;
-  font-size: 0.95rem;
+  font-size: 0.98rem;
 }
 
 .admin-data-table thead {
@@ -286,6 +286,28 @@
   vertical-align: middle;
 }
 
+/* ===== Unified table/list typography (single source of truth) =====
+   Matches the Community Settings list item text (.community-staff-compact-card__name)
+   so every management table shares the same font family, size, weight, line height,
+   letter spacing and color. Typography only (no padding/borders) so each table keeps
+   its own spacing/layout. !important is intentional: several stylesheets (activities,
+   programs, participants, registrations, day-center, list-management, dashboard and
+   the attendance records page) set th/td typography with higher specificity, so this
+   keeps the rule in a single shared place instead of editing each page.
+   Covers the AdminDataTable-based management tables AND the custom attendance
+   records tables (which don't use .admin-data-table). */
+.admin-data-table th,
+.admin-data-table td,
+.attendance-records-page__table th,
+.attendance-records-page__table td {
+  font-family: inherit !important;
+  font-size: 0.98rem !important;
+  font-weight: 800 !important;
+  line-height: 1.3 !important;
+  letter-spacing: normal !important;
+  color: #1f5c34 !important;
+}
+
 .admin-data-table tbody tr:hover {
   background: rgba(250, 244, 236, 0.65);
 }
@@ -298,7 +320,7 @@
   background: transparent;
   padding: 0;
   font: inherit;
-  font-weight: 700;
+  font-weight: 800;
   color: inherit;
   cursor: pointer;
 }
