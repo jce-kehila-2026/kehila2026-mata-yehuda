@@ -1,11 +1,40 @@
 /* ViewRegistrations — admin list, filters & registration requests */
 
-.staff-page--registrations .staff-container--registrations {
-  padding-top: 0.5rem;
+[data-dashboard-page="registrations"] > .staff-subpage-toolbar {
+  display: none;
+}
+
+/* Single pending-requests summary card should not stretch full width */
+.list-mgmt-page
+  .admin-list-section--registrations
+  .list-mgmt-summary {
+  grid-template-columns: repeat(auto-fit, minmax(200px, 240px));
+  justify-content: start;
 }
 
 .staff-page--registrations-edit .staff-toolbar {
   margin-bottom: 1.25rem;
+}
+
+/* Complete-registration form wrapped in a management-style card */
+.staff-page--registrations-edit .registrations-complete-card {
+  background: #ffffff;
+  border: 1px solid #e8efe9;
+  border-radius: 18px;
+  box-shadow: 0 6px 20px rgba(36, 48, 41, 0.06);
+  padding: 1.5rem 1.5rem 1.25rem;
+}
+
+/* The page header already shows the title — hide the form's internal heading */
+.staff-page--registrations-edit .registrations-complete-card > div > h2 {
+  display: none;
+}
+
+@media (max-width: 768px) {
+  .staff-page--registrations-edit .registrations-complete-card {
+    padding: 1.1rem 1rem 1rem;
+    border-radius: 16px;
+  }
 }
 
 .staff-page--registrations-edit .staff-section--form .staff-button,

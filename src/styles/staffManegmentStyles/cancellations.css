@@ -1,13 +1,20 @@
 /* ManageCancellations — admin table, filters, stats & modals */
 
-.staff-page--cancellations .staff-container--cancellations {
-  padding-top: 0.5rem;
+[data-dashboard-page="cancellations"] > .staff-subpage-toolbar {
+  display: none;
 }
 
 .staff-page--cancellations .staff-section--cancellations-list {
   margin-top: 0;
   margin-bottom: 0;
   padding-top: 0;
+}
+
+/* Keep long refund amounts from overflowing the summary card */
+.list-mgmt-page
+  .admin-list-section--cancellations
+  .list-mgmt-summary__value {
+  word-break: break-word;
 }
 
 .cancellations-list {

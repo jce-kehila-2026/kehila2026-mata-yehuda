@@ -1,4 +1,5 @@
 import { useCallback, useEffect, useMemo, useState } from "react";
+import { Users, UserCheck, UserX } from "lucide-react";
 import {
   getAllVolunteers,
   updateVolunteerActiveStatus,
@@ -7,15 +8,10 @@ import {
   CommunityStaffCompactCard,
   CommunityStaffActiveBadge,
   CommunityStaffEmptyState,
-  CommunityStaffListToolbar,
-  CommunityStaffPagination,
-  CommunityStaffStatusOverview,
-  Users,
-  buildActiveInactiveOverviewItems,
 } from "./CommunityStaffListUi.jsx";
 import CommunityStaffConfirmModal from "./CommunityStaffConfirmModal.jsx";
 
-const PAGE_SIZE_OPTIONS = [5, 10, 25];
+const PAGE_SIZE_OPTIONS = [5, 10, 20];
 
 function matchesSearch(volunteer, searchTerm) {
   if (!searchTerm) {
@@ -137,6 +133,22 @@ function VolunteersManagementTable({
     }
   }, [currentPage, totalPages]);
 
+  const volunteerStats = useMemo(() => {
+    let active = 0;
+
+    volunteers.forEach((volunteer) => {
+      if (volunteer.is_active === true) {
+        active += 1;
+      }
+    });
+
+    return {
+      total: volunteers.length,
+      active,
+      inactive: volunteers.length - active,
+    };
+  }, [volunteers]);
+
   const handleConfirmAction = async () => {
     if (!pendingActionVolunteer || !pendingActionType) {
       return;
@@ -163,46 +175,109 @@ function VolunteersManagementTable({
     }
   };
 
-  if (loading) {
-    return (
-      <p className="community-volunteers-mgmt__loading">טוען מתנדבים...</p>
-    );
-  }
-
-  if (error) {
-    return <p className="community-volunteers-mgmt__error">{error}</p>;
-  }
+  const safePage = Math.min(currentPage, totalPages);
 
   return (
     <div className="community-volunteers-mgmt">
-      <CommunityStaffStatusOverview
-        items={buildActiveInactiveOverviewItems(
-          volunteers,
-          (volunteer) => volunteer.is_active === true
-        )}
-      />
+      {!loading && !error ? (
+        <section
+          className="activities-mgmt-summary"
+          aria-label="סיכום מתנדבים"
+        >
+          <div className="activities-mgmt-summary__card activities-mgmt-summary__card--neutral">
+            <span className="activities-mgmt-summary__icon">
+              <Users size={22} strokeWidth={2} aria-hidden="true" />
+            </span>
+            <span className="activities-mgmt-summary__value">
+              {volunteerStats.total}
+            </span>
+            <span className="activities-mgmt-summary__label">סה״כ מתנדבים</span>
+            <span className="activities-mgmt-summary__hint">
+              כל המתנדבים במערכת
+            </span>
+          </div>
+          <div className="activities-mgmt-summary__card activities-mgmt-summary__card--participants">
+            <span className="activities-mgmt-summary__icon">
+              <UserCheck size={22} strokeWidth={2} aria-hidden="true" />
+            </span>
+            <span className="activities-mgmt-summary__value">
+              {volunteerStats.active}
+            </span>
+            <span className="activities-mgmt-summary__label">
+              מתנדבים פעילים
+            </span>
+            <span className="activities-mgmt-summary__hint">
+              פעילים כרגע במערכת
+            </span>
+          </div>
+          <div className="activities-mgmt-summary__card activities-mgmt-summary__card--open">
+            <span className="activities-mgmt-summary__icon">
+              <UserX size={22} strokeWidth={2} aria-hidden="true" />
+            </span>
+            <span className="activities-mgmt-summary__value">
+              {volunteerStats.inactive}
+            </span>
+            <span className="activities-mgmt-summary__label">לא פעילים</span>
+            <span className="activities-mgmt-summary__hint">
+              מתנדבים מושבתים כרגע
+            </span>
+          </div>
+        </section>
+      ) : null}
 
-      <CommunityStaffListToolbar
-        searchId="volunteers-mgmt-search"
-        searchValue={searchTerm}
-        onSearchChange={(event) => setSearchTerm(event.target.value)}
-        searchPlaceholder="חיפוש לפי שם, טלפון או כתובת..."
-        filterId="volunteers-mgmt-filter"
-        filterValue={activeFilter}
-        onFilterChange={(event) => setActiveFilter(event.target.value)}
-        filterLabel="סטטוס"
-        filterOptions={[
-          { value: "all", label: "כל המתנדבים" },
-          { value: "active", label: "פעילים" },
-          { value: "inactive", label: "לא פעילים" },
-        ]}
-        pageSizeId="volunteers-mgmt-page-size"
-        pageSizeValue={pageSize}
-        onPageSizeChange={(event) => setPageSize(Number(event.target.value))}
-        pageSizeOptions={PAGE_SIZE_OPTIONS}
-      />
+      <div className="admin-list-toolbar staff-form staff-list-filters">
+        <div className="admin-list-toolbar__search">
+          <label htmlFor="volunteers-mgmt-search">חיפוש</label>
+          <input
+            id="volunteers-mgmt-search"
+            type="search"
+            value={searchTerm}
+            onChange={(event) => setSearchTerm(event.target.value)}
+            placeholder="חיפוש לפי שם, טלפון או כתובת..."
+          />
+        </div>
 
-      <div className="community-staff-request-list community-volunteers-mgmt__card">
+        <div className="admin-list-toolbar__filters">
+          <div>
+            <label htmlFor="volunteers-mgmt-filter">סטטוס</label>
+            <select
+              id="volunteers-mgmt-filter"
+              value={activeFilter}
+              onChange={(event) => setActiveFilter(event.target.value)}
+            >
+              <option value="all">כל המתנדבים</option>
+              <option value="active">פעילים</option>
+              <option value="inactive">לא פעילים</option>
+            </select>
+          </div>
+        </div>
+
+        <div className="admin-list-toolbar__page-size">
+          <label htmlFor="volunteers-mgmt-page-size">מספר מתנדבים בעמוד</label>
+          <select
+            id="volunteers-mgmt-page-size"
+            value={pageSize}
+            onChange={(event) => setPageSize(Number(event.target.value))}
+          >
+            {PAGE_SIZE_OPTIONS.map((size) => (
+              <option key={size} value={size}>
+                {size}
+              </option>
+            ))}
+          </select>
+        </div>
+      </div>
+
+      {error ? (
+        <p className="staff-alert staff-alert--error">{error}</p>
+      ) : null}
+
+      {loading ? (
+        <p className="activities-mgmt-loading">טוען מתנדבים...</p>
+      ) : null}
+
+      {!loading && !error ? (
+        <div className="community-staff-request-list community-volunteers-mgmt__card">
         {filteredVolunteers.length === 0 ? (
           <CommunityStaffEmptyState
             icon={Users}
@@ -252,18 +327,34 @@ function VolunteersManagementTable({
             })}
           </ul>
         )}
-      </div>
+        </div>
+      ) : null}
 
-      {filteredVolunteers.length > 0 && (
-        <CommunityStaffPagination
-          currentPage={currentPage}
-          totalPages={totalPages}
-          onPrevious={() => setCurrentPage((page) => Math.max(1, page - 1))}
-          onNext={() =>
-            setCurrentPage((page) => Math.min(totalPages, page + 1))
-          }
-        />
-      )}
+      {!loading && !error && filteredVolunteers.length > 0 ? (
+        <div className="activities-mgmt-pagination">
+          <button
+            type="button"
+            className="activities-mgmt-pagination__btn"
+            onClick={() => setCurrentPage((page) => Math.max(1, page - 1))}
+            disabled={safePage <= 1}
+          >
+            הקודם
+          </button>
+          <span className="activities-mgmt-pagination__label">
+            עמוד {safePage} מתוך {totalPages}
+          </span>
+          <button
+            type="button"
+            className="activities-mgmt-pagination__btn"
+            onClick={() =>
+              setCurrentPage((page) => Math.min(totalPages, page + 1))
+            }
+            disabled={safePage >= totalPages}
+          >
+            הבא
+          </button>
+        </div>
+      ) : null}
 
       <CommunityStaffConfirmModal
         message={

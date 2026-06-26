@@ -463,14 +463,14 @@ function StaffDashboard({ onLogout }) {
                 return (
                     <div data-dashboard-page="cancellations">
                         {renderSubpageToolbar(SUBPAGE_TITLES.cancellations)}
-                        <ManageCancellations />
+                        <ManageCancellations onNavigate={goToPage} />
                     </div>
                 );
             case "inquiries":
                 return (
                     <div data-dashboard-page="inquiries">
                         {renderSubpageToolbar(SUBPAGE_TITLES.inquiries)}
-                        <RequestsPage />
+                        <RequestsPage onNavigate={goToPage} />
                     </div>
                 );
             case "messages":
@@ -488,6 +488,7 @@ function StaffDashboard({ onLogout }) {
                             onNavigate={(view) =>
                                 goToPage(buildStaffPage("attendance", view))
                             }
+                            onBackToDashboard={goToDashboard}
                         />
                     </div>
                 );

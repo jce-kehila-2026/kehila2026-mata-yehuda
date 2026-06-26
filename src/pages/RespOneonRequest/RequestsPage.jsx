@@ -1,4 +1,5 @@
 import { useEffect, useMemo, useState } from "react";
+import { CalendarDays, CheckCircle2, Clock, Mail } from "lucide-react";
 
 import RequestDetailPanel from "../../components/RespOneonRequest/RequestDetailPanel";
 import RequestListRow from "../../components/RespOneonRequest/RequestListRow";
@@ -22,7 +23,29 @@ const TAB = {
   answered: "answered",
 };
 
-function RequestsPage() {
+function isToday(value) {
+  if (!value) return false;
+
+  let date;
+  if (typeof value?.toDate === "function") {
+    date = value.toDate();
+  } else if (value instanceof Date) {
+    date = value;
+  } else {
+    date = new Date(value);
+  }
+
+  if (Number.isNaN(date.getTime())) return false;
+
+  const now = new Date();
+  return (
+    date.getFullYear() === now.getFullYear() &&
+    date.getMonth() === now.getMonth() &&
+    date.getDate() === now.getDate()
+  );
+}
+
+function RequestsPage({ onNavigate }) {
   const [requests, setRequests] = useState([]);
   const [answers, setAnswers] = useState({});
   const [loading, setLoading] = useState(true);
@@ -91,6 +114,11 @@ function RequestsPage() {
       sortAnsweredRequests(
         requests.filter((request) => request.status === "answered"),
       ),
+    [requests],
+  );
+
+  const todayCount = useMemo(
+    () => requests.filter((request) => isToday(request.date)).length,
     [requests],
   );
 
@@ -202,37 +230,94 @@ function RequestsPage() {
 
   if (loading) {
     return (
-      <div className="requests-inbox">
-        <div className="requests-inbox__loading">טוען פניות...</div>
+      <div className="requests-inbox list-mgmt-page" dir="rtl">
+        <div className="staff-container">
+          <div className="requests-inbox__loading">טוען פניות...</div>
+        </div>
       </div>
     );
   }
 
+  const summaryCards = [
+    { key: "total", label: "סך הפניות", value: requests.length, icon: Mail },
+    { key: "waiting", label: "לא נענו", value: waiting.length, icon: Clock },
+    {
+      key: "answered",
+      label: "נענו",
+      value: answered.length,
+      icon: CheckCircle2,
+    },
+    {
+      key: "today",
+      label: "פניות היום",
+      value: todayCount,
+      icon: CalendarDays,
+    },
+  ];
+
   return (
-    <div className="requests-inbox">
-      <header className="requests-inbox__page-header">
-        <div>
-          <h1 className="requests-inbox__page-title">ניהול פניות</h1>
-          <p className="requests-inbox__page-subtitle">
-            מענה לפניות הקהילה בוואטסאפ או בשיחה
-          </p>
+    <div className="requests-inbox list-mgmt-page" dir="rtl">
+      <img
+        src="/images/minitree.png"
+        alt=""
+        aria-hidden="true"
+        className="list-mgmt-decoration list-mgmt-decoration--top"
+      />
+      <img
+        src="/images/minitree.png"
+        alt=""
+        aria-hidden="true"
+        className="list-mgmt-decoration list-mgmt-decoration--left"
+      />
+      <img
+        src="/images/minitree.png"
+        alt=""
+        aria-hidden="true"
+        className="list-mgmt-decoration list-mgmt-decoration--bottom"
+      />
+
+      <div className="staff-container">
+        <header className="list-mgmt-page__header">
+          <div className="list-mgmt-page__header-main">
+            <h1 className="list-mgmt-page__title">ניהול פניות</h1>
+            <p className="list-mgmt-page__subtitle">
+              מענה לפניות הקהילה בוואטסאפ או בשיחה
+            </p>
+          </div>
+          <div className="list-mgmt-page__actions">
+            {onNavigate ? (
+              <button
+                type="button"
+                className="staff-back-button"
+                onClick={() => onNavigate("dashboard")}
+              >
+                <span className="staff-back-button__icon" aria-hidden="true">
+                  →
+                </span>
+                חזרה ללוח הבקרה
+              </button>
+            ) : null}
+          </div>
+        </header>
+
+        <div className="list-mgmt-summary" aria-label="סיכום פניות">
+          {summaryCards.map(({ key, label, value, icon: Icon }) => (
+            <div key={key} className="list-mgmt-summary__item">
+              <span className="list-mgmt-summary__icon" aria-hidden="true">
+                <Icon className="list-mgmt-summary__icon-glyph" strokeWidth={2} />
+              </span>
+              <span className="list-mgmt-summary__value">{value}</span>
+              <span className="list-mgmt-summary__label">{label}</span>
+            </div>
+          ))}
         </div>
-        <button
-          type="button"
-          className="inbox-btn inbox-btn--ghost"
-          onClick={() => loadRequests({ showLoading: true })}
-        >
-          רענון
-        </button>
-      </header>
 
-      {error && (
-        <p className="requests-inbox__error" role="alert">
-          {error}
-        </p>
-      )}
+        {error && (
+          <p className="requests-inbox__error" role="alert">
+            {error}
+          </p>
+        )}
 
-      <div className="requests-inbox__shell">
         <nav className="requests-inbox__nav" aria-label="סוג פניות">
           <button
             type="button"

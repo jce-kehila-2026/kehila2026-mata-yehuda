@@ -1,4 +1,6 @@
 import { useState } from "react";
+import { useNavigate } from "react-router-dom";
+import { Plus } from "lucide-react";
 import CommunityMembersTable from "../../components/communityStaff/CommunityMembersTable.jsx";
 import CreateCommunityMemberModal from "../../components/communityStaff/CreateCommunityMemberModal.jsx";
 import EditCommunityMemberModal from "../../components/communityStaff/EditCommunityMemberModal.jsx";
@@ -10,6 +12,7 @@ import CommunityStaffMessage, {
 import "../../styles/communityStaff/CommunityStaffDashboard.css";
 
 function CommunityMembersPage() {
+  const navigate = useNavigate();
   const [selectedMember, setSelectedMember] = useState(null);
   const [detailsMember, setDetailsMember] = useState(null);
   const [historyMember, setHistoryMember] = useState(null);
@@ -29,32 +32,73 @@ function CommunityMembersPage() {
   };
 
   return (
-    <div className="community-members-page" dir="rtl">
-      <header className="community-members-page__header community-staff-page-header">
-        <div className="community-staff-page-header__main">
-          <h1 className="community-members-page__title page-title">חברי קהילה</h1>
-          <p className="community-staff-page-subtitle">
-            ניהול חברי קהילה פעילים ולא פעילים
-          </p>
-        </div>
-        <button
-          type="button"
-          className="community-staff-page-header__action"
-          onClick={() => setShowCreateModal(true)}
-        >
-          הוספת חבר קהילה
-        </button>
-      </header>
-
-      <CommunityStaffMessage message={message} onDismiss={clearMessage} />
-
-      <CommunityMembersTable
-        refreshKey={refreshKey}
-        onEditMember={setSelectedMember}
-        onViewDetails={setDetailsMember}
-        onMemberUpdated={handleMemberUpdated}
-        onShowError={showError}
+    <div
+      className="community-members-page activities-mgmt-page"
+      dir="rtl"
+    >
+      <img
+        src="/images/minitree.png"
+        alt=""
+        aria-hidden="true"
+        className="activities-mgmt-decoration activities-mgmt-decoration--top"
       />
+      <img
+        src="/images/minitree.png"
+        alt=""
+        aria-hidden="true"
+        className="activities-mgmt-decoration activities-mgmt-decoration--left"
+      />
+      <img
+        src="/images/minitree.png"
+        alt=""
+        aria-hidden="true"
+        className="activities-mgmt-decoration activities-mgmt-decoration--bottom"
+      />
+
+      <div className="staff-container staff-container--activities">
+        <header className="activities-mgmt-page__header">
+          <div className="activities-mgmt-page__header-main">
+            <h1 className="activities-mgmt-page__title">חברי קהילה</h1>
+            <p className="activities-mgmt-page__subtitle">
+              ניהול חברי קהילה פעילים ולא פעילים
+            </p>
+          </div>
+          <div className="activities-mgmt-page__actions">
+            <button
+              type="button"
+              className="activities-mgmt-page__action"
+              onClick={() => setShowCreateModal(true)}
+            >
+              <Plus
+                className="activities-mgmt-page__action-icon"
+                strokeWidth={2.25}
+                aria-hidden="true"
+              />
+              <span>הוספת חבר קהילה</span>
+            </button>
+            <button
+              type="button"
+              className="staff-back-button"
+              onClick={() => navigate("/community-staff")}
+            >
+              <span className="staff-back-button__icon" aria-hidden="true">
+                →
+              </span>
+              חזרה ללוח הבקרה
+            </button>
+          </div>
+        </header>
+
+        <CommunityStaffMessage message={message} onDismiss={clearMessage} />
+
+        <CommunityMembersTable
+          refreshKey={refreshKey}
+          onEditMember={setSelectedMember}
+          onViewDetails={setDetailsMember}
+          onMemberUpdated={handleMemberUpdated}
+          onShowError={showError}
+        />
+      </div>
 
       <EditCommunityMemberModal
         member={selectedMember}
