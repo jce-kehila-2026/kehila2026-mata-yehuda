@@ -470,7 +470,7 @@ function StaffDashboard({ onLogout }) {
                 return (
                     <div data-dashboard-page="inquiries">
                         {renderSubpageToolbar(SUBPAGE_TITLES.inquiries)}
-                        <RequestsPage />
+                        <RequestsPage onNavigate={goToPage} />
                     </div>
                 );
             case "messages":
