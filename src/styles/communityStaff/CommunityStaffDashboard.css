@@ -2096,10 +2096,95 @@
 .community-help-requests-page {
   direction: rtl;
   min-height: 100vh;
-  background: #f4faf5;
+  background: #eef7f1;
   color: #243029;
   font-family: "Heebo", system-ui, sans-serif;
   padding: 1.25rem 1.25rem 2.5rem;
+}
+
+/* ===== Aligned to the "בקשות הצטרפות לקהילה תומכת" (Community Join Requests)
+   design, which follows the Activities Management system. The centered
+   .staff-container--activities owns the page padding, so the outer wrapper
+   drops its own to avoid double spacing. ===== */
+.community-help-requests-page.activities-mgmt-page {
+  padding: 0;
+}
+
+.community-help-requests-page.activities-mgmt-page .community-help-requests {
+  max-width: none;
+  margin: 0;
+}
+
+/* Filter / search bar — one wide horizontal row spanning the full container,
+   matching the Join Requests toolbar. Help requests list is search + page-size
+   only, hence a 2-column grid. The toolbar also carries the shared `.staff-form`
+   class (flex-column), so we target the full class combo and use !important to
+   keep the horizontal grid. */
+.community-help-requests-page .admin-list-toolbar,
+.community-help-requests-page
+  .admin-list-toolbar.staff-form.staff-list-filters {
+  display: grid !important;
+  grid-template-columns: minmax(240px, 1fr) auto !important;
+  align-items: end;
+  gap: 0.85rem;
+  width: 100% !important;
+  max-width: none !important;
+  margin: 0 0 1.6rem !important;
+  padding: 1rem 1.15rem;
+  background: #ffffff;
+  border: 1px solid #e8efe9;
+  border-radius: 16px;
+  box-shadow: 0 3px 14px rgba(36, 48, 41, 0.05);
+  box-sizing: border-box;
+  text-align: right;
+}
+
+.community-help-requests-page .admin-list-toolbar__search,
+.community-help-requests-page .admin-list-toolbar__page-size,
+.community-help-requests-page .admin-list-toolbar__filters {
+  display: flex;
+  flex-direction: column;
+  gap: 0.4rem;
+  min-width: 0;
+}
+
+.community-help-requests-page .admin-list-toolbar label {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.35rem;
+  font-size: 0.82rem;
+  font-weight: 700;
+  color: #5a6a60;
+}
+
+.community-help-requests-page .admin-list-toolbar input,
+.community-help-requests-page .admin-list-toolbar select {
+  width: 100%;
+  min-width: 0;
+  font-family: inherit;
+  font-size: 0.92rem;
+  font-weight: 500;
+  color: #243029;
+  background: #fbfdfb;
+  border: 1px solid #dce8df;
+  border-radius: 12px;
+  padding: 0.7rem 0.9rem;
+}
+
+.community-help-requests-page .admin-list-toolbar input:focus,
+.community-help-requests-page .admin-list-toolbar select:focus {
+  outline: none;
+  border-color: #9fd4ab;
+  background: #ffffff;
+  box-shadow: 0 0 0 3px rgba(45, 125, 70, 0.1);
+}
+
+@media (max-width: 768px) {
+  .community-help-requests-page .admin-list-toolbar,
+  .community-help-requests-page
+    .admin-list-toolbar.staff-form.staff-list-filters {
+    grid-template-columns: 1fr !important;
+  }
 }
 
 .community-help-requests-page__header {
@@ -2147,8 +2232,9 @@
 
 .community-help-requests__card {
   background: #ffffff;
-  border: 1px solid #d5ddd8;
-  border-radius: 6px;
+  border: 1px solid #e8efe9;
+  border-radius: 16px;
+  box-shadow: 0 3px 14px rgba(36, 48, 41, 0.05);
   overflow: hidden;
 }
 
@@ -4677,6 +4763,35 @@
   padding: 1.25rem 1rem 2rem;
   max-width: 1100px;
   margin: 0 auto;
+}
+
+/* ===== Aligned to the "בקשות הצטרפות לקהילה תומכת" (Community Join Requests)
+   design. The centered .staff-container--activities owns the page width and
+   padding, so the outer wrapper goes full-width and only sets the background.
+   This is a settings page, so the sections stay as cards (not a table). ===== */
+.community-settings-page.activities-mgmt-page {
+  padding: 0;
+  max-width: none;
+  margin: 0;
+  background: #eef7f1;
+}
+
+.community-settings-page__sections {
+  margin: 0;
+}
+
+.community-settings-page .community-settings-section {
+  background: #ffffff;
+  border: 1px solid #e8efe9;
+  border-radius: 16px;
+  box-shadow: 0 3px 14px rgba(36, 48, 41, 0.05);
+  padding: 1.4rem 1.5rem;
+}
+
+@media (max-width: 768px) {
+  .community-settings-page .community-settings-section {
+    padding: 1.1rem 1rem;
+  }
 }
 
 .community-settings-page__back {
