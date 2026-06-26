@@ -244,21 +244,43 @@ function TakeAttendancePage({ onBack }) {
     !hasSearched;
 
   return (
-    <div className="take-attendance-page" dir="rtl">
-      <header className="take-attendance-page__header">
-        <div className="take-attendance-page__header-row">
-          <h1 className="take-attendance-page__title">לקיחת נוכחות</h1>
-          <button
-            type="button"
-            className="attendance-btn attendance-btn--secondary"
-            onClick={onBack}
-          >
-            חזרה לתפריט
-          </button>
-        </div>
-      </header>
+    <div className="take-attendance-page list-mgmt-page" dir="rtl">
+      <img
+        src="/images/minitree.png"
+        alt=""
+        aria-hidden="true"
+        className="list-mgmt-decoration list-mgmt-decoration--top"
+      />
+      <img
+        src="/images/minitree.png"
+        alt=""
+        aria-hidden="true"
+        className="list-mgmt-decoration list-mgmt-decoration--bottom"
+      />
 
-      <div className="take-attendance-page__content">
+      <div className="staff-container">
+        <header className="list-mgmt-page__header">
+          <div className="list-mgmt-page__header-main">
+            <h1 className="list-mgmt-page__title">לקיחת נוכחות</h1>
+            <p className="list-mgmt-page__subtitle">
+              חיפוש פעילות, סימון נוכחות ושמירת רשומות חדשות
+            </p>
+          </div>
+          <div className="list-mgmt-page__actions">
+            <button
+              type="button"
+              className="staff-back-button"
+              onClick={onBack}
+            >
+              <span className="staff-back-button__icon" aria-hidden="true">
+                →
+              </span>
+              חזרה לתפריט
+            </button>
+          </div>
+        </header>
+
+        <div className="take-attendance-page__content">
         <div className="take-attendance-page__search-wrap">
           <AttendanceSearch
             classPrefix="take-attendance-page"
@@ -353,6 +375,7 @@ function TakeAttendancePage({ onBack }) {
             />
           </>
         )}
+        </div>
       </div>
     </div>
   );

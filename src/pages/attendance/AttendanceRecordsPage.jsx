@@ -226,21 +226,43 @@ function AttendanceRecordsPage({ onBack }) {
     : LOADING_MESSAGES.dashboard;
 
   return (
-    <div className="attendance-records-page" dir="rtl">
-      <header className="attendance-records-page__header">
-        <div className="attendance-records-page__header-row">
-          <h1 className="attendance-records-page__title">צפייה בנוכחות</h1>
-          <button
-            type="button"
-            className="attendance-btn attendance-btn--secondary"
-            onClick={onBack}
-          >
-            חזרה לתפריט
-          </button>
-        </div>
-      </header>
+    <div className="attendance-records-page list-mgmt-page" dir="rtl">
+      <img
+        src="/images/minitree.png"
+        alt=""
+        aria-hidden="true"
+        className="list-mgmt-decoration list-mgmt-decoration--top"
+      />
+      <img
+        src="/images/minitree.png"
+        alt=""
+        aria-hidden="true"
+        className="list-mgmt-decoration list-mgmt-decoration--bottom"
+      />
 
-      <div className="attendance-records-page__content">
+      <div className="staff-container">
+        <header className="list-mgmt-page__header">
+          <div className="list-mgmt-page__header-main">
+            <h1 className="list-mgmt-page__title">צפייה בנוכחות</h1>
+            <p className="list-mgmt-page__subtitle">
+              צפייה ברשומות נוכחות שנשמרו לפי פעילות ותאריך
+            </p>
+          </div>
+          <div className="list-mgmt-page__actions">
+            <button
+              type="button"
+              className="staff-back-button"
+              onClick={onBack}
+            >
+              <span className="staff-back-button__icon" aria-hidden="true">
+                →
+              </span>
+              חזרה לתפריט
+            </button>
+          </div>
+        </header>
+
+        <div className="attendance-records-page__content">
         <div className="attendance-records-page__search-wrap">
           <AttendanceSearch
             classPrefix="attendance-records-page"
@@ -281,6 +303,7 @@ function AttendanceRecordsPage({ onBack }) {
         )}
 
         {!isPageLoading && !error && hasRequestedData && renderPageContent()}
+        </div>
       </div>
     </div>
   );
