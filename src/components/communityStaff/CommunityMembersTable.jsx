@@ -1,13 +1,9 @@
 import { useCallback, useEffect, useMemo, useState } from "react";
+import { Users, UserCheck, UserX } from "lucide-react";
 import {
   CommunityStaffCompactCard,
   CommunityStaffActiveBadge,
   CommunityStaffEmptyState,
-  CommunityStaffListToolbar,
-  CommunityStaffPagination,
-  CommunityStaffStatusOverview,
-  Users,
-  buildActiveInactiveOverviewItems,
 } from "./CommunityStaffListUi.jsx";
 import {
   getCommunityMembers,
@@ -15,7 +11,7 @@ import {
 } from "../../services/communityStaff/communityStaffService";
 import CommunityStaffConfirmModal from "./CommunityStaffConfirmModal.jsx";
 
-const PAGE_SIZE_OPTIONS = [5, 10, 25];
+const PAGE_SIZE_OPTIONS = [5, 10, 20];
 
 function matchesSearch(member, searchTerm) {
   if (!searchTerm) {
@@ -108,6 +104,22 @@ function CommunityMembersTable({
     }
   }, [currentPage, totalPages]);
 
+  const memberStats = useMemo(() => {
+    let active = 0;
+
+    members.forEach((member) => {
+      if (member.status === "active") {
+        active += 1;
+      }
+    });
+
+    return {
+      total: members.length,
+      active,
+      inactive: members.length - active,
+    };
+  }, [members]);
+
   const handleConfirmDeactivate = async () => {
     if (!pendingDeactivateMember) {
       return;
@@ -133,86 +145,167 @@ function CommunityMembersTable({
     }
   };
 
-  if (loading) {
-    return <p className="community-members__loading">טוען חברי קהילה...</p>;
-  }
-
-  if (error) {
-    return <p className="community-members__error">{error}</p>;
-  }
+  const safePage = Math.min(currentPage, totalPages);
 
   return (
     <div className="community-members">
-      <CommunityStaffStatusOverview
-        items={buildActiveInactiveOverviewItems(
-          members,
-          (member) => member.status === "active"
-        )}
-      />
+      {!loading && !error ? (
+        <section
+          className="activities-mgmt-summary"
+          aria-label="סיכום חברי קהילה"
+        >
+          <div className="activities-mgmt-summary__card activities-mgmt-summary__card--neutral">
+            <span className="activities-mgmt-summary__icon">
+              <Users size={22} strokeWidth={2} aria-hidden="true" />
+            </span>
+            <span className="activities-mgmt-summary__value">
+              {memberStats.total}
+            </span>
+            <span className="activities-mgmt-summary__label">סה״כ חברים</span>
+            <span className="activities-mgmt-summary__hint">
+              כל חברי הקהילה במערכת
+            </span>
+          </div>
+          <div className="activities-mgmt-summary__card activities-mgmt-summary__card--participants">
+            <span className="activities-mgmt-summary__icon">
+              <UserCheck size={22} strokeWidth={2} aria-hidden="true" />
+            </span>
+            <span className="activities-mgmt-summary__value">
+              {memberStats.active}
+            </span>
+            <span className="activities-mgmt-summary__label">חברים פעילים</span>
+            <span className="activities-mgmt-summary__hint">
+              חברות פעילה בקהילה
+            </span>
+          </div>
+          <div className="activities-mgmt-summary__card activities-mgmt-summary__card--open">
+            <span className="activities-mgmt-summary__icon">
+              <UserX size={22} strokeWidth={2} aria-hidden="true" />
+            </span>
+            <span className="activities-mgmt-summary__value">
+              {memberStats.inactive}
+            </span>
+            <span className="activities-mgmt-summary__label">לא פעילים</span>
+            <span className="activities-mgmt-summary__hint">
+              חברות מושבתת כרגע
+            </span>
+          </div>
+        </section>
+      ) : null}
 
-      <CommunityStaffListToolbar
-        searchId="community-members-search"
-        searchValue={searchTerm}
-        onSearchChange={(event) => setSearchTerm(event.target.value)}
-        searchPlaceholder="חיפוש לפי שם, ת.ז., טלפון, שירות או שפה..."
-        filterId="community-members-filter"
-        filterValue={statusFilter}
-        onFilterChange={(event) => setStatusFilter(event.target.value)}
-        filterLabel="סטטוס"
-        filterOptions={[
-          { value: "all", label: "הכל" },
-          { value: "active", label: "פעיל" },
-          { value: "inactive", label: "לא פעיל" },
-        ]}
-        pageSizeId="community-members-page-size"
-        pageSizeValue={pageSize}
-        onPageSizeChange={(event) => setPageSize(Number(event.target.value))}
-        pageSizeOptions={PAGE_SIZE_OPTIONS}
-      />
-
-      <div className="community-staff-request-list community-members__card">
-        {filteredMembers.length === 0 ? (
-          <CommunityStaffEmptyState
-            icon={Users}
-            message={
-              members.length === 0
-                ? "אין נתונים להצגה כרגע"
-                : "לא נמצאו תוצאות לפי החיפוש או הסינון"
-            }
+      <div className="admin-list-toolbar staff-form staff-list-filters">
+        <div className="admin-list-toolbar__search">
+          <label htmlFor="community-members-search">חיפוש</label>
+          <input
+            id="community-members-search"
+            type="search"
+            value={searchTerm}
+            onChange={(event) => setSearchTerm(event.target.value)}
+            placeholder="חיפוש לפי שם, ת.ז., טלפון, שירות או שפה..."
           />
-        ) : (
-          <ul className="community-staff-compact-list">
-            {paginatedMembers.map((member) => (
-              <CommunityStaffCompactCard
-                key={member.id}
-                name={member.fullNameDisplay}
-                phone={member.phone}
-                status={
-                  <CommunityStaffActiveBadge isActive={member.status === "active"} />
-                }
-                viewLabel="צפייה"
-                primaryLabel="עריכה"
-                onPrimaryClick={() => onEditMember(member)}
-                onViewDetails={() => onViewDetails(member)}
-                onDeactivate={() => setPendingDeactivateMember(member)}
-                deactivateLabel="השבתה"
-                deactivateDisabled={member.status !== "active"}
-              />
+        </div>
+
+        <div className="admin-list-toolbar__filters">
+          <div>
+            <label htmlFor="community-members-filter">סטטוס</label>
+            <select
+              id="community-members-filter"
+              value={statusFilter}
+              onChange={(event) => setStatusFilter(event.target.value)}
+            >
+              <option value="all">הכל</option>
+              <option value="active">פעיל</option>
+              <option value="inactive">לא פעיל</option>
+            </select>
+          </div>
+        </div>
+
+        <div className="admin-list-toolbar__page-size">
+          <label htmlFor="community-members-page-size">מספר חברים בעמוד</label>
+          <select
+            id="community-members-page-size"
+            value={pageSize}
+            onChange={(event) => setPageSize(Number(event.target.value))}
+          >
+            {PAGE_SIZE_OPTIONS.map((size) => (
+              <option key={size} value={size}>
+                {size}
+              </option>
             ))}
-          </ul>
-        )}
+          </select>
+        </div>
       </div>
 
-      {filteredMembers.length > 0 && (
-        <CommunityStaffPagination
-          currentPage={currentPage}
-          totalPages={totalPages}
-          onPrevious={() => setCurrentPage((page) => Math.max(1, page - 1))}
-          onNext={() =>
-            setCurrentPage((page) => Math.min(totalPages, page + 1))
-          }
-        />
-      )}
+      {error ? (
+        <p className="staff-alert staff-alert--error">{error}</p>
+      ) : null}
+
+      {loading ? (
+        <p className="activities-mgmt-loading">טוען חברי קהילה...</p>
+      ) : null}
+
+      {!loading && !error ? (
+        <div className="community-staff-request-list community-members__card">
+          {filteredMembers.length === 0 ? (
+            <CommunityStaffEmptyState
+              icon={Users}
+              message={
+                members.length === 0
+                  ? "אין נתונים להצגה כרגע"
+                  : "לא נמצאו תוצאות לפי החיפוש או הסינון"
+              }
+            />
+          ) : (
+            <ul className="community-staff-compact-list">
+              {paginatedMembers.map((member) => (
+                <CommunityStaffCompactCard
+                  key={member.id}
+                  name={member.fullNameDisplay}
+                  phone={member.phone}
+                  status={
+                    <CommunityStaffActiveBadge
+                      isActive={member.status === "active"}
+                    />
+                  }
+                  viewLabel="צפייה"
+                  primaryLabel="עריכה"
+                  onPrimaryClick={() => onEditMember(member)}
+                  onViewDetails={() => onViewDetails(member)}
+                  onDeactivate={() => setPendingDeactivateMember(member)}
+                  deactivateLabel="השבתה"
+                  deactivateDisabled={member.status !== "active"}
+                />
+              ))}
+            </ul>
+          )}
+        </div>
+      ) : null}
+
+      {!loading && !error && filteredMembers.length > 0 ? (
+        <div className="activities-mgmt-pagination">
+          <button
+            type="button"
+            className="activities-mgmt-pagination__btn"
+            onClick={() => setCurrentPage((page) => Math.max(1, page - 1))}
+            disabled={safePage <= 1}
+          >
+            הקודם
+          </button>
+          <span className="activities-mgmt-pagination__label">
+            עמוד {safePage} מתוך {totalPages}
+          </span>
+          <button
+            type="button"
+            className="activities-mgmt-pagination__btn"
+            onClick={() =>
+              setCurrentPage((page) => Math.min(totalPages, page + 1))
+            }
+            disabled={safePage >= totalPages}
+          >
+            הבא
+          </button>
+        </div>
+      ) : null}
 
       <CommunityStaffConfirmModal
         message={
