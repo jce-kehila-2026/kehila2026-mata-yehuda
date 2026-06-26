@@ -1,5 +1,5 @@
 import { useCallback, useEffect, useMemo, useState } from "react";
-import { ClipboardList, Plus } from "lucide-react";
+import { Archive, ClipboardList, Plus } from "lucide-react";
 import ProgramCard from "./ProgramCard";
 import AdminDataTable from "../admin/AdminDataTable";
 import AdminListEmptyState from "../admin/AdminListEmptyState";
@@ -50,6 +50,7 @@ function ProgramList({
     onEdit,
     onDelete,
     onAddProgram,
+    onViewArchive,
     onBack
 }) {
     const [sourceItems, setSourceItems] = useState([]);
@@ -171,6 +172,20 @@ function ProgramList({
                                 aria-hidden="true"
                             />
                             <span>הוספת תוכנית</span>
+                        </button>
+                    ) : null}
+                    {onViewArchive ? (
+                        <button
+                            type="button"
+                            className="programs-mgmt-page__action programs-mgmt-page__action--archive"
+                            onClick={onViewArchive}
+                        >
+                            <Archive
+                                className="programs-mgmt-page__action-icon"
+                                strokeWidth={2.25}
+                                aria-hidden="true"
+                            />
+                            <span>צפייה בארכיון</span>
                         </button>
                     ) : null}
                     {onBack ? (

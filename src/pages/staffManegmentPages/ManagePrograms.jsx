@@ -12,6 +12,7 @@ import {
 } from "../../utils/staffManegmentUtils/programConstants";
 import ProgramForm from "../../components/programs/ProgramForm";
 import ProgramList from "../../components/programs/ProgramList";
+import ArchiveProgramsList from "../../components/archive/ArchiveProgramsList";
 
 function ManagePrograms({ programView, onNavigate }) {
     const [editingProgram, setEditingProgram] = useState(null);
@@ -42,6 +43,13 @@ function ManagePrograms({ programView, onNavigate }) {
         setError("");
         setSuccess("");
         navigateToView("add");
+    }
+
+    function handleViewArchive() {
+        setEditingProgram(null);
+        setError("");
+        setSuccess("");
+        navigateToView("archive");
     }
 
     function handleEdit(program) {
@@ -136,10 +144,10 @@ function ManagePrograms({ programView, onNavigate }) {
                 className="programs-mgmt-decoration programs-mgmt-decoration--bottom"
             />
             <div className="staff-container staff-container--programs">
-                {error && programPage === "list" ? (
+                {error && (programPage === "list" || programPage === "archive") ? (
                     <p className="staff-alert staff-alert--error">{error}</p>
                 ) : null}
-                {success && programPage === "list" ? (
+                {success && (programPage === "list" || programPage === "archive") ? (
                     <p className="staff-alert staff-alert--success">{success}</p>
                 ) : null}
 
@@ -150,7 +158,38 @@ function ManagePrograms({ programView, onNavigate }) {
                             onEdit={handleEdit}
                             onDelete={handleDelete}
                             onAddProgram={handleAddProgramClick}
+                            onViewArchive={handleViewArchive}
                             onBack={() => onNavigate("dashboard")}
+                        />
+                    </section>
+                )}
+
+                {programPage === "archive" && (
+                    <section className="staff-section staff-section--list staff-section--programs-archive">
+                        <div className="programs-mgmt-archive-toolbar">
+                            <button
+                                type="button"
+                                className="staff-back-button"
+                                onClick={goBackToList}
+                            >
+                                <span
+                                    className="staff-back-button__icon"
+                                    aria-hidden="true"
+                                >
+                                    →
+                                </span>
+                                <span className="staff-back-button__label">
+                                    חזרה לרשימת תוכניות
+                                </span>
+                            </button>
+                        </div>
+
+                        <ArchiveProgramsList
+                            refreshKey={listRefreshKey}
+                            onActionMessage={(message) => {
+                                setSuccess(message);
+                                refreshProgramList();
+                            }}
                         />
                     </section>
                 )}

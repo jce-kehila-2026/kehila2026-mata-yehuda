@@ -1,30 +1,104 @@
+import { useEffect, useMemo, useState } from "react";
 import { formatDate } from "../../utils/staffManegmentUtils/dateUtils";
 import { getNotificationTargetGroupLabel } from "./helpers/messageHelpers";
 import { hasFormattedDisplay } from "../../utils/staffManegmentUtils/hasValue";
 
+const PAGE_SIZE_OPTIONS = [5, 10, 20];
+const DEFAULT_PAGE_SIZE = 10;
+
+function getSentMillis(value) {
+    if (!value) {
+        return 0;
+    }
+
+    if (typeof value.toDate === "function") {
+        return value.toDate().getTime();
+    }
+
+    if (typeof value.seconds === "number") {
+        return value.seconds * 1000;
+    }
+
+    const parsed = new Date(value);
+    return Number.isNaN(parsed.getTime()) ? 0 : parsed.getTime();
+}
+
 function NotificationRecentActivity({ items = [], loading }) {
+    const [pageSize, setPageSize] = useState(DEFAULT_PAGE_SIZE);
+    const [page, setPage] = useState(1);
+
+    const sortedItems = useMemo(
+        () =>
+            [...items].sort(
+                (a, b) => getSentMillis(b.sentAt) - getSentMillis(a.sentAt)
+            ),
+        [items]
+    );
+
+    const totalPages = Math.max(1, Math.ceil(sortedItems.length / pageSize));
+    const currentPage = Math.min(page, totalPages);
+
+    useEffect(() => {
+        if (page !== currentPage) {
+            setPage(currentPage);
+        }
+    }, [page, currentPage]);
+
+    const pageItems = useMemo(() => {
+        const start = (currentPage - 1) * pageSize;
+        return sortedItems.slice(start, start + pageSize);
+    }, [sortedItems, currentPage, pageSize]);
+
+    function handlePageSizeChange(event) {
+        setPageSize(Number(event.target.value));
+        setPage(1);
+    }
+
+    const hasItems = !loading && sortedItems.length > 0;
+
     return (
         <section className="notifications-activity" aria-labelledby="notifications-activity-title">
             <div className="notifications-activity__header">
-                <h2 id="notifications-activity-title" className="notifications-activity__title">
-                    פעילות אחרונה
-                </h2>
-                <p className="notifications-activity__subtitle">
-                    הודעות שנשלחו לאחרונה מהמערכת
-                </p>
+                <div className="notifications-activity__header-main">
+                    <h2 id="notifications-activity-title" className="notifications-activity__title">
+                        פעילות אחרונה
+                    </h2>
+                    <p className="notifications-activity__subtitle">
+                        הודעות שנשלחו לאחרונה מהמערכת
+                    </p>
+                </div>
+
+                {hasItems ? (
+                    <div className="notifications-activity__page-size">
+                        <label htmlFor="notifications-activity-page-size">
+                            מספר הודעות בעמוד
+                        </label>
+                        <select
+                            id="notifications-activity-page-size"
+                            value={pageSize}
+                            onChange={handlePageSizeChange}
+                        >
+                            {PAGE_SIZE_OPTIONS.map((option) => (
+                                <option key={option} value={option}>
+                                    {option}
+                                </option>
+                            ))}
+                        </select>
+                    </div>
+                ) : null}
             </div>
 
             {loading ? (
                 <p className="notifications-activity__loading">טוען פעילות...</p>
             ) : null}
 
-            {!loading && items.length === 0 ? (
+            {!loading && sortedItems.length === 0 ? (
                 <div className="notifications-activity__empty">
                     <p>עדיין לא נשלחו הודעות מהמערכת</p>
                 </div>
             ) : null}
 
-            {!loading && items.length > 0 ? (
+            {hasItems ? (
                 <>
                     <div className="notifications-activity__table-wrap notifications-activity__table-wrap--desktop">
                         <table className="notifications-activity__table">
@@ -38,7 +112,7 @@ function NotificationRecentActivity({ items = [], loading }) {
                                 </tr>
                             </thead>
                             <tbody>
-                                {items.map((item) => {
+                                {pageItems.map((item) => {
                                     const sentDate = formatDate(item.sentAt);
                                     const recipientCount =
                                         item.totalTokens ?? item.successCount ?? 0;
@@ -70,7 +144,7 @@ function NotificationRecentActivity({ items = [], loading }) {
                     </div>
 
                     <ul className="notifications-activity__list notifications-activity__list--mobile">
-                        {items.map((item) => {
+                        {pageItems.map((item) => {
                             const sentDate = formatDate(item.sentAt);
                             const recipientCount =
                                 item.totalTokens ?? item.successCount ?? 0;
@@ -102,6 +176,28 @@ function NotificationRecentActivity({ items = [], loading }) {
                             );
                         })}
                     </ul>
+
+                    <div className="messages-mgmt-pagination">
+                        <button
+                            type="button"
+                            className="messages-mgmt-pagination__btn"
+                            onClick={() => setPage(currentPage - 1)}
+                            disabled={currentPage <= 1}
+                        >
+                            הקודם
+                        </button>
+                        <span className="messages-mgmt-pagination__label">
+                            עמוד {currentPage} מתוך {totalPages}
+                        </span>
+                        <button
+                            type="button"
+                            className="messages-mgmt-pagination__btn"
+                            onClick={() => setPage(currentPage + 1)}
+                            disabled={currentPage >= totalPages}
+                        >
+                            הבא
+                        </button>
+                    </div>
                 </>
             ) : null}
         </section>

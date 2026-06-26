@@ -1,8 +1,5 @@
 import { useCallback, useEffect, useState } from "react";
-import CommunityStaffMessage, {
-    useCommunityStaffMessage
-} from "../../components/communityStaff/CommunityStaffMessage.jsx";
-import { CommunityStaffStatusOverview } from "../../components/communityStaff/CommunityStaffListUi.jsx";
+import { Clock, Plus, UserCheck, UserX } from "lucide-react";
 import DayCenterVolunteerDetailsModal from "../../components/dayCenterVolunteers/DayCenterVolunteerDetailsModal";
 import DayCenterVolunteerRequestsList from "../../components/dayCenterVolunteers/DayCenterVolunteerRequestsList";
 import DayCenterVolunteersList from "../../components/dayCenterVolunteers/DayCenterVolunteersList";
@@ -13,12 +10,17 @@ import {
     getDayCenterVolunteers,
     updateDayCenterVolunteer
 } from "../../services/dayCenterVolunteerService";
-import "../../styles/communityStaff/CommunityStaffDashboard.css";
 
 const TAB_VOLUNTEERS = "volunteers";
 const TAB_REQUESTS = "requests";
 
-function ManageDayCenterVolunteers() {
+const SUMMARY_ICONS = {
+    active: UserCheck,
+    inactive: UserX,
+    pending: Clock
+};
+
+function ManageDayCenterVolunteers({ onNavigate }) {
     const [activeTab, setActiveTab] = useState(TAB_VOLUNTEERS);
     const [refreshKey, setRefreshKey] = useState(0);
     const [overview, setOverview] = useState({
@@ -30,8 +32,19 @@ function ManageDayCenterVolunteers() {
     const [detailsVolunteer, setDetailsVolunteer] = useState(null);
     const [showCreateModal, setShowCreateModal] = useState(false);
     const [isSubmitting, setIsSubmitting] = useState(false);
-    const { message, showSuccess, showError, clearMessage } =
-        useCommunityStaffMessage();
+    const [feedback, setFeedback] = useState(null);
+
+    const showSuccess = useCallback((text) => {
+        if (text) {
+            setFeedback({ type: "success", text });
+        }
+    }, []);
+
+    const showError = useCallback((text) => {
+        if (text) {
+            setFeedback({ type: "error", text });
+        }
+    }, []);
 
     const loadOverview = useCallback(async () => {
         try {
@@ -122,118 +135,186 @@ function ManageDayCenterVolunteers() {
         }
     }
 
+    const summaryItems = [
+        { key: "active", label: "פעילים", value: overview.active },
+        { key: "inactive", label: "לא פעילים", value: overview.inactive },
+        { key: "pending", label: "בקשות ממתינות", value: overview.pending }
+    ];
+
     return (
         <div
-            className="day-center-volunteers-mgmt-page community-volunteers-mgmt-page"
+            className="day-center-volunteers-mgmt-page list-mgmt-page"
             dir="rtl"
         >
-            <header className="community-volunteers-mgmt-page__header community-staff-page-header">
-                <div className="community-staff-page-header__main">
-                    <h1 className="community-volunteers-mgmt-page__title page-title">
-                        ניהול מתנדבי מרכז יום
-                    </h1>
-                    <p className="community-staff-page-subtitle">
-                        ניהול מתנדבים פעילים, לא פעילים ובקשות התנדבות
-                    </p>
-                </div>
-                {activeTab === TAB_VOLUNTEERS ? (
-                    <button
-                        type="button"
-                        className="community-staff-page-header__action"
-                        onClick={handleAddClick}
-                    >
-                        הוספת מתנדב
-                    </button>
-                ) : null}
-            </header>
-
-            <CommunityStaffMessage message={message} onDismiss={clearMessage} />
-
-            <CommunityStaffStatusOverview
-                items={[
-                    { value: overview.active, label: "פעילים", tone: "active" },
-                    {
-                        value: overview.inactive,
-                        label: "לא פעילים",
-                        tone: "inactive"
-                    },
-                    {
-                        value: overview.pending,
-                        label: "בקשות ממתינות",
-                        tone: "pending"
-                    }
-                ]}
+            <img
+                src="/images/minitree.png"
+                alt=""
+                aria-hidden="true"
+                className="list-mgmt-decoration list-mgmt-decoration--top"
+            />
+            <img
+                src="/images/minitree.png"
+                alt=""
+                aria-hidden="true"
+                className="list-mgmt-decoration list-mgmt-decoration--left"
+            />
+            <img
+                src="/images/minitree.png"
+                alt=""
+                aria-hidden="true"
+                className="list-mgmt-decoration list-mgmt-decoration--bottom"
             />
 
-            <div
-                className="day-center-volunteers-mgmt-tabs"
-                role="tablist"
-                aria-label="ניהול מתנדבי מרכז יום"
-            >
-                <button
-                    type="button"
-                    role="tab"
-                    id="day-center-volunteers-tab-volunteers"
-                    aria-selected={activeTab === TAB_VOLUNTEERS}
-                    aria-controls="day-center-volunteers-panel-volunteers"
-                    className={`day-center-volunteers-mgmt-tabs__tab${
-                        activeTab === TAB_VOLUNTEERS
-                            ? " day-center-volunteers-mgmt-tabs__tab--active"
-                            : ""
-                    }`}
-                    onClick={() => setActiveTab(TAB_VOLUNTEERS)}
-                >
-                    מתנדבים
-                </button>
-                <button
-                    type="button"
-                    role="tab"
-                    id="day-center-volunteers-tab-requests"
-                    aria-selected={activeTab === TAB_REQUESTS}
-                    aria-controls="day-center-volunteers-panel-requests"
-                    className={`day-center-volunteers-mgmt-tabs__tab${
-                        activeTab === TAB_REQUESTS
-                            ? " day-center-volunteers-mgmt-tabs__tab--active"
-                            : ""
-                    }`}
-                    onClick={() => setActiveTab(TAB_REQUESTS)}
-                >
-                    בקשות
-                    {overview.pending > 0 ? (
-                        <span className="day-center-volunteers-mgmt-tabs__count">
-                            {overview.pending}
-                        </span>
-                    ) : null}
-                </button>
-            </div>
+            <div className="staff-container">
+                <header className="list-mgmt-page__header">
+                    <div className="list-mgmt-page__header-main">
+                        <h1 className="list-mgmt-page__title">
+                            ניהול מתנדבי מרכז יום
+                        </h1>
+                        <p className="list-mgmt-page__subtitle">
+                            ניהול מתנדבים פעילים, לא פעילים ובקשות התנדבות
+                        </p>
+                    </div>
+                    <div className="list-mgmt-page__actions">
+                        {activeTab === TAB_VOLUNTEERS ? (
+                            <button
+                                type="button"
+                                className="list-mgmt-page__action"
+                                onClick={handleAddClick}
+                            >
+                                <Plus
+                                    className="list-mgmt-page__action-icon"
+                                    strokeWidth={2.25}
+                                    aria-hidden="true"
+                                />
+                                <span>הוספת מתנדב</span>
+                            </button>
+                        ) : null}
+                        {onNavigate ? (
+                            <button
+                                type="button"
+                                className="staff-back-button"
+                                onClick={() => onNavigate("dashboard")}
+                            >
+                                <span
+                                    className="staff-back-button__icon"
+                                    aria-hidden="true"
+                                >
+                                    →
+                                </span>
+                                <span className="staff-back-button__label">
+                                    חזרה ללוח הבקרה
+                                </span>
+                            </button>
+                        ) : null}
+                    </div>
+                </header>
 
-            {activeTab === TAB_VOLUNTEERS ? (
-                <div
-                    role="tabpanel"
-                    id="day-center-volunteers-panel-volunteers"
-                    aria-labelledby="day-center-volunteers-tab-volunteers"
-                >
-                    <DayCenterVolunteersList
-                        refreshKey={refreshKey}
-                        onEditVolunteer={handleEditClick}
-                        onViewDetails={setDetailsVolunteer}
-                        onVolunteerUpdated={handleDataUpdated}
-                        onShowError={showError}
-                    />
+                {feedback ? (
+                    <p
+                        className={`staff-alert staff-alert--${feedback.type}`}
+                        role={feedback.type === "error" ? "alert" : "status"}
+                    >
+                        {feedback.text}
+                    </p>
+                ) : null}
+
+                <div className="list-mgmt-summary" aria-label="סיכום מתנדבי מרכז יום">
+                    {summaryItems.map((item) => {
+                        const Icon = SUMMARY_ICONS[item.key] || UserCheck;
+
+                        return (
+                            <div key={item.key} className="list-mgmt-summary__item">
+                                <span
+                                    className="list-mgmt-summary__icon"
+                                    aria-hidden="true"
+                                >
+                                    <Icon
+                                        className="list-mgmt-summary__icon-glyph"
+                                        strokeWidth={2}
+                                    />
+                                </span>
+                                <span className="list-mgmt-summary__value">
+                                    {item.value}
+                                </span>
+                                <span className="list-mgmt-summary__label">
+                                    {item.label}
+                                </span>
+                            </div>
+                        );
+                    })}
                 </div>
-            ) : (
+
                 <div
-                    role="tabpanel"
-                    id="day-center-volunteers-panel-requests"
-                    aria-labelledby="day-center-volunteers-tab-requests"
+                    className="day-center-volunteers-mgmt-tabs"
+                    role="tablist"
+                    aria-label="ניהול מתנדבי מרכז יום"
                 >
-                    <DayCenterVolunteerRequestsList
-                        refreshKey={refreshKey}
-                        onRequestUpdated={handleDataUpdated}
-                        onShowError={showError}
-                    />
+                    <button
+                        type="button"
+                        role="tab"
+                        id="day-center-volunteers-tab-volunteers"
+                        aria-selected={activeTab === TAB_VOLUNTEERS}
+                        aria-controls="day-center-volunteers-panel-volunteers"
+                        className={`day-center-volunteers-mgmt-tabs__tab${
+                            activeTab === TAB_VOLUNTEERS
+                                ? " day-center-volunteers-mgmt-tabs__tab--active"
+                                : ""
+                        }`}
+                        onClick={() => setActiveTab(TAB_VOLUNTEERS)}
+                    >
+                        מתנדבים
+                    </button>
+                    <button
+                        type="button"
+                        role="tab"
+                        id="day-center-volunteers-tab-requests"
+                        aria-selected={activeTab === TAB_REQUESTS}
+                        aria-controls="day-center-volunteers-panel-requests"
+                        className={`day-center-volunteers-mgmt-tabs__tab${
+                            activeTab === TAB_REQUESTS
+                                ? " day-center-volunteers-mgmt-tabs__tab--active"
+                                : ""
+                        }`}
+                        onClick={() => setActiveTab(TAB_REQUESTS)}
+                    >
+                        בקשות
+                        {overview.pending > 0 ? (
+                            <span className="day-center-volunteers-mgmt-tabs__count">
+                                {overview.pending}
+                            </span>
+                        ) : null}
+                    </button>
                 </div>
-            )}
+
+                {activeTab === TAB_VOLUNTEERS ? (
+                    <div
+                        role="tabpanel"
+                        id="day-center-volunteers-panel-volunteers"
+                        aria-labelledby="day-center-volunteers-tab-volunteers"
+                    >
+                        <DayCenterVolunteersList
+                            refreshKey={refreshKey}
+                            onEditVolunteer={handleEditClick}
+                            onViewDetails={setDetailsVolunteer}
+                            onVolunteerUpdated={handleDataUpdated}
+                            onShowError={showError}
+                        />
+                    </div>
+                ) : (
+                    <div
+                        role="tabpanel"
+                        id="day-center-volunteers-panel-requests"
+                        aria-labelledby="day-center-volunteers-tab-requests"
+                    >
+                        <DayCenterVolunteerRequestsList
+                            refreshKey={refreshKey}
+                            onRequestUpdated={handleDataUpdated}
+                            onShowError={showError}
+                        />
+                    </div>
+                )}
+            </div>
 
             <DayCenterVolunteerDetailsModal
                 volunteer={detailsVolunteer}

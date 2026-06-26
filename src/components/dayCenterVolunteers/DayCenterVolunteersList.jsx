@@ -1,51 +1,71 @@
 import { useCallback, useEffect, useMemo, useState } from "react";
-import CommunityStaffConfirmModal from "../communityStaff/CommunityStaffConfirmModal.jsx";
+import { Users } from "lucide-react";
+import DayCenterVolunteerCompactCard from "./DayCenterVolunteerCompactCard";
+import AdminDataTable from "../admin/AdminDataTable";
+import AdminListEmptyState from "../admin/AdminListEmptyState";
+import AdminListToolbar from "../admin/AdminListToolbar";
+import AdminResponsiveList from "../admin/AdminResponsiveList";
 import {
-    CommunityStaffEmptyState,
-    CommunityStaffListToolbar,
-    CommunityStaffPagination,
-    CommunityStaffStatusOverview,
-    Users,
-    buildActiveInactiveOverviewItems
-} from "../communityStaff/CommunityStaffListUi.jsx";
+    AdminTableActions,
+    AdminTableDeleteButton,
+    AdminTableEditButton,
+    AdminTableViewButton
+} from "../admin/AdminTableActions";
+import ReactivateVolunteerButton from "../admin/ReactivateVolunteerButton";
+import StaffConfirmModal from "../staff/StaffConfirmModal";
+import { useAdminList } from "../../hooks/useAdminList";
 import {
     deactivateDayCenterVolunteer,
     filterDayCenterVolunteersList,
     getDayCenterVolunteers,
+    getDayCenterVolunteerSortValue,
+    getVolunteerDisplayName,
     reactivateDayCenterVolunteer,
-    sortDayCenterVolunteersWithActiveFirst,
     VOLUNTEER_STATUS_FILTER_ACTIVE,
     VOLUNTEER_STATUS_FILTER_ALL,
     VOLUNTEER_STATUS_FILTER_INACTIVE
 } from "../../services/dayCenterVolunteerService";
-import DayCenterVolunteerCompactCard from "./DayCenterVolunteerCompactCard";
 
-const PAGE_SIZE_OPTIONS = [5, 10, 25];
-
-const STATUS_FILTER_MAP = {
-    all: VOLUNTEER_STATUS_FILTER_ALL,
-    active: VOLUNTEER_STATUS_FILTER_ACTIVE,
-    inactive: VOLUNTEER_STATUS_FILTER_INACTIVE
-};
+const VOLUNTEER_COLUMNS = [
+    { key: "name", label: "שם", sortKey: "name" },
+    { key: "id_number", label: "ת.ז." },
+    { key: "phone", label: "טלפון", sortKey: "phone" },
+    { key: "about_me", label: "אודות" },
+    { key: "status", label: "סטטוס", sortKey: "is_active" },
+    { key: "actions", label: "פעולות" }
+];
 
 function DayCenterVolunteersList({
     refreshKey = 0,
     onEditVolunteer,
     onViewDetails,
     onVolunteerUpdated,
-    onShowError,
-    showOverview = false
+    onShowError
 }) {
-    const [volunteers, setVolunteers] = useState([]);
+    const [sourceItems, setSourceItems] = useState([]);
     const [loading, setLoading] = useState(true);
     const [error, setError] = useState("");
-    const [searchTerm, setSearchTerm] = useState("");
-    const [statusFilter, setStatusFilter] = useState("all");
-    const [pageSize, setPageSize] = useState(10);
-    const [currentPage, setCurrentPage] = useState(1);
     const [pendingActionVolunteer, setPendingActionVolunteer] = useState(null);
     const [pendingActionType, setPendingActionType] = useState(null);
     const [isProcessing, setIsProcessing] = useState(false);
+
+    const filterItems = useCallback(
+        (items, searchQuery, filters) =>
+            filterDayCenterVolunteersList(
+                items,
+                searchQuery,
+                filters.statusFilter || VOLUNTEER_STATUS_FILTER_ALL
+            ),
+        []
+    );
+
+    const list = useAdminList({
+        sourceItems,
+        filterItems,
+        totalCount: sourceItems.length,
+        getSortValue: getDayCenterVolunteerSortValue,
+        initialSortField: "name"
+    });
 
     const loadVolunteers = useCallback(async () => {
         setLoading(true);
@@ -53,11 +73,11 @@ function DayCenterVolunteersList({
 
         try {
             const records = await getDayCenterVolunteers();
-            setVolunteers(records);
+            setSourceItems(records);
         } catch (loadError) {
             console.error(loadError);
             setError("שגיאה בטעינת מתנדבי מרכז היום");
-            setVolunteers([]);
+            setSourceItems([]);
         } finally {
             setLoading(false);
         }
@@ -66,34 +86,6 @@ function DayCenterVolunteersList({
     useEffect(() => {
         loadVolunteers();
     }, [loadVolunteers, refreshKey]);
-
-    const filteredVolunteers = useMemo(() => {
-        const filtered = filterDayCenterVolunteersList(
-            volunteers,
-            searchTerm,
-            STATUS_FILTER_MAP[statusFilter] || VOLUNTEER_STATUS_FILTER_ALL
-        );
-
-        return sortDayCenterVolunteersWithActiveFirst(filtered, "name", "asc");
-    }, [volunteers, searchTerm, statusFilter]);
-
-    const totalPages = Math.max(1, Math.ceil(filteredVolunteers.length / pageSize));
-
-    const paginatedVolunteers = useMemo(() => {
-        const safePage = Math.min(currentPage, totalPages);
-        const startIndex = (safePage - 1) * pageSize;
-        return filteredVolunteers.slice(startIndex, startIndex + pageSize);
-    }, [filteredVolunteers, currentPage, pageSize, totalPages]);
-
-    useEffect(() => {
-        setCurrentPage(1);
-    }, [searchTerm, statusFilter, pageSize]);
-
-    useEffect(() => {
-        if (currentPage > totalPages) {
-            setCurrentPage(totalPages);
-        }
-    }, [currentPage, totalPages]);
 
     function openDeactivateConfirm(volunteer) {
         setPendingActionVolunteer(volunteer);
@@ -115,14 +107,10 @@ function DayCenterVolunteersList({
         try {
             if (pendingActionType === "deactivate") {
                 await deactivateDayCenterVolunteer(pendingActionVolunteer.id);
-                onVolunteerUpdated?.({
-                    successMessage: "המתנדב הושבת בהצלחה"
-                });
+                onVolunteerUpdated?.({ successMessage: "המתנדב הושבת בהצלחה" });
             } else {
                 await reactivateDayCenterVolunteer(pendingActionVolunteer.id);
-                onVolunteerUpdated?.({
-                    successMessage: "המתנדב הופעל בהצלחה"
-                });
+                onVolunteerUpdated?.({ successMessage: "המתנדב הופעל בהצלחה" });
             }
 
             setPendingActionVolunteer(null);
@@ -136,98 +124,227 @@ function DayCenterVolunteersList({
         }
     }
 
-    if (loading) {
+    const toolbarFilters = (
+        <div className="admin-list-toolbar__filter-item">
+            <label htmlFor="day-center-volunteers-status-filter">סטטוס</label>
+            <select
+                id="day-center-volunteers-status-filter"
+                value={list.filters.statusFilter || VOLUNTEER_STATUS_FILTER_ALL}
+                onChange={(event) =>
+                    list.setFilter("statusFilter", event.target.value)
+                }
+            >
+                <option value={VOLUNTEER_STATUS_FILTER_ALL}>כל המתנדבים</option>
+                <option value={VOLUNTEER_STATUS_FILTER_ACTIVE}>פעילים</option>
+                <option value={VOLUNTEER_STATUS_FILTER_INACTIVE}>לא פעילים</option>
+            </select>
+        </div>
+    );
+
+    const emptyState = useMemo(() => {
+        if (loading) {
+            return null;
+        }
+
+        if (sourceItems.length === 0) {
+            return (
+                <AdminListEmptyState
+                    icon={Users}
+                    title="אין מתנדבים במערכת"
+                    message="הוסיפו את המתנדב/ת הראשון/ה כדי להתחיל לנהל את מרכז היום."
+                />
+            );
+        }
+
+        if (list.totalFiltered === 0) {
+            return (
+                <AdminListEmptyState
+                    icon={Users}
+                    title="לא נמצאו תוצאות"
+                    message="נסו לשנות את החיפוש או את הסינון כדי למצוא מתנדבים אחרים."
+                />
+            );
+        }
+
+        return null;
+    }, [loading, sourceItems.length, list.totalFiltered]);
+
+    function renderVolunteerActions(volunteer) {
+        const isActive = volunteer.is_active !== false;
+
         return (
-            <p className="community-volunteers-mgmt__loading">טוען מתנדבים...</p>
+            <AdminTableActions>
+                <AdminTableViewButton
+                    onClick={() => onViewDetails?.(volunteer)}
+                    label="צפייה בפרטי מתנדב/ת"
+                />
+                <AdminTableEditButton
+                    onClick={() => onEditVolunteer?.(volunteer)}
+                    label="עריכת מתנדב/ת"
+                />
+                {isActive ? (
+                    <AdminTableDeleteButton
+                        onClick={() => openDeactivateConfirm(volunteer)}
+                        label="השבתת מתנדב/ת"
+                        disabled={isProcessing}
+                    />
+                ) : (
+                    <ReactivateVolunteerButton
+                        onClick={() => openReactivateConfirm(volunteer)}
+                        disabled={isProcessing}
+                    />
+                )}
+            </AdminTableActions>
         );
     }
 
-    if (error) {
-        return <p className="community-volunteers-mgmt__error">{error}</p>;
-    }
-
     return (
-        <div className="community-volunteers-mgmt">
-            {showOverview ? (
-                <CommunityStaffStatusOverview
-                    items={buildActiveInactiveOverviewItems(
-                        volunteers,
-                        (volunteer) => volunteer.is_active !== false
-                    )}
-                />
-            ) : null}
-
-            <CommunityStaffListToolbar
+        <div className="staff-list-section admin-list-section admin-list-section--day-center-volunteers">
+            <AdminListToolbar
                 searchId="day-center-volunteers-search"
-                searchValue={searchTerm}
-                onSearchChange={(event) => setSearchTerm(event.target.value)}
+                searchLabel="חיפוש"
                 searchPlaceholder="שם, תעודת זהות, טלפון או תוכן אישי"
-                filterId="day-center-volunteers-status-filter"
-                filterValue={statusFilter}
-                onFilterChange={(event) => setStatusFilter(event.target.value)}
-                filterLabel="סטטוס"
-                filterOptions={[
-                    { value: "all", label: "כל המתנדבים" },
-                    { value: "active", label: "פעילים" },
-                    { value: "inactive", label: "לא פעילים" }
-                ]}
-                pageSizeId="day-center-volunteers-page-size"
-                pageSizeValue={pageSize}
-                onPageSizeChange={(event) => setPageSize(Number(event.target.value))}
-                pageSizeOptions={PAGE_SIZE_OPTIONS}
+                searchQuery={list.searchQuery}
+                onSearchChange={list.setSearchQuery}
+                filters={toolbarFilters}
+                pageSize={list.pageSize}
+                onPageSizeChange={list.setPageSize}
+                pageSizeLabel="הצג בעמוד"
+                pageSizeOptions={[5, 10, 20]}
             />
 
-            <div className="community-staff-request-list community-volunteers-mgmt__card">
-                {filteredVolunteers.length === 0 ? (
-                    <CommunityStaffEmptyState
-                        icon={Users}
-                        message={
-                            volunteers.length === 0
-                                ? "אין מתנדבים במערכת"
-                                : "לא נמצאו תוצאות לפי החיפוש או הסינון"
-                        }
-                    />
-                ) : (
-                    <ul className="community-staff-compact-list">
-                        {paginatedVolunteers.map((volunteer) => (
-                            <DayCenterVolunteerCompactCard
-                                key={volunteer.id}
-                                volunteer={volunteer}
-                                onViewDetails={onViewDetails}
-                                onEdit={onEditVolunteer}
-                                onDeactivate={openDeactivateConfirm}
-                                onReactivate={openReactivateConfirm}
-                            />
-                        ))}
-                    </ul>
-                )}
-            </div>
-
-            {filteredVolunteers.length > 0 ? (
-                <CommunityStaffPagination
-                    currentPage={currentPage}
-                    totalPages={totalPages}
-                    onPrevious={() => setCurrentPage((page) => Math.max(1, page - 1))}
-                    onNext={() =>
-                        setCurrentPage((page) => Math.min(totalPages, page + 1))
-                    }
-                />
+            {error ? (
+                <p className="staff-alert staff-alert--error">{error}</p>
             ) : null}
 
-            <CommunityStaffConfirmModal
+            {loading ? (
+                <p className="list-mgmt-loading">טוען מתנדבים...</p>
+            ) : null}
+
+            {!loading && emptyState}
+
+            {!loading && list.totalFiltered > 0 ? (
+                <>
+                    <div className="list-mgmt-list">
+                        <AdminResponsiveList
+                            desktopTable={
+                                <AdminDataTable
+                                    ariaLabel="טבלת מתנדבי מרכז יום"
+                                    compact
+                                    columns={VOLUNTEER_COLUMNS}
+                                    sortField={list.sortField}
+                                    sortDirection={list.sortDirection}
+                                    onSort={list.handleSort}
+                                    rows={list.pageItems.map((volunteer) => {
+                                        const isActive =
+                                            volunteer.is_active !== false;
+
+                                        return (
+                                            <tr
+                                                key={volunteer.id}
+                                                className={
+                                                    isActive
+                                                        ? undefined
+                                                        : "day-center-volunteers-list__row--inactive"
+                                                }
+                                            >
+                                                <td className="admin-data-table__name-cell">
+                                                    {getVolunteerDisplayName(volunteer)}
+                                                </td>
+                                                <td className="admin-data-table__numeric">
+                                                    {volunteer.id_number || "—"}
+                                                </td>
+                                                <td className="admin-data-table__numeric">
+                                                    {volunteer.phone || "—"}
+                                                </td>
+                                                <td className="day-center-volunteers-list__about-cell">
+                                                    {volunteer.about_me?.trim() ? (
+                                                        <span className="day-center-volunteers-list__about-preview">
+                                                            {volunteer.about_me}
+                                                        </span>
+                                                    ) : (
+                                                        "—"
+                                                    )}
+                                                </td>
+                                                <td className="day-center-volunteers-list__status-cell">
+                                                    <span
+                                                        className={`day-center-volunteers-list__status day-center-volunteers-list__status--${
+                                                            isActive
+                                                                ? "active"
+                                                                : "inactive"
+                                                        }`}
+                                                    >
+                                                        {isActive ? "פעיל" : "לא פעיל"}
+                                                    </span>
+                                                </td>
+                                                <td>
+                                                    {renderVolunteerActions(volunteer)}
+                                                </td>
+                                            </tr>
+                                        );
+                                    })}
+                                />
+                            }
+                            mobileCards={
+                                <div className="day-center-volunteers-cards">
+                                    {list.pageItems.map((volunteer) => (
+                                        <DayCenterVolunteerCompactCard
+                                            key={volunteer.id}
+                                            volunteer={volunteer}
+                                            onViewDetails={onViewDetails}
+                                            onEdit={onEditVolunteer}
+                                            onDeactivate={openDeactivateConfirm}
+                                            onReactivate={openReactivateConfirm}
+                                        />
+                                    ))}
+                                </div>
+                            }
+                        />
+                    </div>
+
+                    <div className="list-mgmt-pagination">
+                        <button
+                            type="button"
+                            className="list-mgmt-pagination__btn"
+                            onClick={() => list.setPage(list.page - 1)}
+                            disabled={list.page <= 1}
+                        >
+                            הקודם
+                        </button>
+                        <span className="list-mgmt-pagination__label">
+                            עמוד {list.page} מתוך {list.totalPages}
+                        </span>
+                        <button
+                            type="button"
+                            className="list-mgmt-pagination__btn"
+                            onClick={() => list.setPage(list.page + 1)}
+                            disabled={list.page >= list.totalPages}
+                        >
+                            הבא
+                        </button>
+                    </div>
+                </>
+            ) : null}
+
+            <StaffConfirmModal
                 message={
                     pendingActionVolunteer
                         ? pendingActionType === "deactivate"
                             ? "להשבית את המתנדב/ה?"
                             : "להפעיל את המתנדב/ה מחדש?"
-                        : null
+                        : ""
                 }
+                confirmLabel={
+                    pendingActionType === "deactivate" ? "השבתה" : "הפעלה מחדש"
+                }
+                confirming={isProcessing}
                 onConfirm={handleConfirmAction}
                 onCancel={() => {
-                    setPendingActionVolunteer(null);
-                    setPendingActionType(null);
+                    if (!isProcessing) {
+                        setPendingActionVolunteer(null);
+                        setPendingActionType(null);
+                    }
                 }}
-                confirming={isProcessing}
             />
         </div>
     );

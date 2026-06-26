@@ -8,6 +8,7 @@ import {
 
 import ActivityForm from "../../components/activities/ActivityForm";
 import ActivityList from "../../components/activities/ActivityList";
+import ArchiveActivitiesList from "../../components/archive/ArchiveActivitiesList";
 
 function ManageActivities({ activityView, onNavigate }) {
     const [error, setError] = useState("");
@@ -45,6 +46,13 @@ function ManageActivities({ activityView, onNavigate }) {
     function handleAddActivityClick() {
         setEditingActivity(null);
         navigateToView("add");
+    }
+
+    function handleViewArchive() {
+        setEditingActivity(null);
+        setError("");
+        setSuccess("");
+        navigateToView("archive");
     }
 
     useEffect(() => {
@@ -120,7 +128,38 @@ function ManageActivities({ activityView, onNavigate }) {
                             onDelete={handleDeleteActivity}
                             onEdit={handleEditActivity}
                             onAddActivity={handleAddActivityClick}
+                            onViewArchive={handleViewArchive}
                             onBack={() => onNavigate("dashboard")}
+                        />
+                    </section>
+                )}
+
+                {activityPage === "archive" && (
+                    <section className="staff-section staff-section--list staff-section--activities-archive">
+                        <div className="activities-mgmt-archive-toolbar">
+                            <button
+                                type="button"
+                                className="staff-back-button"
+                                onClick={goBackToList}
+                            >
+                                <span
+                                    className="staff-back-button__icon"
+                                    aria-hidden="true"
+                                >
+                                    →
+                                </span>
+                                <span className="staff-back-button__label">
+                                    חזרה לרשימת פעילויות
+                                </span>
+                            </button>
+                        </div>
+
+                        <ArchiveActivitiesList
+                            refreshKey={listRefreshKey}
+                            onActionMessage={(message) => {
+                                setSuccess(message);
+                                refreshActivityList();
+                            }}
                         />
                     </section>
                 )}

@@ -1,4 +1,5 @@
 import { Check, Eye, X } from "lucide-react";
+import { AdminTableActions } from "../admin/AdminTableActions";
 import {
     formatRequestTimestamp,
     getRequestDisplayName,
@@ -15,43 +16,41 @@ function DayCenterVolunteerRequestCompactCard({
     const fullName = getRequestDisplayName(request);
 
     return (
-        <li className="community-staff-compact-card day-center-volunteer-request-card">
-            <div className="community-staff-compact-card__main">
-                <div className="community-staff-compact-card__identity">
-                    <span className="community-staff-compact-card__name">{fullName}</span>
-                    {request.phone ? (
-                        <span className="community-staff-compact-card__phone">
-                            {request.phone}
-                        </span>
-                    ) : null}
-                    {request.id_number ? (
-                        <span className="day-center-volunteer-request-card__meta">
-                            ת.ז. {request.id_number}
-                        </span>
-                    ) : null}
-                    {request.about_me?.trim() ? (
-                        <span
-                            className="day-center-volunteer-request-card__about"
-                            title={request.about_me}
-                        >
-                            {request.about_me}
-                        </span>
-                    ) : null}
-                    <span className="day-center-volunteer-request-card__date">
-                        תאריך הגשה: {formatRequestTimestamp(request.created_at)}
-                    </span>
-                </div>
-                <div className="community-staff-compact-card__status-wrap">
-                    <span
-                        className={`day-center-volunteers-request-status day-center-volunteers-request-status--${request.status}`}
-                    >
-                        {getRequestStatusLabel(request.status)}
-                    </span>
-                </div>
+        <article className="day-center-volunteers-card">
+            <div className="day-center-volunteers-card__header">
+                <h3 className="day-center-volunteers-card__title">{fullName}</h3>
+                <span
+                    className={`day-center-volunteers-request-status day-center-volunteers-request-status--${request.status}`}
+                >
+                    {getRequestStatusLabel(request.status)}
+                </span>
             </div>
 
-            <div className="community-staff-compact-card__actions">
-                <div className="admin-data-table__actions admin-data-table__actions--compact day-center-volunteer-request-card__actions">
+            <dl className="day-center-volunteers-card__details">
+                {request.id_number ? (
+                    <div>
+                        <dt>תעודת זהות</dt>
+                        <dd>{request.id_number}</dd>
+                    </div>
+                ) : null}
+                <div>
+                    <dt>טלפון</dt>
+                    <dd>{request.phone || "—"}</dd>
+                </div>
+                {request.about_me?.trim() ? (
+                    <div>
+                        <dt>אודות</dt>
+                        <dd>{request.about_me}</dd>
+                    </div>
+                ) : null}
+                <div>
+                    <dt>תאריך הגשה</dt>
+                    <dd>{formatRequestTimestamp(request.created_at)}</dd>
+                </div>
+            </dl>
+
+            <div className="day-center-volunteers-card__actions">
+                <AdminTableActions>
                     <button
                         type="button"
                         className="admin-table-action admin-table-action--view"
@@ -68,7 +67,7 @@ function DayCenterVolunteerRequestCompactCard({
                     </button>
                     <button
                         type="button"
-                        className="admin-table-action admin-table-action--edit day-center-volunteer-request-card__approve-btn"
+                        className="admin-table-action admin-table-action--edit"
                         onClick={() => onApprove?.(request)}
                         disabled={disabled}
                         title="אישור"
@@ -94,9 +93,9 @@ function DayCenterVolunteerRequestCompactCard({
                             aria-hidden="true"
                         />
                     </button>
-                </div>
+                </AdminTableActions>
             </div>
-        </li>
+        </article>
     );
 }
 
