@@ -19,6 +19,74 @@
   display: none;
 }
 
+/* The full-width subpage strip is removed for this page — the back button now
+   lives in the shared management header next to "+ הוספת מתנדב". */
+[data-dashboard-page="dayCenterVolunteers"] > .staff-subpage-toolbar {
+  display: none;
+}
+
+/* Keep the page tabs aligned with the centered management container width. */
+.list-mgmt-page .day-center-volunteers-mgmt-tabs {
+  max-width: none;
+  margin: 0 0 1.85rem;
+}
+
+/* ===== Search & filters toolbar — single row, like the Participants page =====
+   The shared management toolbar styling (white card, inputs, spacing) comes from
+   listManagement.css; here we only define the column layout so the controls sit
+   on one row that adapts to this page's control count (no empty grid cells).
+   These rules load after listManagement.css, so they win the layout. */
+
+.day-center-volunteers-mgmt-page
+  .admin-list-section--day-center-volunteers
+  .admin-list-toolbar.staff-form.staff-list-filters {
+  display: grid;
+  grid-template-columns: minmax(0, 2fr) minmax(0, 1fr) auto;
+  gap: 0.85rem;
+  align-items: end;
+}
+
+.day-center-volunteers-mgmt-page
+  .admin-list-section--day-center-volunteer-requests
+  .admin-list-toolbar.staff-form.staff-list-filters {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) auto;
+  gap: 0.85rem;
+  align-items: end;
+}
+
+.day-center-volunteers-mgmt-page
+  .admin-list-section
+  .admin-list-toolbar__filters {
+  display: contents;
+}
+
+.day-center-volunteers-mgmt-page
+  .admin-list-section
+  .admin-list-toolbar__search,
+.day-center-volunteers-mgmt-page
+  .admin-list-section
+  .admin-list-toolbar__filter-item,
+.day-center-volunteers-mgmt-page
+  .admin-list-section
+  .admin-list-toolbar__page-size {
+  display: flex;
+  flex-direction: column;
+  gap: 0.4rem;
+  min-width: 0;
+}
+
+@media (max-width: 768px) {
+  .day-center-volunteers-mgmt-page
+    .admin-list-section--day-center-volunteers
+    .admin-list-toolbar.staff-form.staff-list-filters,
+  .day-center-volunteers-mgmt-page
+    .admin-list-section--day-center-volunteer-requests
+    .admin-list-toolbar.staff-form.staff-list-filters {
+    grid-template-columns: 1fr;
+  }
+}
+
 .day-center-volunteers-mgmt-page.community-volunteers-mgmt-page {
   min-height: auto;
   background: #f4faf5;

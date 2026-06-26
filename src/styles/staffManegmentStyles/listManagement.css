@@ -260,6 +260,12 @@
   box-shadow: 0 3px 14px rgba(36, 48, 41, 0.05);
 }
 
+/* Flatten the filters wrapper so each filter becomes a direct flex child of
+   the toolbar (works regardless of the toolbar layout variant). */
+.list-mgmt-page .admin-list-section .admin-list-toolbar__filters {
+  display: contents;
+}
+
 .list-mgmt-page .admin-list-section .admin-list-toolbar .admin-list-toolbar__search {
   display: flex;
   flex-direction: column;

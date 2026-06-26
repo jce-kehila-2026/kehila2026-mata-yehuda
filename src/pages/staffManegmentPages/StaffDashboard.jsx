@@ -433,7 +433,7 @@ function StaffDashboard({ onLogout }) {
                 return (
                     <div data-dashboard-page="dayCenterVolunteers">
                         {renderSubpageToolbar(SUBPAGE_TITLES.dayCenterVolunteers)}
-                        <ManageDayCenterVolunteers />
+                        <ManageDayCenterVolunteers onNavigate={goToPage} />
                     </div>
                 );
             case "manageParticipants":
