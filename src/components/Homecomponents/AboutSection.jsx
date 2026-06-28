@@ -50,6 +50,119 @@ function AboutIcon({ type }) {
 }
 
 function AboutSection({ showPageLayout = false }) {
+  if (showPageLayout) {
+    return (
+      <section className="about-modern">
+        <img
+          className="about-modern__leaf about-modern__leaf--start"
+          src="/images/leaf-decoration.png"
+          alt=""
+          aria-hidden="true"
+        />
+        <img
+          className="about-modern__leaf about-modern__leaf--end"
+          src="/images/leaf-decoration.png"
+          alt=""
+          aria-hidden="true"
+        />
+        <img
+          className="about-modern__kishot"
+          src="/images/kishot.png"
+          alt=""
+          aria-hidden="true"
+        />
+
+        <div className="about-modern__hero">
+          <div className="about-modern__visual home-about-section__visual">
+            <div className="home-about-section__image-glow" />
+            <div className="home-about-section__image-wrap">
+              <img
+                src="/images/about-us.png"
+                alt="משתתפות וצוות במרכז היום לוותיק מטה יהודה"
+                className="home-about-section__image"
+              />
+            </div>
+            <div className="home-about-section__tag">
+              <span>מרכז יום לוותיק</span>
+              <strong>מטה יהודה</strong>
+            </div>
+            <img
+              className="about-modern__visual-leaf"
+              src="/images/leaf-decoration.png"
+              alt=""
+              aria-hidden="true"
+            />
+          </div>
+
+          <div className="about-modern__intro">
+            <img
+              className="about-modern__heart"
+              src="/images/heart-line.png"
+              alt=""
+              aria-hidden="true"
+            />
+            <p className="home-section-eyebrow about-modern__eyebrow">
+              אנשים. קהילה. בית.
+            </p>
+            <h1 className="about-modern__title">מי אנחנו?</h1>
+            <p className="about-modern__lead-intro">
+              הכירו את העמותה, החזון והשירותים שאנחנו מעניקים לקהילת הוותיקים
+            </p>
+          </div>
+        </div>
+
+        <div className="about-modern__body">
+          <div className="about-modern__text">
+            <p className="home-about-section__lead">
+              עמותת ותיקי מטה-יהודה פועלת בהתמדה לשיפור איכות חייהם של כלל תושבי
+              המועצה הוותיקים ולהרחבת מגוון השירותים והפעילויות המוצעים לגיל
+              השלישי.
+            </p>
+            <p className="home-about-section__text">
+              אנו מבקשים לאפשר לותיקי המועצה להזדקן בכבוד, בביטחון ובביתם,
+              ולהמשיך להיות חלק בלתי נפרד מהקהילה ומהמשפחה שהקימו אותן. העמותה
+              שואפת למתן שירות איכותי ומקצועי תוך ראיית הצרכים המשתנים והמגוונים
+              של כלל אוכלוסיית גיל השלישי במועצה.
+            </p>
+            <p className="home-about-section__audience">
+              <strong>יעד קהל:</strong> כלל תושבי המועצה בגילאי +60 מינוס
+            </p>
+          </div>
+
+          <div className="about-modern__quote-wrap">
+            <span className="about-modern__quote-shape" aria-hidden="true" />
+            <blockquote className="home-about-section__quote about-modern__quote">
+              <span className="about-modern__quote-badge" aria-hidden="true">
+                <svg viewBox="0 0 24 24" fill="currentColor">
+                  <path d="M7.17 6A4.17 4.17 0 003 10.17V18h7v-7H6.5a3.5 3.5 0 013.5-3.5V6H7.17zm9 0A4.17 4.17 0 0012 10.17V18h7v-7h-3.5A3.5 3.5 0 0119 7.5V6h-2.83z" />
+                </svg>
+              </span>
+              <p>״אם יוצאים — מגיעים למקומות נפלאות״</p>
+              <cite>דוקטור סוס</cite>
+            </blockquote>
+          </div>
+        </div>
+
+        <p className="home-about-section__community-note">
+          בין משתתפי מרכז היום: ניצולי שואה, ותיקים מהמגזר הערבי, עולים ממדינות
+          רבות וחלוצי הארץ — קהילה מגוונת, חמה ומחוברת.
+        </p>
+
+        <div className="home-about-section__values">
+          {PILLARS.map((item) => (
+            <article key={item.title} className="home-about-value-card">
+              <div className="home-about-value-card__icon">
+                <AboutIcon type={item.icon} />
+              </div>
+              <h3>{item.title}</h3>
+              <p>{item.text}</p>
+            </article>
+          ))}
+        </div>
+      </section>
+    );
+  }
+
   return (
     <section
       className={`home-about-section${showPageLayout ? " home-about-section--page" : ""}`}
