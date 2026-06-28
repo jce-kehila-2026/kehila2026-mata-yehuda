@@ -24,13 +24,11 @@ import {
     SUPPORTIVE_COMMUNITY_ID
 } from "../../utils/staffManegmentUtils/programConstants";
 import {
-    archiveCommunitySubscription,
     fetchArchivedCommunitySubscriptionsForAdminList,
     fetchCommunitySubscriptionsForAdminList,
     getParticipantDocumentId,
     isCommunitySubscriptionRecord,
-    permanentlyDeleteCommunitySubscription,
-    restoreCommunitySubscription
+    resolveParticipantArchiveTarget
 } from "./communitySubscriptionService";
 import { toSafeString, matchesPaymentStatusFilter, matchesRegistrationStatusFilter } from "../../utils/staffManegmentUtils/participantStatusLabels";
 import { shouldShowParticipantAsInitialRequest } from "../../utils/staffManegmentUtils/initialRequestFilters";
@@ -223,8 +221,8 @@ async function fetchAllParticipantsOrdered() {
     );
 
     return participantSnapshot.docs.map((participantDoc) => ({
-        id: participantDoc.id,
-        ...participantDoc.data()
+        ...participantDoc.data(),
+        id: participantDoc.id
     }));
 }
 
@@ -234,7 +232,10 @@ export async function fetchParticipantsForAdminList() {
         fetchCommunitySubscriptionsForAdminList()
     ]);
 
-    return [...participantRecords, ...communitySubscriptions];
+    return filterActiveRecords([
+        ...participantRecords,
+        ...communitySubscriptions
+    ]);
 }
 
 export async function fetchArchivedParticipantsForAdminList() {
@@ -243,7 +244,10 @@ export async function fetchArchivedParticipantsForAdminList() {
         fetchArchivedCommunitySubscriptionsForAdminList()
     ]);
 
-    return [...participantRecords, ...communitySubscriptions];
+    return filterArchivedRecords([
+        ...participantRecords,
+        ...communitySubscriptions
+    ]);
 }
 
 export {
@@ -364,33 +368,19 @@ export async function deleteParticipant(participantId) {
 }
 
 export async function archiveParticipantRecord(record) {
-    if (isCommunitySubscriptionRecord(record)) {
-        return archiveCommunitySubscription(record.id);
-    }
+    const { collectionName, documentId } = resolveParticipantArchiveTarget(record);
 
-    return deleteParticipant(record.id);
-}
-
-export async function restoreParticipant(participantId) {
-    return restoreDocument("participants", participantId);
+    return archiveDocument(collectionName, documentId);
 }
 
 export async function restoreParticipantRecord(record) {
-    if (isCommunitySubscriptionRecord(record)) {
-        return restoreCommunitySubscription(record.id);
-    }
+    const { collectionName, documentId } = resolveParticipantArchiveTarget(record);
 
-    return restoreParticipant(record.id);
-}
-
-export async function permanentlyDeleteParticipant(participantId) {
-    return permanentlyDeleteDocument("participants", participantId);
+    return restoreDocument(collectionName, documentId);
 }
 
 export async function permanentlyDeleteParticipantRecord(record) {
-    if (isCommunitySubscriptionRecord(record)) {
-        return permanentlyDeleteCommunitySubscription(record.id);
-    }
+    const { collectionName, documentId } = resolveParticipantArchiveTarget(record);
 
-    return permanentlyDeleteParticipant(record.id);
+    return permanentlyDeleteDocument(collectionName, documentId);
 }

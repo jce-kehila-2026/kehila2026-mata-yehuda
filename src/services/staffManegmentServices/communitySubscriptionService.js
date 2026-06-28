@@ -7,7 +7,7 @@ import {
     limit,
     query
 } from "firebase/firestore";
-import { SUPPORTIVE_COMMUNITY_ID } from "../../utils/staffManegmentUtils/programConstants";
+import { SUPPORTIVE_COMMUNITY_ID, resolveCanonicalProgramId } from "../../utils/staffManegmentUtils/programConstants";
 import { toSafeString } from "../../utils/staffManegmentUtils/participantStatusLabels";
 import {
     filterActiveRecords,
@@ -25,6 +25,13 @@ export const COMMUNITY_SUBSCRIPTIONS_COLLECTION = "communitySubscriptions";
 const ADMIN_QUERY_LIMIT = 1000;
 
 export const COMMUNITY_SUBSCRIPTION_SOURCE_TYPE = "community_subscription";
+
+function mapFirestoreDoc(docSnap) {
+    return {
+        ...docSnap.data(),
+        id: docSnap.id
+    };
+}
 
 function getParticipantRefId(participantRef) {
     if (!participantRef) {
@@ -192,7 +199,7 @@ export function getParticipantDocumentId(record) {
         return "";
     }
 
-    if (record.sourceType === COMMUNITY_SUBSCRIPTION_SOURCE_TYPE) {
+    if (isCommunitySubscriptionRecord(record)) {
         return record.participantDocId || record.participant_id || "";
     }
 
@@ -200,7 +207,43 @@ export function getParticipantDocumentId(record) {
 }
 
 export function isCommunitySubscriptionRecord(record) {
-    return record?.sourceType === COMMUNITY_SUBSCRIPTION_SOURCE_TYPE;
+    if (!record) {
+        return false;
+    }
+
+    if (record.sourceType === COMMUNITY_SUBSCRIPTION_SOURCE_TYPE) {
+        return true;
+    }
+
+    if (Object.prototype.hasOwnProperty.call(record, "subscriptionStatus")) {
+        return true;
+    }
+
+    const linkedParticipantId = record.participantDocId || record.participant_id || "";
+
+    return (
+        resolveCanonicalProgramId(record.program_id) === SUPPORTIVE_COMMUNITY_ID &&
+        Boolean(linkedParticipantId) &&
+        linkedParticipantId !== record.id
+    );
+}
+
+export function resolveParticipantArchiveTarget(record) {
+    if (!record?.id) {
+        throw new Error("Missing record id for participant archive action");
+    }
+
+    if (isCommunitySubscriptionRecord(record)) {
+        return {
+            collectionName: COMMUNITY_SUBSCRIPTIONS_COLLECTION,
+            documentId: record.id
+        };
+    }
+
+    return {
+        collectionName: "participants",
+        documentId: record.id
+    };
 }
 
 async function fetchParticipantById(participantDocId) {
@@ -217,8 +260,8 @@ async function fetchParticipantById(participantDocId) {
     }
 
     return {
-        id: participantSnap.id,
-        ...participantSnap.data()
+        ...participantSnap.data(),
+        id: participantSnap.id
     };
 }
 
@@ -247,10 +290,9 @@ async function fetchAllCommunitySubscriptionDocs() {
         )
     );
 
-    return snapshot.docs.map((subscriptionDoc) => ({
-        id: subscriptionDoc.id,
-        ...subscriptionDoc.data()
-    }));
+    return snapshot.docs.map((subscriptionDoc) =>
+        mapFirestoreDoc(subscriptionDoc)
+    );
 }
 
 export async function fetchCommunitySubscriptionsForAdminList() {
