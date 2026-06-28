@@ -606,6 +606,45 @@
   }
 }
 
+@media (max-width: 768px) {
+  .plus60-main__panel .activities-calendar__card-title {
+    font-size: 1.2rem;
+  }
+
+  .plus60-main__panel .activities-calendar__today-hint {
+    font-size: 0.88rem;
+  }
+
+  .plus60-main__panel .activities-calendar .react-calendar__navigation button {
+    min-height: 40px;
+    font-size: 0.9rem;
+  }
+
+  .plus60-main__panel .activities-calendar .react-calendar__navigation__label {
+    font-size: 1rem;
+  }
+
+  .plus60-main__panel .activities-calendar .react-calendar__tile {
+    min-height: 72px;
+    padding: 5px;
+  }
+
+  .plus60-main__panel .activities-calendar .react-calendar__tile > abbr {
+    width: 1.5rem;
+    height: 1.5rem;
+    font-size: 0.8rem;
+  }
+
+  .plus60-main__panel .calendar-sidebar-panel h3 {
+    font-size: 1.1rem;
+  }
+
+  .plus60-main__panel .calendar-sidebar-panel--empty p {
+    font-size: 1rem;
+    line-height: 1.65;
+  }
+}
+
 @media (max-width: 640px) {
   .activities-calendar .react-calendar__tile {
     min-height: 64px;
@@ -630,5 +669,24 @@
 
   .calendar-activity-pill__time {
     font-size: 0.5rem;
+  }
+
+  .plus60-main__panel .activities-calendar .react-calendar__tile {
+    min-height: 72px;
+    padding: 5px;
+  }
+
+  .plus60-main__panel .activities-calendar .react-calendar__tile > abbr {
+    width: 1.5rem;
+    height: 1.5rem;
+    font-size: 0.8rem;
+  }
+
+  .plus60-main__panel .calendar-activity-pill__name {
+    font-size: 0.58rem;
+  }
+
+  .plus60-main__panel .calendar-activity-pill__time {
+    font-size: 0.52rem;
   }
 }

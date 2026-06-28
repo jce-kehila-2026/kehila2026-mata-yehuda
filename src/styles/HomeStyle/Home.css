@@ -4,8 +4,10 @@
   margin: 0 auto;
   width: 100%;
   max-width: 100%;
+  min-width: 0;
   padding: 0 var(--app-padding-x, clamp(0.85rem, 3vw, 2rem)) 0;
   box-sizing: border-box;
+  overflow-x: hidden;
 }
 
 .home-section-anchor,
@@ -1891,13 +1893,16 @@
 
 @media (max-width: 900px) {
   .home-navbar__inner {
-    flex-wrap: nowrap;
+    flex-wrap: wrap;
     gap: 0.5rem;
+    row-gap: 0.65rem;
   }
 
   .home-navbar__nav {
+    flex: 1 1 100%;
+    order: 3;
     gap: clamp(1rem, 2.8vw, 1.75rem);
-    justify-content: center;
+    justify-content: flex-start;
   }
 
   .home-navbar__title {
