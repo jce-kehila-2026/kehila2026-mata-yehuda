@@ -865,27 +865,29 @@
   transform: scaleX(-1) rotate(12deg);
 }
 
-/* decorative kishot background — top-right, behind the text, bleeding off the edges */
-.about-page .about-modern__kishot {
-  position: absolute;
-  z-index: 0;
-  top: -1.75rem;
-  right: -1.75rem;
-  width: clamp(220px, 33vw, 440px);
-  height: auto;
-  object-fit: contain;
-  opacity: 0.6;
-  pointer-events: none;
-}
-
 /* Split hero — image (1st item) on the left, text (2nd) on the right */
 .about-page .about-modern__hero {
+  position: relative;
   display: grid;
-  grid-template-columns: minmax(0, 0.82fr) minmax(0, 1.18fr);
-  gap: clamp(2rem, 4.5vw, 4rem);
+  grid-template-columns: minmax(0, 0.72fr) minmax(0, 1.28fr);
+  gap: clamp(2rem, 5vw, 4.5rem);
   align-items: center;
-  margin-bottom: clamp(2rem, 4vw, 3rem);
+  margin-bottom: clamp(2.5rem, 5vw, 4rem);
+  padding-block: clamp(1rem, 2.5vw, 2.25rem);
   direction: ltr;
+  /* kishot leaves as a real, transparent background of the hero — anchored
+     top-right and softly faded into the page colour toward the lower-left so
+     it reads as an elegant backdrop rather than a pasted image */
+  background-image:
+    linear-gradient(
+      to bottom left,
+      rgba(255, 255, 255, 0) 32%,
+      rgba(255, 255, 255, 0.78) 68%
+    ),
+    url("/images/kishot.png");
+  background-repeat: no-repeat, no-repeat;
+  background-position: top right, top right;
+  background-size: 100% 100%, clamp(320px, 44vw, 600px) auto;
 }
 
 /* Image bleeds to the card's top-left so it overlaps the hero background
@@ -934,11 +936,13 @@
 
 .about-page .about-modern__intro {
   direction: rtl;
-  text-align: right;
+  text-align: center;
   display: flex;
   flex-direction: column;
-  align-items: flex-start;
+  /* sit toward the image (left) side of the column, not the far-right edge */
+  align-items: flex-end;
   gap: 0.55rem;
+  padding-inline: clamp(0.5rem, 2vw, 1.5rem);
 }
 
 .about-page .about-modern__eyebrow {
@@ -1107,11 +1111,8 @@
     width: 100%;
   }
 
-  .about-page .about-modern__kishot {
-    width: clamp(160px, 42vw, 240px);
-    opacity: 0.4;
-    top: -1.5rem;
-    right: -1.5rem;
+  .about-page .about-modern__hero {
+    background-size: 100% 100%, clamp(220px, 70vw, 360px) auto;
   }
 }
 

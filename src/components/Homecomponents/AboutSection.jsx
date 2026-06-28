@@ -65,13 +65,6 @@ function AboutSection({ showPageLayout = false }) {
           alt=""
           aria-hidden="true"
         />
-        <img
-          className="about-modern__kishot"
-          src="/images/kishot.png"
-          alt=""
-          aria-hidden="true"
-        />
-
         <div className="about-modern__hero">
           <div className="about-modern__visual home-about-section__visual">
             <div className="home-about-section__image-glow" />
