@@ -2,7 +2,12 @@ import { useMemo, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import DonationAmountPicker from "./DonationAmountPicker";
 import DonationSuccessMessage from "./DonationSuccessMessage";
+import PaymentFlowActions from "../../components/Payment/PaymentFlowActions";
+import PaymentFlowShell from "../../components/Payment/PaymentFlowShell";
+import PaymentStepHeader from "../../components/Payment/PaymentStepHeader";
+import RegistrationStepper from "../../components/Payment/RegistrationStepper";
 import {
+  DONATION_FLOW_STEPS,
   DONATION_PAYMENT_METHODS,
   DONATION_STORAGE_KEYS,
 } from "../config/donations";
@@ -12,28 +17,16 @@ import {
   saveDonationCashPayment,
 } from "../services/donationService";
 import { formatDisplayPrice } from "../../services/Payment/formatPrice";
+import {
+  getDonationAmountValidation,
+  resolveDonationAmount,
+} from "../utils/donationAmount";
 
 const EMPTY_DONOR = {
   firstName: "",
   phone: "",
   paymentMethod: "",
 };
-
-function resolveDonationAmount(selectedAmount, customAmount) {
-  if (customAmount !== "") {
-    const parsed = Number(customAmount);
-    if (!Number.isFinite(parsed) || parsed <= 0) {
-      return null;
-    }
-    return Math.round(parsed * 100) / 100;
-  }
-
-  if (typeof selectedAmount === "number" && selectedAmount > 0) {
-    return selectedAmount;
-  }
-
-  return null;
-}
 
 function buildDonationPayload(donor, donationAmount, selectedAmount, customAmount) {
   const isCustomAmount =
@@ -118,8 +111,13 @@ function DonationForm({ initialAmount = null, showBackToHome = false }) {
   const goToPaymentStep = () => {
     setFormError("");
 
-    if (!donationAmount) {
-      setFormError("אנא בחרו סכום תרומה");
+    const { amount, error } = getDonationAmountValidation(
+      selectedAmount,
+      customAmount
+    );
+
+    if (!amount) {
+      setFormError(error);
       return;
     }
 
@@ -147,7 +145,11 @@ function DonationForm({ initialAmount = null, showBackToHome = false }) {
     }
 
     if (!donationAmount) {
-      setFormError("סכום תרומה לא תקין");
+      const { error } = getDonationAmountValidation(
+        selectedAmount,
+        customAmount
+      );
+      setFormError(error || "סכום תרומה לא תקין");
       return;
     }
 
@@ -224,24 +226,36 @@ function DonationForm({ initialAmount = null, showBackToHome = false }) {
 
   if (step === 3) {
     return (
-      <section className="community-section donation-flow">
+      <PaymentFlowShell>
+        <RegistrationStepper
+          currentStep={3}
+          steps={DONATION_FLOW_STEPS}
+          ariaLabel="התקדמות תרומה"
+        />
+        <PaymentStepHeader title="תודה על תרומתכם" hint="התרומה התקבלה בהצלחה" />
         <DonationSuccessMessage paymentMethod={completedMethod} />
-        <div className="community-actions">
+        <PaymentFlowActions>
           <button
             type="button"
-            className="primary-btn"
+            className="primary-btn payment-flow-btn"
             onClick={() => navigate("/")}
           >
             חזרה למסך הראשי
           </button>
-        </div>
-      </section>
+        </PaymentFlowActions>
+      </PaymentFlowShell>
     );
   }
 
   return (
-    <section className="community-section donation-flow">
-      <form className="donation-form" onSubmit={handleSubmitDonation}>
+    <PaymentFlowShell>
+      <RegistrationStepper
+        currentStep={step}
+        steps={DONATION_FLOW_STEPS}
+        ariaLabel="התקדמות תרומה"
+      />
+
+      <form className="donation-form payment-form" onSubmit={handleSubmitDonation}>
         {formError && (
           <p className="form-error" role="alert">
             {formError}
@@ -250,10 +264,11 @@ function DonationForm({ initialAmount = null, showBackToHome = false }) {
 
         {step === 1 && (
           <>
-            <h2 className="step-panel-title">בחרו סכום תרומה</h2>
-            <p className="step-panel-hint">
-              התרומה שלכם עוזרת לנו להמשיך ולתמוך בקהילת הוותיקים
-            </p>
+            <PaymentStepHeader
+              title="בחרו סכום תרומה"
+              hint="התרומה שלכם עוזרת לנו להמשיך ולתמוך בקהילת הוותיקים"
+              showLeafDecoration
+            />
 
             <DonationAmountPicker
               selectedAmount={selectedAmount}
@@ -269,7 +284,7 @@ function DonationForm({ initialAmount = null, showBackToHome = false }) {
               </p>
             )}
 
-            <div className="community-actions form-actions">
+            <PaymentFlowActions split={showBackToHome}>
               {showBackToHome && (
                 <button
                   type="button"
@@ -281,22 +296,24 @@ function DonationForm({ initialAmount = null, showBackToHome = false }) {
               )}
               <button
                 type="button"
-                className="primary-btn"
+                className="primary-btn payment-flow-btn"
                 onClick={goToPaymentStep}
               >
                 לתרום
+                <span className="payment-flow-btn__chevron" aria-hidden="true">
+                  ‹
+                </span>
               </button>
-            </div>
+            </PaymentFlowActions>
           </>
         )}
 
         {step === 2 && (
           <>
-            <h2 className="step-panel-title">איך תרצו לתרום?</h2>
-            <p className="step-panel-hint">
-              סכום התרומה:{" "}
-              <strong>{formatDisplayPrice(donationAmount)}</strong>
-            </p>
+            <PaymentStepHeader
+              title="איך תרצו לתרום?"
+              hint={`סכום התרומה: ${formatDisplayPrice(donationAmount)}`}
+            />
 
             <fieldset className="payment-methods">
               <legend className="visually-hidden">שיטת תשלום</legend>
@@ -346,7 +363,7 @@ function DonationForm({ initialAmount = null, showBackToHome = false }) {
               />
             </div>
 
-            <div className="community-actions form-actions form-actions--split">
+            <PaymentFlowActions split>
               <button
                 type="button"
                 className="secondary-btn"
@@ -359,16 +376,19 @@ function DonationForm({ initialAmount = null, showBackToHome = false }) {
               </button>
               <button
                 type="submit"
-                className="primary-btn"
+                className="primary-btn payment-flow-btn"
                 disabled={isSubmitting}
               >
                 {isSubmitting ? "שולח..." : "אישור תרומה"}
+                <span className="payment-flow-btn__chevron" aria-hidden="true">
+                  ‹
+                </span>
               </button>
-            </div>
+            </PaymentFlowActions>
           </>
         )}
       </form>
-    </section>
+    </PaymentFlowShell>
   );
 }
 

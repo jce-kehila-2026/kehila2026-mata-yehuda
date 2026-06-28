@@ -6,10 +6,14 @@ import {
     doc,
     getDoc,
     setDoc,
-    updateDoc,
-    deleteDoc
+    updateDoc
 } from "firebase/firestore";
 import { normalizeSearchQuery } from "../../utils/staffManegmentUtils/adminListUtils";
+import {
+    archiveDocument,
+    permanentlyDeleteDocument,
+    restoreDocument
+} from "./archiveService";
 import {
     DAY_CENTER_ID,
     DAY_CENTER_NAME,
@@ -116,9 +120,15 @@ export async function fetchPrograms() {
             return;
         }
 
+        const data = programDoc.data();
+
+        if (data.isArchived === true) {
+            return;
+        }
+
         programMap.set(id, {
             id,
-            ...programDoc.data()
+            ...data
         });
     });
 
@@ -161,6 +171,30 @@ export function getProgramSortValue(program, sortField) {
         default:
             return formatProgramTitle(program) || program.title || "";
     }
+}
+
+export async function fetchArchivedProgramsForAdminList() {
+    const snapshot = await getDocs(programsCollection);
+    const archivedPrograms = [];
+
+    snapshot.docs.forEach((programDoc) => {
+        const id = programDoc.id;
+
+        if (isDeprecatedFixedProgramId(id) || isFixedProgramId(id)) {
+            return;
+        }
+
+        const data = programDoc.data();
+
+        if (data.isArchived === true) {
+            archivedPrograms.push({
+                id,
+                ...data
+            });
+        }
+    });
+
+    return sortPrograms(archivedPrograms);
 }
 
 export async function fetchProgramsForAdminList() {
@@ -226,5 +260,17 @@ export async function deleteProgram(programId) {
         throw new Error("Cannot delete fixed program");
     }
 
-    return deleteDoc(doc(db, "programs", programId));
+    return archiveDocument("programs", programId);
+}
+
+export async function restoreProgram(programId) {
+    return restoreDocument("programs", programId);
+}
+
+export async function permanentlyDeleteProgram(programId) {
+    if (isFixedProgramId(programId)) {
+        throw new Error("Cannot delete fixed program");
+    }
+
+    return permanentlyDeleteDocument("programs", programId);
 }

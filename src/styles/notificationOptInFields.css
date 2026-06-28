@@ -54,29 +54,9 @@
   vertical-align: middle;
 }
 
-.notification-opt-in__activate {
-  align-self: flex-start;
-  width: auto;
-  min-height: 0;
-  margin-top: 0.15rem;
-  padding: 0.45rem 0.9rem;
-  font-size: 0.92rem;
-  font-weight: 600;
-  font-family: "Heebo", system-ui, sans-serif;
-  color: #fff;
-  background: var(--color-primary, #2d7d46);
-  border: none;
-  border-radius: 999px;
-  cursor: pointer;
-}
-
-.notification-opt-in__activate:hover:not(:disabled) {
-  background: var(--color-primary-hover, #236b38);
-}
-
-.notification-opt-in__activate:disabled {
-  opacity: 0.65;
-  cursor: not-allowed;
+.notification-opt-in__checkbox:disabled {
+  cursor: wait;
+  opacity: 0.7;
 }
 
 .notification-opt-in__success {
@@ -125,12 +105,6 @@
   box-shadow: none !important;
 }
 
-.supportive-community-page .payment-form .notification-opt-in__activate {
-  width: auto;
-  min-height: 0;
-  border-radius: 999px;
-}
-
 /* Homepage modal */
 .form-box .notification-opt-in {
   margin-top: 0;
@@ -157,12 +131,6 @@
   border: 1px solid #b8b8b8 !important;
   border-radius: 3px !important;
   background: #fff !important;
-}
-
-.form-box .notification-opt-in__activate {
-  width: 100%;
-  text-align: center;
-  border-radius: var(--radius, 18px);
 }
 
 @media (max-width: 420px) {

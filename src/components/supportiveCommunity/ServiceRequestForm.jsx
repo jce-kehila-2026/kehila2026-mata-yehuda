@@ -89,44 +89,54 @@ function ServiceRequestForm({ participantDocId, subscriptionDocId }) {
   };
 
   return (
-    <form className="community-join-form" onSubmit={handleSubmit} noValidate>
-      <section className="form-section">
-        <h2>בקשת שירות נוסף</h2>
-        <p className="form-hint">
-          בחרו את סוג העזרה הדרושה. צוות העמותה יבדוק את הבקשה ויתאם מתנדב מתאים.
-        </p>
+    <form
+      className="community-join-staff-form community-join-form"
+      onSubmit={handleSubmit}
+      noValidate
+    >
+      <div className="community-join-staff-card">
+        <section className="form-section">
+          <p className="form-hint">
+            בחרו את סוג העזרה הדרושה. צוות העמותה יבדוק את הבקשה ויתאם מתנדב
+            מתאים.
+          </p>
 
-        <HelpServicesSelector
-          selectedServices={serviceRequest.services}
-          setSelectedServices={(services) => updateField("services", services)}
-        />
+          <HelpServicesSelector
+            selectedServices={serviceRequest.services}
+            setSelectedServices={(services) => updateField("services", services)}
+          />
 
-        {serviceRequest.services.includes("other") && (
+          {serviceRequest.services.includes("other") && (
+            <div className="form-field">
+              <label>תאר את סוג העזרה</label>
+              <textarea
+                value={serviceRequest.otherService}
+                onChange={(e) => updateField("otherService", e.target.value)}
+              />
+            </div>
+          )}
+        </section>
+
+        <section className="form-section">
+          <LanguagesSelector
+            selectedLanguages={serviceRequest.languages}
+            setSelectedLanguages={(languages) =>
+              updateField("languages", languages)
+            }
+          />
+        </section>
+
+        <section className="form-section">
           <div className="form-field">
-            <label>תאר את סוג העזרה</label>
+            <label>הערות נוספות</label>
             <textarea
-              value={serviceRequest.otherService}
-              onChange={(e) => updateField("otherService", e.target.value)}
+              value={serviceRequest.notes}
+              onChange={(e) => updateField("notes", e.target.value)}
             />
           </div>
-        )}
+        </section>
 
-        <LanguagesSelector
-          selectedLanguages={serviceRequest.languages}
-          setSelectedLanguages={(languages) =>
-            updateField("languages", languages)
-          }
-        />
-
-        <div className="form-field">
-          <label>הערות נוספות</label>
-          <textarea
-            value={serviceRequest.notes}
-            onChange={(e) => updateField("notes", e.target.value)}
-          />
-        </div>
-
-        <div className="form-submit">
+        <div className="community-join-staff-submit form-submit">
           {message.text && (
             <div
               className={`form-message form-message--${message.type}`}
@@ -137,7 +147,7 @@ function ServiceRequestForm({ participantDocId, subscriptionDocId }) {
           )}
           <button type="submit">שליחת בקשה</button>
         </div>
-      </section>
+      </div>
     </form>
   );
 }

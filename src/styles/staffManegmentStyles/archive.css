@@ -1,0 +1,421 @@
+/* Shared contextual archive views inside manage pages.
+   Single visual template for ארכיון פעילויות, ארכיון משתתפים, and related archive lists. */
+
+.admin-list-section--archive,
+.admin-list-section--archive-activities,
+.admin-list-section--archive-participants,
+.admin-list-section--archive-programs {
+  width: 100%;
+}
+
+/* ===== Archive view back-to-list navigation ===== */
+
+.activities-mgmt-page .activities-mgmt-archive-toolbar,
+.list-mgmt-page .list-mgmt-archive-toolbar,
+.programs-mgmt-page .programs-mgmt-archive-toolbar,
+.admin-archive-toolbar {
+  position: relative;
+  z-index: 1;
+  display: flex;
+  justify-content: flex-end;
+  margin-bottom: 1rem;
+}
+
+/* ===== Header ===== */
+
+.admin-list-section--archive .admin-list-header,
+.admin-list-section--archive-activities .admin-list-header,
+.admin-list-section--archive-participants .admin-list-header,
+.admin-list-section--archive-programs .admin-list-header {
+  display: flex;
+  align-items: center;
+  justify-content: flex-start;
+  flex-wrap: wrap;
+  gap: 0.65rem 0.85rem;
+  direction: rtl;
+  margin-bottom: 0.75rem;
+}
+
+.admin-list-section--archive .admin-list-header__title,
+.admin-list-section--archive-activities .admin-list-header__title,
+.admin-list-section--archive-participants .admin-list-header__title,
+.admin-list-section--archive-programs .admin-list-header__title {
+  margin: 0;
+  font-size: 1.35rem;
+  font-weight: 700;
+  color: var(--color-primary);
+  line-height: 1.3;
+}
+
+/* ===== Search & page-size toolbar (white card) ===== */
+
+.admin-list-section--archive .admin-list-toolbar.staff-form.staff-list-filters,
+.admin-list-section--archive-activities .admin-list-toolbar.staff-form.staff-list-filters,
+.admin-list-section--archive-participants .admin-list-toolbar.staff-form.staff-list-filters,
+.admin-list-section--archive-programs .admin-list-toolbar.staff-form.staff-list-filters,
+.list-mgmt-page .admin-list-section--archive .admin-list-toolbar.staff-form.staff-list-filters,
+.list-mgmt-page .admin-list-section--archive-participants .admin-list-toolbar.staff-form.staff-list-filters {
+  display: grid;
+  grid-template-columns: minmax(240px, 1fr) auto auto;
+  align-items: end;
+  gap: 0.85rem;
+  margin: 0 0 1.6rem;
+  padding: 1rem 1.15rem;
+  background: #ffffff;
+  border: 1px solid #e8efe9;
+  border-radius: 16px;
+  box-shadow: 0 3px 14px rgba(36, 48, 41, 0.05);
+  direction: rtl;
+}
+
+.admin-list-section--archive .admin-list-toolbar__search,
+.admin-list-section--archive .admin-list-toolbar__page-size,
+.admin-list-section--archive-activities .admin-list-toolbar__search,
+.admin-list-section--archive-activities .admin-list-toolbar__page-size,
+.admin-list-section--archive-participants .admin-list-toolbar__search,
+.admin-list-section--archive-participants .admin-list-toolbar__page-size,
+.admin-list-section--archive-programs .admin-list-toolbar__search,
+.admin-list-section--archive-programs .admin-list-toolbar__page-size {
+  display: flex;
+  flex-direction: column;
+  gap: 0.4rem;
+  min-width: 0;
+}
+
+.admin-list-section--archive .admin-list-toolbar__search,
+.admin-list-section--archive-activities .admin-list-toolbar__search,
+.admin-list-section--archive-participants .admin-list-toolbar__search,
+.admin-list-section--archive-programs .admin-list-toolbar__search {
+  grid-column: 1;
+}
+
+.admin-list-section--archive .admin-list-toolbar__page-size,
+.admin-list-section--archive-activities .admin-list-toolbar__page-size,
+.admin-list-section--archive-participants .admin-list-toolbar__page-size,
+.admin-list-section--archive-programs .admin-list-toolbar__page-size {
+  grid-column: 3;
+  min-width: 130px;
+}
+
+.admin-list-section--archive .admin-list-toolbar label,
+.admin-list-section--archive-activities .admin-list-toolbar label,
+.admin-list-section--archive-participants .admin-list-toolbar label,
+.admin-list-section--archive-programs .admin-list-toolbar label {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.35rem;
+  margin: 0;
+  font-size: 0.82rem;
+  font-weight: 700;
+  color: #5a6a60;
+}
+
+.admin-list-section--archive .admin-list-toolbar input,
+.admin-list-section--archive .admin-list-toolbar select,
+.admin-list-section--archive-activities .admin-list-toolbar input,
+.admin-list-section--archive-activities .admin-list-toolbar select,
+.admin-list-section--archive-participants .admin-list-toolbar input,
+.admin-list-section--archive-participants .admin-list-toolbar select,
+.admin-list-section--archive-programs .admin-list-toolbar input,
+.admin-list-section--archive-programs .admin-list-toolbar select {
+  width: 100%;
+  min-width: 0;
+  box-sizing: border-box;
+  font-family: inherit;
+  font-size: 0.92rem;
+  font-weight: 500;
+  color: #243029;
+  background: #fbfdfb;
+  border: 1px solid #dce8df;
+  border-radius: 12px;
+  padding: 0.7rem 0.9rem;
+}
+
+.admin-list-section--archive .admin-list-toolbar input:focus,
+.admin-list-section--archive .admin-list-toolbar select:focus,
+.admin-list-section--archive-activities .admin-list-toolbar input:focus,
+.admin-list-section--archive-activities .admin-list-toolbar select:focus,
+.admin-list-section--archive-participants .admin-list-toolbar input:focus,
+.admin-list-section--archive-participants .admin-list-toolbar select:focus,
+.admin-list-section--archive-programs .admin-list-toolbar input:focus,
+.admin-list-section--archive-programs .admin-list-toolbar select:focus {
+  outline: none;
+  border-color: #9fd4ab;
+  background: #ffffff;
+  box-shadow: 0 0 0 3px rgba(45, 125, 70, 0.1);
+}
+
+/* ===== Summary line ===== */
+
+.admin-list-section--archive .admin-list-summary,
+.admin-list-section--archive-activities .admin-list-summary,
+.admin-list-section--archive-participants .admin-list-summary,
+.admin-list-section--archive-programs .admin-list-summary {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: space-between;
+  gap: 0.5rem 1rem;
+  margin: 0 0 1rem;
+  direction: rtl;
+}
+
+.admin-list-section--archive .admin-list-summary__text,
+.admin-list-section--archive .admin-list-summary__page,
+.admin-list-section--archive-activities .admin-list-summary__text,
+.admin-list-section--archive-activities .admin-list-summary__page,
+.admin-list-section--archive-participants .admin-list-summary__text,
+.admin-list-section--archive-participants .admin-list-summary__page,
+.admin-list-section--archive-programs .admin-list-summary__text,
+.admin-list-section--archive-programs .admin-list-summary__page {
+  margin: 0;
+  font-size: 0.88rem;
+}
+
+.admin-list-section--archive .admin-list-summary__page,
+.admin-list-section--archive-activities .admin-list-summary__page,
+.admin-list-section--archive-participants .admin-list-summary__page,
+.admin-list-section--archive-programs .admin-list-summary__page {
+  font-weight: 700;
+  color: var(--color-primary);
+}
+
+/* ===== Table container ===== */
+
+.admin-list-section--archive .admin-data-table-wrap,
+.admin-list-section--archive-activities .admin-data-table-wrap,
+.admin-list-section--archive-participants .admin-data-table-wrap,
+.admin-list-section--archive-programs .admin-data-table-wrap {
+  border: 1px solid #e8efe9;
+  border-radius: 16px;
+  background: #ffffff;
+  box-shadow: 0 4px 18px rgba(36, 48, 41, 0.06);
+  overflow: auto;
+}
+
+.admin-list-section--archive .admin-data-table thead,
+.admin-list-section--archive-activities .admin-data-table thead,
+.admin-list-section--archive-participants .admin-data-table thead,
+.admin-list-section--archive-programs .admin-data-table thead {
+  background: #f3f9f4;
+}
+
+.admin-list-section--archive .admin-data-table th,
+.admin-list-section--archive-activities .admin-data-table th,
+.admin-list-section--archive-participants .admin-data-table th,
+.admin-list-section--archive-programs .admin-data-table th {
+  color: #1f5c34;
+  font-size: 0.9rem;
+}
+
+.admin-list-section--archive .admin-data-table th,
+.admin-list-section--archive .admin-data-table td,
+.admin-list-section--archive .admin-data-table--compact th,
+.admin-list-section--archive .admin-data-table--compact td,
+.admin-list-section--archive-activities .admin-data-table th,
+.admin-list-section--archive-activities .admin-data-table td,
+.admin-list-section--archive-activities .admin-data-table--compact th,
+.admin-list-section--archive-activities .admin-data-table--compact td,
+.admin-list-section--archive-participants .admin-data-table th,
+.admin-list-section--archive-participants .admin-data-table td,
+.admin-list-section--archive-participants .admin-data-table--compact th,
+.admin-list-section--archive-participants .admin-data-table--compact td,
+.admin-list-section--archive-programs .admin-data-table th,
+.admin-list-section--archive-programs .admin-data-table td,
+.admin-list-section--archive-programs .admin-data-table--compact th,
+.admin-list-section--archive-programs .admin-data-table--compact td {
+  padding: 1.05rem 1.15rem;
+  border-bottom-color: #eef3ef;
+}
+
+.admin-list-section--archive .admin-data-table--compact td,
+.admin-list-section--archive-activities .admin-data-table--compact td,
+.admin-list-section--archive-participants .admin-data-table--compact td,
+.admin-list-section--archive-programs .admin-data-table--compact td {
+  font-size: 0.95rem;
+}
+
+.admin-list-section--archive .admin-data-table tbody tr:last-child td,
+.admin-list-section--archive-activities .admin-data-table tbody tr:last-child td,
+.admin-list-section--archive-participants .admin-data-table tbody tr:last-child td,
+.admin-list-section--archive-programs .admin-data-table tbody tr:last-child td {
+  border-bottom: none;
+}
+
+.admin-list-section--archive .admin-data-table tbody tr:hover,
+.admin-list-section--archive-activities .admin-data-table tbody tr:hover,
+.admin-list-section--archive-participants .admin-data-table tbody tr:hover,
+.admin-list-section--archive-programs .admin-data-table tbody tr:hover {
+  background: #f7fbf8;
+}
+
+.admin-list-section--archive .admin-data-table th:last-child,
+.admin-list-section--archive .admin-data-table td:last-child,
+.admin-list-section--archive-activities .admin-data-table th:last-child,
+.admin-list-section--archive-activities .admin-data-table td:last-child,
+.admin-list-section--archive-participants .admin-data-table th:last-child,
+.admin-list-section--archive-participants .admin-data-table td:last-child,
+.admin-list-section--archive-programs .admin-data-table th:last-child,
+.admin-list-section--archive-programs .admin-data-table td:last-child {
+  width: 1%;
+  white-space: nowrap;
+}
+
+.admin-list-section--archive .admin-data-table__actions,
+.admin-list-section--archive-activities .admin-data-table__actions,
+.admin-list-section--archive-participants .admin-data-table__actions,
+.admin-list-section--archive-programs .admin-data-table__actions {
+  flex-wrap: nowrap;
+  justify-content: flex-start;
+}
+
+.admin-list-section--archive .admin-table-action,
+.admin-list-section--archive-activities .admin-table-action,
+.admin-list-section--archive-participants .admin-table-action,
+.admin-list-section--archive-programs .admin-table-action {
+  width: 2.3rem;
+  height: 2.3rem;
+  border-radius: 10px;
+  border-color: #e2ebe5;
+  background: #ffffff;
+}
+
+.admin-list-section--archive .admin-table-action:hover:not(:disabled),
+.admin-list-section--archive .admin-table-action:active:not(:disabled),
+.admin-list-section--archive-activities .admin-table-action:hover:not(:disabled),
+.admin-list-section--archive-activities .admin-table-action:active:not(:disabled),
+.admin-list-section--archive-participants .admin-table-action:hover:not(:disabled),
+.admin-list-section--archive-participants .admin-table-action:active:not(:disabled),
+.admin-list-section--archive-programs .admin-table-action:hover:not(:disabled),
+.admin-list-section--archive-programs .admin-table-action:active:not(:disabled) {
+  background: #f3f9f4;
+}
+
+.admin-list-section--archive .admin-table-action--delete,
+.admin-list-section--archive-activities .admin-table-action--delete,
+.admin-list-section--archive-participants .admin-table-action--delete,
+.admin-list-section--archive-programs .admin-table-action--delete {
+  color: #d64545;
+  border-color: #f0d9d9;
+}
+
+.admin-list-section--archive .admin-table-action--delete:hover:not(:disabled),
+.admin-list-section--archive .admin-table-action--delete:active:not(:disabled),
+.admin-list-section--archive-activities .admin-table-action--delete:hover:not(:disabled),
+.admin-list-section--archive-activities .admin-table-action--delete:active:not(:disabled),
+.admin-list-section--archive-participants .admin-table-action--delete:hover:not(:disabled),
+.admin-list-section--archive-participants .admin-table-action--delete:active:not(:disabled),
+.admin-list-section--archive-programs .admin-table-action--delete:hover:not(:disabled),
+.admin-list-section--archive-programs .admin-table-action--delete:active:not(:disabled) {
+  background: #fdecec;
+  border-color: #f0c4c4;
+}
+
+/* ===== Empty / loading states ===== */
+
+.admin-list-section--archive .admin-list-empty,
+.admin-list-section--archive-activities .admin-list-empty,
+.admin-list-section--archive-participants .admin-list-empty,
+.admin-list-section--archive-programs .admin-list-empty {
+  border: none;
+  border-radius: 0;
+  background: transparent;
+  padding: 2.75rem 1.25rem;
+}
+
+.admin-list-section--archive .admin-list-empty__icon,
+.admin-list-section--archive-activities .admin-list-empty__icon,
+.admin-list-section--archive-participants .admin-list-empty__icon,
+.admin-list-section--archive-programs .admin-list-empty__icon {
+  width: 4rem;
+  height: 4rem;
+  background: #eef8f1;
+  color: #1f7a3f;
+}
+
+.admin-list-section--archive .admin-list-empty__title,
+.admin-list-section--archive-activities .admin-list-empty__title,
+.admin-list-section--archive-participants .admin-list-empty__title,
+.admin-list-section--archive-programs .admin-list-empty__title {
+  color: #243029;
+}
+
+.admin-list-section--archive .admin-list-empty__message,
+.admin-list-section--archive-activities .admin-list-empty__message,
+.admin-list-section--archive-participants .admin-list-empty__message,
+.admin-list-section--archive-programs .admin-list-empty__message {
+  color: #6b7770;
+}
+
+.admin-archive-loading {
+  margin: 0;
+  padding: 2rem 1rem;
+  text-align: center;
+  font-size: 1.05rem;
+  color: #5a6a60;
+}
+
+/* ===== Pagination ===== */
+
+.admin-list-section--archive .admin-list-pagination,
+.admin-list-section--archive-activities .admin-list-pagination,
+.admin-list-section--archive-participants .admin-list-pagination,
+.admin-list-section--archive-programs .admin-list-pagination {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: center;
+  gap: 0.75rem;
+  margin-top: 1.25rem;
+}
+
+/* ===== Mobile archive cards ===== */
+
+.archive-card__actions,
+.activity-card-actions.archive-card__actions {
+  display: flex;
+  justify-content: flex-start;
+  gap: 0.35rem;
+  padding-top: 0.75rem;
+}
+
+.admin-list-section--archive .activity-list,
+.admin-list-section--archive-activities .activity-list,
+.admin-list-section--archive-participants .activity-list {
+  width: 100%;
+  max-width: none;
+}
+
+/* ===== Responsive ===== */
+
+@media (max-width: 768px) {
+  .admin-list-section--archive .admin-list-toolbar.staff-form.staff-list-filters,
+  .admin-list-section--archive-activities .admin-list-toolbar.staff-form.staff-list-filters,
+  .admin-list-section--archive-participants .admin-list-toolbar.staff-form.staff-list-filters,
+  .admin-list-section--archive-programs .admin-list-toolbar.staff-form.staff-list-filters,
+  .list-mgmt-page .admin-list-section--archive .admin-list-toolbar.staff-form.staff-list-filters,
+  .list-mgmt-page .admin-list-section--archive-participants .admin-list-toolbar.staff-form.staff-list-filters {
+    grid-template-columns: 1fr;
+  }
+
+  .admin-list-section--archive .admin-list-toolbar__search,
+  .admin-list-section--archive .admin-list-toolbar__page-size,
+  .admin-list-section--archive-activities .admin-list-toolbar__search,
+  .admin-list-section--archive-activities .admin-list-toolbar__page-size,
+  .admin-list-section--archive-participants .admin-list-toolbar__search,
+  .admin-list-section--archive-participants .admin-list-toolbar__page-size,
+  .admin-list-section--archive-programs .admin-list-toolbar__search,
+  .admin-list-section--archive-programs .admin-list-toolbar__page-size {
+    grid-column: auto;
+  }
+
+  .admin-list-section--archive .admin-data-table-wrap,
+  .admin-list-section--archive-activities .admin-data-table-wrap,
+  .admin-list-section--archive-participants .admin-data-table-wrap,
+  .admin-list-section--archive-programs .admin-data-table-wrap {
+    border: none;
+    border-radius: 0;
+    box-shadow: none;
+    background: transparent;
+  }
+}

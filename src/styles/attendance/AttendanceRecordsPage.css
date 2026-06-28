@@ -2,11 +2,8 @@
 
 .attendance-records-page {
   direction: rtl;
-  min-height: auto;
-  background: #f4faf5;
   color: #243029;
   font-family: "Heebo", system-ui, sans-serif;
-  padding: 1.25rem 1rem 2rem;
 }
 
 .attendance-records-page__header {
@@ -38,8 +35,8 @@
 }
 
 .attendance-records-page__content {
-  max-width: 1000px;
-  margin: 0 auto;
+  max-width: none;
+  margin: 0;
 }
 
 .attendance-records-page__search-wrap {
@@ -70,13 +67,13 @@
   display: grid;
   grid-template-columns: minmax(0, 1fr) 10.5rem max-content;
   align-items: end;
-  gap: 0.75rem;
+  gap: 0.85rem;
   margin-bottom: 0;
   background: #ffffff;
-  border: 1px solid #d5ddd8;
+  border: 1px solid #e8efe9;
   border-radius: 16px;
-  padding: 0.85rem 1rem;
-  box-shadow: 0 4px 18px rgba(36, 48, 41, 0.06);
+  padding: 1rem 1.15rem;
+  box-shadow: 0 3px 14px rgba(36, 48, 41, 0.05);
 }
 
 .attendance-records-page__toolbar-title {
@@ -156,10 +153,10 @@
 }
 
 .attendance-records-page__message-block {
-  max-width: 720px;
-  margin: 0 auto 0.65rem;
-  padding: 0.65rem 0.85rem;
-  border-radius: 6px;
+  max-width: none;
+  margin: 0 0 0.85rem;
+  padding: 0.75rem 1rem;
+  border-radius: 12px;
 }
 
 .attendance-records-page__message-block--error {
@@ -201,10 +198,11 @@
 
 .attendance-records-page__daily-activity-block {
   background: #ffffff;
-  border: 1px solid #d5ddd8;
+  border: 1px solid #e8efe9;
   border-right: 4px solid #2d7d46;
-  border-radius: 6px;
-  padding: 0.75rem 0.85rem;
+  border-radius: 14px;
+  padding: 0.85rem 0.95rem;
+  box-shadow: 0 3px 14px rgba(36, 48, 41, 0.05);
 }
 
 .attendance-records-page__daily-activity-name {
@@ -450,10 +448,11 @@
   flex-direction: column;
   gap: 0.15rem;
   background: #ffffff;
-  border: 1px solid #d5ddd8;
-  border-radius: 6px;
-  padding: 0.6rem 0.75rem;
+  border: 1px solid #e8efe9;
+  border-radius: 14px;
+  padding: 0.75rem 0.85rem;
   text-align: center;
+  box-shadow: 0 3px 14px rgba(36, 48, 41, 0.05);
 }
 
 .attendance-records-page__summary-card--present {
@@ -492,10 +491,11 @@
 .attendance-records-page__activity-info {
   margin-bottom: 0.65rem;
   background: #ffffff;
-  border: 1px solid #d5ddd8;
+  border: 1px solid #e8efe9;
   border-right: 4px solid #2d7d46;
-  border-radius: 6px;
-  padding: 0.65rem 0.85rem;
+  border-radius: 14px;
+  padding: 0.75rem 0.95rem;
+  box-shadow: 0 3px 14px rgba(36, 48, 41, 0.05);
 }
 
 .attendance-records-page__activity-info-label {
@@ -531,10 +531,11 @@
 
 .attendance-records-page__insight-card {
   background: #ffffff;
-  border: 1px solid #d5ddd8;
+  border: 1px solid #e8efe9;
   border-right: 4px solid #2d7d46;
-  border-radius: 6px;
-  padding: 0.75rem 0.85rem;
+  border-radius: 14px;
+  padding: 0.85rem 0.95rem;
+  box-shadow: 0 3px 14px rgba(36, 48, 41, 0.05);
 }
 
 .attendance-records-page__insight-title {
@@ -575,9 +576,10 @@
 
 .attendance-records-page__card {
   background: #ffffff;
-  border: 1px solid #d5ddd8;
-  border-radius: 6px;
+  border: 1px solid #e8efe9;
+  border-radius: 16px;
   overflow: hidden;
+  box-shadow: 0 4px 18px rgba(36, 48, 41, 0.06);
 }
 
 .attendance-records-page__table-wrapper {

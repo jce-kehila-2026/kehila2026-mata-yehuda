@@ -152,3 +152,348 @@
   }
 }
 
+/* ============================================================
+   Staff-styled public Community Join request form.
+   Mirrors the Staff "לקיחת נוכחות" (TakeAttendancePage) / list-mgmt
+   design: soft green page, centered container, staff header, white
+   form card, staff inputs/buttons and inline messages.
+
+   Scoped entirely under .community-join-staff-page so the shared
+   .supportive-community-page forms (volunteer registration, service
+   request, landing page) are NOT affected. UI only — no changes to
+   validation, Firestore, submit flow, routing, or field names.
+   ============================================================ */
+
+.community-join-staff-page {
+  font-family: "Heebo", system-ui, sans-serif;
+  color: #243029;
+  background: #eef7f1;
+  min-height: 100vh;
+  direction: rtl;
+  text-align: right;
+}
+
+.community-join-staff-page *,
+.community-join-staff-page *::before,
+.community-join-staff-page *::after {
+  box-sizing: border-box;
+}
+
+/* Centered content aligned with the staff pages (header + card share width) */
+.community-join-staff-page.list-mgmt-page .staff-container {
+  max-width: 980px;
+}
+
+.community-join-staff-page .staff-back-button {
+  text-decoration: none;
+}
+
+/* ===== White form card ===== */
+.community-join-staff-page .community-join-staff-form {
+  position: relative;
+  z-index: 1;
+  width: 100%;
+  margin: 0;
+}
+
+.community-join-staff-page .community-join-staff-card {
+  background: #ffffff;
+  border: 1px solid #e8efe9;
+  border-radius: 16px;
+  box-shadow: 0 4px 18px rgba(36, 48, 41, 0.06);
+  padding: 1.6rem 1.65rem;
+}
+
+/* ===== Sections (clear, divided blocks) ===== */
+.community-join-staff-page .form-section {
+  margin: 0;
+  padding: 0;
+}
+
+.community-join-staff-page .form-section + .form-section,
+.community-join-staff-page .community-join-staff-submit {
+  margin-top: 2.1rem;
+  padding-top: 2.1rem;
+  border-top: 1px solid #eef3ef;
+}
+
+.community-join-staff-page .community-join-staff-section__head {
+  margin-bottom: 1.15rem;
+}
+
+.community-join-staff-page .form-section h2 {
+  margin: 0;
+  font-size: 1.3rem;
+  font-weight: 800;
+  color: #1f5c34;
+  line-height: 1.3;
+}
+
+.community-join-staff-page .form-hint {
+  margin: 0.35rem 0 0;
+  font-size: 1rem;
+  font-weight: 500;
+  color: #5a6a60;
+  line-height: 1.55;
+}
+
+/* A hint used as a standalone section intro (direct child of a section,
+   e.g. the Service Request form) gets bottom spacing before the content. */
+.community-join-staff-page .form-section > .form-hint {
+  margin: 0 0 1.1rem;
+}
+
+/* Inline error message block (e.g. membership check) */
+.community-join-staff-page .form-error {
+  margin: 0 0 0.25rem;
+  padding: 0.85rem 1.1rem;
+  border-radius: 12px;
+  font-size: 1rem;
+  font-weight: 700;
+  line-height: 1.5;
+  color: #b42318;
+  background: #fff1f0;
+  border: 1px solid #f3c6c1;
+}
+
+/* Selector sub-headings act as the section title for help/languages */
+.community-join-staff-page .form-selector h3 {
+  margin: 0 0 0.35rem;
+  font-size: 1.3rem;
+  font-weight: 800;
+  color: #1f5c34;
+  line-height: 1.3;
+}
+
+.community-join-staff-page .form-selector h3::after {
+  content: " *";
+  color: #b42318;
+  font-weight: 800;
+}
+
+.community-join-staff-page .form-selector .form-hint {
+  margin: 0 0 0.85rem;
+}
+
+/* ===== Fields ===== */
+.community-join-staff-page .form-fields {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 1rem 1.25rem;
+}
+
+.community-join-staff-page .form-field {
+  display: flex;
+  flex-direction: column;
+  gap: 0.4rem;
+  margin: 0;
+  min-width: 0;
+}
+
+.community-join-staff-page .form-field label {
+  font-size: 1.05rem;
+  font-weight: 800;
+  color: #4a574f;
+  line-height: 1.35;
+}
+
+.community-join-staff-page .required {
+  color: #b42318;
+  font-weight: 800;
+}
+
+/* The "other service" textarea spans the full card width */
+.community-join-staff-page .form-selector-wrapper + .form-field {
+  margin-top: 1rem;
+}
+
+.community-join-staff-page input:not([type="checkbox"]):not([type="radio"]),
+.community-join-staff-page select,
+.community-join-staff-page textarea {
+  width: 100%;
+  min-width: 0;
+  box-sizing: border-box;
+  font-family: inherit;
+  font-size: 1.05rem;
+  color: #1f2933;
+  background: #fbfdfc;
+  border: 1.5px solid #d9e2dc;
+  border-radius: 10px;
+  padding: 0.72rem 0.9rem;
+  line-height: 1.4;
+}
+
+.community-join-staff-page textarea {
+  min-height: 96px;
+  resize: vertical;
+}
+
+.community-join-staff-page input:not([type="checkbox"]):not([type="radio"]):focus,
+.community-join-staff-page select:focus,
+.community-join-staff-page textarea:focus {
+  outline: none;
+  border-color: #2d7d46;
+  background: #ffffff;
+  box-shadow: 0 0 0 3px rgba(45, 125, 70, 0.15);
+}
+
+.community-join-staff-page input.field-invalid,
+.community-join-staff-page textarea.field-invalid {
+  border-color: #b42318;
+  background: #fff7f6;
+}
+
+.community-join-staff-page input.field-invalid:focus,
+.community-join-staff-page textarea.field-invalid:focus {
+  border-color: #b42318;
+  box-shadow: 0 0 0 3px rgba(180, 35, 24, 0.15);
+}
+
+.community-join-staff-page .field-error {
+  margin: 0.1rem 0 0;
+  font-size: 0.85rem;
+  font-weight: 700;
+  color: #b42318;
+  line-height: 1.4;
+}
+
+/* ===== Checkbox option cards (help types / languages) ===== */
+.community-join-staff-page .form-selector-wrapper {
+  margin: 0;
+}
+
+.community-join-staff-page .options-container {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 0.75rem;
+}
+
+.community-join-staff-page .option-label {
+  display: flex;
+  align-items: center;
+  gap: 0.85rem;
+  background: #fbfdfc;
+  border: 1.5px solid #d9e2dc;
+  border-radius: 12px;
+  padding: 1rem 1.1rem;
+  min-height: 3.4rem;
+  font-size: 1.1rem;
+  font-weight: 600;
+  color: #243029;
+  cursor: pointer;
+  transition:
+    border-color 0.15s ease,
+    background 0.15s ease,
+    box-shadow 0.15s ease;
+}
+
+.community-join-staff-page .option-label:hover {
+  border-color: #b9d8c2;
+  background: #ffffff;
+}
+
+/* Selected state — the whole card reflects the checked checkbox.
+   Uses :has() so no markup/logic change is needed. */
+.community-join-staff-page .option-label:has(input[type="checkbox"]:checked) {
+  background: #e8f6ec;
+  border-color: #2d7d46;
+  box-shadow: inset 0 0 0 1px #2d7d46;
+  color: #1f5c34;
+  font-weight: 700;
+}
+
+.community-join-staff-page .option-label input[type="checkbox"] {
+  width: 1.5rem;
+  height: 1.5rem;
+  flex-shrink: 0;
+  accent-color: #2d7d46;
+  cursor: pointer;
+}
+
+.community-join-staff-page .form-selector--invalid .options-container {
+  outline: 2px solid #b42318;
+  outline-offset: 3px;
+  border-radius: 14px;
+}
+
+/* ===== Submit area + inline messages ===== */
+.community-join-staff-page .community-join-staff-submit {
+  display: flex;
+  flex-direction: column;
+  gap: 1rem;
+}
+
+.community-join-staff-page .form-message {
+  margin: 0;
+  padding: 0.85rem 1.1rem;
+  border-radius: 12px;
+  font-size: 0.98rem;
+  font-weight: 600;
+  line-height: 1.6;
+  white-space: pre-line;
+}
+
+.community-join-staff-page .form-message--error {
+  color: #b42318;
+  background: #fff1f0;
+  border: 1px solid #f3c6c1;
+}
+
+.community-join-staff-page .form-message--success {
+  color: #2d7d46;
+  background: #eaf6ee;
+  border: 1px solid #cfe7d5;
+}
+
+.community-join-staff-page .community-join-staff-submit button {
+  align-self: flex-start;
+  min-width: 16rem;
+  min-height: 3.85rem;
+  font-family: inherit;
+  font-size: 1.15rem;
+  font-weight: 800;
+  color: #ffffff;
+  background: #1f7a3f;
+  border: 1px solid #1a6a36;
+  border-radius: 12px;
+  padding: 1.05rem 2.75rem;
+  cursor: pointer;
+  box-shadow: 0 2px 7px rgba(31, 122, 63, 0.12);
+  transition:
+    background 0.15s ease,
+    border-color 0.15s ease,
+    transform 0.15s ease,
+    box-shadow 0.15s ease;
+}
+
+.community-join-staff-page .community-join-staff-submit button:hover,
+.community-join-staff-page .community-join-staff-submit button:active {
+  background: #19632f;
+  border-color: #134d25;
+  transform: translateY(-2px);
+  box-shadow: 0 4px 11px rgba(31, 122, 63, 0.16);
+}
+
+.community-join-staff-page .community-join-staff-submit button:focus-visible {
+  outline: 3px solid rgba(45, 125, 70, 0.35);
+  outline-offset: 2px;
+}
+
+/* ===== Responsive ===== */
+@media (max-width: 768px) {
+  .community-join-staff-page .community-join-staff-card {
+    padding: 1.15rem 1rem;
+  }
+
+  .community-join-staff-page .form-fields,
+  .community-join-staff-page .options-container {
+    grid-template-columns: 1fr;
+  }
+
+  .community-join-staff-page .community-join-staff-submit button {
+    align-self: stretch;
+    width: 100%;
+    min-width: 0;
+  }
+}
+

@@ -6,11 +6,11 @@ import {
 } from "../../config/staffRoles";
 import { updateStaffMember } from "../../services/staffManegmentServices/staffService";
 import FormActionRow from "../shared/FormActionRow";
+import { nameContainsNumber } from "../../utils/nameValidation";
 
 function EditStaffMember({ staff, onCompleted, onCancel }) {
     const [fullName, setFullName] = useState(staff?.full_name || "");
     const [phone, setPhone] = useState(staff?.phone || "");
-    const [password, setPassword] = useState("");
     const [isActive, setIsActive] = useState(staff?.is_active ?? false);
     const [role, setRole] = useState(
         normalizeStaffRole(staff?.role ?? DEFAULT_STAFF_ROLE)
@@ -24,6 +24,12 @@ function EditStaffMember({ staff, onCompleted, onCancel }) {
     }
 
     async function handleUpdateStaff() {
+        if (nameContainsNumber(fullName)) {
+            setError("השם אינו יכול להכיל מספרים");
+            setSuccess("");
+            return;
+        }
+
         setSubmitting(true);
 
         try {
@@ -32,8 +38,7 @@ function EditStaffMember({ staff, onCompleted, onCancel }) {
                 full_name: fullName,
                 phone,
                 is_active: isActive,
-                role,
-                password
+                role
             });
 
             setSuccess("איש הצוות עודכן בהצלחה");
@@ -79,15 +84,6 @@ function EditStaffMember({ staff, onCompleted, onCancel }) {
             <input id="edit-staff-email" type="email" value={staff.email} disabled />
 
             <p className="staff-form__hint">לא ניתן לשנות את האימייל</p>
-
-            <label htmlFor="edit-staff-password">סיסמה חדשה (אופציונלי)</label>
-            <input
-                id="edit-staff-password"
-                type="password"
-                placeholder="סיסמה חדשה (אופציונלי)"
-                value={password}
-                onChange={(event) => setPassword(event.target.value)}
-            />
 
             <label htmlFor="edit-staff-role">תפקיד</label>
             <select

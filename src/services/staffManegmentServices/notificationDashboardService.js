@@ -74,7 +74,7 @@ export async function fetchNotificationDashboardData() {
             query(
                 collection(db, "notifications_log"),
                 orderBy("sentAt", "desc"),
-                limit(12)
+                limit(100)
             )
         )
     ]);
@@ -92,6 +92,6 @@ export async function fetchNotificationDashboardData() {
             activeDevices: countActiveDevices(tokenDocs),
             sentThisWeek: computeSentThisWeek(recentNotifications)
         },
-        recentNotifications: recentNotifications.slice(0, 5)
+        recentNotifications
     };
 }

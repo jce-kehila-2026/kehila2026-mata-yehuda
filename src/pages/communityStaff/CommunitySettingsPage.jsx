@@ -12,34 +12,63 @@ function CommunitySettingsPage() {
     useCommunityStaffMessage();
 
   return (
-    <div className="community-settings-page" dir="rtl">
-      <header className="community-settings-page__header community-staff-page-header">
-        <div className="community-staff-page-header__main">
-          <button
-            type="button"
-            className="community-settings-page__back"
-            onClick={() => navigate("/community-staff")}
-          >
-            חזרה ללוח הבקרה
-          </button>
-          <h1 className="community-settings-page__title page-title">הגדרות קהילה</h1>
-          <p className="community-staff-page-subtitle">
-            ניהול שפות וסוגי עזרה
-          </p>
+    <div
+      className="community-settings-page activities-mgmt-page"
+      dir="rtl"
+    >
+      <img
+        src="/images/minitree.png"
+        alt=""
+        aria-hidden="true"
+        className="activities-mgmt-decoration activities-mgmt-decoration--top"
+      />
+      <img
+        src="/images/minitree.png"
+        alt=""
+        aria-hidden="true"
+        className="activities-mgmt-decoration activities-mgmt-decoration--left"
+      />
+      <img
+        src="/images/minitree.png"
+        alt=""
+        aria-hidden="true"
+        className="activities-mgmt-decoration activities-mgmt-decoration--bottom"
+      />
+
+      <div className="staff-container staff-container--activities">
+        <header className="activities-mgmt-page__header">
+          <div className="activities-mgmt-page__header-main">
+            <h1 className="activities-mgmt-page__title">הגדרות קהילה</h1>
+            <p className="activities-mgmt-page__subtitle">
+              ניהול שפות וסוגי עזרה
+            </p>
+          </div>
+          <div className="activities-mgmt-page__actions">
+            <button
+              type="button"
+              className="staff-back-button"
+              onClick={() => navigate("/community-staff")}
+            >
+              <span className="staff-back-button__icon" aria-hidden="true">
+                →
+              </span>
+              חזרה ללוח הבקרה
+            </button>
+          </div>
+        </header>
+
+        <CommunityStaffMessage message={message} onDismiss={clearMessage} />
+
+        <div className="community-settings-page__sections">
+          <CommunitySettingsLanguagesSection
+            onShowSuccess={showSuccess}
+            onShowError={showError}
+          />
+          <CommunitySettingsHelpTypesSection
+            onShowSuccess={showSuccess}
+            onShowError={showError}
+          />
         </div>
-      </header>
-
-      <CommunityStaffMessage message={message} onDismiss={clearMessage} />
-
-      <div className="community-settings-page__sections">
-        <CommunitySettingsLanguagesSection
-          onShowSuccess={showSuccess}
-          onShowError={showError}
-        />
-        <CommunitySettingsHelpTypesSection
-          onShowSuccess={showSuccess}
-          onShowError={showError}
-        />
       </div>
     </div>
   );

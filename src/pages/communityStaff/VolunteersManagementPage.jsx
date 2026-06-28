@@ -1,4 +1,6 @@
 import { useState } from "react";
+import { useNavigate } from "react-router-dom";
+import { Plus } from "lucide-react";
 import CreateVolunteerModal from "../../components/communityStaff/CreateVolunteerModal.jsx";
 import VolunteersManagementTable from "../../components/communityStaff/VolunteersManagementTable.jsx";
 import EditVolunteerModal from "../../components/communityStaff/EditVolunteerModal.jsx";
@@ -9,6 +11,7 @@ import CommunityStaffMessage, {
 import "../../styles/communityStaff/CommunityStaffDashboard.css";
 
 function VolunteersManagementPage() {
+  const navigate = useNavigate();
   const [selectedVolunteer, setSelectedVolunteer] = useState(null);
   const [detailsVolunteer, setDetailsVolunteer] = useState(null);
   const [showCreateModal, setShowCreateModal] = useState(false);
@@ -27,32 +30,73 @@ function VolunteersManagementPage() {
   };
 
   return (
-    <div className="community-volunteers-mgmt-page" dir="rtl">
-      <header className="community-volunteers-mgmt-page__header community-staff-page-header">
-        <div className="community-staff-page-header__main">
-          <h1 className="community-volunteers-mgmt-page__title page-title">מתנדבים</h1>
-          <p className="community-staff-page-subtitle">
-            ניהול מתנדבים פעילים ולא פעילים
-          </p>
-        </div>
-        <button
-          type="button"
-          className="community-staff-page-header__action"
-          onClick={() => setShowCreateModal(true)}
-        >
-          הוספת מתנדב
-        </button>
-      </header>
-
-      <CommunityStaffMessage message={message} onDismiss={clearMessage} />
-
-      <VolunteersManagementTable
-        refreshKey={refreshKey}
-        onEditVolunteer={setSelectedVolunteer}
-        onViewDetails={setDetailsVolunteer}
-        onVolunteerUpdated={handleVolunteerUpdated}
-        onShowError={showError}
+    <div
+      className="community-volunteers-mgmt-page activities-mgmt-page"
+      dir="rtl"
+    >
+      <img
+        src="/images/minitree.png"
+        alt=""
+        aria-hidden="true"
+        className="activities-mgmt-decoration activities-mgmt-decoration--top"
       />
+      <img
+        src="/images/minitree.png"
+        alt=""
+        aria-hidden="true"
+        className="activities-mgmt-decoration activities-mgmt-decoration--left"
+      />
+      <img
+        src="/images/minitree.png"
+        alt=""
+        aria-hidden="true"
+        className="activities-mgmt-decoration activities-mgmt-decoration--bottom"
+      />
+
+      <div className="staff-container staff-container--activities">
+        <header className="activities-mgmt-page__header">
+          <div className="activities-mgmt-page__header-main">
+            <h1 className="activities-mgmt-page__title">מתנדבים</h1>
+            <p className="activities-mgmt-page__subtitle">
+              ניהול מתנדבים פעילים ולא פעילים
+            </p>
+          </div>
+          <div className="activities-mgmt-page__actions">
+            <button
+              type="button"
+              className="activities-mgmt-page__action"
+              onClick={() => setShowCreateModal(true)}
+            >
+              <Plus
+                className="activities-mgmt-page__action-icon"
+                strokeWidth={2.25}
+                aria-hidden="true"
+              />
+              <span>הוספת מתנדב</span>
+            </button>
+            <button
+              type="button"
+              className="staff-back-button"
+              onClick={() => navigate("/community-staff")}
+            >
+              <span className="staff-back-button__icon" aria-hidden="true">
+                →
+              </span>
+              חזרה ללוח הבקרה
+            </button>
+          </div>
+        </header>
+
+        <CommunityStaffMessage message={message} onDismiss={clearMessage} />
+
+        <VolunteersManagementTable
+          refreshKey={refreshKey}
+          onEditVolunteer={setSelectedVolunteer}
+          onViewDetails={setDetailsVolunteer}
+          onVolunteerUpdated={handleVolunteerUpdated}
+          onShowError={showError}
+        />
+      </div>
 
       <VolunteerManagementDetailsModal
         volunteer={detailsVolunteer}

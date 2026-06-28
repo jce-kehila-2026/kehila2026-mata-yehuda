@@ -6,6 +6,11 @@ import {
 
 import HelpServicesSelector from "../supportiveCommunity/HelpServicesSelector";
 import LanguagesSelector from "../supportiveCommunity/LanguagesSelector";
+import {
+  INVALID_ADDRESS_MESSAGE,
+  isValidAddress,
+  nameContainsNumber,
+} from "../../utils/nameValidation";
 
 import "../../styles/supportive community/VolunteerRegistrationForm.css";
 
@@ -24,6 +29,14 @@ function validateVolunteerForm(form) {
     !form.about.trim()
   ) {
     return { submit: "נא למלא את כל שדות החובה" };
+  }
+
+  if (nameContainsNumber(form.firstName) || nameContainsNumber(form.lastName)) {
+    return { submit: "השם אינו יכול להכיל מספרים" };
+  }
+
+  if (!isValidAddress(form.address)) {
+    return { submit: INVALID_ADDRESS_MESSAGE };
   }
 
   if (!/^\d{9}$/.test(form.volunteerId)) {
@@ -178,12 +191,19 @@ function VolunteerRegistrationForm() {
   };
 
   return (
-    <form className="community-join-form volunteer-registration-form" onSubmit={handleSubmit} noValidate>
-      <section className="form-section">
-        <h2>פרטים אישיים</h2>
-        <p className="form-hint">כל השדות המסומנים ב-* הם שדות חובה</p>
+    <form
+      className="community-join-staff-form community-join-form volunteer-registration-form"
+      onSubmit={handleSubmit}
+      noValidate
+    >
+      <div className="community-join-staff-card">
+        <section className="form-section">
+          <div className="community-join-staff-section__head">
+            <h2>פרטים אישיים</h2>
+            <p className="form-hint">כל השדות המסומנים ב-* הם שדות חובה</p>
+          </div>
 
-        <div className="form-fields">
+          <div className="form-fields">
           <div className="form-field">
             <label>תעודת זהות *</label>
             <input
@@ -286,7 +306,9 @@ function VolunteerRegistrationForm() {
       </section>
 
       <section className="form-section">
-        <h2>עוד קצת עליכם</h2>
+        <div className="community-join-staff-section__head">
+          <h2>עוד קצת עליכם</h2>
+        </div>
 
         <div className="form-field">
           <label>ספר/י קצת על עצמך *</label>
@@ -306,30 +328,33 @@ function VolunteerRegistrationForm() {
         </div>
       </section>
 
-      <div className="form-submit">
-        {duplicatePrompt && (
-          <div className="duplicate-prompt" role="status">
-            <div className="form-message form-message--prompt">{DUPLICATE_MESSAGE}</div>
-            <div className="duplicate-prompt-actions">
-              <button type="button" onClick={handleUpdateDuplicate}>
-                עדכון פרטים
-              </button>
+        <div className="community-join-staff-submit form-submit">
+          {duplicatePrompt && (
+            <div className="duplicate-prompt" role="status">
+              <div className="form-message form-message--prompt">
+                {DUPLICATE_MESSAGE}
+              </div>
+              <div className="duplicate-prompt-actions">
+                <button type="button" onClick={handleUpdateDuplicate}>
+                  עדכון פרטים
+                </button>
+              </div>
             </div>
-          </div>
-        )}
+          )}
 
-        {message.text && (
-          <div
-            className={`form-message form-message--${message.type}`}
-            role={message.type === "error" ? "alert" : "status"}
-          >
-            {message.text}
-          </div>
-        )}
+          {message.text && (
+            <div
+              className={`form-message form-message--${message.type}`}
+              role={message.type === "error" ? "alert" : "status"}
+            >
+              {message.text}
+            </div>
+          )}
 
-        {!duplicatePrompt && (
-          <button type="submit">שליחת בקשת התנדבות</button>
-        )}
+          {!duplicatePrompt && (
+            <button type="submit">שליחת בקשת התנדבות</button>
+          )}
+        </div>
       </div>
     </form>
   );

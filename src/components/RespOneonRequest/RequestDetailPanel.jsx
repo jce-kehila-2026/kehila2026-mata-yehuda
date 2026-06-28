@@ -58,7 +58,7 @@ function RequestDetailPanel({
       </header>
 
       <div className="inbox-detail__body">
-        <section className="inbox-detail__message">
+        <section className="inbox-detail__message inbox-detail__message--incoming">
           <h3 className="inbox-detail__label">הפנייה</h3>
           <p className="inbox-detail__text">{request.content}</p>
           {mode === "answered" && (
@@ -79,6 +79,7 @@ function RequestDetailPanel({
 
         {mode === "waiting" && (
           <section className="inbox-detail__reply">
+            <h3 className="inbox-detail__reply-title">תגובה</h3>
             {useCallInstead && (
               <div className="inbox-detail__call-notice" role="status">
                 <p className="inbox-detail__call-notice-title">

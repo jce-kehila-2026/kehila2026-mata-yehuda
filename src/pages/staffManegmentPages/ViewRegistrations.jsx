@@ -157,14 +157,51 @@ function ViewRegistrations({
         staffNavigateBack();
     }
 
+    const pageDecorations = (
+        <>
+            <img
+                src="/images/minitree.png"
+                alt=""
+                aria-hidden="true"
+                className="list-mgmt-decoration list-mgmt-decoration--top"
+            />
+            <img
+                src="/images/minitree.png"
+                alt=""
+                aria-hidden="true"
+                className="list-mgmt-decoration list-mgmt-decoration--left"
+            />
+            <img
+                src="/images/minitree.png"
+                alt=""
+                aria-hidden="true"
+                className="list-mgmt-decoration list-mgmt-decoration--bottom"
+            />
+        </>
+    );
+
+    const completeBackLabel =
+        window.history.state?.[STAFF_RETURN_PAGE_KEY] === "dashboard"
+            ? "חזרה ללוח הבקרה"
+            : "חזרה לצפייה בבקשות";
+
     if (showCompleteRegistration && completeLoading) {
         return (
-            <div className="staff-page staff-page--registrations-edit">
-                <header className="staff-header">
-                    <h1>השלמת רישום</h1>
-                </header>
+            <div
+                className="staff-page staff-page--registrations-edit list-mgmt-page"
+                dir="rtl"
+            >
+                {pageDecorations}
                 <div className="staff-container">
-                    <p className="staff-meta">טוען...</p>
+                    <header className="list-mgmt-page__header">
+                        <div className="list-mgmt-page__header-main">
+                            <h1 className="list-mgmt-page__title">השלמת רישום</h1>
+                            <p className="list-mgmt-page__subtitle">
+                                השלמת פרטי המשתתף לרישום במערכת
+                            </p>
+                        </div>
+                    </header>
+                    <p className="list-mgmt-loading">טוען...</p>
                 </div>
             </div>
         );
@@ -172,23 +209,38 @@ function ViewRegistrations({
 
     if (showCompleteRegistration && !selectedRegistration) {
         return (
-            <div className="staff-page staff-page--registrations-edit">
-                <header className="staff-header">
-                    <h1>השלמת רישום</h1>
-                </header>
+            <div
+                className="staff-page staff-page--registrations-edit list-mgmt-page"
+                dir="rtl"
+            >
+                {pageDecorations}
                 <div className="staff-container">
+                    <header className="list-mgmt-page__header">
+                        <div className="list-mgmt-page__header-main">
+                            <h1 className="list-mgmt-page__title">השלמת רישום</h1>
+                            <p className="list-mgmt-page__subtitle">
+                                השלמת פרטי המשתתף לרישום במערכת
+                            </p>
+                        </div>
+                        <div className="list-mgmt-page__actions">
+                            <button
+                                type="button"
+                                className="staff-back-button"
+                                onClick={handleCancelComplete}
+                            >
+                                <span
+                                    className="staff-back-button__icon"
+                                    aria-hidden="true"
+                                >
+                                    →
+                                </span>
+                                חזרה
+                            </button>
+                        </div>
+                    </header>
                     {error ? (
                         <p className="staff-alert staff-alert--error">{error}</p>
                     ) : null}
-                    <div className="staff-toolbar">
-                        <button
-                            type="button"
-                            className="staff-button staff-button--secondary staff-button--small"
-                            onClick={handleCancelComplete}
-                        >
-                            חזרה
-                        </button>
-                    </div>
                 </div>
             </div>
         );
@@ -196,52 +248,93 @@ function ViewRegistrations({
 
     if (showCompleteRegistration && selectedRegistration) {
         return (
-            <div className="staff-page staff-page--registrations-edit">
-                <header className="staff-header">
-                    <h1>השלמת רישום</h1>
-                </header>
+            <div
+                className="staff-page staff-page--registrations-edit list-mgmt-page"
+                dir="rtl"
+            >
+                {pageDecorations}
                 <div className="staff-container">
-                    <div className="staff-toolbar">
-                        <button
-                            type="button"
-                            className="staff-button staff-button--secondary staff-button--small"
-                            onClick={handleCancelComplete}
-                        >
-                            {window.history.state?.[STAFF_RETURN_PAGE_KEY] ===
-                            "dashboard"
-                                ? "חזרה ללוח הבקרה"
-                                : "חזרה לצפייה בבקשות"}
-                        </button>
-                    </div>
-                    <section className="staff-section staff-section--form">
+                    <header className="list-mgmt-page__header">
+                        <div className="list-mgmt-page__header-main">
+                            <h1 className="list-mgmt-page__title">השלמת רישום</h1>
+                            <p className="list-mgmt-page__subtitle">
+                                השלמת פרטי המשתתף לרישום במערכת
+                            </p>
+                        </div>
+                        <div className="list-mgmt-page__actions">
+                            <button
+                                type="button"
+                                className="staff-back-button"
+                                onClick={handleCancelComplete}
+                            >
+                                <span
+                                    className="staff-back-button__icon"
+                                    aria-hidden="true"
+                                >
+                                    →
+                                </span>
+                                {completeBackLabel}
+                            </button>
+                        </div>
+                    </header>
+                    <div className="registrations-complete-card">
                         <EditParticipant
                             participant={selectedRegistration}
                             completeRegistration
                             onCompleted={handleRegistrationCompleted}
                             onCancel={handleCancelComplete}
                         />
-                    </section>
+                    </div>
                 </div>
             </div>
         );
     }
 
     return (
-        <div className="staff-page staff-page--registrations">
+        <div
+            className="staff-page staff-page--registrations list-mgmt-page"
+            dir="rtl"
+        >
+            {pageDecorations}
+
             <div className="staff-container staff-container--registrations">
-                <section className="staff-section staff-section--list staff-section--registrations-list">
-                    <RegistrationList
-                        registrations={registrations}
-                        loading={loading}
-                        error={error}
-                        activities={activities}
-                        programFilter={programFilter}
-                        activityFilter={activityFilter}
-                        onProgramFilterChange={handleProgramFilterChange}
-                        onActivityFilterChange={setActivityFilter}
-                        onCompleteRegistration={handleCompleteRegistration}
-                    />
-                </section>
+                <header className="list-mgmt-page__header">
+                    <div className="list-mgmt-page__header-main">
+                        <h1 className="list-mgmt-page__title">בקשות הרשמה</h1>
+                        <p className="list-mgmt-page__subtitle">
+                            ניהול והשלמה של בקשות רישום שהתקבלו מהמערכת
+                        </p>
+                    </div>
+                    {onNavigate ? (
+                        <div className="list-mgmt-page__actions">
+                            <button
+                                type="button"
+                                className="staff-back-button"
+                                onClick={() => onNavigate("dashboard")}
+                            >
+                                <span
+                                    className="staff-back-button__icon"
+                                    aria-hidden="true"
+                                >
+                                    →
+                                </span>
+                                חזרה ללוח הבקרה
+                            </button>
+                        </div>
+                    ) : null}
+                </header>
+
+                <RegistrationList
+                    registrations={registrations}
+                    loading={loading}
+                    error={error}
+                    activities={activities}
+                    programFilter={programFilter}
+                    activityFilter={activityFilter}
+                    onProgramFilterChange={handleProgramFilterChange}
+                    onActivityFilterChange={setActivityFilter}
+                    onCompleteRegistration={handleCompleteRegistration}
+                />
             </div>
         </div>
     );

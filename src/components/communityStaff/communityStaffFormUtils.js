@@ -1,4 +1,9 @@
 import { buildSubscriptionFormValues } from "./CommunityStaffSubscriptionFormFields.jsx";
+import {
+  INVALID_ADDRESS_MESSAGE,
+  isValidAddress,
+  nameContainsNumber,
+} from "../../utils/nameValidation";
 
 export const EMERGENCY_NUMBER_ERROR =
   "מספר חירום חייב להיות מספר טלפון נייד תקין המתחיל ב-05 ומכיל 10 ספרות";
@@ -22,8 +27,16 @@ export function validateCommunityMemberParticipantForm(form) {
     return "נא למלא שם פרטי";
   }
 
+  if (nameContainsNumber(form.first_name)) {
+    return "שם פרטי אינו יכול להכיל מספרים";
+  }
+
   if (!form.last_name.trim()) {
     return "נא למלא שם משפחה";
+  }
+
+  if (nameContainsNumber(form.last_name)) {
+    return "שם משפחה אינו יכול להכיל מספרים";
   }
 
   if (!form.id_number.trim()) {
@@ -52,6 +65,10 @@ export function validateCommunityMemberParticipantForm(form) {
 
   if (!form.address.trim()) {
     return "נא למלא כתובת";
+  }
+
+  if (!isValidAddress(form.address)) {
+    return INVALID_ADDRESS_MESSAGE;
   }
 
   const emergencyNumberError = getEmergencyNumberError(form.emergency_number);
@@ -131,8 +148,16 @@ export function validateCreateVolunteerForm(form) {
     return "נא למלא שם פרטי";
   }
 
+  if (nameContainsNumber(form.first_name)) {
+    return "שם פרטי אינו יכול להכיל מספרים";
+  }
+
   if (!form.last_name.trim()) {
     return "נא למלא שם משפחה";
+  }
+
+  if (nameContainsNumber(form.last_name)) {
+    return "שם משפחה אינו יכול להכיל מספרים";
   }
 
   if (!form.phone.trim()) {

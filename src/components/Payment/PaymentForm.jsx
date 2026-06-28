@@ -3,6 +3,9 @@ import { useNavigate } from "react-router-dom";
 import CancelRegistrationButton from "../CancelTheRegistration/CancelRegistrationButton";
 import PaymentSuccessMessage from "./PaymentSuccessMessage";
 import PaymentNotificationOptIn from "./PaymentNotificationOptIn";
+import PaymentFlowActions from "./PaymentFlowActions";
+import PaymentFlowShell from "./PaymentFlowShell";
+import PaymentStepHeader from "./PaymentStepHeader";
 import RegistrationStepper, { REGISTRATION_STEPS } from "./RegistrationStepper";
 import {
   validateIsraeliId,
@@ -10,7 +13,7 @@ import {
   validateRegistrationForm,
 } from "../../services/Payment/validation";
 import { apiPost } from "../../services/Payment/api.js";
-import { formatDisplayPrice } from "../../services/Payment/formatPrice";
+import { formatActivityPrice, formatDisplayPrice } from "../../services/Payment/formatPrice";
 import { notifyRegistrationBlock } from "../../services/Payment/registrationErrors";
 import { checkParticipantByIdNumber } from "../../services/Payment/participantService";
 
@@ -26,7 +29,14 @@ const PAYMENT_METHOD_LABELS = {
   paypal: "PayPal",
   bit: "Bit",
   cash: "מזומן",
+  free: "ללא תשלום",
 };
+
+const FREE_REGISTRATION_STEPS = [
+  { id: "id-check", label: "ת.ז." },
+  { id: "details", label: "פרטים אישיים" },
+  { id: "success", label: "סיום" },
+];
 
 function PaymentForm({
   onRegistrationCancelled,
@@ -61,7 +71,15 @@ function PaymentForm({
   const [idCheckMessage, setIdCheckMessage] = useState("");
   const [formData, setFormData] = useState(EMPTY_FORM_DATA);
 
-  const successStep = REGISTRATION_STEPS.length;
+  const isFreeActivity =
+    Boolean(paymentInfo?.isFree) ||
+    paymentInfo?.price == null ||
+    paymentInfo?.price === "" ||
+    Number(paymentInfo?.price) === 0;
+  const activeSteps = isFreeActivity
+    ? FREE_REGISTRATION_STEPS
+    : REGISTRATION_STEPS;
+  const successStep = activeSteps.length;
   const lookupBackLabel =
     lookupBackLabelOverride ??
     (registrationOnly || !paymentInfo ? "חזרה" : "חזרה להרשמה");
@@ -177,6 +195,104 @@ function PaymentForm({
       return;
     }
     setCurrentStep(4);
+  };
+
+  const handleFormSubmit = async (e) => {
+    e.preventDefault();
+
+    if (currentStep === 1) {
+      await verifyIdAndContinue();
+      return;
+    }
+
+    if (currentStep === 2) {
+      if (isFreeActivity) {
+        await handleFreeRegistration();
+        return;
+      }
+      goToPaymentMethodStep();
+      return;
+    }
+
+    if (currentStep === 3) {
+      goToPaymentStep();
+      return;
+    }
+
+    if (currentStep === 4) {
+      await handlePayment(e);
+    }
+  };
+
+  const handleFreeRegistration = async () => {
+    setFormError("");
+
+    const validation = validateRegistrationDetails(formData);
+    if (!validation.valid) {
+      setFormError(validation.message);
+      return;
+    }
+
+    const { firstName, idNumber, phone } = validation;
+
+    if (!paymentInfo?.activityId) {
+      setFormError("לא נטענו פרטי פעילות. בדקו את הקישור להרשמה.");
+      return;
+    }
+
+    const resolvedProgramId =
+      programId || paymentInfo.programId || "";
+
+    const registrationPayload = {
+      firstName,
+      idNumber,
+      phone,
+      activityId: paymentInfo.activityId,
+      programId: resolvedProgramId || undefined,
+    };
+
+    const persistRegistrationContext = () => {
+      localStorage.setItem("paymentAmount", "0");
+      localStorage.setItem("paymentCurrency", paymentInfo.currency);
+      localStorage.setItem("activityTitle", paymentInfo.title);
+      if (activityId) {
+        localStorage.setItem("activityId", activityId);
+      }
+      if (resolvedProgramId) {
+        localStorage.setItem("programId", resolvedProgramId);
+      }
+    };
+
+    setIsSubmitting(true);
+
+    try {
+      const { response, data } = await apiPost(
+        "/save-free-registration",
+        registrationPayload
+      );
+
+      if (response.status === 404) {
+        setFormError(
+          "שרת התשלומים לא מעודכן. הפעילו מחדש: cd server && npm run start:payment"
+        );
+        return;
+      }
+
+      if (data.success && data.paymentId) {
+        persistRegistrationContext();
+        saveCompletedRegistration(data.paymentId, "free");
+      } else {
+        notifyRegistrationBlock(
+          data.message || "הייתה שגיאה בהשלמת ההרשמה",
+          setFormError
+        );
+      }
+    } catch (error) {
+      console.error(error);
+      setFormError(error.message || "שגיאה בחיבור לשרת");
+    } finally {
+      setIsSubmitting(false);
+    }
   };
 
   const handlePayment = async (e) => {
@@ -410,15 +526,16 @@ function PaymentForm({
 
   if (completedPaymentId && showPaymentConfirmation && !showLookupScreen) {
     return (
-      <section className="community-section registration-flow">
-        <RegistrationStepper currentStep={successStep} />
+      <PaymentFlowShell>
+        <RegistrationStepper currentStep={successStep} steps={activeSteps} />
+        <PaymentStepHeader title="סיום" hint="ההרשמה הושלמה בהצלחה" />
         <PaymentSuccessMessage paymentMethod={completedPaymentMethod} />
-        <div className="community-actions">
+        <PaymentFlowActions>
           <button type="button" className="secondary-btn" onClick={goToHomeScreen}>
             חזרה למסך הראשי
           </button>
-        </div>
-      </section>
+        </PaymentFlowActions>
+      </PaymentFlowShell>
     );
   }
 
@@ -433,208 +550,226 @@ function PaymentForm({
         ? "בחרו את ההרשמה שברצונכם לבטל."
         : "הזינו מספר תעודת זהות כדי למצוא הרשמות פעילות ולבטל אותן.";
 
+    const isIdSearchView =
+      lookupStatus !== "found" && lookupStatus !== "not_found";
+
     return (
-      <section
-        className="cancel-registration-flow"
-        aria-labelledby="cancel-registration-title"
-      >
-        <div className="cancel-registration-page">
-          <div className="cancel-registration-shell">
-            {showSuccessScreen ? (
-              <div className="cancel-registration-success" role="status">
-                <h2 className="cancel-registration-success__title">
-                  הבקשה התקבלה
-                </h2>
-                <p className="cancel-registration-success__text">
-                  {lookupCancelMessage}
+      <PaymentFlowShell>
+        {showSuccessScreen ? (
+          <>
+            <PaymentStepHeader
+              title="הבקשה התקבלה"
+              hint={lookupCancelMessage}
+            />
+            <PaymentFlowActions>
+              <button
+                type="button"
+                className="primary-btn payment-flow-btn"
+                onClick={resetLookupSearch}
+              >
+                חיפוש עם ת.ז. אחרת
+                <span className="payment-flow-btn__chevron" aria-hidden="true">
+                  ‹
+                </span>
+              </button>
+              <button
+                type="button"
+                className="secondary-btn"
+                onClick={closeLookupScreen}
+              >
+                {lookupBackLabel}
+              </button>
+            </PaymentFlowActions>
+          </>
+        ) : (
+          <>
+            <PaymentStepHeader
+              title="ביטול הרשמה"
+              hint={cancelSubtitle}
+              showLeafDecoration={isIdSearchView}
+            />
+
+            {lookupError && lookupStatus !== "found" && lookupStatus !== "not_found" && (
+              <p className="form-error" role="alert">
+                {lookupError}
+              </p>
+            )}
+
+            {lookupStatus === "found" && lookupRegistrations.length > 0 && (
+              <>
+                <p className="lookup-success">
+                  נמצאו {lookupRegistrations.length} הרשמות פעילות.
                 </p>
-                <div className="cancel-registration-actions">
+                {lookupCancelMessage && (
+                  <p className="lookup-success">{lookupCancelMessage}</p>
+                )}
+                <ul className="lookup-registrations-list">
+                  {lookupRegistrations.map((registration) => (
+                    <li
+                      key={registration.paymentId}
+                      className="lookup-registration-item"
+                    >
+                      <div className="lookup-registration-details">
+                        <p className="lookup-registration-title">
+                          <strong>
+                            {registration.activityTitle || "הרשמה לפעילות"}
+                          </strong>
+                        </p>
+                        {registration.createdAt > 0 && (
+                          <p className="lookup-registration-meta">
+                            תאריך הרשמה:{" "}
+                            {formatRegistrationDate(registration.createdAt)}
+                          </p>
+                        )}
+                        <p className="lookup-registration-meta">
+                          שיטת תשלום:{" "}
+                          {PAYMENT_METHOD_LABELS[registration.paymentMethod] ||
+                            registration.paymentMethod ||
+                            "—"}
+                        </p>
+                        {registration.amount != null && (
+                          <p className="lookup-registration-meta">
+                            סכום:{" "}
+                            {formatActivityPrice(
+                    registration.amount,
+                    registration.currency
+                  )}
+                          </p>
+                        )}
+                      </div>
+                      <CancelRegistrationButton
+                        paymentId={registration.paymentId}
+                        buttonLabel="ביטול הרשמה"
+                        compact
+                        className="primary-btn lookup-registration-cancel-btn"
+                        onCancelled={handleLookupRegistrationCancelled}
+                      />
+                    </li>
+                  ))}
+                </ul>
+                <PaymentFlowActions>
                   <button
                     type="button"
-                    className="cancel-registration-primary-btn"
+                    className="secondary-btn"
                     onClick={resetLookupSearch}
                   >
                     חיפוש עם ת.ז. אחרת
                   </button>
                   <button
                     type="button"
-                    className="cancel-registration-link-btn"
+                    className="secondary-btn"
                     onClick={closeLookupScreen}
                   >
                     {lookupBackLabel}
                   </button>
-                </div>
-              </div>
-            ) : (
-              <>
-                <div className="cancel-registration-header">
-                  <h1 id="cancel-registration-title">ביטול הרשמה</h1>
-                  <p className="cancel-registration-subtitle">{cancelSubtitle}</p>
-                </div>
-
-                <div className="cancel-registration-body">
-        {lookupStatus === "found" && lookupRegistrations.length > 0 && (
-          <>
-            <p className="lookup-success">
-              נמצאו {lookupRegistrations.length} הרשמות פעילות.
-            </p>
-            {lookupCancelMessage && (
-              <p className="lookup-success">{lookupCancelMessage}</p>
-            )}
-            <ul className="volunteer-services-list lookup-registrations-list">
-              {lookupRegistrations.map((registration) => (
-                <li key={registration.paymentId} className="lookup-registration-item">
-                  <div className="lookup-registration-details">
-                    <p className="lookup-registration-title">
-                      <strong>
-                        {registration.activityTitle || "הרשמה לפעילות"}
-                      </strong>
-                    </p>
-                    {registration.createdAt > 0 && (
-                      <p className="lookup-registration-meta">
-                        תאריך הרשמה: {formatRegistrationDate(registration.createdAt)}
-                      </p>
-                    )}
-                    <p className="lookup-registration-meta">
-                      שיטת תשלום:{" "}
-                      {PAYMENT_METHOD_LABELS[registration.paymentMethod] ||
-                        registration.paymentMethod ||
-                        "—"}
-                    </p>
-                    {registration.amount != null && (
-                      <p className="lookup-registration-meta">
-                        סכום:{" "}
-                        {formatDisplayPrice(
-                          registration.amount,
-                          registration.currency
-                        )}
-                      </p>
-                    )}
-                  </div>
-                  <CancelRegistrationButton
-                    paymentId={registration.paymentId}
-                    buttonLabel="ביטול הרשמה"
-                    compact
-                    className="lookup-registration-cancel-btn"
-                    onCancelled={handleLookupRegistrationCancelled}
-                  />
-                </li>
-              ))}
-            </ul>
-            <div className="cancel-registration-actions">
-              <button
-                type="button"
-                className="cancel-registration-link-btn"
-                onClick={resetLookupSearch}
-              >
-                חיפוש עם ת.ז. אחרת
-              </button>
-              <button
-                type="button"
-                className="cancel-registration-link-btn"
-                onClick={closeLookupScreen}
-              >
-                {lookupBackLabel}
-              </button>
-            </div>
-          </>
-        )}
-
-        {lookupStatus === "found" && lookupRegistrations.length === 0 && !lookupCancelMessage && (
-          <>
-            <p className="lookup-success">כל ההרשמות הפעילות בוטלו.</p>
-            <div className="cancel-registration-actions">
-              <button
-                type="button"
-                className="cancel-registration-primary-btn"
-                onClick={resetLookupSearch}
-              >
-                חיפוש עם ת.ז. אחרת
-              </button>
-              <button
-                type="button"
-                className="cancel-registration-link-btn"
-                onClick={closeLookupScreen}
-              >
-                {lookupBackLabel}
-              </button>
-            </div>
-          </>
-        )}
-
-        {lookupStatus === "not_found" && (
-          <>
-            <p className="lookup-error">
-              {lookupError || "לא נמצאו הרשמות פעילות למספר תעודת זהות זה."}
-            </p>
-            <div className="cancel-registration-actions">
-              <button
-                type="button"
-                className="cancel-registration-primary-btn"
-                onClick={resetLookupSearch}
-              >
-                חיפוש עם מספר אחר
-              </button>
-              <button
-                type="button"
-                className="cancel-registration-link-btn"
-                onClick={closeLookupScreen}
-              >
-                {lookupBackLabel}
-              </button>
-            </div>
-          </>
-        )}
-
-        {lookupError && lookupStatus !== "found" && lookupStatus !== "not_found" && (
-          <p className="lookup-error" role="alert">{lookupError}</p>
-        )}
-
-        {lookupStatus !== "found" && lookupStatus !== "not_found" && (
-          <>
-            <div className="cancel-registration-field">
-              <label className="cancel-registration-label" htmlFor="lookup-id-number">
-                מספר תעודת זהות
-              </label>
-              <input
-                id="lookup-id-number"
-                type="text"
-                className="cancel-registration-input"
-                placeholder="אנא הזן 9 ספרות"
-                value={lookupIdNumber}
-                onChange={handleLookupIdNumberChange}
-                disabled={lookupLoading}
-                maxLength={9}
-                inputMode="numeric"
-                autoComplete="off"
-              />
-            </div>
-            <div className="cancel-registration-actions">
-              <button
-                type="button"
-                className="cancel-registration-primary-btn"
-                onClick={searchRegistrationsByIdNumber}
-                disabled={lookupLoading}
-              >
-                {lookupLoading ? "מחפש..." : "חיפוש הרשמות"}
-              </button>
-              <button
-                type="button"
-                className="cancel-registration-link-btn"
-                onClick={closeLookupScreen}
-                disabled={lookupLoading}
-              >
-                {lookupBackLabel}
-              </button>
-            </div>
-          </>
-        )}
-                </div>
+                </PaymentFlowActions>
               </>
             )}
-          </div>
-        </div>
-      </section>
+
+            {lookupStatus === "found" &&
+              lookupRegistrations.length === 0 &&
+              !lookupCancelMessage && (
+                <>
+                  <p className="lookup-success">כל ההרשמות הפעילות בוטלו.</p>
+                  <PaymentFlowActions>
+                    <button
+                      type="button"
+                      className="primary-btn payment-flow-btn"
+                      onClick={resetLookupSearch}
+                    >
+                      חיפוש עם ת.ז. אחרת
+                      <span className="payment-flow-btn__chevron" aria-hidden="true">
+                        ‹
+                      </span>
+                    </button>
+                    <button
+                      type="button"
+                      className="secondary-btn"
+                      onClick={closeLookupScreen}
+                    >
+                      {lookupBackLabel}
+                    </button>
+                  </PaymentFlowActions>
+                </>
+              )}
+
+            {lookupStatus === "not_found" && (
+              <>
+                <p className="lookup-error" role="alert">
+                  {lookupError || "לא נמצאו הרשמות פעילות למספר תעודת זהות זה."}
+                </p>
+                <PaymentFlowActions split>
+                  <button
+                    type="button"
+                    className="secondary-btn"
+                    onClick={closeLookupScreen}
+                  >
+                    {lookupBackLabel}
+                  </button>
+                  <button
+                    type="button"
+                    className="primary-btn payment-flow-btn"
+                    onClick={resetLookupSearch}
+                  >
+                    חיפוש עם מספר אחר
+                    <span className="payment-flow-btn__chevron" aria-hidden="true">
+                      ‹
+                    </span>
+                  </button>
+                </PaymentFlowActions>
+              </>
+            )}
+
+            {isIdSearchView && (
+              <>
+                <div className="form-field">
+                  <label className="form-label" htmlFor="lookup-id-number">
+                    מספר תעודת זהות
+                  </label>
+                  <div className="payment-input-wrap">
+                    <span
+                      className="payment-input-icon material-symbols-outlined"
+                      aria-hidden="true"
+                    >
+                      badge
+                    </span>
+                    <input
+                      id="lookup-id-number"
+                      type="tel"
+                      className="payment-input"
+                      placeholder="9 ספרות"
+                      value={lookupIdNumber}
+                      onChange={handleLookupIdNumberChange}
+                      disabled={lookupLoading}
+                      maxLength={9}
+                      inputMode="numeric"
+                      autoComplete="off"
+                    />
+                  </div>
+                </div>
+                <PaymentFlowActions showLeafDecoration split>
+                  <button
+                    type="button"
+                    className="secondary-btn"
+                    onClick={closeLookupScreen}
+                    disabled={lookupLoading}
+                  >
+                    {lookupBackLabel}
+                  </button>
+                  <button
+                    type="button"
+                    className="primary-btn payment-flow-btn payment-flow-btn--leaf-left"
+                    onClick={searchRegistrationsByIdNumber}
+                    disabled={lookupLoading}
+                  >
+                    {lookupLoading ? "מחפש..." : "חיפוש הרשמות >"}
+                  </button>
+                </PaymentFlowActions>
+              </>
+            )}
+          </>
+        )}
+      </PaymentFlowShell>
     );
   }
 
@@ -643,10 +778,10 @@ function PaymentForm({
   }
 
   return (
-    <section className="community-section registration-flow">
-      <RegistrationStepper currentStep={currentStep} />
+    <PaymentFlowShell>
+      <RegistrationStepper currentStep={currentStep} steps={activeSteps} />
 
-      <form className="payment-form" onSubmit={handlePayment}>
+      <form className="payment-form" onSubmit={handleFormSubmit}>
         {formError && (
           <p className="form-error" role="alert">
             {formError}
@@ -655,26 +790,33 @@ function PaymentForm({
 
         {currentStep === 1 && (
           <>
-            <h2 className="step-panel-title">זיהוי לפי ת.ז.</h2>
-            <p className="step-panel-hint">
-              הזינו את מספר תעודת הזהות — נבדוק אם אתם כבר רשומים במערכת
-            </p>
+            <PaymentStepHeader
+              title="זיהוי לפי ת.ז."
+              hint="הזינו את מספר תעודת הזהות – נבדוק אם אתם כבר רשומים במערכת"
+              showLeafDecoration
+            />
 
             <div className="form-field">
               <label className="form-label" htmlFor="idNumber">
                 מספר תעודת זהות
               </label>
-              <input
-                id="idNumber"
-                type="tel"
-                name="idNumber"
-                placeholder="9 ספרות"
-                value={formData.idNumber}
-                onChange={handleChange}
-                maxLength={9}
-                inputMode="numeric"
-                disabled={isCheckingId}
-              />
+              <div className="payment-input-wrap">
+                <span className="payment-input-icon material-symbols-outlined" aria-hidden="true">
+                  badge
+                </span>
+                <input
+                  id="idNumber"
+                  type="tel"
+                  name="idNumber"
+                  className="payment-input"
+                  placeholder="9 ספרות"
+                  value={formData.idNumber}
+                  onChange={handleChange}
+                  maxLength={9}
+                  inputMode="numeric"
+                  disabled={isCheckingId}
+                />
+              </div>
             </div>
 
             {idCheckMessage && (
@@ -683,23 +825,32 @@ function PaymentForm({
               </p>
             )}
 
-            <div className="community-actions form-actions">
+            <PaymentFlowActions showLeafDecoration>
               <button
                 type="button"
-                className="primary-btn"
+                className="primary-btn payment-flow-btn payment-flow-btn--leaf-both"
                 onClick={verifyIdAndContinue}
                 disabled={isCheckingId}
               >
                 {isCheckingId ? "בודק..." : "המשך"}
+                <span className="payment-flow-btn__chevron" aria-hidden="true">
+                  ‹
+                </span>
               </button>
-            </div>
+            </PaymentFlowActions>
           </>
         )}
 
         {currentStep === 2 && (
           <>
-            <h2 className="step-panel-title">פרטים אישיים</h2>
-            <p className="step-panel-hint">השלימו או עדכנו את הפרטים של המשתתף/ת</p>
+            <PaymentStepHeader
+              title="פרטים אישיים"
+              hint={
+                isFreeActivity
+                  ? "פעילות זו ללא תשלום — השלימו את הפרטים להרשמה"
+                  : "השלימו או עדכנו את הפרטים של המשתתף/ת"
+              }
+            />
 
             <div className="form-field">
               <label className="form-label">מספר תעודת זהות</label>
@@ -740,21 +891,34 @@ function PaymentForm({
 
             <PaymentNotificationOptIn />
 
-            <div className="community-actions form-actions form-actions--split">
+            <PaymentFlowActions split>
               <button type="button" className="secondary-btn" onClick={goToIdCheckStep}>
                 חזרה
               </button>
-              <button type="button" className="primary-btn" onClick={goToPaymentMethodStep}>
-                המשך
+              <button
+                type="button"
+                className="primary-btn payment-flow-btn"
+                onClick={
+                  isFreeActivity ? handleFreeRegistration : goToPaymentMethodStep
+                }
+                disabled={isSubmitting}
+              >
+                {isFreeActivity
+                  ? isSubmitting
+                    ? "שולח..."
+                    : "השלמת הרשמה"
+                  : "המשך"}
+                <span className="payment-flow-btn__chevron" aria-hidden="true">
+                  ‹
+                </span>
               </button>
-            </div>
+            </PaymentFlowActions>
           </>
         )}
 
-        {currentStep === 3 && (
+        {currentStep === 3 && !isFreeActivity && (
           <>
-            <h2 className="step-panel-title">אמצעי תשלום</h2>
-            <p className="step-panel-hint">בחרו כיצד תשלמו</p>
+            <PaymentStepHeader title="אמצעי תשלום" hint="בחרו כיצד תשלמו" />
 
             <fieldset className="payment-methods">
               <legend className="visually-hidden">שיטת תשלום</legend>
@@ -779,21 +943,27 @@ function PaymentForm({
               </div>
             </fieldset>
 
-            <div className="community-actions form-actions form-actions--split">
+            <PaymentFlowActions split>
               <button type="button" className="secondary-btn" onClick={goToDetailsStep}>
                 חזרה
               </button>
-              <button type="button" className="primary-btn" onClick={goToPaymentStep}>
+              <button
+                type="button"
+                className="primary-btn payment-flow-btn"
+                onClick={goToPaymentStep}
+              >
                 המשך
+                <span className="payment-flow-btn__chevron" aria-hidden="true">
+                  ‹
+                </span>
               </button>
-            </div>
+            </PaymentFlowActions>
           </>
         )}
 
-        {currentStep === 4 && (
+        {currentStep === 4 && !isFreeActivity && (
           <>
-            <h2 className="step-panel-title">אישור ותשלום</h2>
-            <p className="step-panel-hint">בדקו את הפרטים ולחצו להשלמה</p>
+            <PaymentStepHeader title="אישור ותשלום" hint="בדקו את הפרטים ולחצו להשלמה" />
 
             <dl className="payment-summary">
               <div className="payment-summary__row">
@@ -818,12 +988,12 @@ function PaymentForm({
               <div className="payment-summary__row payment-summary__row--total">
                 <dt>לתשלום</dt>
                 <dd>
-                  {formatDisplayPrice(paymentInfo.price, paymentInfo.currency)}
+                  {formatActivityPrice(paymentInfo.price, paymentInfo.currency)}
                 </dd>
               </div>
             </dl>
 
-            <div className="community-actions form-actions form-actions--split">
+            <PaymentFlowActions split>
               <button
                 type="button"
                 className="secondary-btn"
@@ -834,14 +1004,21 @@ function PaymentForm({
               >
                 חזרה
               </button>
-              <button type="submit" className="primary-btn" disabled={isSubmitting}>
+              <button
+                type="submit"
+                className="primary-btn payment-flow-btn"
+                disabled={isSubmitting}
+              >
                 {isSubmitting ? "שולח..." : submitLabel}
+                <span className="payment-flow-btn__chevron" aria-hidden="true">
+                  ‹
+                </span>
               </button>
-            </div>
+            </PaymentFlowActions>
           </>
         )}
       </form>
-    </section>
+    </PaymentFlowShell>
   );
 }
 

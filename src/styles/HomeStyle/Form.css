@@ -99,3 +99,40 @@
   color: #2e7d32;
   border: 1px solid #81c784;
 }
+
+.form-box__field-label {
+  display: block;
+  margin: 0;
+  font-size: 0.95rem;
+  font-weight: 600;
+  color: #243029;
+  text-align: right;
+}
+
+.form-box__required {
+  color: #c62828;
+}
+
+.form-box textarea {
+  padding: 11px 14px;
+  font-size: 16px;
+  border: 1.5px solid var(--color-card-border);
+  border-radius: var(--radius);
+  outline: none;
+  font-family: inherit;
+  resize: vertical;
+  min-height: 90px;
+}
+
+.form-box textarea:focus {
+  border-color: var(--color-primary);
+}
+
+.form-box__textarea--large {
+  min-height: 120px;
+}
+
+.form-box__input--phone-rtl {
+  direction: rtl;
+  text-align: right;
+}

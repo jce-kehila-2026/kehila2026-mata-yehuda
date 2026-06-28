@@ -81,6 +81,33 @@
   margin-bottom: 1.25rem;
 }
 
+/* Decorative background leaves — matches the Staff Dashboard */
+.community-staff-dashboard__decoration {
+  position: absolute;
+  z-index: 0;
+  object-fit: contain;
+  pointer-events: none;
+  user-select: none;
+}
+
+.community-staff-dashboard__decoration--top-right {
+  top: 0.4rem;
+  right: 0.35rem;
+  width: clamp(105px, 11vw, 168px);
+  opacity: 0.45;
+  transform: scale(1.25);
+  transform-origin: right top;
+}
+
+.community-staff-dashboard__decoration--bottom-left {
+  bottom: clamp(0.75rem, 2.5vh, 2rem);
+  left: clamp(0.15rem, 1vw, 1rem);
+  width: clamp(118px, 15vw, 192px);
+  opacity: 0.4;
+  transform: scale(1.25);
+  transform-origin: left bottom;
+}
+
 .community-staff-dashboard__container {
   position: relative;
   z-index: 1;
@@ -128,7 +155,7 @@
   display: flex;
   flex-direction: column;
   gap: 1rem;
-  margin-bottom: 1.75rem;
+  margin-bottom: 1.85rem;
 }
 
 .community-staff-dashboard__summary {
@@ -1129,10 +1156,104 @@
 .community-join-requests-page {
   direction: rtl;
   min-height: 100vh;
-  background: #f4faf5;
+  background: #eef7f1;
   color: #243029;
   font-family: "Heebo", system-ui, sans-serif;
   padding: 1.25rem 1.25rem 2.5rem;
+}
+
+/* ===== Aligned to the "ניהול פעילויות" (Activities Management) design system.
+   The page reuses the activities-mgmt shell/header/summary/toolbar/table/
+   pagination, so the centered .staff-container--activities owns the page
+   padding and the outer wrapper drops its own to avoid double spacing. ===== */
+.community-join-requests-page.activities-mgmt-page {
+  padding: 0;
+}
+
+.community-join-requests-page.activities-mgmt-page .community-join-requests {
+  max-width: none;
+  margin: 0;
+}
+
+/* Filter / search bar — one wide horizontal row spanning the full container,
+   matching the Activities Management toolbar. The toolbar also carries the
+   shared `.staff-form` class (flex-column), so we target the full class combo
+   and use !important to guarantee the horizontal grid always wins. */
+.community-join-requests-page .admin-list-toolbar,
+.community-join-requests-page .admin-list-toolbar.staff-form.staff-list-filters {
+  display: grid !important;
+  grid-template-columns: minmax(240px, 1fr) auto auto !important;
+  align-items: end;
+  gap: 0.85rem;
+  width: 100% !important;
+  max-width: none !important;
+  margin: 0 0 1.6rem !important;
+  padding: 1rem 1.15rem;
+  background: #ffffff;
+  border: 1px solid #e8efe9;
+  border-radius: 16px;
+  box-shadow: 0 3px 14px rgba(36, 48, 41, 0.05);
+  box-sizing: border-box;
+  text-align: right;
+}
+
+.community-join-requests-page .admin-list-toolbar__search,
+.community-join-requests-page .admin-list-toolbar__page-size,
+.community-join-requests-page .admin-list-toolbar__filters {
+  display: flex;
+  flex-direction: column;
+  gap: 0.4rem;
+  min-width: 0;
+}
+
+.community-join-requests-page .admin-list-toolbar__filters > div {
+  display: flex;
+  flex-direction: column;
+  gap: 0.4rem;
+  min-width: 150px;
+}
+
+.community-join-requests-page .admin-list-toolbar label {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.35rem;
+  font-size: 0.82rem;
+  font-weight: 700;
+  color: #5a6a60;
+}
+
+.community-join-requests-page .admin-list-toolbar input,
+.community-join-requests-page .admin-list-toolbar select {
+  width: 100%;
+  min-width: 0;
+  font-family: inherit;
+  font-size: 0.92rem;
+  font-weight: 500;
+  color: #243029;
+  background: #fbfdfb;
+  border: 1px solid #dce8df;
+  border-radius: 12px;
+  padding: 0.7rem 0.9rem;
+}
+
+.community-join-requests-page .admin-list-toolbar input:focus,
+.community-join-requests-page .admin-list-toolbar select:focus {
+  outline: none;
+  border-color: #9fd4ab;
+  background: #ffffff;
+  box-shadow: 0 0 0 3px rgba(45, 125, 70, 0.1);
+}
+
+/* The request list itself reuses the SAME compact-card list as the
+   "בקשות התנדבות" (Volunteer Requests) page, so its typography (font family,
+   size, weight, line height) is identical. No per-card overrides here on
+   purpose — it inherits the shared .community-staff-compact-card styling. */
+
+@media (max-width: 768px) {
+  .community-join-requests-page .admin-list-toolbar,
+  .community-join-requests-page .admin-list-toolbar.staff-form.staff-list-filters {
+    grid-template-columns: 1fr !important;
+  }
 }
 
 .community-join-requests-page__header {
@@ -1222,7 +1343,16 @@
 }
 
 .community-join-requests__search input {
-  min-width: 320px;
+  min-width: 0;
+  width: 100%;
+  max-width: 100%;
+  box-sizing: border-box;
+}
+
+@media (min-width: 769px) {
+  .community-join-requests__search input {
+    min-width: 280px;
+  }
 }
 
 .community-join-requests__search input:focus,
@@ -1236,8 +1366,9 @@
 
 .community-join-requests__card {
   background: #ffffff;
-  border: 1px solid #d5ddd8;
-  border-radius: 6px;
+  border: 1px solid #e8efe9;
+  border-radius: 16px;
+  box-shadow: 0 3px 14px rgba(36, 48, 41, 0.05);
   overflow: hidden;
 }
 
@@ -1620,10 +1751,97 @@
 .community-volunteer-requests-page {
   direction: rtl;
   min-height: 100vh;
-  background: #f4faf5;
+  background: #eef7f1;
   color: #243029;
   font-family: "Heebo", system-ui, sans-serif;
   padding: 1.25rem 1.25rem 2.5rem;
+}
+
+/* ===== Aligned to the "בקשות הצטרפות לקהילה תומכת" (Community Join Requests)
+   design, which itself follows the Activities Management system. The page
+   reuses the activities-mgmt shell/header/summary/toolbar/list/pagination, so
+   the centered .staff-container--activities owns the page padding and the
+   outer wrapper drops its own to avoid double spacing. ===== */
+.community-volunteer-requests-page.activities-mgmt-page {
+  padding: 0;
+}
+
+.community-volunteer-requests-page.activities-mgmt-page
+  .community-volunteer-requests {
+  max-width: none;
+  margin: 0;
+}
+
+/* Filter / search bar — one wide horizontal row spanning the full container,
+   matching the Join Requests toolbar. The volunteer list is search + page-size
+   only (all requests are pending, so no status filter), hence a 2-column grid.
+   The toolbar also carries the shared `.staff-form` class (flex-column), so we
+   target the full class combo and use !important to keep the horizontal grid. */
+.community-volunteer-requests-page .admin-list-toolbar,
+.community-volunteer-requests-page
+  .admin-list-toolbar.staff-form.staff-list-filters {
+  display: grid !important;
+  grid-template-columns: minmax(240px, 1fr) auto !important;
+  align-items: end;
+  gap: 0.85rem;
+  width: 100% !important;
+  max-width: none !important;
+  margin: 0 0 1.6rem !important;
+  padding: 1rem 1.15rem;
+  background: #ffffff;
+  border: 1px solid #e8efe9;
+  border-radius: 16px;
+  box-shadow: 0 3px 14px rgba(36, 48, 41, 0.05);
+  box-sizing: border-box;
+  text-align: right;
+}
+
+.community-volunteer-requests-page .admin-list-toolbar__search,
+.community-volunteer-requests-page .admin-list-toolbar__page-size,
+.community-volunteer-requests-page .admin-list-toolbar__filters {
+  display: flex;
+  flex-direction: column;
+  gap: 0.4rem;
+  min-width: 0;
+}
+
+.community-volunteer-requests-page .admin-list-toolbar label {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.35rem;
+  font-size: 0.82rem;
+  font-weight: 700;
+  color: #5a6a60;
+}
+
+.community-volunteer-requests-page .admin-list-toolbar input,
+.community-volunteer-requests-page .admin-list-toolbar select {
+  width: 100%;
+  min-width: 0;
+  font-family: inherit;
+  font-size: 0.92rem;
+  font-weight: 500;
+  color: #243029;
+  background: #fbfdfb;
+  border: 1px solid #dce8df;
+  border-radius: 12px;
+  padding: 0.7rem 0.9rem;
+}
+
+.community-volunteer-requests-page .admin-list-toolbar input:focus,
+.community-volunteer-requests-page .admin-list-toolbar select:focus {
+  outline: none;
+  border-color: #9fd4ab;
+  background: #ffffff;
+  box-shadow: 0 0 0 3px rgba(45, 125, 70, 0.1);
+}
+
+@media (max-width: 768px) {
+  .community-volunteer-requests-page .admin-list-toolbar,
+  .community-volunteer-requests-page
+    .admin-list-toolbar.staff-form.staff-list-filters {
+    grid-template-columns: 1fr !important;
+  }
 }
 
 .community-volunteer-requests-page__header {
@@ -1671,8 +1889,9 @@
 
 .community-volunteer-requests__card {
   background: #ffffff;
-  border: 1px solid #d5ddd8;
-  border-radius: 6px;
+  border: 1px solid #e8efe9;
+  border-radius: 16px;
+  box-shadow: 0 3px 14px rgba(36, 48, 41, 0.05);
   overflow: hidden;
 }
 
@@ -1886,10 +2105,95 @@
 .community-help-requests-page {
   direction: rtl;
   min-height: 100vh;
-  background: #f4faf5;
+  background: #eef7f1;
   color: #243029;
   font-family: "Heebo", system-ui, sans-serif;
   padding: 1.25rem 1.25rem 2.5rem;
+}
+
+/* ===== Aligned to the "בקשות הצטרפות לקהילה תומכת" (Community Join Requests)
+   design, which follows the Activities Management system. The centered
+   .staff-container--activities owns the page padding, so the outer wrapper
+   drops its own to avoid double spacing. ===== */
+.community-help-requests-page.activities-mgmt-page {
+  padding: 0;
+}
+
+.community-help-requests-page.activities-mgmt-page .community-help-requests {
+  max-width: none;
+  margin: 0;
+}
+
+/* Filter / search bar — one wide horizontal row spanning the full container,
+   matching the Join Requests toolbar. Help requests list is search + page-size
+   only, hence a 2-column grid. The toolbar also carries the shared `.staff-form`
+   class (flex-column), so we target the full class combo and use !important to
+   keep the horizontal grid. */
+.community-help-requests-page .admin-list-toolbar,
+.community-help-requests-page
+  .admin-list-toolbar.staff-form.staff-list-filters {
+  display: grid !important;
+  grid-template-columns: minmax(240px, 1fr) auto !important;
+  align-items: end;
+  gap: 0.85rem;
+  width: 100% !important;
+  max-width: none !important;
+  margin: 0 0 1.6rem !important;
+  padding: 1rem 1.15rem;
+  background: #ffffff;
+  border: 1px solid #e8efe9;
+  border-radius: 16px;
+  box-shadow: 0 3px 14px rgba(36, 48, 41, 0.05);
+  box-sizing: border-box;
+  text-align: right;
+}
+
+.community-help-requests-page .admin-list-toolbar__search,
+.community-help-requests-page .admin-list-toolbar__page-size,
+.community-help-requests-page .admin-list-toolbar__filters {
+  display: flex;
+  flex-direction: column;
+  gap: 0.4rem;
+  min-width: 0;
+}
+
+.community-help-requests-page .admin-list-toolbar label {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.35rem;
+  font-size: 0.82rem;
+  font-weight: 700;
+  color: #5a6a60;
+}
+
+.community-help-requests-page .admin-list-toolbar input,
+.community-help-requests-page .admin-list-toolbar select {
+  width: 100%;
+  min-width: 0;
+  font-family: inherit;
+  font-size: 0.92rem;
+  font-weight: 500;
+  color: #243029;
+  background: #fbfdfb;
+  border: 1px solid #dce8df;
+  border-radius: 12px;
+  padding: 0.7rem 0.9rem;
+}
+
+.community-help-requests-page .admin-list-toolbar input:focus,
+.community-help-requests-page .admin-list-toolbar select:focus {
+  outline: none;
+  border-color: #9fd4ab;
+  background: #ffffff;
+  box-shadow: 0 0 0 3px rgba(45, 125, 70, 0.1);
+}
+
+@media (max-width: 768px) {
+  .community-help-requests-page .admin-list-toolbar,
+  .community-help-requests-page
+    .admin-list-toolbar.staff-form.staff-list-filters {
+    grid-template-columns: 1fr !important;
+  }
 }
 
 .community-help-requests-page__header {
@@ -1937,8 +2241,9 @@
 
 .community-help-requests__card {
   background: #ffffff;
-  border: 1px solid #d5ddd8;
-  border-radius: 6px;
+  border: 1px solid #e8efe9;
+  border-radius: 16px;
+  box-shadow: 0 3px 14px rgba(36, 48, 41, 0.05);
   overflow: hidden;
 }
 
@@ -2338,6 +2643,26 @@
   box-shadow: 0 3px 8px rgba(45, 125, 70, 0.12);
 }
 
+.community-join-requests-page .admin-table-action--reactivate:hover:not(:disabled),
+.community-volunteer-requests-page .admin-table-action--reactivate:hover:not(:disabled),
+.community-help-requests-page .admin-table-action--reactivate:hover:not(:disabled),
+.community-members-page .admin-table-action--reactivate:hover:not(:disabled),
+.community-volunteers-mgmt-page .admin-table-action--reactivate:hover:not(:disabled),
+.community-active-matches-page .admin-table-action--reactivate:hover:not(:disabled),
+.community-join-requests-page .admin-table-action--reactivate:active:not(:disabled),
+.community-volunteer-requests-page .admin-table-action--reactivate:active:not(:disabled),
+.community-help-requests-page .admin-table-action--reactivate:active:not(:disabled),
+.community-members-page .admin-table-action--reactivate:active:not(:disabled),
+.community-volunteers-mgmt-page .admin-table-action--reactivate:active:not(:disabled),
+.community-active-matches-page .admin-table-action--reactivate:active:not(:disabled) {
+  background: #eaf6ee;
+  background-color: #eaf6ee;
+  border-color: #9fd4ab;
+  color: #1a5230;
+  transform: translateY(-1px);
+  box-shadow: 0 3px 8px rgba(45, 125, 70, 0.12);
+}
+
 .community-join-requests-page .admin-table-action--delete:hover:not(:disabled),
 .community-volunteer-requests-page .admin-table-action--delete:hover:not(:disabled),
 .community-help-requests-page .admin-table-action--delete:hover:not(:disabled),
@@ -2592,10 +2917,99 @@
 .community-members-page {
   direction: rtl;
   min-height: 100vh;
-  background: #f4faf5;
+  background: #eef7f1;
   color: #243029;
   font-family: "Heebo", system-ui, sans-serif;
   padding: 1.25rem 1.25rem 2.5rem;
+}
+
+/* ===== Aligned to the "בקשות הצטרפות לקהילה תומכת" (Community Join Requests)
+   design, which follows the Activities Management system. The centered
+   .staff-container--activities owns the page padding, so the outer wrapper
+   drops its own to avoid double spacing. ===== */
+.community-members-page.activities-mgmt-page {
+  padding: 0;
+}
+
+.community-members-page.activities-mgmt-page .community-members {
+  max-width: none;
+  margin: 0;
+}
+
+/* Filter / search bar — one wide horizontal row spanning the full container,
+   matching the Join Requests toolbar (search + status filter + page size).
+   The toolbar also carries the shared `.staff-form` class (flex-column), so we
+   target the full class combo and use !important to keep the horizontal grid. */
+.community-members-page .admin-list-toolbar,
+.community-members-page .admin-list-toolbar.staff-form.staff-list-filters {
+  display: grid !important;
+  grid-template-columns: minmax(240px, 1fr) auto auto !important;
+  align-items: end;
+  gap: 0.85rem;
+  width: 100% !important;
+  max-width: none !important;
+  margin: 0 0 1.6rem !important;
+  padding: 1rem 1.15rem;
+  background: #ffffff;
+  border: 1px solid #e8efe9;
+  border-radius: 16px;
+  box-shadow: 0 3px 14px rgba(36, 48, 41, 0.05);
+  box-sizing: border-box;
+  text-align: right;
+}
+
+.community-members-page .admin-list-toolbar__search,
+.community-members-page .admin-list-toolbar__page-size,
+.community-members-page .admin-list-toolbar__filters {
+  display: flex;
+  flex-direction: column;
+  gap: 0.4rem;
+  min-width: 0;
+}
+
+.community-members-page .admin-list-toolbar__filters > div {
+  display: flex;
+  flex-direction: column;
+  gap: 0.4rem;
+  min-width: 150px;
+}
+
+.community-members-page .admin-list-toolbar label {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.35rem;
+  font-size: 0.82rem;
+  font-weight: 700;
+  color: #5a6a60;
+}
+
+.community-members-page .admin-list-toolbar input,
+.community-members-page .admin-list-toolbar select {
+  width: 100%;
+  min-width: 0;
+  font-family: inherit;
+  font-size: 0.92rem;
+  font-weight: 500;
+  color: #243029;
+  background: #fbfdfb;
+  border: 1px solid #dce8df;
+  border-radius: 12px;
+  padding: 0.7rem 0.9rem;
+}
+
+.community-members-page .admin-list-toolbar input:focus,
+.community-members-page .admin-list-toolbar select:focus {
+  outline: none;
+  border-color: #9fd4ab;
+  background: #ffffff;
+  box-shadow: 0 0 0 3px rgba(45, 125, 70, 0.1);
+}
+
+@media (max-width: 768px) {
+  .community-members-page .admin-list-toolbar,
+  .community-members-page .admin-list-toolbar.staff-form.staff-list-filters {
+    grid-template-columns: 1fr !important;
+  }
 }
 
 .community-members-page__header {
@@ -2687,8 +3101,9 @@
 
 .community-members__card {
   background: #ffffff;
-  border: 1px solid #d9e7dd;
-  border-radius: 6px;
+  border: 1px solid #e8efe9;
+  border-radius: 16px;
+  box-shadow: 0 3px 14px rgba(36, 48, 41, 0.05);
   overflow: hidden;
 }
 
@@ -3088,10 +3503,101 @@
 .community-volunteers-mgmt-page {
   direction: rtl;
   min-height: 100vh;
-  background: #f4faf5;
+  background: #eef7f1;
   color: #243029;
   font-family: "Heebo", system-ui, sans-serif;
   padding: 1.25rem 1.25rem 2.5rem;
+}
+
+/* ===== Aligned to the "בקשות הצטרפות לקהילה תומכת" (Community Join Requests)
+   design, which follows the Activities Management system. The centered
+   .staff-container--activities owns the page padding, so the outer wrapper
+   drops its own to avoid double spacing. ===== */
+.community-volunteers-mgmt-page.activities-mgmt-page {
+  padding: 0;
+}
+
+.community-volunteers-mgmt-page.activities-mgmt-page .community-volunteers-mgmt {
+  max-width: none;
+  margin: 0;
+}
+
+/* Filter / search bar — one wide horizontal row spanning the full container,
+   matching the Join Requests toolbar (search + status filter + page size).
+   The toolbar also carries the shared `.staff-form` class (flex-column), so we
+   target the full class combo and use !important to keep the horizontal grid. */
+.community-volunteers-mgmt-page .admin-list-toolbar,
+.community-volunteers-mgmt-page
+  .admin-list-toolbar.staff-form.staff-list-filters {
+  display: grid !important;
+  grid-template-columns: minmax(240px, 1fr) auto auto !important;
+  align-items: end;
+  gap: 0.85rem;
+  width: 100% !important;
+  max-width: none !important;
+  margin: 0 0 1.6rem !important;
+  padding: 1rem 1.15rem;
+  background: #ffffff;
+  border: 1px solid #e8efe9;
+  border-radius: 16px;
+  box-shadow: 0 3px 14px rgba(36, 48, 41, 0.05);
+  box-sizing: border-box;
+  text-align: right;
+}
+
+.community-volunteers-mgmt-page .admin-list-toolbar__search,
+.community-volunteers-mgmt-page .admin-list-toolbar__page-size,
+.community-volunteers-mgmt-page .admin-list-toolbar__filters {
+  display: flex;
+  flex-direction: column;
+  gap: 0.4rem;
+  min-width: 0;
+}
+
+.community-volunteers-mgmt-page .admin-list-toolbar__filters > div {
+  display: flex;
+  flex-direction: column;
+  gap: 0.4rem;
+  min-width: 150px;
+}
+
+.community-volunteers-mgmt-page .admin-list-toolbar label {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.35rem;
+  font-size: 0.82rem;
+  font-weight: 700;
+  color: #5a6a60;
+}
+
+.community-volunteers-mgmt-page .admin-list-toolbar input,
+.community-volunteers-mgmt-page .admin-list-toolbar select {
+  width: 100%;
+  min-width: 0;
+  font-family: inherit;
+  font-size: 0.92rem;
+  font-weight: 500;
+  color: #243029;
+  background: #fbfdfb;
+  border: 1px solid #dce8df;
+  border-radius: 12px;
+  padding: 0.7rem 0.9rem;
+}
+
+.community-volunteers-mgmt-page .admin-list-toolbar input:focus,
+.community-volunteers-mgmt-page .admin-list-toolbar select:focus {
+  outline: none;
+  border-color: #9fd4ab;
+  background: #ffffff;
+  box-shadow: 0 0 0 3px rgba(45, 125, 70, 0.1);
+}
+
+@media (max-width: 768px) {
+  .community-volunteers-mgmt-page .admin-list-toolbar,
+  .community-volunteers-mgmt-page
+    .admin-list-toolbar.staff-form.staff-list-filters {
+    grid-template-columns: 1fr !important;
+  }
 }
 
 .community-volunteers-mgmt-page__header {
@@ -3183,9 +3689,28 @@
 
 .community-volunteers-mgmt__card {
   background: #ffffff;
-  border: 1px solid #d9e7dd;
-  border-radius: 6px;
+  border: 1px solid #e8efe9;
+  border-radius: 16px;
+  box-shadow: 0 3px 14px rgba(36, 48, 41, 0.05);
   overflow: hidden;
+}
+
+.community-volunteers-mgmt-page .community-staff-compact-card--inactive {
+  opacity: 0.72;
+  background: #f8faf9;
+}
+
+.community-volunteers-mgmt-page .community-staff-compact-card--inactive:hover {
+  opacity: 0.82;
+}
+
+.community-volunteers-mgmt-page
+  .community-staff-compact-card--inactive
+  .community-staff-compact-card__name,
+.community-volunteers-mgmt-page
+  .community-staff-compact-card--inactive
+  .community-staff-compact-card__phone {
+  color: #6b7770;
 }
 
 .community-volunteers-mgmt__table-wrapper {
@@ -3448,10 +3973,95 @@
 .community-active-matches-page {
   direction: rtl;
   min-height: 100vh;
-  background: #f4faf5;
+  background: #eef7f1;
   color: #243029;
   font-family: "Heebo", system-ui, sans-serif;
   padding: 1.25rem 1.25rem 2.5rem;
+}
+
+/* ===== Aligned to the "בקשות הצטרפות לקהילה תומכת" (Community Join Requests)
+   design, which follows the Activities Management system. The centered
+   .staff-container--activities owns the page padding, so the outer wrapper
+   drops its own to avoid double spacing. ===== */
+.community-active-matches-page.activities-mgmt-page {
+  padding: 0;
+}
+
+.community-active-matches-page.activities-mgmt-page .community-active-matches {
+  max-width: none;
+  margin: 0;
+}
+
+/* Filter / search bar — one wide horizontal row spanning the full container,
+   matching the Join Requests toolbar. Active matches list is search + page-size
+   only (no status filter), hence a 2-column grid. The toolbar also carries the
+   shared `.staff-form` class (flex-column), so we target the full class combo
+   and use !important to keep the horizontal grid. */
+.community-active-matches-page .admin-list-toolbar,
+.community-active-matches-page
+  .admin-list-toolbar.staff-form.staff-list-filters {
+  display: grid !important;
+  grid-template-columns: minmax(240px, 1fr) auto !important;
+  align-items: end;
+  gap: 0.85rem;
+  width: 100% !important;
+  max-width: none !important;
+  margin: 0 0 1.6rem !important;
+  padding: 1rem 1.15rem;
+  background: #ffffff;
+  border: 1px solid #e8efe9;
+  border-radius: 16px;
+  box-shadow: 0 3px 14px rgba(36, 48, 41, 0.05);
+  box-sizing: border-box;
+  text-align: right;
+}
+
+.community-active-matches-page .admin-list-toolbar__search,
+.community-active-matches-page .admin-list-toolbar__page-size,
+.community-active-matches-page .admin-list-toolbar__filters {
+  display: flex;
+  flex-direction: column;
+  gap: 0.4rem;
+  min-width: 0;
+}
+
+.community-active-matches-page .admin-list-toolbar label {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.35rem;
+  font-size: 0.82rem;
+  font-weight: 700;
+  color: #5a6a60;
+}
+
+.community-active-matches-page .admin-list-toolbar input,
+.community-active-matches-page .admin-list-toolbar select {
+  width: 100%;
+  min-width: 0;
+  font-family: inherit;
+  font-size: 0.92rem;
+  font-weight: 500;
+  color: #243029;
+  background: #fbfdfb;
+  border: 1px solid #dce8df;
+  border-radius: 12px;
+  padding: 0.7rem 0.9rem;
+}
+
+.community-active-matches-page .admin-list-toolbar input:focus,
+.community-active-matches-page .admin-list-toolbar select:focus {
+  outline: none;
+  border-color: #9fd4ab;
+  background: #ffffff;
+  box-shadow: 0 0 0 3px rgba(45, 125, 70, 0.1);
+}
+
+@media (max-width: 768px) {
+  .community-active-matches-page .admin-list-toolbar,
+  .community-active-matches-page
+    .admin-list-toolbar.staff-form.staff-list-filters {
+    grid-template-columns: 1fr !important;
+  }
 }
 
 .community-active-matches-page__header {
@@ -3536,8 +4146,9 @@
 
 .community-active-matches__card {
   background: #ffffff;
-  border: 1px solid #d9e7dd;
-  border-radius: 6px;
+  border: 1px solid #e8efe9;
+  border-radius: 16px;
+  box-shadow: 0 3px 14px rgba(36, 48, 41, 0.05);
   overflow: hidden;
 }
 
@@ -4163,6 +4774,35 @@
   margin: 0 auto;
 }
 
+/* ===== Aligned to the "בקשות הצטרפות לקהילה תומכת" (Community Join Requests)
+   design. The centered .staff-container--activities owns the page width and
+   padding, so the outer wrapper goes full-width and only sets the background.
+   This is a settings page, so the sections stay as cards (not a table). ===== */
+.community-settings-page.activities-mgmt-page {
+  padding: 0;
+  max-width: none;
+  margin: 0;
+  background: #eef7f1;
+}
+
+.community-settings-page__sections {
+  margin: 0;
+}
+
+.community-settings-page .community-settings-section {
+  background: #ffffff;
+  border: 1px solid #e8efe9;
+  border-radius: 16px;
+  box-shadow: 0 3px 14px rgba(36, 48, 41, 0.05);
+  padding: 1.4rem 1.5rem;
+}
+
+@media (max-width: 768px) {
+  .community-settings-page .community-settings-section {
+    padding: 1.1rem 1rem;
+  }
+}
+
 .community-settings-page__back {
   display: inline-flex;
   align-items: center;
@@ -4213,6 +4853,80 @@
 
 .community-settings-section__list {
   margin-top: 0.25rem;
+}
+
+/* ===== Search/filter toolbar — identical to the Community Join Requests
+   page so the settings sections share the same table/list controls. ===== */
+.community-settings-page .admin-list-toolbar,
+.community-settings-page .admin-list-toolbar.staff-form.staff-list-filters {
+  display: grid !important;
+  grid-template-columns: minmax(240px, 1fr) auto auto !important;
+  align-items: end;
+  gap: 0.85rem;
+  width: 100% !important;
+  max-width: none !important;
+  margin: 0 0 1.2rem !important;
+  padding: 1rem 1.15rem;
+  background: #ffffff;
+  border: 1px solid #e8efe9;
+  border-radius: 16px;
+  box-shadow: 0 3px 14px rgba(36, 48, 41, 0.05);
+  box-sizing: border-box;
+  text-align: right;
+}
+
+.community-settings-page .admin-list-toolbar__search,
+.community-settings-page .admin-list-toolbar__page-size,
+.community-settings-page .admin-list-toolbar__filters {
+  display: flex;
+  flex-direction: column;
+  gap: 0.4rem;
+  min-width: 0;
+}
+
+.community-settings-page .admin-list-toolbar__filters > div {
+  display: flex;
+  flex-direction: column;
+  gap: 0.4rem;
+  min-width: 150px;
+}
+
+.community-settings-page .admin-list-toolbar label {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.35rem;
+  font-size: 0.82rem;
+  font-weight: 700;
+  color: #5a6a60;
+}
+
+.community-settings-page .admin-list-toolbar input,
+.community-settings-page .admin-list-toolbar select {
+  width: 100%;
+  min-width: 0;
+  font-family: inherit;
+  font-size: 0.92rem;
+  font-weight: 500;
+  color: #243029;
+  background: #fbfdfb;
+  border: 1px solid #dce8df;
+  border-radius: 12px;
+  padding: 0.7rem 0.9rem;
+}
+
+.community-settings-page .admin-list-toolbar input:focus,
+.community-settings-page .admin-list-toolbar select:focus {
+  outline: none;
+  border-color: #9fd4ab;
+  background: #ffffff;
+  box-shadow: 0 0 0 3px rgba(45, 125, 70, 0.1);
+}
+
+@media (max-width: 768px) {
+  .community-settings-page .admin-list-toolbar,
+  .community-settings-page .admin-list-toolbar.staff-form.staff-list-filters {
+    grid-template-columns: 1fr !important;
+  }
 }
 
 .community-settings-section__loading,
