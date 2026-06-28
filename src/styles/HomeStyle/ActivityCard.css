@@ -153,18 +153,4 @@
   .activity-info {
     padding: 0.75rem 0.8rem 0.85rem;
   }
-
-  .activity-card__footer {
-    flex-direction: column;
-    align-items: stretch;
-  }
-
-  .activity-card__register {
-    width: 100%;
-    text-align: center;
-  }
-
-  .activity-card__details {
-    justify-content: center;
-  }
 }
