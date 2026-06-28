@@ -3,6 +3,7 @@ import {
   createLanguage,
   updateLanguage,
 } from "../../services/communityStaff/communitySettingsService";
+import { nameContainsNumber } from "../../utils/nameValidation";
 
 function LanguageFormModal({ open, language, onClose, onSaved }) {
   const [name, setName] = useState("");
@@ -32,6 +33,11 @@ function LanguageFormModal({ open, language, onClose, onSaved }) {
 
     if (!trimmedName) {
       setError("שם השפה הוא שדה חובה");
+      return;
+    }
+
+    if (nameContainsNumber(trimmedName)) {
+      setError("שם השפה אינו יכול להכיל מספרים");
       return;
     }
 

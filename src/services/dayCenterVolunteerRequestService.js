@@ -12,6 +12,7 @@ import {
 } from "firebase/firestore";
 import { normalizeSearchQuery } from "../utils/staffManegmentUtils/adminListUtils";
 import { createVolunteerFromRequest } from "./dayCenterVolunteerService";
+import { nameContainsNumber } from "../utils/nameValidation";
 
 const requestsCollection = collection(db, "day_center_volunteer_requests");
 
@@ -152,8 +153,16 @@ export function validateDayCenterVolunteerRequestForm(form) {
         return "נא למלא שם פרטי";
     }
 
+    if (nameContainsNumber(form.first_name)) {
+        return "שם פרטי אינו יכול להכיל מספרים";
+    }
+
     if (!form.last_name?.trim()) {
         return "נא למלא שם משפחה";
+    }
+
+    if (nameContainsNumber(form.last_name)) {
+        return "שם משפחה אינו יכול להכיל מספרים";
     }
 
     if (!form.phone?.trim()) {

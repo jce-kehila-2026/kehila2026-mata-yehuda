@@ -3,6 +3,7 @@ import {
   createHelpType,
   updateHelpType,
 } from "../../services/communityStaff/communitySettingsService";
+import { nameContainsNumber } from "../../utils/nameValidation";
 
 function HelpTypeFormModal({ open, helpType, onClose, onSaved }) {
   const [helpName, setHelpName] = useState("");
@@ -34,6 +35,11 @@ function HelpTypeFormModal({ open, helpType, onClose, onSaved }) {
 
     if (!trimmedName) {
       setError("שם סוג העזרה הוא שדה חובה");
+      return;
+    }
+
+    if (nameContainsNumber(trimmedName)) {
+      setError("שם סוג העזרה אינו יכול להכיל מספרים");
       return;
     }
 

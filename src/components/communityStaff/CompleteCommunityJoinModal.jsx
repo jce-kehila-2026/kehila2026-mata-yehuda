@@ -7,6 +7,11 @@ import CommunityStaffSubscriptionFormFields, {
   buildSubscriptionFormValues,
   validateSubscriptionForm,
 } from "./CommunityStaffSubscriptionFormFields.jsx";
+import {
+  INVALID_ADDRESS_MESSAGE,
+  isValidAddress,
+  nameContainsNumber,
+} from "../../utils/nameValidation";
 
 function formatBirthDateForInput(value) {
   if (!value) {
@@ -68,8 +73,16 @@ function validateParticipantForm(form) {
     return "נא למלא שם פרטי";
   }
 
+  if (nameContainsNumber(form.first_name)) {
+    return "שם פרטי אינו יכול להכיל מספרים";
+  }
+
   if (!form.last_name.trim()) {
     return "נא למלא שם משפחה";
+  }
+
+  if (nameContainsNumber(form.last_name)) {
+    return "שם משפחה אינו יכול להכיל מספרים";
   }
 
   if (!form.id_number.trim()) {
@@ -94,6 +107,10 @@ function validateParticipantForm(form) {
 
   if (!form.address.trim()) {
     return "נא למלא כתובת";
+  }
+
+  if (!isValidAddress(form.address)) {
+    return INVALID_ADDRESS_MESSAGE;
   }
 
   const emergencyNumberError = getEmergencyNumberError(form.emergency_number);

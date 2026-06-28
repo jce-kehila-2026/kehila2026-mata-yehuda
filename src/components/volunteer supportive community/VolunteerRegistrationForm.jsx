@@ -6,6 +6,11 @@ import {
 
 import HelpServicesSelector from "../supportiveCommunity/HelpServicesSelector";
 import LanguagesSelector from "../supportiveCommunity/LanguagesSelector";
+import {
+  INVALID_ADDRESS_MESSAGE,
+  isValidAddress,
+  nameContainsNumber,
+} from "../../utils/nameValidation";
 
 import "../../styles/supportive community/VolunteerRegistrationForm.css";
 
@@ -24,6 +29,14 @@ function validateVolunteerForm(form) {
     !form.about.trim()
   ) {
     return { submit: "נא למלא את כל שדות החובה" };
+  }
+
+  if (nameContainsNumber(form.firstName) || nameContainsNumber(form.lastName)) {
+    return { submit: "השם אינו יכול להכיל מספרים" };
+  }
+
+  if (!isValidAddress(form.address)) {
+    return { submit: INVALID_ADDRESS_MESSAGE };
   }
 
   if (!/^\d{9}$/.test(form.volunteerId)) {
