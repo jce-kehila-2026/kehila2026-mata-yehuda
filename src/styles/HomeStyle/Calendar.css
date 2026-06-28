@@ -506,6 +506,46 @@
   border-radius: 0;
   padding-inline: 0;
 }
+
+.plus60-main__panel .activities-calendar__card-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 0.75rem;
+  flex-wrap: wrap;
+}
+
+.plus60-main__panel .activities-calendar__today-hint {
+  font-size: 0.85rem;
+  line-height: 1.45;
+}
+
+/* בדף Plus60 — לוח שנה ופאנל צד תמיד זה לצד זה (כמו בדסקטופ) */
+@media (max-width: 900px) {
+  .plus60-main__panel .activities-calendar__layout {
+    grid-template-columns: minmax(0, 1fr) minmax(0, 1fr) !important;
+  }
+
+  .plus60-main__panel .activities-calendar__main {
+    padding-inline-end: clamp(0.25rem, 1vw, 0.5rem);
+  }
+
+  .plus60-main__panel .activities-calendar__sidebar {
+    position: sticky;
+    top: 1.25rem;
+    height: var(--calendar-main-height, auto);
+    max-height: var(--calendar-main-height, none);
+    overflow: hidden;
+    border-inline-start: 1px solid rgba(45, 125, 70, 0.12);
+    padding-inline-start: clamp(0.25rem, 1vw, 0.5rem);
+  }
+
+  .plus60-main__panel .calendar-sidebar-panel {
+    max-height: 100%;
+    overflow: hidden;
+  }
+}
+
 @media (max-width: 900px) {
   .activities-calendar__layout {
     grid-template-columns: 1fr;
