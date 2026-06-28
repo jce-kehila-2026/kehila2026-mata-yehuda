@@ -1,4 +1,4 @@
-import { useEffect, useMemo, useState } from "react";
+import { useEffect, useMemo, useRef, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import ActivityCard from "../../components/Homecomponents/ActivityCard";
 import { getAllActivities } from "../../services/HomeServices/activitiesService";
@@ -47,6 +47,8 @@ function sortUpcomingActivities(activities) {
 
 function Plus60Page() {
     const navigate = useNavigate();
+    const canvasRef = useRef(null);
+    const stageRef = useRef(null);
     const [activities, setActivities] = useState([]);
     const [viewMode, setViewMode] = useState("calendar");
     const [cardsVisibleCount, setCardsVisibleCount] = useState(6);
@@ -74,6 +76,40 @@ function Plus60Page() {
 
         loadActivities();
     }, []);
+
+    useEffect(() => {
+      const DESIGN_WIDTH = 1180;
+      const canvas = canvasRef.current;
+      const stage = stageRef.current;
+
+      if (!canvas || !stage) {
+        return undefined;
+      }
+
+      const updateLayout = () => {
+        const scale = Math.min(1, window.innerWidth / DESIGN_WIDTH);
+        stage.style.setProperty("--plus60-scale", String(scale));
+        stage.style.setProperty(
+          "--plus60-stage-height",
+          `${canvas.offsetHeight * scale}px`
+        );
+      };
+
+      const resizeObserver = new ResizeObserver(updateLayout);
+      resizeObserver.observe(canvas);
+      window.addEventListener("resize", updateLayout);
+      updateLayout();
+
+      return () => {
+        resizeObserver.disconnect();
+        window.removeEventListener("resize", updateLayout);
+      };
+    }, [
+      viewMode,
+      activities.length,
+      cardsVisibleCount,
+      upcomingVisibleCount,
+    ]);
 
       const activeActivities = useMemo(
         () =>
@@ -114,19 +150,8 @@ function Plus60Page() {
 
     return (
     <div className="plus60-page">
-      <img
-        src="/images/community-staff-dashboard/kishot-clear.png"
-        alt=""
-        aria-hidden="true"
-        className="plus60-page__deco plus60-page__deco--kishot"
-      />
-      <img
-        src="/images/community-staff-dashboard/treefortheac-clear.png"
-        alt=""
-        aria-hidden="true"
-        className="plus60-page__deco plus60-page__deco--tree"
-      />
-
+      <div className="plus60-page__stage" ref={stageRef}>
+        <div className="plus60-page__canvas" ref={canvasRef}>
       <section className="plus60-hero">
         <div className="plus60-hero__photo-wrap" aria-hidden="true">
           <img
@@ -330,6 +355,8 @@ function Plus60Page() {
           </div>
         </section>
       )}
+        </div>
+      </div>
     </div>
     );
 }
