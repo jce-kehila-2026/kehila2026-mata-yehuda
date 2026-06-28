@@ -6,6 +6,7 @@ import {
 } from "../../config/staffRoles";
 import { updateStaffMember } from "../../services/staffManegmentServices/staffService";
 import FormActionRow from "../shared/FormActionRow";
+import { nameContainsNumber } from "../../utils/nameValidation";
 
 function EditStaffMember({ staff, onCompleted, onCancel }) {
     const [fullName, setFullName] = useState(staff?.full_name || "");
@@ -23,6 +24,12 @@ function EditStaffMember({ staff, onCompleted, onCancel }) {
     }
 
     async function handleUpdateStaff() {
+        if (nameContainsNumber(fullName)) {
+            setError("השם אינו יכול להכיל מספרים");
+            setSuccess("");
+            return;
+        }
+
         setSubmitting(true);
 
         try {

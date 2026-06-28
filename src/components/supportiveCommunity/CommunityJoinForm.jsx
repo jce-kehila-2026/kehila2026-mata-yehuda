@@ -6,6 +6,11 @@ import LanguagesSelector from "./LanguagesSelector";
 import "../../styles/supportive community/CommunityJoinPage.css";
 import "../../styles/supportive community/CommunityJoinForm.css";
 import { saveCommunityJoinRequest } from "../../services/supportive community/supportiveCommunityService";
+import {
+  INVALID_ADDRESS_MESSAGE,
+  isValidAddress,
+  nameContainsNumber,
+} from "../../utils/nameValidation";
 
 const VALIDATION_SUMMARY = "יש לתקן את השדות המסומנים באדום";
 
@@ -14,6 +19,8 @@ function validateJoinForm(form) {
 
   if (!form.participantName.trim()) {
     errors.participantName = "שגיאה: נא למלא את כל שדות החובה";
+  } else if (nameContainsNumber(form.participantName)) {
+    errors.participantName = "השם אינו יכול להכיל מספרים";
   }
 
   if (!form.participantId.trim()) {
@@ -30,6 +37,8 @@ function validateJoinForm(form) {
 
   if (!form.address.trim()) {
     errors.address = "שגיאה: נא למלא את כל שדות החובה";
+  } else if (!isValidAddress(form.address)) {
+    errors.address = INVALID_ADDRESS_MESSAGE;
   }
 
   if (form.services.length === 0) {

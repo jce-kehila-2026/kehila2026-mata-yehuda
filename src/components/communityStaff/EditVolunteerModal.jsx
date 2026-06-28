@@ -4,6 +4,7 @@ import {
   updateVolunteerDetails,
 } from "../../services/communityStaff/communityStaffService";
 import CommunityStaffCheckboxGrid from "./CommunityStaffCheckboxGrid.jsx";
+import { nameContainsNumber } from "../../utils/nameValidation";
 
 function buildInitialForm(volunteer) {
   return {
@@ -24,8 +25,16 @@ function validateForm(form) {
     return "נא למלא שם פרטי";
   }
 
+  if (nameContainsNumber(form.first_name)) {
+    return "שם פרטי אינו יכול להכיל מספרים";
+  }
+
   if (!form.last_name.trim()) {
     return "נא למלא שם משפחה";
+  }
+
+  if (nameContainsNumber(form.last_name)) {
+    return "שם משפחה אינו יכול להכיל מספרים";
   }
 
   if (!form.phone.trim()) {

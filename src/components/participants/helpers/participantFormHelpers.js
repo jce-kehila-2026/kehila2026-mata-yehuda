@@ -12,6 +12,7 @@ import {
     applyActivitySelection
 } from "../../../utils/staffManegmentUtils/programSelectionHelpers";
 import { formatDate } from "../../../utils/staffManegmentUtils/dateUtils";
+import { nameContainsNumber } from "../../../utils/nameValidation";
 
 export { applyProgramSelection, applyActivitySelection };
 export { isActivityRequiredForProgram } from "../../../utils/staffManegmentUtils/programConstants";
@@ -213,6 +214,14 @@ export function extractParticipantPersonalFields(form) {
 }
 
 export function validateParticipantForm(form, programs = []) {
+    if (nameContainsNumber(form.first_name)) {
+        return "שם פרטי אינו יכול להכיל מספרים";
+    }
+
+    if (nameContainsNumber(form.last_name)) {
+        return "שם משפחה אינו יכול להכיל מספרים";
+    }
+
     if (!form.id_number.trim()) {
         return "יש להזין תעודת זהות";
     }

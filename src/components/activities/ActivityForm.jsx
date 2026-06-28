@@ -251,6 +251,23 @@ function ActivityForm({
             return;
         }
 
+        const maxParticipantsNumber = Number(maxParticipants);
+
+        if (
+            !Number.isInteger(maxParticipantsNumber) ||
+            maxParticipantsNumber <= 0
+        ) {
+            alert("מספר משתתפים חייב להיות מספר שלם גדול מ-0");
+            return;
+        }
+
+        const priceNumber = Number(price);
+
+        if (!Number.isFinite(priceNumber) || priceNumber < 0) {
+            alert("מחיר חייב להיות מספר שאינו שלילי");
+            return;
+        }
+
         if (imageError) {
             return;
         }
@@ -280,11 +297,11 @@ function ActivityForm({
                 ),
 
                 day_of_week: getDayOfWeekFromActivityDate(startDate, startTime),
-                max_participants: Number(maxParticipants),
+                max_participants: maxParticipantsNumber,
                 current_participants: editingActivity
                     ? editingActivity.data.current_participants || 0
                     : 0,
-                price: Number(price),
+                price: priceNumber,
                 price_note: priceNote,
                 is_open: isRegistrationOpenForDeadlineInput(registrationDeadLine)
             };
