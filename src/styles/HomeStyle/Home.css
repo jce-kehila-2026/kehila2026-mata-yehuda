@@ -5,14 +5,15 @@
   width: 100%;
   max-width: 100%;
   min-width: 0;
-  padding: 0 var(--app-padding-x, clamp(0.85rem, 3vw, 2rem)) 0;
+  padding: var(--home-navbar-height, clamp(4.25rem, 11vw, 5.25rem))
+    var(--app-padding-x, clamp(0.85rem, 3vw, 2rem)) 0;
   box-sizing: border-box;
   overflow-x: hidden;
 }
 
 .home-section-anchor,
 #contact {
-  scroll-margin-top: clamp(5rem, 14vw, 6.5rem);
+  scroll-margin-top: var(--home-navbar-height, clamp(4.25rem, 11vw, 5.25rem));
 }
 
 .home-section-eyebrow {
@@ -38,14 +39,18 @@
 
 /* Navbar */
 .home-navbar {
-  position: sticky;
+  position: fixed;
   top: 0;
-  z-index: 1000;
-  margin: 0 calc(-1 * var(--app-padding-x, clamp(0.85rem, 3vw, 2rem))) 2rem;
+  left: 0;
+  right: 0;
+  width: 100%;
+  z-index: 1100;
+  margin: 0;
   background: rgba(255, 255, 255, 0.96);
   border-bottom: 1px solid rgba(45, 125, 70, 0.12);
   box-shadow: 0 8px 24px rgba(24, 84, 57, 0.08);
   backdrop-filter: blur(10px);
+  box-sizing: border-box;
 }
 
 .home-navbar__inner {
@@ -1893,25 +1898,51 @@
 
 @media (max-width: 900px) {
   .home-navbar__inner {
-    flex-wrap: wrap;
-    gap: 0.5rem;
-    row-gap: 0.65rem;
+    flex-wrap: nowrap;
+    align-items: center;
+    gap: clamp(0.35rem, 1.5vw, 0.55rem);
+    padding-top: 0.65rem;
+    padding-bottom: 0.65rem;
+  }
+
+  .home-navbar__brand {
+    gap: 0.4rem;
+    min-width: 0;
+    flex: 0 1 auto;
   }
 
   .home-navbar__nav {
-    flex: 1 1 100%;
-    order: 3;
-    gap: clamp(1rem, 2.8vw, 1.75rem);
+    flex: 1 1 auto;
+    order: 0;
+    gap: clamp(0.45rem, 2vw, 0.85rem);
     justify-content: flex-start;
+    padding-inline: 0.1rem;
+  }
+
+  .home-navbar button.home-navbar__link {
+    padding: 0.38rem 0.55rem;
+    font-size: clamp(0.7rem, 2.6vw, 0.84rem);
+    white-space: nowrap;
+    flex-shrink: 0;
   }
 
   .home-navbar__title {
-    font-size: 0.9rem;
+    font-size: clamp(0.78rem, 2.4vw, 0.9rem);
+    overflow: hidden;
+    text-overflow: ellipsis;
+    max-width: 7.5rem;
   }
 
   .home-navbar__login {
-    padding: 0.45rem 0.85rem;
-    font-size: 0.85rem;
+    padding: 0.38rem 0.65rem;
+    font-size: clamp(0.72rem, 2.5vw, 0.82rem);
+    white-space: nowrap;
+  }
+
+  .home-navbar__logo {
+    width: 34px;
+    height: 34px;
+    transform: scale(1.35);
   }
 }
 
@@ -1920,15 +1951,28 @@
     display: none;
   }
 
+  .home-navbar__inner {
+    gap: 0.3rem;
+  }
+
   .home-navbar__nav {
-    gap: clamp(0.85rem, 3.5vw, 1.25rem);
-    justify-content: flex-start;
+    gap: clamp(0.35rem, 2.2vw, 0.65rem);
+  }
+
+  .home-navbar button.home-navbar__link {
+    padding: 0.35rem 0.45rem;
+    font-size: clamp(0.66rem, 3vw, 0.78rem);
+  }
+
+  .home-navbar__login {
+    padding: 0.35rem 0.55rem;
+    font-size: 0.72rem;
   }
 
   .home-navbar__logo {
-    width: 36px;
-    height: 36px;
-    transform: scale(1.55);
+    width: 32px;
+    height: 32px;
+    transform: scale(1.3);
   }
 }
 
@@ -1983,7 +2027,7 @@
 .home-requests-wrap {
   width: calc(100% + 2 * var(--app-padding-x, clamp(0.85rem, 3vw, 2rem)));
   margin-inline: calc(-1 * var(--app-padding-x, clamp(0.85rem, 3vw, 2rem)));
-  scroll-margin-top: clamp(4.5rem, 14vw, 6.5rem);
+  scroll-margin-top: var(--home-navbar-height, clamp(4.25rem, 11vw, 5.25rem));
 }
 
 .home-action-cards .contact-request-grid {
@@ -1998,7 +2042,7 @@
   position: relative;
   z-index: 2;
   margin-bottom: 0;
-  scroll-margin-top: clamp(4.5rem, 14vw, 6.5rem);
+  scroll-margin-top: var(--home-navbar-height, clamp(4.25rem, 11vw, 5.25rem));
 }
 
 .home-donations-wrap .donation-box-section {
