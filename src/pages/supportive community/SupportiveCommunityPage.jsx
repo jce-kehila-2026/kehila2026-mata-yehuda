@@ -2,10 +2,6 @@ import { useState } from "react";
 import { Link, useNavigate } from "react-router-dom";
 import "../../styles/supportive community/SupportiveCommunityPage.css";
 
-/* Demo hero image — replace with organization photo when available */
-const HERO_IMAGE =
-  "https://images.unsplash.com/photo-1762955911431-4c44c7c3f408?w=1000&auto=format&fit=crop&q=60&ixlib=rb-4.1.0&ixid=M3wxMjA3fDB8MHxzZWFyY2h8MjZ8fGVsZGVybHklMjB2b2x1bnRlZXJ8ZW58MHx8MHx8fDA%3D";
-
 const VOLUNTEER_INITIAL_COUNT = 6;
 
 const FIXED_SERVICES = [
@@ -262,6 +258,19 @@ function SupportiveCommunityPage() {
         דלג לתוכן העיקרי
       </a>
 
+      <img
+        src="/images/minitree.png"
+        alt=""
+        aria-hidden="true"
+        className="sc-page-deco sc-page-deco--top-right"
+      />
+      <img
+        src="/images/minitree.png"
+        alt=""
+        aria-hidden="true"
+        className="sc-page-deco sc-page-deco--bottom-left"
+      />
+
       <div className="site-header">
         <div className="site-header-inner">
           <span className="site-brand">עמותת ותיקי מטה יהודה</span>
@@ -269,50 +278,67 @@ function SupportiveCommunityPage() {
         </div>
       </div>
 
-      <nav className="community-home-nav" aria-label="ניווט חזרה">
-        <div className="community-home-nav-inner">
-          <Link className="community-home-nav-link" to="/">
-            ← חזרה לדף הראשי
+      <section className="sc-hero-area">
+        <div className="sc-hero__topbar">
+          <Link className="sc-hero__back" to="/">
+            <span>חזרה לדף הראשי</span>
+            <span className="sc-hero__back-arrow" aria-hidden="true">
+              →
+            </span>
           </Link>
         </div>
-      </nav>
 
-      <header className="community-hero">
-        <div className="hero-shell">
-          <div className="hero-banner">
-            <img
-              className="hero-image"
-              src={HERO_IMAGE}
-              alt="מתנדבים מסייעים לאזרחים ותיקים — תמיכה קהילתית וליווי"
-              width={1000}
-              height={560}
-              decoding="async"
-              referrerPolicy="no-referrer"
-            />
-            <div className="hero-panel">
-              <p className="hero-org">עמותת ותיקי מטה יהודה</p>
-              <h1>קהילה תומכת</h1>
-              <p className="hero-lead">
-                שירותי תמיכה, ליווי וסיוע לבני 62+ בבית ובקהילה.
-              </p>
-              <button
-                type="button"
-                className="btn btn-primary btn-hero"
-                onClick={() => navigate("/community-join")}
-              >
-                בקשת הצטרפות לקהילה תומכת
-              </button>
-            </div>
-          </div>
+        <header className="sc-hero" aria-label="קהילה תומכת">
+        <img
+          className="sc-hero__photo"
+          src="/images/supportive-community.png"
+          alt="מתנדבים מסייעים לאזרחים ותיקים — תמיכה קהילתית וליווי"
+        />
+        <div className="sc-hero__scrim" aria-hidden="true" />
+        <img
+          className="sc-hero__foliage"
+          src="/images/leaf-decoration.png"
+          alt=""
+          aria-hidden="true"
+        />
+
+        <div className="sc-hero__panel">
+          <svg
+            className="sc-hero__heart"
+            viewBox="0 0 120 96"
+            fill="none"
+            aria-hidden="true"
+          >
+            <path d="M60 82 C30 60 14 44 14 28 C14 16 24 8 36 12 C46 15 55 24 60 33 C65 24 74 15 84 12 C96 8 106 16 106 28 C106 44 90 60 60 82 Z" />
+          </svg>
+          <p className="sc-hero__kicker">עמותת ותיקי מטה יהודה</p>
+          <h1 className="sc-hero__title">קהילה תומכת</h1>
+          <p className="sc-hero__lead">
+            שירותי תמיכה, ליווי וסיוע לבני 62+ בבית ובקהילה.
+          </p>
+          <button
+            type="button"
+            className="sc-hero__btn"
+            onClick={() => navigate("/community-join")}
+          >
+            בקשת הצטרפות לקהילה תומכת
+          </button>
         </div>
-      </header>
+        </header>
+      </section>
 
       <main id="main-content" className="page-main">
         <section
-          className="page-section page-section--white"
+          className="page-section page-section--white sc-fixed-section"
           aria-labelledby="fixed-services-title"
         >
           <div className="page-wrap">
+            <img
+              className="sc-fixed-section__leaf"
+              src="/images/leaf-decoration.png"
+              alt=""
+              aria-hidden="true"
+            />
             <div className="section-header">
               <span className="section-eyebrow">מה מקבלים</span>
               <h2 id="fixed-services-title">שירותים קבועים</h2>
