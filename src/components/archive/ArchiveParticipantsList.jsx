@@ -20,13 +20,12 @@ import {
     fetchArchivedParticipantsForAdminList,
     filterParticipantsList,
     getParticipantSortValue,
-    permanentlyDeleteParticipant,
-    restoreParticipant
+    permanentlyDeleteParticipantRecord,
+    restoreParticipantRecord
 } from "../../services/staffManegmentServices/participantService";
 import { fetchProgramsForAdminList } from "../../services/staffManegmentServices/programService";
 import { PERMANENT_DELETE_CONFIRM_MESSAGE } from "../../utils/staffManegmentUtils/archiveUtils";
 import { formatDate } from "../../utils/staffManegmentUtils/dateUtils";
-import { maskIdNumber } from "../../utils/staffManegmentUtils/maskIdNumber";
 import {
     resolveCanonicalProgramId,
     resolveProgramDisplayTitle
@@ -107,24 +106,24 @@ function ArchiveParticipantsList({ refreshKey = 0, onActionMessage }) {
         loadArchivedParticipants();
     }, [refreshKey]);
 
-    function handleRestore(participantId) {
+    function handleRestore(participant) {
         confirm.requestAction({
             message: "האם לשחזר את המשתתף מהארכיון?",
             confirmLabel: "שחזור",
             action: async () => {
-                await restoreParticipant(participantId);
+                await restoreParticipantRecord(participant);
                 onActionMessage?.("המשתתף שוחזר בהצלחה");
                 await loadArchivedParticipants();
             }
         });
     }
 
-    function handlePermanentDelete(participantId) {
+    function handlePermanentDelete(participant) {
         confirm.requestAction({
             message: PERMANENT_DELETE_CONFIRM_MESSAGE,
             confirmLabel: "מחיקה סופית",
             action: async () => {
-                await permanentlyDeleteParticipant(participantId);
+                await permanentlyDeleteParticipantRecord(participant);
                 onActionMessage?.("המשתתף נמחק לצמיתות");
                 await loadArchivedParticipants();
             }
@@ -163,11 +162,11 @@ function ArchiveParticipantsList({ refreshKey = 0, onActionMessage }) {
         return (
             <AdminTableActions>
                 <AdminTableRestoreButton
-                    onClick={() => handleRestore(participant.id)}
+                    onClick={() => handleRestore(participant)}
                     label="שחזור משתתף"
                 />
                 <AdminTableDeleteButton
-                    onClick={() => handlePermanentDelete(participant.id)}
+                    onClick={() => handlePermanentDelete(participant)}
                     label="מחיקה סופית"
                 />
             </AdminTableActions>
@@ -224,9 +223,11 @@ function ArchiveParticipantsList({ refreshKey = 0, onActionMessage }) {
                                         <td>{getParticipantFullName(participant) || "—"}</td>
                                         <td>
                                             <MaskedIdDisplay
-                                                idNumber={maskIdNumber(
-                                                    participant.id_number
-                                                )}
+                                                idNumber={
+                                                    toSafeString(
+                                                        participant.id_number
+                                                    ) || "—"
+                                                }
                                             />
                                         </td>
                                         <td>{toSafeString(participant.phone) || "—"}</td>
@@ -254,9 +255,11 @@ function ArchiveParticipantsList({ refreshKey = 0, onActionMessage }) {
                                             <p>
                                                 ת.ז.:{" "}
                                                 <MaskedIdDisplay
-                                                    idNumber={maskIdNumber(
-                                                        participant.id_number
-                                                    )}
+                                                    idNumber={
+                                                        toSafeString(
+                                                            participant.id_number
+                                                        ) || "—"
+                                                    }
                                                 />
                                             </p>
                                             <p>
