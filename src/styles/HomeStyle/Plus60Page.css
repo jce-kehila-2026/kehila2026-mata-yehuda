@@ -1,7 +1,5 @@
 /* ── Design tokens ── */
 .plus60-page {
-  --plus60-design-width: 1180px;
-  --plus60-canvas-padding: 40px;
   --plus60-green-dark: #1f5c38;
   --plus60-green: #2d7d46;
   --plus60-green-light: #dff5df;
@@ -17,13 +15,11 @@
   --plus60-shadow-soft: 0 4px 18px rgba(31, 92, 56, 0.06);
   --plus60-radius: 22px;
   --plus60-radius-sm: 14px;
-}
 
-.plus60-page {
   width: 100%;
   max-width: 100%;
   margin: 0;
-  padding: 0;
+  padding: 0 var(--app-padding-x, clamp(1rem, 3vw, 2.5rem)) 3rem;
   box-sizing: border-box;
   background: linear-gradient(
     180deg,
@@ -33,46 +29,31 @@
   );
   min-height: 100vh;
   position: relative;
-  overflow-x: hidden;
-}
-
-.plus60-page__stage {
-  width: 100%;
-  height: var(--plus60-stage-height, auto);
-  display: flex;
-  justify-content: center;
-  overflow: hidden;
-}
-
-.plus60-page__canvas {
-  width: var(--plus60-design-width);
-  flex-shrink: 0;
-  padding: 0 var(--plus60-canvas-padding) 48px;
-  box-sizing: border-box;
-  transform: scale(var(--plus60-scale, 1));
-  transform-origin: top center;
+  overflow-x: clip;
 }
 
 /* ── Hero: large people photo (left) | kishot (right) | title center ── */
 .plus60-hero {
   position: relative;
   display: block;
-  min-height: 282px;
-  margin: 0 calc(-1 * var(--plus60-canvas-padding)) 0;
-  padding: 24px var(--plus60-canvas-padding) 0;
-  border-radius: 0 0 28px 28px;
-  overflow: visible;
+  min-height: calc(clamp(10rem, 30vw, 15rem) + 2.65rem);
+  margin: 0 calc(-1 * var(--app-padding-x, clamp(1rem, 3vw, 2.5rem))) 0;
+  padding: clamp(1rem, 2.5vw, 1.5rem) clamp(1.25rem, 3vw, 2.5rem) 0;
+  border-radius: 0 0 clamp(18px, 3vw, 28px) clamp(18px, 3vw, 28px);
+  overflow: hidden;
   background: var(--plus60-cream);
   direction: ltr;
+  z-index: 1;
+  isolation: isolate;
 }
 
 .plus60-hero__photo-wrap {
   position: absolute;
   top: 42%;
   left: 0;
-  width: 720px;
+  width: min(68%, 720px);
   max-width: 68%;
-  max-height: 520px;
+  max-height: min(100%, 520px);
   transform: translateY(-50%);
   pointer-events: none;
   z-index: 0;
@@ -82,7 +63,7 @@
   display: block;
   width: 100%;
   height: auto;
-  max-height: 520px;
+  max-height: min(100%, 520px);
   object-fit: contain;
   object-position: left center;
   filter: saturate(1.03);
@@ -103,19 +84,22 @@
 
 .plus60-hero__foliage {
   position: absolute;
-  top: 16px;
-  right: 16px;
-  width: 340px;
+  top: clamp(0.25rem, 1.2vw, 0.85rem);
+  right: clamp(0.25rem, 1.5vw, 1rem);
+  width: clamp(210px, 28vw, 380px);
+  max-height: clamp(180px, 26vw, 300px);
   height: auto;
+  object-fit: contain;
+  object-position: right top;
   pointer-events: none;
-  z-index: 2;
+  z-index: 0;
   opacity: 0.94;
 }
 
 .plus60-hero__toolbar {
   position: absolute;
-  top: 22px;
-  left: 24px;
+  top: clamp(0.85rem, 2vw, 1.35rem);
+  left: clamp(0.85rem, 2vw, 1.5rem);
   display: flex;
   flex-wrap: wrap;
   gap: 0.55rem;
@@ -125,23 +109,23 @@
 
 .plus60-hero__title-block {
   position: absolute;
-  top: 28px;
-  right: 56px;
+  top: clamp(1rem, 3vw, 1.75rem);
+  right: clamp(1rem, 4.5vw, 3.5rem);
   left: auto;
-  z-index: 3;
-  width: 460px;
+  z-index: 4;
+  width: min(100%, 460px);
   margin: 0;
   padding: 0;
-  padding-inline-end: 16px;
+  padding-inline-end: clamp(0.5rem, 2vw, 1rem);
   text-align: center;
   background: transparent;
   direction: rtl;
-  transform: translateX(-232px);
+  transform: translateX(clamp(-6.75rem, -21vw, -14.5rem));
 }
 
 .plus60-hero__heart {
   display: block;
-  width: 230px;
+  width: clamp(155px, 19vw, 230px);
   height: auto;
   margin: 0 auto 0.5rem;
   object-fit: contain;
@@ -151,7 +135,7 @@
 .plus60-hero__title-block h1 {
   margin: 0 0 0.55rem;
   color: var(--plus60-green-dark);
-  font-size: 2.85rem;
+  font-size: clamp(2rem, 4.5vw, 2.85rem);
   font-weight: 800;
   line-height: 1.15;
   letter-spacing: -0.02em;
@@ -160,23 +144,23 @@
 .plus60-hero__title-block p {
   margin: 0;
   color: #4a5c50;
-  font-size: 1.05rem;
+  font-size: clamp(0.92rem, 2vw, 1.05rem);
   line-height: 1.75;
 }
 
 /* ── View tabs (below people1) ── */
 .plus60-view-tabs {
   position: absolute;
-  top: 240px;
+  top: clamp(10rem, 30vw, 15rem);
   bottom: auto;
-  left: 24px;
+  left: clamp(0.85rem, 2vw, 1.5rem);
   z-index: 5;
   display: flex;
   flex-direction: row-reverse;
   align-items: flex-end;
   gap: 0;
-  width: 420px;
-  max-width: calc(50% - 16px);
+  width: min(50%, 420px);
+  max-width: calc(50% - 1rem);
   direction: rtl;
 }
 
@@ -188,16 +172,16 @@
   flex: 1 1 0;
   min-width: 0;
   padding: 0.7rem 0.85rem;
-  border: 1px solid rgba(45, 125, 70, 0.08);
+  border: 1px solid rgba(45, 125, 70, 0.12);
   border-bottom: none;
   border-radius: 14px 14px 0 0;
-  background: var(--plus60-cream-warm);
-  color: var(--plus60-muted);
-  font-size: 0.92rem;
+  background: #e6e1d9;
+  color: #6d7870;
+  font-size: clamp(0.78rem, 1.6vw, 0.92rem);
   font-weight: 700;
   line-height: 1.25;
   cursor: pointer;
-  transition: background 0.18s ease, color 0.18s ease, box-shadow 0.18s ease;
+  transition: background 0.18s ease, color 0.18s ease, border-color 0.18s ease;
 }
 
 .plus60-view-tabs__tab svg {
@@ -212,24 +196,28 @@
 }
 
 .plus60-view-tabs__tab:hover:not(.plus60-view-tabs__tab--active) {
-  background: #efe8dc;
+  background: #ddd7ce;
   color: var(--plus60-text);
 }
 
 .plus60-view-tabs__tab--active {
   background: var(--plus60-white);
   color: var(--plus60-green-dark);
-  border-color: rgba(45, 125, 70, 0.12);
+  border-color: rgba(45, 125, 70, 0.16);
+  border-bottom: 2px solid var(--plus60-white);
+  margin-bottom: -2px;
+  padding-bottom: calc(0.7rem + 2px);
   box-shadow: none;
-  padding-bottom: 0.7rem;
   position: relative;
   z-index: 2;
 }
 
 /* ── Main content panel ── */
 .plus60-main {
-  max-width: 100%;
-  margin: -26px 0 48px;
+  position: relative;
+  z-index: 3;
+  max-width: min(100%, 1180px);
+  margin: -1.65rem auto clamp(2rem, 5vw, 3rem);
   padding-top: 0;
   width: 100%;
   box-sizing: border-box;
@@ -247,20 +235,22 @@
 
 .plus60-main__panel .activities-calendar {
   margin: 0;
-  padding: 24px;
+  padding: clamp(1rem, 2.5vw, 1.5rem);
   max-width: none;
 }
 
 .plus60-main__panel.plus60-cards-panel {
   width: 100%;
-  border-top: 1px solid rgba(45, 125, 70, 0.1);
-  border-radius: var(--plus60-radius);
+  border-top: none;
+  border-radius: 0 var(--plus60-radius) var(--plus60-radius) var(--plus60-radius);
   overflow: hidden;
   box-sizing: border-box;
+  background: var(--plus60-white);
 }
 
 .plus60-cards-panel {
-  padding: 32px;
+  padding: clamp(1.5rem, 3vw, 2rem);
+  background: var(--plus60-white);
 }
 
 .plus60-cards-panel__empty {
@@ -275,8 +265,8 @@
 .plus60-activities-grid {
   display: grid;
   grid-template-columns: repeat(3, minmax(0, 1fr));
-  column-gap: 22px;
-  row-gap: 30px;
+  column-gap: clamp(1rem, 2vw, 1.35rem);
+  row-gap: clamp(1.35rem, 2.5vw, 1.85rem);
   width: 100%;
   box-sizing: border-box;
   direction: rtl;
@@ -376,8 +366,10 @@
 
 /* ── Upcoming activities section ── */
 .plus60-upcoming {
-  max-width: 100%;
-  margin: 0 0 48px;
+  position: relative;
+  z-index: 3;
+  max-width: min(100%, 1180px);
+  margin: 0 auto clamp(2rem, 5vw, 3rem);
   width: 100%;
   box-sizing: border-box;
 }
@@ -387,7 +379,7 @@
   border: 1px solid rgba(45, 125, 70, 0.1);
   border-radius: var(--plus60-radius);
   box-shadow: var(--plus60-shadow);
-  padding: 32px;
+  padding: clamp(1.5rem, 3vw, 2rem);
   overflow: hidden;
   box-sizing: border-box;
   width: 100%;
@@ -413,7 +405,7 @@
 .plus60-upcoming__header h2 {
   margin: 0;
   color: var(--plus60-green-dark);
-  font-size: 1.65rem;
+  font-size: clamp(1.25rem, 3vw, 1.65rem);
   font-weight: 800;
 }
 
@@ -461,5 +453,239 @@
 
   100% {
     background: #e4f7ea;
+  }
+}
+
+/* ── Tablet ── */
+@media (max-width: 992px) {
+  .plus60-cards-panel__grid,
+  .plus60-activities-grid {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+}
+
+/* ── Mobile ── */
+@media (max-width: 768px) {
+  .plus60-page {
+    padding-bottom: 2rem;
+    --app-padding-x: clamp(0.75rem, 3vw, 1.25rem);
+  }
+
+  .plus60-hero {
+    display: flex;
+    flex-direction: column;
+    align-items: stretch;
+    min-height: auto;
+    margin: 0 calc(-1 * var(--app-padding-x, 0.75rem)) 0;
+    padding: 0.65rem var(--app-padding-x, 0.75rem) 0;
+    overflow: hidden;
+  }
+
+  .plus60-hero__photo-wrap,
+  .plus60-hero__toolbar,
+  .plus60-hero__title-block,
+  .plus60-view-tabs {
+    position: relative;
+    top: auto;
+    left: auto;
+    right: auto;
+    bottom: auto;
+    transform: none;
+  }
+
+  .plus60-hero__foliage {
+    position: absolute;
+    top: clamp(3.5rem, 11vw, 5rem);
+    bottom: auto;
+    right: 0;
+    width: clamp(110px, 30vw, 165px);
+    max-height: clamp(105px, 28vw, 155px);
+    object-fit: contain;
+    object-position: right top;
+    opacity: 0.45;
+    z-index: 0;
+    pointer-events: none;
+  }
+
+  .plus60-hero__toolbar {
+    order: 1;
+    z-index: 4;
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 0.5rem;
+    width: 100%;
+    margin-bottom: 0.35rem;
+  }
+
+  .plus60-hero__toolbar .cancel-btn,
+  .plus60-hero__toolbar .home-btn {
+    width: 100%;
+    max-width: none;
+    min-width: 0;
+    font-size: 0.8rem;
+    padding: 0.55rem 0.65rem;
+  }
+
+  .plus60-hero__title-block {
+    order: 2;
+    z-index: 4;
+    position: relative;
+    width: 100%;
+    max-width: 100%;
+    padding: 0.25rem 0 0.65rem;
+    text-align: center;
+  }
+
+  .plus60-hero__heart {
+    width: clamp(118px, 34vw, 170px);
+    margin: 0 auto 0.4rem;
+  }
+
+  .plus60-hero__title-block h1 {
+    font-size: clamp(1.65rem, 7vw, 2.1rem);
+  }
+
+  .plus60-hero__title-block p {
+    font-size: clamp(0.84rem, 3.6vw, 0.95rem);
+    line-height: 1.65;
+    padding-inline: 0.25rem;
+  }
+
+  .plus60-hero__photo-wrap {
+    order: 3;
+    z-index: 1;
+    width: 100%;
+    max-width: 100%;
+    max-height: clamp(150px, 42vw, 210px);
+    margin: 0 auto;
+  }
+
+  .plus60-hero__photo {
+    width: 100%;
+    max-height: clamp(150px, 42vw, 210px);
+    object-fit: contain;
+    object-position: center bottom;
+    opacity: 0.9;
+    -webkit-mask-image: none;
+    mask-image: none;
+  }
+
+  .plus60-view-tabs {
+    order: 4;
+    z-index: 5;
+    width: 100%;
+    max-width: 100%;
+    margin: 0;
+    flex-direction: row-reverse;
+  }
+
+  .plus60-view-tabs__tab {
+    padding: 0.62rem 0.45rem;
+    font-size: clamp(0.68rem, 2.8vw, 0.8rem);
+    border-radius: 12px 12px 0 0;
+    background: #e6e1d9;
+  }
+
+  .plus60-view-tabs__tab--active {
+    background: var(--plus60-white);
+    border-bottom: 2px solid var(--plus60-white);
+    margin-bottom: -2px;
+    padding-bottom: calc(0.62rem + 2px);
+  }
+
+  .plus60-view-tabs__tab svg {
+    width: 0.88rem;
+    height: 0.88rem;
+  }
+
+  .plus60-main {
+    margin-top: 0;
+    margin-bottom: 1.5rem;
+  }
+
+  .plus60-main__panel {
+    border-radius: 0 0 var(--plus60-radius) var(--plus60-radius);
+  }
+
+  .plus60-main__panel.plus60-cards-panel {
+    border-radius: 0 0 var(--plus60-radius) var(--plus60-radius);
+  }
+
+  .plus60-main__panel .activities-calendar {
+    padding: clamp(0.75rem, 3vw, 1rem);
+  }
+
+  .plus60-cards-panel,
+  .plus60-upcoming-panel {
+    padding: clamp(1rem, 3.5vw, 1.35rem);
+  }
+
+  .plus60-cards-panel__grid,
+  .plus60-activities-grid {
+    grid-template-columns: 1fr;
+    row-gap: clamp(1.25rem, 4vw, 1.65rem);
+    max-width: 100%;
+  }
+
+  .plus60-cards-panel__grid > .activity-card,
+  .plus60-activities-grid > .activity-card {
+    width: 100%;
+    max-width: 100%;
+  }
+
+  .plus60-upcoming {
+    margin-bottom: 1.5rem;
+  }
+
+  .plus60-upcoming__header {
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 0.35rem;
+    margin-bottom: 1rem;
+  }
+
+  .plus60-upcoming__header h2 {
+    font-size: clamp(1.15rem, 5vw, 1.4rem);
+  }
+}
+
+@media (max-width: 480px) {
+  .plus60-page {
+    padding-bottom: 1.5rem;
+  }
+
+  .plus60-hero__title-block h1 {
+    font-size: 1.55rem;
+  }
+
+  .plus60-hero__photo-wrap,
+  .plus60-hero__photo {
+    max-height: clamp(130px, 38vw, 170px);
+  }
+
+  .plus60-view-tabs__tab {
+    gap: 0.3rem;
+    padding: 0.55rem 0.35rem;
+  }
+
+  .show-more-circle {
+    width: 46px;
+    height: 46px;
+    font-size: 20px;
+  }
+
+  .activities-actions {
+    margin-top: 1.25rem;
+  }
+}
+
+@media (min-width: 1200px) {
+  .plus60-main,
+  .plus60-upcoming {
+    max-width: min(100%, 1240px);
+  }
+
+  .plus60-hero__title-block {
+    transform: translateX(clamp(-7rem, -18vw, -12rem));
   }
 }
