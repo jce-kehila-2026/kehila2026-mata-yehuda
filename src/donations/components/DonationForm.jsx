@@ -17,28 +17,16 @@ import {
   saveDonationCashPayment,
 } from "../services/donationService";
 import { formatDisplayPrice } from "../../services/Payment/formatPrice";
+import {
+  getDonationAmountValidation,
+  resolveDonationAmount,
+} from "../utils/donationAmount";
 
 const EMPTY_DONOR = {
   firstName: "",
   phone: "",
   paymentMethod: "",
 };
-
-function resolveDonationAmount(selectedAmount, customAmount) {
-  if (customAmount !== "") {
-    const parsed = Number(customAmount);
-    if (!Number.isFinite(parsed) || parsed <= 0) {
-      return null;
-    }
-    return Math.round(parsed * 100) / 100;
-  }
-
-  if (typeof selectedAmount === "number" && selectedAmount > 0) {
-    return selectedAmount;
-  }
-
-  return null;
-}
 
 function buildDonationPayload(donor, donationAmount, selectedAmount, customAmount) {
   const isCustomAmount =
@@ -123,8 +111,13 @@ function DonationForm({ initialAmount = null, showBackToHome = false }) {
   const goToPaymentStep = () => {
     setFormError("");
 
-    if (!donationAmount) {
-      setFormError("אנא בחרו סכום תרומה");
+    const { amount, error } = getDonationAmountValidation(
+      selectedAmount,
+      customAmount
+    );
+
+    if (!amount) {
+      setFormError(error);
       return;
     }
 
@@ -152,7 +145,11 @@ function DonationForm({ initialAmount = null, showBackToHome = false }) {
     }
 
     if (!donationAmount) {
-      setFormError("סכום תרומה לא תקין");
+      const { error } = getDonationAmountValidation(
+        selectedAmount,
+        customAmount
+      );
+      setFormError(error || "סכום תרומה לא תקין");
       return;
     }
 
