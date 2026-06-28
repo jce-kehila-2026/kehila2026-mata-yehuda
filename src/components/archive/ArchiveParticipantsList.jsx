@@ -174,7 +174,7 @@ function ArchiveParticipantsList({ refreshKey = 0, onActionMessage }) {
     }
 
     return (
-        <div className="staff-list-section admin-list-section admin-list-section--archive-participants">
+        <div className="staff-list-section admin-list-section admin-list-section--archive admin-list-section--archive-participants">
             <div className="admin-list-header">
                 <h2 className="admin-list-header__title">ארכיון משתתפים</h2>
             </div>
@@ -203,7 +203,7 @@ function ArchiveParticipantsList({ refreshKey = 0, onActionMessage }) {
                 <p className="staff-alert staff-alert--error">{loadError}</p>
             ) : null}
 
-            {loading ? <p>טוען...</p> : null}
+            {loading ? <p className="admin-archive-loading">טוען...</p> : null}
 
             {!loading && emptyState}
 
@@ -244,11 +244,11 @@ function ArchiveParticipantsList({ refreshKey = 0, onActionMessage }) {
                             />
                         }
                         mobileCards={
-                            <div className="participants-list staff-grid staff-grid--cards">
+                            <div className="activity-list staff-grid staff-grid--cards">
                                 {list.pageItems.map((participant) => (
                                     <article
                                         key={participant.id}
-                                        className="participant-card staff-card archive-card"
+                                        className="staff-card activity-card archive-card"
                                     >
                                         <div className="staff-card-body">
                                             <h3>{getParticipantFullName(participant) || "—"}</h3>
@@ -283,7 +283,7 @@ function ArchiveParticipantsList({ refreshKey = 0, onActionMessage }) {
                                                 />
                                             </p>
                                         </div>
-                                        <div className="archive-card__actions">
+                                        <div className="activity-card-actions archive-card__actions">
                                             {renderActions(participant)}
                                         </div>
                                     </article>
