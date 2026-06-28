@@ -376,10 +376,16 @@ function SupportiveCommunityPage() {
         </section>
 
         <section
-          className="page-section page-section--accent"
+          className="page-section page-section--accent sc-price-section"
           aria-labelledby="payment-title"
         >
           <div className="page-wrap">
+            <img
+              className="sc-panel-leaf"
+              src="/images/leaf-decoration.png"
+              alt=""
+              aria-hidden="true"
+            />
             <div className="section-header">
               <span className="section-eyebrow">שקיפות</span>
               <h2 id="payment-title">מחיר ותנאים</h2>
@@ -387,26 +393,66 @@ function SupportiveCommunityPage() {
 
             <div className="pricing-block">
               <div className="price-highlight">
-                <span className="price-label">עלות חודשית רגילה</span>
-                <span className="price-value">160 ₪</span>
+                <span className="price-highlight__icon" aria-hidden="true">
+                  <svg viewBox="0 0 24 24" fill="currentColor">
+                    <path d="M12 21.35l-1.45-1.32C5.4 15.36 2 12.28 2 8.5 2 5.42 4.42 3 7.5 3c1.74 0 3.41.81 4.5 2.09C13.09 3.81 14.76 3 16.5 3 19.58 3 22 5.42 22 8.5c0 3.78-3.4 6.86-8.55 11.54L12 21.35z" />
+                  </svg>
+                </span>
+                <div className="price-highlight__text">
+                  <span className="price-label">עלות חודשית רגילה</span>
+                  <span className="price-value">160 ₪</span>
+                </div>
               </div>
 
-              <p className="payment-discounts">
-                קיימות הנחות לזכאים, לדוגמה ניצולי שואה, מוכרי רווחה ובעלי חוק
-                סיעוד.
-              </p>
-
               <ul className="payment-details">
-                <li>
-                  ביקור רופא בבית — <strong>25 ₪</strong>
+                <li className="payment-detail">
+                  <span className="payment-detail__icon" aria-hidden="true">
+                    <svg viewBox="0 0 24 24" fill="currentColor">
+                      <path d="M12 3 3 10.5V21h6v-5h6v5h6V10.5L12 3zm1 6h2v2h-2v2h-2v-2H9V9h2V7h2v2z" />
+                    </svg>
+                  </span>
+                  <span className="payment-detail__text">
+                    <span className="payment-detail__label">ביקור רופא בבית</span>
+                    <span className="payment-detail__amount">25 ₪</span>
+                  </span>
                 </li>
-                <li>
-                  נסיעה באמבולנס — <strong>35 ₪</strong>
+                <li className="payment-detail">
+                  <span className="payment-detail__icon" aria-hidden="true">
+                    <svg viewBox="0 0 24 24" fill="currentColor">
+                      <path d="M3 6a1 1 0 0 1 1-1h9a1 1 0 0 1 1 1v2h3.4a2 2 0 0 1 1.6.8l1.6 2.13a2 2 0 0 1 .4 1.2V16a1 1 0 0 1-1 1h-1.05a2.5 2.5 0 0 1-4.9 0H8.95a2.5 2.5 0 0 1-4.9 0H4a1 1 0 0 1-1-1V6zm4 2V6.5H5.5V8H4v1.5h1.5V11H7V9.5h1.5V8H7zm9 0v2h3.9l-1.5-2H16zM6.5 15.5a1 1 0 1 0 1 1 1 1 0 0 0-1-1zm9 0a1 1 0 1 0 1 1 1 1 0 0 0-1-1z" />
+                    </svg>
+                  </span>
+                  <span className="payment-detail__text">
+                    <span className="payment-detail__label">נסיעה באמבולנס</span>
+                    <span className="payment-detail__amount">35 ₪</span>
+                  </span>
                 </li>
-                <li>
-                  בדיקת אמבולנס ללא פינוי — עד <strong>200 ₪</strong>
+                <li className="payment-detail">
+                  <span className="payment-detail__icon" aria-hidden="true">
+                    <svg viewBox="0 0 24 24" fill="currentColor">
+                      <path d="M9 2a1 1 0 0 0-1 1H6a2 2 0 0 0-2 2v15a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V5a2 2 0 0 0-2-2h-2a1 1 0 0 0-1-1H9zm0 2h6v2H9V4zm4 5h-2v2H9v2h2v2h2v-2h2v-2h-2V9z" />
+                    </svg>
+                  </span>
+                  <span className="payment-detail__text">
+                    <span className="payment-detail__label">
+                      בדיקת אמבולנס ללא פינוי
+                    </span>
+                    <span className="payment-detail__amount">עד 200 ₪</span>
+                  </span>
                 </li>
               </ul>
+
+              <div className="payment-discounts">
+                <span className="payment-discounts__icon" aria-hidden="true">
+                  <svg viewBox="0 0 24 24" fill="currentColor">
+                    <path d="M19.4 11.6 12.4 4.6A2 2 0 0 0 11 4H5a1 1 0 0 0-1 1v6a2 2 0 0 0 .6 1.4l7 7a2 2 0 0 0 2.8 0l5-5a2 2 0 0 0 0-2.8zM7.5 9A1.5 1.5 0 1 1 9 7.5 1.5 1.5 0 0 1 7.5 9z" />
+                  </svg>
+                </span>
+                <p>
+                  קיימות הנחות לזכאים, לדוגמה ניצולי שואה, מוכרי רווחה ובעלי חוק
+                  סיעוד.
+                </p>
+              </div>
 
               <p className="payment-note">
                 ההצטרפות היא בקשה ראשונית בלבד. צוות העמותה יצור קשר להשלמת
