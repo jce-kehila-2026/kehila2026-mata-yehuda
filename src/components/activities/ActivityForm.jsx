@@ -3,7 +3,7 @@ import { Timestamp } from "firebase/firestore";
 import { ImageUp, Pencil, Trash2 } from "lucide-react";
 import {
     ACTIVITY_IMAGE_ACCEPT,
-    uploadActivityImage,
+    prepareActivityImageUrl,
     validateActivityImageFile
 } from "../../services/staffManegmentServices/activityImageService";
 import FormActionRow from "../shared/FormActionRow";
@@ -261,10 +261,7 @@ function ActivityForm({
             let imageUrl = savedImageUrl;
 
             if (selectedFile) {
-                imageUrl = await uploadActivityImage(
-                    selectedFile,
-                    editingActivity?.id
-                );
+                imageUrl = await prepareActivityImageUrl(selectedFile);
             } else if (!previewUrl) {
                 imageUrl = "";
             }
@@ -301,8 +298,8 @@ function ActivityForm({
             await onSubmit(activityData);
             resetFormFields();
         } catch (error) {
-            console.error("Activity image upload failed:", error);
-            setImageError(error.message || "שגיאה בהעלאת התמונה");
+            console.error("Activity image processing failed:", error);
+            setImageError(error.message || "שגיאה בעיבוד התמונה");
         } finally {
             setIsUploading(false);
         }
@@ -499,7 +496,7 @@ function ActivityForm({
             <FormActionRow
                 submitLabel={
                     isUploading
-                        ? "מעלה תמונה..."
+                        ? "שומר..."
                         : editingActivity
                           ? "שמירת שינויים"
                           : "הוספת פעילות"

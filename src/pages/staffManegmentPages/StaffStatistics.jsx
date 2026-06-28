@@ -15,11 +15,10 @@ import {
     YAxis
 } from "recharts";
 import { Loader2 } from "lucide-react";
+import StaffPeriodFilter from "../../components/staff/StaffPeriodFilter";
 import {
     STATISTICS_VIEW_MODE,
     fetchStaffStatistics,
-    formatStatisticsMonthDisplay,
-    formatStatisticsMonthHebrewDisplay,
     getStatisticsRangeValidationMessage,
     isInvalidStatisticsRange,
     resolveStatisticsFilter
@@ -233,183 +232,74 @@ function StaffStatistics({ onBack }) {
 
     return (
         <div className="staff-statistics-page" dir="rtl">
-            <header className="staff-statistics-header">
-                <div className="staff-statistics-header__intro">
-                    <h1 className="staff-statistics-header__title">סטטיסטיקות</h1>
-                    <p className="staff-statistics-header__subtitle">
-                        סקירת פעילות, הרשמות וביטולים לפי תקופה
-                    </p>
-                </div>
-                {onBack ? (
-                    <button
-                        type="button"
-                        className="staff-statistics-back"
-                        onClick={onBack}
-                    >
-                        ← חזרה ללוח הבקרה
-                    </button>
-                ) : null}
-            </header>
+            <img
+                src="/images/minitree.png"
+                alt=""
+                aria-hidden="true"
+                className="staff-statistics-decoration staff-statistics-decoration--top"
+            />
+            <img
+                src="/images/minitree.png"
+                alt=""
+                aria-hidden="true"
+                className="staff-statistics-decoration staff-statistics-decoration--left"
+            />
+            <img
+                src="/images/minitree.png"
+                alt=""
+                aria-hidden="true"
+                className="staff-statistics-decoration staff-statistics-decoration--bottom"
+            />
 
-            <div className="staff-statistics-content">
-                <section
-                    className="staff-statistics-filter-card"
-                    aria-label="סינון לפי תקופה"
-                >
-                    <div className="staff-statistics-filter-card__head">
-                        <h2 className="staff-statistics-filter-card__title">
-                            סינון לפי תקופה
-                        </h2>
-
-                        <div
-                            className="staff-statistics-view-toggle"
-                            role="tablist"
-                            aria-label="סוג תצוגה"
-                        >
-                        <button
-                            type="button"
-                            role="tab"
-                            aria-selected={
-                                viewMode === STATISTICS_VIEW_MODE.MONTHLY
-                            }
-                            className={`staff-statistics-view-toggle__btn${
-                                viewMode === STATISTICS_VIEW_MODE.MONTHLY
-                                    ? " staff-statistics-view-toggle__btn--active"
-                                    : ""
-                            }`}
-                            onClick={() =>
-                                handleViewModeChange(
-                                    STATISTICS_VIEW_MODE.MONTHLY
-                                )
-                            }
-                        >
-                            חודשית
-                        </button>
-                        <button
-                            type="button"
-                            role="tab"
-                            aria-selected={
-                                viewMode === STATISTICS_VIEW_MODE.YEARLY
-                            }
-                            className={`staff-statistics-view-toggle__btn${
-                                viewMode === STATISTICS_VIEW_MODE.YEARLY
-                                    ? " staff-statistics-view-toggle__btn--active"
-                                    : ""
-                            }`}
-                            onClick={() =>
-                                handleViewModeChange(STATISTICS_VIEW_MODE.YEARLY)
-                            }
-                        >
-                            שנתית
-                        </button>
-                    </div>
-                    </div>
-
-                    <div className="staff-statistics-month-filter">
-                        <div className="staff-statistics-month-filter__inputs">
-                        {viewMode === STATISTICS_VIEW_MODE.MONTHLY ? (
-                            <>
-                                <label className="staff-statistics-month-filter__field">
-                                    <span>מחודש</span>
-                                    <input
-                                        type="month"
-                                        className="staff-statistics-month-filter__month-input"
-                                        aria-label="מחודש ושנה התחלה"
-                                        value={fromValue}
-                                        onChange={(event) => {
-                                            setFromValue(event.target.value);
-                                            setRangeValidationError("");
-                                        }}
-                                    />
-                                    <span className="staff-statistics-month-filter__preview">
-                                        {fromValue
-                                            ? `${formatStatisticsMonthDisplay(fromValue)} · ${formatStatisticsMonthHebrewDisplay(fromValue)}`
-                                            : "\u00a0"}
-                                    </span>
-                                </label>
-                                <label className="staff-statistics-month-filter__field">
-                                    <span>עד חודש</span>
-                                    <input
-                                        type="month"
-                                        className="staff-statistics-month-filter__month-input"
-                                        aria-label="מחודש ושנה סיום"
-                                        value={toValue}
-                                        onChange={(event) => {
-                                            setToValue(event.target.value);
-                                            setRangeValidationError("");
-                                        }}
-                                    />
-                                    <span className="staff-statistics-month-filter__preview">
-                                        {toValue
-                                            ? `${formatStatisticsMonthDisplay(toValue)} · ${formatStatisticsMonthHebrewDisplay(toValue)}`
-                                            : "\u00a0"}
-                                    </span>
-                                </label>
-                            </>
-                        ) : (
-                            <>
-                                <label className="staff-statistics-month-filter__field">
-                                    <span>משנה</span>
-                                    <input
-                                        type="number"
-                                        min="2000"
-                                        max="2100"
-                                        step="1"
-                                        inputMode="numeric"
-                                        placeholder="YYYY"
-                                        value={fromValue}
-                                        onChange={(event) => {
-                                            setFromValue(event.target.value);
-                                            setRangeValidationError("");
-                                        }}
-                                    />
-                                </label>
-                                <label className="staff-statistics-month-filter__field">
-                                    <span>עד שנה</span>
-                                    <input
-                                        type="number"
-                                        min="2000"
-                                        max="2100"
-                                        step="1"
-                                        inputMode="numeric"
-                                        placeholder="YYYY"
-                                        value={toValue}
-                                        onChange={(event) => {
-                                            setToValue(event.target.value);
-                                            setRangeValidationError("");
-                                        }}
-                                    />
-                                </label>
-                            </>
-                        )}
-                        </div>
-                        <div className="staff-statistics-month-filter__actions">
-                            <button
-                                type="button"
-                                className="staff-statistics-month-filter__submit"
-                                onClick={handleApplyFilter}
-                            >
-                                הצג נתונים
-                            </button>
-                            <button
-                                type="button"
-                                className="staff-statistics-month-filter__reset"
-                                onClick={handleResetFilter}
-                            >
-                                איפוס
-                            </button>
-                        </div>
-                    </div>
-
-                    {displayValidationError ? (
-                        <p
-                            className="staff-statistics-month-filter__error"
-                            role="alert"
-                        >
-                            {displayValidationError}
+            <div className="staff-statistics-container">
+                <header className="staff-statistics-header">
+                    <div className="staff-statistics-header__intro">
+                        <h1 className="staff-statistics-header__title">
+                            סטטיסטיקות
+                        </h1>
+                        <p className="staff-statistics-header__subtitle">
+                            סקירת פעילות, הרשמות וביטולים לפי תקופה
                         </p>
+                    </div>
+                    {onBack ? (
+                        <div className="staff-statistics-header__actions">
+                            <button
+                                type="button"
+                                className="staff-back-button"
+                                onClick={onBack}
+                            >
+                                <span
+                                    className="staff-back-button__icon"
+                                    aria-hidden="true"
+                                >
+                                    →
+                                </span>
+                                <span className="staff-back-button__label">
+                                    חזרה ללוח הבקרה
+                                </span>
+                            </button>
+                        </div>
                     ) : null}
-                </section>
+                </header>
+
+                <div className="staff-statistics-content">
+                <StaffPeriodFilter
+                    viewMode={viewMode}
+                    fromValue={fromValue}
+                    toValue={toValue}
+                    validationError={displayValidationError}
+                    onViewModeChange={handleViewModeChange}
+                    onFromChange={(value) => {
+                        setFromValue(value);
+                        setRangeValidationError("");
+                    }}
+                    onToChange={(value) => {
+                        setToValue(value);
+                        setRangeValidationError("");
+                    }}
+                    onApply={handleApplyFilter}
+                    onReset={handleResetFilter}
+                />
 
                 {loading ? (
                     <div className="staff-statistics-state" role="status">
@@ -787,6 +677,7 @@ function StaffStatistics({ onBack }) {
                         </div>
                     </div>
                 ) : null}
+                </div>
             </div>
         </div>
     );

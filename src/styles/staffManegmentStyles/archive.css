@@ -1,0 +1,58 @@
+/* Contextual archive views inside manage pages */
+
+.archive-card__actions {
+  display: flex;
+  justify-content: flex-start;
+  gap: 0.35rem;
+  padding-top: 0.75rem;
+}
+
+.staff-confirm-overlay {
+  position: fixed;
+  inset: 0;
+  z-index: 1200;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 1rem;
+  background: rgba(17, 24, 39, 0.45);
+}
+
+.staff-confirm-modal {
+  width: min(100%, 28rem);
+  padding: 1.25rem 1.35rem;
+  border-radius: 16px;
+  background: #ffffff;
+  border: 1px solid var(--color-card-border);
+  box-shadow: 0 18px 48px rgba(0, 0, 0, 0.16);
+  direction: rtl;
+  text-align: right;
+}
+
+.staff-confirm-modal__message {
+  margin: 0 0 1.1rem;
+  font-size: 1rem;
+  line-height: 1.65;
+  color: var(--color-text);
+}
+
+.staff-confirm-modal__actions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.75rem;
+  justify-content: flex-start;
+}
+
+.staff-confirm-modal__btn {
+  min-width: 7.5rem;
+}
+
+@media (max-width: 768px) {
+  .staff-confirm-modal__actions {
+    flex-direction: column;
+  }
+
+  .staff-confirm-modal__btn {
+    width: 100%;
+  }
+}

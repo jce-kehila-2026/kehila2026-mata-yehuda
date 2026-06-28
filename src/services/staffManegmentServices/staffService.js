@@ -102,24 +102,17 @@ export async function addStaffMember(staffData) {
         phone: staffData.phone,
         email: staffData.email,
         is_active: staffData.is_active ?? false,
-        role: normalizeStaffRole(staffData.role ?? DEFAULT_STAFF_ROLE),
-        password: staffData.password
+        role: normalizeStaffRole(staffData.role ?? DEFAULT_STAFF_ROLE)
     });
 }
 
 export async function updateStaffMember(staff) {
-    const updates = {
+    await updateDoc(doc(db, "staff", staff.id), {
         full_name: staff.full_name,
         phone: staff.phone,
         is_active: staff.is_active ?? false,
         role: normalizeStaffRole(staff.role ?? DEFAULT_STAFF_ROLE)
-    };
-
-    if (staff.password?.trim()) {
-        updates.password = staff.password;
-    }
-
-    await updateDoc(doc(db, "staff", staff.id), updates);
+    });
 }
 
 export async function disableStaffMember(staffId) {

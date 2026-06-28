@@ -45,14 +45,20 @@ function CommunityMembershipCheck({ onVerified }) {
   };
 
   return (
-    <form className="community-join-form" onSubmit={handleCheck}>
-      <section className="form-section">
-        <h2>בדיקת חברות בקהילה תומכת</h2>
-        <p className="form-hint">
-          כדי להגיש בקשת שירות נוסף, יש להזין תעודת זהות ומספר טלפון.
-        </p>
+    <form
+      className="community-join-staff-form community-join-form"
+      onSubmit={handleCheck}
+    >
+      <div className="community-join-staff-card">
+        <section className="form-section">
+          <div className="community-join-staff-section__head">
+            <h2>בדיקת חברות בקהילה תומכת</h2>
+            <p className="form-hint">
+              כדי להגיש בקשת שירות נוסף, יש להזין תעודת זהות ומספר טלפון.
+            </p>
+          </div>
 
-        <div className="form-fields">
+          <div className="form-fields">
           <div className="form-field">
             <label>תעודת זהות</label>
             <input
@@ -77,12 +83,13 @@ function CommunityMembershipCheck({ onVerified }) {
           </div>
         </div>
 
-        {message && <p className="form-error">{message}</p>}
+          {message && <p className="form-error">{message}</p>}
 
-        <div className="form-submit">
-          <button type="submit">בדיקה</button>
-        </div>
-      </section>
+          <div className="community-join-staff-submit form-submit">
+            <button type="submit">בדיקה</button>
+          </div>
+        </section>
+      </div>
     </form>
   );
 }

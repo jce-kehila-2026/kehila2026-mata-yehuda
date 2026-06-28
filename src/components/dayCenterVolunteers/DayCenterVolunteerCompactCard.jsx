@@ -1,4 +1,10 @@
-import { CommunityStaffActiveBadge, CommunityStaffCompactCard } from "../communityStaff/CommunityStaffListUi.jsx";
+import {
+    AdminTableActions,
+    AdminTableDeleteButton,
+    AdminTableEditButton,
+    AdminTableViewButton
+} from "../admin/AdminTableActions";
+import ReactivateVolunteerButton from "../admin/ReactivateVolunteerButton";
 import { getVolunteerDisplayName } from "../../services/dayCenterVolunteerService";
 
 function DayCenterVolunteerCompactCard({
@@ -12,37 +18,64 @@ function DayCenterVolunteerCompactCard({
     const isActive = volunteer.is_active !== false;
 
     return (
-        <CommunityStaffCompactCard
-            className="day-center-volunteers-compact-card"
-            name={fullName}
-            phone={volunteer.phone}
-            inactive={!isActive}
-            status={<CommunityStaffActiveBadge isActive={isActive} />}
-            viewLabel="צפייה"
-            primaryLabel="עריכה"
-            onPrimaryClick={() => onEdit?.(volunteer)}
-            onViewDetails={() => onViewDetails?.(volunteer)}
-            onDeactivate={isActive ? () => onDeactivate?.(volunteer) : undefined}
-            onReactivate={!isActive ? () => onReactivate?.(volunteer) : undefined}
-            deactivateLabel="השבתה"
-            extraIdentityContent={
-                <>
-                    {volunteer.id_number ? (
-                        <span className="day-center-volunteers-compact-card__meta">
-                            ת.ז. {volunteer.id_number}
-                        </span>
-                    ) : null}
-                    {volunteer.about_me?.trim() ? (
-                        <span
-                            className="day-center-volunteers-compact-card__about"
-                            title={volunteer.about_me}
-                        >
-                            {volunteer.about_me}
-                        </span>
-                    ) : null}
-                </>
-            }
-        />
+        <article
+            className={`day-center-volunteers-card${
+                isActive ? "" : " day-center-volunteers-card--inactive"
+            }`}
+        >
+            <div className="day-center-volunteers-card__header">
+                <h3 className="day-center-volunteers-card__title">{fullName}</h3>
+                <span
+                    className={`day-center-volunteers-card__status day-center-volunteers-card__status--${
+                        isActive ? "active" : "inactive"
+                    }`}
+                >
+                    {isActive ? "פעיל" : "לא פעיל"}
+                </span>
+            </div>
+
+            <dl className="day-center-volunteers-card__details">
+                {volunteer.id_number ? (
+                    <div>
+                        <dt>תעודת זהות</dt>
+                        <dd>{volunteer.id_number}</dd>
+                    </div>
+                ) : null}
+                <div>
+                    <dt>טלפון</dt>
+                    <dd>{volunteer.phone || "—"}</dd>
+                </div>
+                {volunteer.about_me?.trim() ? (
+                    <div>
+                        <dt>אודות</dt>
+                        <dd>{volunteer.about_me}</dd>
+                    </div>
+                ) : null}
+            </dl>
+
+            <div className="day-center-volunteers-card__actions">
+                <AdminTableActions>
+                    <AdminTableViewButton
+                        onClick={() => onViewDetails?.(volunteer)}
+                        label="צפייה בפרטי מתנדב/ת"
+                    />
+                    <AdminTableEditButton
+                        onClick={() => onEdit?.(volunteer)}
+                        label="עריכת מתנדב/ת"
+                    />
+                    {isActive ? (
+                        <AdminTableDeleteButton
+                            onClick={() => onDeactivate?.(volunteer)}
+                            label="השבתת מתנדב/ת"
+                        />
+                    ) : (
+                        <ReactivateVolunteerButton
+                            onClick={() => onReactivate?.(volunteer)}
+                        />
+                    )}
+                </AdminTableActions>
+            </div>
+        </article>
     );
 }
 

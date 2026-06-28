@@ -8,9 +8,29 @@ import {
     XAxis,
     YAxis
 } from "recharts";
-import { getDonationStatistics } from "../../services/donationService";
+import {
+    CalendarDays,
+    Coins,
+    Crown,
+    HandCoins,
+    TrendingUp,
+    Users
+} from "lucide-react";
+import {
+    getDonationChartTitle,
+    getDonationStatistics
+} from "../../services/donationService";
 
 const CHART_COLOR = "#2E7D32";
+
+const SUMMARY_ICONS = {
+    total: HandCoins,
+    monthly: CalendarDays,
+    donors: Users,
+    average: TrendingUp,
+    largest: Coins,
+    "top-donor": Crown
+};
 
 function formatCurrency(value) {
     return new Intl.NumberFormat("he-IL", {
@@ -37,10 +57,14 @@ function DonationChartTooltip({ active, payload, label }) {
     );
 }
 
-function DonationSummary({ donations = [] }) {
+function DonationSummary({ donations = [], periodFilter }) {
     const stats = useMemo(
-        () => getDonationStatistics(donations),
-        [donations]
+        () => getDonationStatistics(donations, periodFilter),
+        [donations, periodFilter]
+    );
+    const chartTitle = useMemo(
+        () => getDonationChartTitle(periodFilter),
+        [periodFilter]
     );
 
     const summaryCards = [
@@ -81,22 +105,38 @@ function DonationSummary({ donations = [] }) {
 
     return (
         <section className="donations-summary" aria-label="סיכום תרומות">
-            <div className="donations-summary__cards">
-                {summaryCards.map((card) => (
-                    <article key={card.id} className="donations-summary__card">
-                        <span className="donations-summary__card-value">
-                            {card.value}
-                        </span>
-                        <span className="donations-summary__card-label">
-                            {card.label}
-                        </span>
-                    </article>
-                ))}
+            <div className="donations-summary__cards list-mgmt-summary">
+                {summaryCards.map((card) => {
+                    const Icon = SUMMARY_ICONS[card.id] || HandCoins;
+
+                    return (
+                        <article
+                            key={card.id}
+                            className="donations-summary__card list-mgmt-summary__item"
+                        >
+                            <span
+                                className="list-mgmt-summary__icon"
+                                aria-hidden="true"
+                            >
+                                <Icon
+                                    className="list-mgmt-summary__icon-glyph"
+                                    strokeWidth={2}
+                                />
+                            </span>
+                            <span className="donations-summary__card-value list-mgmt-summary__value">
+                                {card.value}
+                            </span>
+                            <span className="donations-summary__card-label list-mgmt-summary__label">
+                                {card.label}
+                            </span>
+                        </article>
+                    );
+                })}
             </div>
 
             <article className="donations-summary__chart-card">
                 <h3 className="donations-summary__chart-title">
-                    תרומות לפי חודש
+                    {chartTitle}
                 </h3>
                 <div className="donations-summary__chart-wrap">
                     <ResponsiveContainer width="100%" height="100%">

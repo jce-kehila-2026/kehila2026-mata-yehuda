@@ -1,5 +1,5 @@
 import { useCallback, useEffect, useMemo, useState } from "react";
-import { Plus, UserRound } from "lucide-react";
+import { Archive, Plus, UserRound } from "lucide-react";
 import ParticipantCard from "./ParticipantCard";
 import ParticipantStatusBadge from "../ParticipantStatusBadge";
 import {
@@ -9,8 +9,6 @@ import {
 } from "../ParticipantListStats";
 import AdminDataTable from "../../admin/AdminDataTable";
 import AdminListEmptyState from "../../admin/AdminListEmptyState";
-import AdminListPagination from "../../admin/AdminListPagination";
-import AdminListSummary from "../../admin/AdminListSummary";
 import AdminListToolbar from "../../admin/AdminListToolbar";
 import AdminResponsiveList from "../../admin/AdminResponsiveList";
 import {
@@ -40,6 +38,8 @@ import {
     REGISTRATION_STATUS_FILTER_OPTIONS,
     toSafeString
 } from "../../../utils/staffManegmentUtils/participantStatusLabels";
+import { ARCHIVE_CONFIRM_MESSAGE } from "../../../utils/staffManegmentUtils/archiveUtils";
+import StaffConfirmModal from "../../staff/StaffConfirmModal";
 import { hasFormattedDisplay, hasValue } from "../../../utils/staffManegmentUtils/hasValue";
 
 const PARTICIPANT_COLUMNS = [
@@ -82,7 +82,9 @@ function getProgramLabel(participant, programs = []) {
 function ParticipantList({
     refreshKey = 0,
     onEditParticipant,
-    onAddParticipant
+    onAddParticipant,
+    onViewArchive,
+    onBack
 }) {
     const [sourceItems, setSourceItems] = useState([]);
     const [programs, setPrograms] = useState([]);
@@ -90,6 +92,8 @@ function ParticipantList({
     const [loading, setLoading] = useState(true);
     const [error, setError] = useState("");
     const [actionMessage, setActionMessage] = useState("");
+    const [pendingArchiveParticipant, setPendingArchiveParticipant] = useState(null);
+    const [archiving, setArchiving] = useState(false);
 
     const filterItems = useCallback(
         (items, searchQuery, filters) =>
@@ -143,21 +147,26 @@ function ParticipantList({
     }, [refreshKey]);
 
     async function handleDeleteParticipant(participant) {
-        const confirmDelete = window.confirm(
-            "האם אתה בטוח שברצונך למחוק משתתף זה?"
-        );
+        setPendingArchiveParticipant(participant);
+    }
 
-        if (!confirmDelete) {
+    async function confirmArchiveParticipant() {
+        if (!pendingArchiveParticipant) {
             return;
         }
 
+        setArchiving(true);
+
         try {
-            await deleteParticipant(participant.id);
-            setActionMessage("המשתתף נמחק בהצלחה");
+            await deleteParticipant(pendingArchiveParticipant.id);
+            setActionMessage("המשתתף הועבר לארכיון בהצלחה");
             await loadParticipants();
         } catch (err) {
             console.error(err);
-            setError("שגיאה במחיקת המשתתף");
+            setError("שגיאה בהעברת המשתתף לארכיון");
+        } finally {
+            setArchiving(false);
+            setPendingArchiveParticipant(null);
         }
     }
 
@@ -275,23 +284,65 @@ function ParticipantList({
 
     return (
         <div className="staff-list-section admin-list-section admin-list-section--participants">
-            <div className="admin-list-header admin-list-header--split">
-                <h2 className="admin-list-header__title">רשימת משתתפים</h2>
-                {onAddParticipant ? (
-                    <button
-                        type="button"
-                        className="staff-button staff-button--small admin-list-header__action admin-list-header__action--compact"
-                        onClick={onAddParticipant}
-                    >
-                        <Plus
-                            className="admin-list-header__action-icon"
-                            strokeWidth={2.25}
-                            aria-hidden="true"
-                        />
-                        <span>הוספת משתתף</span>
-                    </button>
-                ) : null}
-            </div>
+            <header className="list-mgmt-page__header">
+                <div className="list-mgmt-page__header-main">
+                    <h2 className="list-mgmt-page__title">רשימת משתתפים</h2>
+                    <p className="list-mgmt-page__subtitle">
+                        ניהול, צפייה וחיפוש של כל המשתתפים במערכת
+                    </p>
+                </div>
+                <div className="list-mgmt-page__actions">
+                    {onAddParticipant ? (
+                        <button
+                            type="button"
+                            className="list-mgmt-page__action"
+                            onClick={onAddParticipant}
+                        >
+                            <Plus
+                                className="list-mgmt-page__action-icon"
+                                strokeWidth={2.25}
+                                aria-hidden="true"
+                            />
+                            <span>הוספת משתתף</span>
+                        </button>
+                    ) : null}
+                    {onViewArchive ? (
+                        <button
+                            type="button"
+                            className="list-mgmt-page__action list-mgmt-page__action--archive"
+                            onClick={onViewArchive}
+                        >
+                            <Archive
+                                className="list-mgmt-page__action-icon"
+                                strokeWidth={2.25}
+                                aria-hidden="true"
+                            />
+                            <span>צפייה בארכיון</span>
+                        </button>
+                    ) : null}
+                    {onBack ? (
+                        <button
+                            type="button"
+                            className="staff-back-button"
+                            onClick={onBack}
+                        >
+                            <span
+                                className="staff-back-button__icon"
+                                aria-hidden="true"
+                            >
+                                →
+                            </span>
+                            <span className="staff-back-button__label">
+                                חזרה ללוח הבקרה
+                            </span>
+                        </button>
+                    ) : null}
+                </div>
+            </header>
+
+            {!loading && filteredParticipants.length > 0 ? (
+                <ParticipantListStats stats={participantStats} />
+            ) : null}
 
             <AdminListToolbar
                 layout="participants"
@@ -304,20 +355,8 @@ function ParticipantList({
                 pageSize={list.pageSize}
                 onPageSizeChange={list.setPageSize}
                 pageSizeLabel="הצג בעמוד"
+                pageSizeOptions={[5, 10, 20]}
             />
-
-            <AdminListSummary
-                totalCount={list.totalCount}
-                totalFiltered={list.totalFiltered}
-                pageCount={list.pageCount}
-                page={list.page}
-                totalPages={list.totalPages}
-                showAll={list.showAll}
-            />
-
-            {!loading && filteredParticipants.length > 0 ? (
-                <ParticipantListStats stats={participantStats} />
-            ) : null}
 
             {error ? (
                 <p className="staff-alert staff-alert--error">{error}</p>
@@ -326,12 +365,15 @@ function ParticipantList({
                 <p className="staff-alert staff-alert--success">{actionMessage}</p>
             ) : null}
 
-            {loading ? <p>טוען...</p> : null}
+            {loading ? (
+                <p className="list-mgmt-loading">טוען...</p>
+            ) : null}
 
             {!loading && emptyState}
 
             {!loading && list.totalFiltered > 0 ? (
                 <>
+                    <div className="list-mgmt-list">
                     <AdminResponsiveList
                         desktopTable={
                             <AdminDataTable
@@ -410,14 +452,43 @@ function ParticipantList({
                             </div>
                         }
                     />
+                    </div>
 
-                    <AdminListPagination
-                        page={list.page}
-                        totalPages={list.totalPages}
-                        onPageChange={list.setPage}
-                    />
+                    <div className="list-mgmt-pagination">
+                        <button
+                            type="button"
+                            className="list-mgmt-pagination__btn"
+                            onClick={() => list.setPage(list.page - 1)}
+                            disabled={list.page <= 1}
+                        >
+                            הקודם
+                        </button>
+                        <span className="list-mgmt-pagination__label">
+                            עמוד {list.page} מתוך {list.totalPages}
+                        </span>
+                        <button
+                            type="button"
+                            className="list-mgmt-pagination__btn"
+                            onClick={() => list.setPage(list.page + 1)}
+                            disabled={list.page >= list.totalPages}
+                        >
+                            הבא
+                        </button>
+                    </div>
                 </>
             ) : null}
+
+            <StaffConfirmModal
+                message={pendingArchiveParticipant ? ARCHIVE_CONFIRM_MESSAGE : ""}
+                confirmLabel="העברה לארכיון"
+                confirming={archiving}
+                onConfirm={confirmArchiveParticipant}
+                onCancel={() => {
+                    if (!archiving) {
+                        setPendingArchiveParticipant(null);
+                    }
+                }}
+            />
         </div>
     );
 }

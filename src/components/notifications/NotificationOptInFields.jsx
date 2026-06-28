@@ -1,9 +1,15 @@
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { useFcmTokenRegistrationContext } from "./FcmTokenRegistrationProvider";
+import { getStoredFcmToken } from "../../services/staffManegmentServices/notificationTokenService";
 import "../../styles/notificationOptInFields.css";
 
 const PERMISSION_DENIED_MESSAGE =
-    "הודעות חסומות בדפדפן. יש לאפשר הודעות בהגדרות הדפדפן עבור אתר זה ולנסות שוב.";
+    "לא ניתן להפעיל הודעות כי לא ניתנה הרשאה בדפדפן. יש לאפשר הודעות בהגדרות הדפדפן עבור אתר זה ולנסות שוב.";
+
+const PERMISSION_NOT_GRANTED_MESSAGE =
+    "לא ניתן להפעיל הודעות כי לא ניתנה הרשאה בדפדפן.";
+
+const SUCCESS_MESSAGE = "הודעות הופעלו בהצלחה.";
 
 function getNotificationPermission() {
     if (typeof Notification === "undefined") {
@@ -13,12 +19,17 @@ function getNotificationPermission() {
     return Notification.permission;
 }
 
+function isNotificationsAlreadyEnabled(token) {
+    const hasToken = Boolean(token || getStoredFcmToken());
+    return hasToken && getNotificationPermission() === "granted";
+}
+
 async function requestPermissionInUserGesture() {
     if (!("Notification" in window)) {
         return "unsupported";
     }
 
-    let permission = Notification.permission;
+    const permission = Notification.permission;
 
     if (permission !== "default") {
         return permission;
@@ -28,35 +39,44 @@ async function requestPermissionInUserGesture() {
 }
 
 function NotificationOptInFields({ className = "" }) {
+    const { token, requestNotificationPermission } =
+        useFcmTokenRegistrationContext();
+
     const [wantsNotifications, setWantsNotifications] = useState(false);
     const [activationSuccess, setActivationSuccess] = useState(false);
     const [activating, setActivating] = useState(false);
     const [localError, setLocalError] = useState("");
-    const { error, requestNotificationPermission } =
-        useFcmTokenRegistrationContext();
 
-    const displayError = localError || error;
+    useEffect(() => {
+        if (isNotificationsAlreadyEnabled(token)) {
+            setWantsNotifications(true);
+        }
+    }, [token]);
+
     const rootClassName = ["notification-opt-in", className]
         .filter(Boolean)
         .join(" ");
 
-    function handleCheckboxChange(event) {
+    async function handleCheckboxChange(event) {
         const checked = event.target.checked;
-        setWantsNotifications(checked);
 
         if (!checked) {
+            setWantsNotifications(false);
             setActivationSuccess(false);
             setLocalError("");
+            return;
         }
-    }
 
-    async function handleActivate(event) {
-        event.preventDefault();
-        event.stopPropagation();
+        setLocalError("");
 
-        const permissionBefore = getNotificationPermission();
+        if (isNotificationsAlreadyEnabled(token)) {
+            setWantsNotifications(true);
+            setActivationSuccess(false);
+            return;
+        }
 
-        if (permissionBefore === "denied") {
+        if (getNotificationPermission() === "denied") {
+            setWantsNotifications(false);
             setLocalError(PERMISSION_DENIED_MESSAGE);
             return;
         }
@@ -65,24 +85,27 @@ function NotificationOptInFields({ className = "" }) {
             console.error(
                 "Notification opt-in: requestNotificationPermission is not available from context"
             );
+            setWantsNotifications(false);
             setLocalError("שגיאה בהפעלת הודעות. נסו לרענן את הדף.");
             return;
         }
 
-        setActivating(true);
+        setWantsNotifications(true);
         setActivationSuccess(false);
-        setLocalError("");
+        setActivating(true);
 
         try {
             const permission = await requestPermissionInUserGesture();
 
             if (permission === "denied") {
+                setWantsNotifications(false);
                 setLocalError(PERMISSION_DENIED_MESSAGE);
                 return;
             }
 
             if (permission !== "granted") {
-                setLocalError("הדפדפן אינו תומך בהודעות");
+                setWantsNotifications(false);
+                setLocalError(PERMISSION_NOT_GRANTED_MESSAGE);
                 return;
             }
 
@@ -95,17 +118,23 @@ function NotificationOptInFields({ className = "" }) {
                 return;
             }
 
+            setWantsNotifications(false);
+
             if (getNotificationPermission() === "denied") {
                 setLocalError(PERMISSION_DENIED_MESSAGE);
+            } else {
+                setLocalError("לא ניתן להפעיל הודעות כרגע. נסו שוב.");
             }
         } catch (activateError) {
             console.error("Notification opt-in activation failed", activateError);
+            setWantsNotifications(false);
 
             if (getNotificationPermission() === "denied") {
                 setLocalError(PERMISSION_DENIED_MESSAGE);
             } else {
                 setLocalError(
-                    activateError?.message || "שגיאה בהפעלת הודעות. נסו שוב."
+                    activateError?.message ||
+                        "לא ניתן להפעיל הודעות כרגע. נסו שוב."
                 );
             }
         } finally {
@@ -121,30 +150,24 @@ function NotificationOptInFields({ className = "" }) {
                     className="notification-opt-in__checkbox"
                     checked={wantsNotifications}
                     onChange={handleCheckboxChange}
+                    disabled={activating}
                 />
-                <span>אני רוצה לקבל עדכונים והודעות מהעמותה</span>
+                <span>
+                    {activating
+                        ? "מפעיל הודעות..."
+                        : "אני רוצה לקבל עדכונים והודעות מהעמותה"}
+                </span>
             </label>
 
-            {wantsNotifications && !activationSuccess && (
-                <button
-                    type="button"
-                    className="notification-opt-in__activate"
-                    onClick={handleActivate}
-                    disabled={activating}
-                >
-                    {activating ? "מפעיל..." : "הפעלת הודעות"}
-                </button>
-            )}
-
-            {wantsNotifications && activationSuccess && (
+            {activationSuccess && (
                 <p className="notification-opt-in__success" role="status">
-                    הודעות ועדכונים הופעלו בהצלחה!
+                    {SUCCESS_MESSAGE}
                 </p>
             )}
 
-            {wantsNotifications && displayError && (
+            {localError && (
                 <p className="notification-opt-in__error" role="alert">
-                    {displayError}
+                    {localError}
                 </p>
             )}
         </div>

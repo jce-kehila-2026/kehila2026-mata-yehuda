@@ -17,19 +17,34 @@ function AboutPage() {
     <div className="home-page about-page">
       <HomeNavbar />
 
-      <section className="about-page-hero">
-        <h1>מי אנחנו?</h1>
-        <p>הכירו את העמותה, החזון והשירותים שאנחנו מעניקים לקהילת הוותיקים</p>
-      </section>
-
       <AboutSection showPageLayout />
 
       <section className="about-page-gallery" aria-label="גלריית רגעים מהקהילה">
         <div className="about-page-gallery__title-divider">
           <span className="about-page-gallery__title-line" aria-hidden="true" />
-          <h2 className="about-page-gallery__title">רגעים מהקהילה</h2>
+          <span className="about-page-gallery__title-core">
+            <img
+              className="about-page-gallery__leaf about-page-gallery__leaf--start"
+              src="/images/leaf-decoration.png"
+              alt=""
+              aria-hidden="true"
+            />
+            <h2 className="about-page-gallery__title">רגעים מהקהילה</h2>
+            <img
+              className="about-page-gallery__leaf about-page-gallery__leaf--end"
+              src="/images/leaf-decoration.png"
+              alt=""
+              aria-hidden="true"
+            />
+          </span>
           <span className="about-page-gallery__title-line" aria-hidden="true" />
         </div>
+        <img
+          className="about-page-gallery__heart"
+          src="/images/heart-line.png"
+          alt=""
+          aria-hidden="true"
+        />
         <div className="about-page-gallery__grid">
           {ABOUT_GALLERY_IMAGES.map((image) => (
             <figure key={image.src} className="about-page-gallery__card">
@@ -40,13 +55,41 @@ function AboutPage() {
             </figure>
           ))}
         </div>
+        <div className="about-page-gallery__actions">
+          <button type="button" className="about-page-gallery__btn">
+            צפו בגלריה המלאה
+          </button>
+        </div>
       </section>
 
-      <div className="about-page-back">
-        <button type="button" className="secondary-btn" onClick={() => navigate("/")}>
-          חזרה לדף הבית
-        </button>
-      </div>
+      <section className="about-page-cta" aria-label="חזרה לדף הבית">
+        <img
+          className="about-page-cta__leaf about-page-cta__leaf--start"
+          src="/images/leaf-decoration.png"
+          alt=""
+          aria-hidden="true"
+        />
+        <img
+          className="about-page-cta__leaf about-page-cta__leaf--end"
+          src="/images/leaf-decoration.png"
+          alt=""
+          aria-hidden="true"
+        />
+        <div className="about-page-cta__inner">
+          <div className="about-page-cta__text">
+            <h2 className="about-page-cta__title">
+              בואו להיות חלק מהקהילה שלנו
+            </h2>
+          </div>
+          <button
+            type="button"
+            className="secondary-btn"
+            onClick={() => navigate("/")}
+          >
+            חזרה לדף הבית
+          </button>
+        </div>
+      </section>
     </div>
   );
 }

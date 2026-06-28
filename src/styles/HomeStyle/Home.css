@@ -780,36 +780,340 @@
   }
 }
 
-.about-page-hero {
+/* ============================================================
+   About page — modern, reference-style redesign (UI only).
+   Scoped to .about-page; the shared Home AboutSection layout
+   (non-page branch) is left completely untouched.
+   ============================================================ */
+
+/* Bright page background with soft green gradients */
+.about-page {
+  position: relative;
+  background:
+    radial-gradient(circle at 10% 6%, rgba(123, 201, 149, 0.14), transparent 26%),
+    radial-gradient(circle at 92% 3%, rgba(45, 125, 70, 0.08), transparent 22%),
+    #f1f8f3;
+}
+
+/* ---- Modern About card (split hero + body) ---- */
+.about-page .about-modern {
+  position: relative;
+  overflow: hidden;
+  margin-bottom: clamp(2.5rem, 5vw, 3.5rem);
+  padding: clamp(1.75rem, 4vw, 3rem);
+  border-radius: 32px;
+  background:
+    radial-gradient(circle at top left, rgba(45, 125, 70, 0.06), transparent 30%),
+    linear-gradient(180deg, #ffffff 0%, #f6fcf8 100%);
+  border: 1px solid rgba(45, 125, 70, 0.1);
+  box-shadow: 0 18px 44px rgba(24, 84, 57, 0.07);
+}
+
+/* soft curved background shapes behind the hero */
+.about-page .about-modern::before,
+.about-page .about-modern::after {
+  content: "";
+  position: absolute;
+  z-index: 0;
+  border-radius: 50%;
+  pointer-events: none;
+}
+
+.about-page .about-modern::before {
+  top: -26%;
+  inset-inline-start: -12%;
+  width: 58%;
+  height: 72%;
+  background: radial-gradient(circle, rgba(123, 201, 149, 0.22), transparent 62%);
+}
+
+.about-page .about-modern::after {
+  top: -16%;
+  inset-inline-end: -10%;
+  width: 46%;
+  height: 58%;
+  background: radial-gradient(circle, rgba(45, 125, 70, 0.12), transparent 60%);
+}
+
+.about-page .about-modern__hero,
+.about-page .about-modern__body,
+.about-page .about-modern > .home-about-section__community-note,
+.about-page .about-modern > .home-about-section__values {
+  position: relative;
+  z-index: 1;
+}
+
+/* subtle leaves in the card corners */
+.about-page .about-modern__leaf {
+  position: absolute;
+  z-index: 0;
+  width: clamp(90px, 14vw, 150px);
+  height: auto;
+  object-fit: contain;
+  opacity: 0.13;
+  pointer-events: none;
+}
+
+/* top-right corner is reserved for the kishot decoration */
+.about-page .about-modern__leaf--start {
+  display: none;
+}
+
+.about-page .about-modern__leaf--end {
+  bottom: -0.7rem;
+  inset-inline-end: -0.7rem;
+  transform: scaleX(-1) rotate(12deg);
+}
+
+/* Split hero — image (1st item) on the left, text (2nd) on the right */
+.about-page .about-modern__hero {
+  position: relative;
+  display: grid;
+  grid-template-columns: minmax(0, 0.72fr) minmax(0, 1.28fr);
+  gap: clamp(2rem, 5vw, 4.5rem);
+  align-items: center;
+  margin-bottom: clamp(2.5rem, 5vw, 4rem);
+  padding-block: clamp(1rem, 2.5vw, 2.25rem);
+  direction: ltr;
+  /* kishot leaves as a real, transparent background of the hero — anchored
+     top-right and softly faded into the page colour toward the lower-left so
+     it reads as an elegant backdrop rather than a pasted image */
+  background-image:
+    linear-gradient(
+      to bottom left,
+      rgba(255, 255, 255, 0) 32%,
+      rgba(255, 255, 255, 0.78) 68%
+    ),
+    url("/images/kishot.png");
+  background-repeat: no-repeat, no-repeat;
+  background-position: top right, top right;
+  background-size: 100% 100%, clamp(320px, 44vw, 600px) auto;
+}
+
+/* Image bleeds to the card's top-left so it overlaps the hero background
+   (flush under the navbar, not framed inside a small card) */
+.about-page .about-modern__visual {
+  position: relative;
+  align-self: start;
+  margin-top: calc(-1 * clamp(1.75rem, 4vw, 3rem));
+  margin-inline-start: calc(-1 * clamp(1.75rem, 4vw, 3rem));
+}
+
+.about-page .about-modern__visual .home-about-section__image-glow {
+  display: none;
+}
+
+/* large, prominent image with a straight top (flush) and organic curved bottom */
+.about-page .about-modern__visual .home-about-section__image-wrap {
+  border-radius: 0 0 clamp(48px, 9vw, 120px) clamp(28px, 5vw, 64px);
+  border: none;
+  box-shadow: none;
+}
+
+.about-page .about-modern__visual .home-about-section__image {
+  height: clamp(240px, 30vw, 350px);
+}
+
+/* keep the existing tag clear of the overlapping leaf */
+.about-page .about-modern__visual .home-about-section__tag {
+  left: auto;
+  right: 1.25rem;
+  bottom: 1rem;
+}
+
+/* leaf overlapping the lower-left of the image (kept inside the card) */
+.about-page .about-modern__visual-leaf {
+  position: absolute;
+  z-index: 3;
+  left: clamp(0.25rem, 1.5vw, 1.25rem);
+  bottom: clamp(0.25rem, 1.5vw, 1.5rem);
+  width: clamp(120px, 20vw, 195px);
+  height: auto;
+  object-fit: contain;
+  pointer-events: none;
+  filter: drop-shadow(0 8px 14px rgba(24, 84, 57, 0.16));
+}
+
+.about-page .about-modern__intro {
+  direction: rtl;
   text-align: center;
-  margin-bottom: 2rem;
-  padding: clamp(1.5rem, 4vw, 2.5rem);
-  border-radius: 24px;
+  display: flex;
+  flex-direction: column;
+  /* sit toward the image (left) side of the column, not the far-right edge */
+  align-items: flex-end;
+  gap: 0.55rem;
+  padding-inline: clamp(0.5rem, 2vw, 1.5rem);
+}
+
+.about-page .about-modern__eyebrow {
+  display: inline-block;
+  margin: 0;
+  padding: 0.4rem 1rem;
+  border-radius: 999px;
+  background: rgba(45, 125, 70, 0.1);
+  color: var(--color-primary, #2d7d46);
+  font-size: 0.95rem;
+  font-weight: 700;
+}
+
+.about-page .about-modern__title {
+  display: block;
+  margin: 0.15rem 0 0.35rem;
+  color: var(--color-primary, #2d7d46);
+  font-family: "Heebo", system-ui, sans-serif;
+  font-size: clamp(2.1rem, 5vw, 3.2rem);
+  font-weight: 800;
+  line-height: 1.15;
+}
+
+/* gold heart-line decoration above the title */
+.about-page .about-modern__heart {
+  display: block;
+  width: clamp(120px, 20vw, 180px);
+  height: auto;
+  object-fit: contain;
+  opacity: 0.95;
+  margin: 0 0 0.1rem;
+  pointer-events: none;
+}
+
+.about-page .about-modern__lead-intro {
+  margin: 0;
+  max-width: 34rem;
+  color: #4d5c52;
+  font-family: "Heebo", system-ui, sans-serif;
+  font-size: clamp(1.05rem, 2.4vw, 1.2rem);
+  line-height: 1.85;
+}
+
+/* Body: description on the left, floating quote card on the right */
+.about-page .about-modern__body {
+  display: grid;
+  grid-template-columns: minmax(0, 1.5fr) minmax(0, 1fr);
+  gap: clamp(1.75rem, 3.5vw, 3rem);
+  align-items: center;
+  margin-bottom: clamp(1.75rem, 3.5vw, 2.5rem);
+  direction: ltr;
+}
+
+.about-page .about-modern__text {
+  direction: rtl;
+  text-align: right;
+  max-width: 42rem;
+}
+
+.about-page .about-modern__text > * {
+  margin: 0;
+}
+
+.about-page .about-modern__text > * + * {
+  margin-top: 1rem;
+}
+
+/* Floating quote card — white card with a soft shape behind it */
+.about-page .about-modern__quote-wrap {
+  position: relative;
+  direction: rtl;
+}
+
+.about-page .about-modern__quote-shape {
+  position: absolute;
+  z-index: 0;
+  inset: -0.5rem -0.85rem -1.6rem 0.6rem;
+  border-radius: 34px 28px 40px 30px;
   background: linear-gradient(
-    135deg,
-    var(--color-primary, #2d7d46),
-    rgba(45, 125, 70, 0.88)
+    160deg,
+    rgba(123, 201, 149, 0.32),
+    rgba(245, 249, 240, 0.95)
   );
-  color: #fff;
-  box-shadow: 0 16px 36px rgba(45, 125, 70, 0.15);
 }
 
-.about-page-hero h1 {
-  margin: 0 0 0.7rem;
-  font-family: "Heebo", system-ui, sans-serif;
-  font-size: clamp(1.5rem, 4vw, 2.7rem);
-  font-weight: 600;
-  line-height: 1.3;
-  color: #fff;
+.about-page .about-modern__quote-wrap .about-modern__quote {
+  position: relative;
+  z-index: 1;
+  margin: 0;
+  padding: 2.4rem 1.75rem 1.6rem;
+  border-radius: 22px;
+  background: #ffffff;
+  border: 1px solid rgba(45, 125, 70, 0.12);
+  box-shadow: 0 18px 38px rgba(24, 84, 57, 0.12);
 }
 
-.about-page-hero p {
-  margin: 0 auto;
-  max-width: 40rem;
-  font-family: "Heebo", system-ui, sans-serif;
-  font-size: 1.05rem;
-  line-height: 1.8;
-  color: rgba(255, 255, 255, 0.95);
+.about-page .about-modern__quote-badge {
+  position: absolute;
+  top: -1.15rem;
+  inset-inline-start: 1.5rem;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 2.9rem;
+  height: 2.9rem;
+  border-radius: 50%;
+  background: var(--color-primary, #2d7d46);
+  color: #fff;
+  box-shadow: 0 10px 22px rgba(45, 125, 70, 0.32);
+}
+
+.about-page .about-modern__quote-badge svg {
+  width: 1.45rem;
+  height: 1.45rem;
+}
+
+.about-page .about-modern__quote-wrap .about-modern__quote p {
+  margin: 0.4rem 0 0.6rem;
+  color: #1f3a2a;
+  font-weight: 800;
+  font-size: clamp(1.1rem, 2.4vw, 1.28rem);
+  line-height: 1.6;
+}
+
+.about-page .about-modern__quote-wrap .about-modern__quote cite {
+  display: block;
+  color: #5a7262;
+  font-size: 0.95rem;
+  font-style: normal;
+}
+
+@media (max-width: 900px) {
+  .about-page .about-modern__hero,
+  .about-page .about-modern__body {
+    grid-template-columns: 1fr;
+  }
+
+  .about-page .about-modern__visual {
+    max-width: 34rem;
+    width: 100%;
+    margin: 0 auto;
+  }
+
+  .about-page .about-modern__visual .home-about-section__image-wrap {
+    border-radius: 24px 24px clamp(40px, 8vw, 80px) clamp(24px, 5vw, 48px);
+  }
+
+  .about-page .about-modern__intro,
+  .about-page .about-modern__text {
+    text-align: center;
+    max-width: none;
+  }
+
+  .about-page .about-modern__title {
+    justify-content: center;
+  }
+
+  .about-page .about-modern__lead-intro {
+    margin-inline: auto;
+  }
+
+  .about-page .about-modern__quote-wrap {
+    margin-top: 1.75rem;
+    max-width: 34rem;
+    margin-inline: auto;
+    width: 100%;
+  }
+
+  .about-page .about-modern__hero {
+    background-size: 100% 100%, clamp(220px, 70vw, 360px) auto;
+  }
 }
 
 .home-about-section--page {
@@ -913,11 +1217,6 @@
   background: linear-gradient(90deg, var(--color-primary, #2d7d46), #52b872);
 }
 
-.about-page .home-about-section__quote {
-  background: rgba(45, 125, 70, 0.08);
-  border-right-color: var(--color-primary, #2d7d46);
-}
-
 .about-page .home-about-section__community-note {
   background: rgba(45, 125, 70, 0.06);
 }
@@ -939,7 +1238,7 @@
 .about-page-gallery {
   width: min(100%, 960px);
   max-width: 100%;
-  margin: clamp(1.75rem, 4vw, 2.5rem) auto 0;
+  margin: clamp(2.5rem, 5vw, 3.5rem) auto 0;
   padding: 0;
   box-sizing: border-box;
 }
@@ -950,7 +1249,7 @@
   justify-content: center;
   gap: clamp(0.85rem, 2.5vw, 1.35rem);
   width: 100%;
-  margin: 0 0 clamp(1rem, 2.5vw, 1.35rem);
+  margin: 0 0 clamp(0.75rem, 1.8vw, 1.1rem);
 }
 
 .about-page-gallery__title-line {
@@ -959,6 +1258,35 @@
   min-width: 1.5rem;
   background: var(--color-primary, #2d7d46);
   border-radius: 999px;
+}
+
+.about-page-gallery__title-core {
+  display: inline-flex;
+  align-items: center;
+  gap: clamp(0.5rem, 1.6vw, 0.9rem);
+  flex-shrink: 0;
+}
+
+.about-page-gallery__leaf {
+  width: clamp(28px, 4.5vw, 46px);
+  height: auto;
+  object-fit: contain;
+  opacity: 0.9;
+  pointer-events: none;
+}
+
+.about-page-gallery__leaf--end {
+  transform: scaleX(-1);
+}
+
+.about-page-gallery__heart {
+  display: block;
+  width: clamp(110px, 22vw, 170px);
+  height: auto;
+  object-fit: contain;
+  opacity: 0.85;
+  margin: 0 auto clamp(1.5rem, 3vw, 2.25rem);
+  pointer-events: none;
 }
 
 .about-page-gallery__title {
@@ -976,7 +1304,7 @@
 .about-page-gallery__grid {
   display: grid;
   grid-template-columns: repeat(3, minmax(0, 1fr));
-  gap: clamp(1.15rem, 2.5vw, 1.65rem);
+  gap: clamp(1.35rem, 3vw, 2.1rem);
   align-items: stretch;
   width: min(100%, 800px);
   margin-inline: auto;
@@ -1064,29 +1392,126 @@
   }
 }
 
-.about-page-back {
+/* Gallery "view full gallery" button */
+.about-page-gallery__actions {
   display: flex;
   justify-content: center;
-  margin: 2rem 0 1rem;
+  margin-top: clamp(1.5rem, 3vw, 2.25rem);
 }
 
-.about-page-back .secondary-btn {
+.about-page-gallery__btn {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.5rem;
+  font-family: "Heebo", system-ui, sans-serif;
+  font-size: 1rem;
+  font-weight: 700;
+  padding: 0.7rem 1.65rem;
+  border: 1.5px solid rgba(45, 125, 70, 0.35);
+  border-radius: 999px;
+  background: #ffffff;
+  color: var(--color-primary, #2d7d46);
+  cursor: pointer;
+  box-shadow: 0 8px 20px rgba(45, 125, 70, 0.1);
+  transition: transform 0.2s ease, box-shadow 0.2s ease, background 0.2s ease;
+}
+
+.about-page-gallery__btn:hover {
+  transform: translateY(-2px);
+  background: #f3fbf5;
+  box-shadow: 0 12px 26px rgba(45, 125, 70, 0.16);
+}
+
+/* Bottom CTA — full-width dark-green rounded band, the page's visual ending */
+.about-page-cta {
+  position: relative;
+  overflow: hidden;
+  margin: clamp(2.5rem, 5vw, 3.75rem) 0 1.25rem;
+  padding: clamp(2rem, 5vw, 3.25rem) clamp(1.5rem, 5vw, 3rem);
+  border-radius: 30px;
+  background:
+    radial-gradient(circle at top left, rgba(255, 255, 255, 0.08), transparent 32%),
+    linear-gradient(135deg, #2f6b45 0%, #224f35 100%);
+  box-shadow: 0 22px 48px rgba(24, 84, 57, 0.22);
+  text-align: center;
+}
+
+.about-page-cta__inner {
+  position: relative;
+  z-index: 1;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  flex-wrap: wrap;
+  gap: clamp(1rem, 3vw, 2rem);
+  direction: rtl;
+  text-align: right;
+}
+
+.about-page-cta__text {
+  flex: 1 1 18rem;
+}
+
+.about-page-cta__title {
+  margin: 0;
+  color: #ffffff;
+  font-family: "Heebo", system-ui, sans-serif;
+  font-size: clamp(1.4rem, 3.5vw, 2.1rem);
+  font-weight: 800;
+  line-height: 1.25;
+}
+
+@media (max-width: 620px) {
+  .about-page-cta__inner {
+    justify-content: center;
+    text-align: center;
+  }
+
+  .about-page-cta__text {
+    flex-basis: 100%;
+  }
+}
+
+.about-page-cta__leaf {
+  position: absolute;
+  z-index: 0;
+  bottom: -0.75rem;
+  width: clamp(120px, 20vw, 220px);
+  height: auto;
+  object-fit: contain;
+  opacity: 0.5;
+  pointer-events: none;
+}
+
+.about-page-cta__leaf--start {
+  inset-inline-start: -1.25rem;
+  transform: rotate(-8deg);
+}
+
+.about-page-cta__leaf--end {
+  inset-inline-end: -1.25rem;
+  transform: scaleX(-1) rotate(-8deg);
+}
+
+.about-page-cta .secondary-btn {
   font-family: "Heebo", system-ui, sans-serif;
   font-size: 1.1rem;
   font-weight: 700;
-  padding: 0.75rem 1.2rem;
+  padding: 0.85rem 2.1rem;
   border: none;
-  border-radius: var(--radius);
-  background: var(--color-primary);
-  color: #ffffff;
+  border-radius: 999px;
+  background: #ffffff;
+  color: var(--color-primary, #2d7d46);
   cursor: pointer;
-  transition: background 0.2s ease;
+  box-shadow: 0 10px 24px rgba(0, 0, 0, 0.14);
+  transition: transform 0.2s ease, box-shadow 0.2s ease, background 0.2s ease;
 }
 
-.about-page-back .secondary-btn:hover,
-.about-page-back .secondary-btn:active {
-  background: var(--color-primary-hover);
-  color: #ffffff;
+.about-page-cta .secondary-btn:hover,
+.about-page-cta .secondary-btn:active {
+  transform: translateY(-2px);
+  background: #f3fbf5;
+  box-shadow: 0 14px 30px rgba(0, 0, 0, 0.2);
 }
 
 /* Services */

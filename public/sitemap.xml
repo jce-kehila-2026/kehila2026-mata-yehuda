@@ -1,0 +1,49 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">
+
+  <url>
+    <loc>https://matayehuda-frontend.onrender.com/</loc>
+    <priority>1.0</priority>
+  </url>
+
+  <url>
+    <loc>https://matayehuda-frontend.onrender.com/about</loc>
+    <priority>0.8</priority>
+  </url>
+
+  <url>
+    <loc>https://matayehuda-frontend.onrender.com/services</loc>
+    <priority>0.9</priority>
+  </url>
+
+  <url>
+    <loc>https://matayehuda-frontend.onrender.com/day-center</loc>
+    <priority>0.9</priority>
+  </url>
+
+  <url>
+    <loc>https://matayehuda-frontend.onrender.com/plus60</loc>
+    <priority>0.8</priority>
+  </url>
+
+  <url>
+    <loc>https://matayehuda-frontend.onrender.com/supportive-community</loc>
+    <priority>0.9</priority>
+  </url>
+
+  <url>
+    <loc>https://matayehuda-frontend.onrender.com/community-join</loc>
+    <priority>0.8</priority>
+  </url>
+
+  <url>
+    <loc>https://matayehuda-frontend.onrender.com/community-volunteer</loc>
+    <priority>0.8</priority>
+  </url>
+
+  <url>
+    <loc>https://matayehuda-frontend.onrender.com/donations</loc>
+    <priority>0.8</priority>
+  </url>
+
+</urlset>
