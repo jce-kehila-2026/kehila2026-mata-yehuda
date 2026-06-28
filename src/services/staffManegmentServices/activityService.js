@@ -11,10 +11,6 @@ import {
 } from "firebase/firestore";
 import { normalizeSearchQuery } from "../../utils/staffManegmentUtils/adminListUtils";
 import {
-    filterActiveRecords,
-    filterArchivedRecords
-} from "../../utils/staffManegmentUtils/archiveUtils";
-import {
     archiveDocument,
     permanentlyDeleteDocument,
     restoreDocument
@@ -33,6 +29,18 @@ function mapActivityDoc(activityDoc) {
         id: activityDoc.id,
         data: activityDoc.data()
     };
+}
+
+function isActivityArchived(activity) {
+    return activity?.data?.isArchived === true;
+}
+
+function filterActiveActivities(activities) {
+    return activities.filter((activity) => !isActivityArchived(activity));
+}
+
+function filterArchivedActivities(activities) {
+    return activities.filter(isActivityArchived);
 }
 
 export function filterActivitiesList(activities, searchQuery, openFilter) {
@@ -96,14 +104,14 @@ export async function fetchActivitiesForAdminList() {
     const constraints = [orderBy("name"), limit(ADMIN_QUERY_LIMIT)];
 
     const snapshot = await getDocs(query(activitiesCollection, ...constraints));
-    return filterActiveRecords(snapshot.docs.map(mapActivityDoc));
+    return filterActiveActivities(snapshot.docs.map(mapActivityDoc));
 }
 
 export async function fetchArchivedActivitiesForAdminList() {
     const constraints = [orderBy("name"), limit(ADMIN_QUERY_LIMIT)];
 
     const snapshot = await getDocs(query(activitiesCollection, ...constraints));
-    return filterArchivedRecords(snapshot.docs.map(mapActivityDoc));
+    return filterArchivedActivities(snapshot.docs.map(mapActivityDoc));
 }
 
 export async function fetchActivityTypes() {
@@ -116,7 +124,7 @@ export async function fetchActivityTypes() {
 
 export async function fetchActivities() {
     const docs = await getDocs(activitiesCollection);
-    return filterActiveRecords(docs.docs.map(mapActivityDoc));
+    return filterActiveActivities(docs.docs.map(mapActivityDoc));
 }
 
 export async function addActivity(activityData) {
