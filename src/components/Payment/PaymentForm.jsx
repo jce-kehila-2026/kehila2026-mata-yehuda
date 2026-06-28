@@ -13,7 +13,7 @@ import {
   validateRegistrationForm,
 } from "../../services/Payment/validation";
 import { apiPost } from "../../services/Payment/api.js";
-import { formatDisplayPrice } from "../../services/Payment/formatPrice";
+import { formatActivityPrice, formatDisplayPrice } from "../../services/Payment/formatPrice";
 import { notifyRegistrationBlock } from "../../services/Payment/registrationErrors";
 import { checkParticipantByIdNumber } from "../../services/Payment/participantService";
 
@@ -29,7 +29,14 @@ const PAYMENT_METHOD_LABELS = {
   paypal: "PayPal",
   bit: "Bit",
   cash: "מזומן",
+  free: "ללא תשלום",
 };
+
+const FREE_REGISTRATION_STEPS = [
+  { id: "id-check", label: "ת.ז." },
+  { id: "details", label: "פרטים אישיים" },
+  { id: "success", label: "סיום" },
+];
 
 function PaymentForm({
   onRegistrationCancelled,
@@ -64,7 +71,15 @@ function PaymentForm({
   const [idCheckMessage, setIdCheckMessage] = useState("");
   const [formData, setFormData] = useState(EMPTY_FORM_DATA);
 
-  const successStep = REGISTRATION_STEPS.length;
+  const isFreeActivity =
+    Boolean(paymentInfo?.isFree) ||
+    paymentInfo?.price == null ||
+    paymentInfo?.price === "" ||
+    Number(paymentInfo?.price) === 0;
+  const activeSteps = isFreeActivity
+    ? FREE_REGISTRATION_STEPS
+    : REGISTRATION_STEPS;
+  const successStep = activeSteps.length;
   const lookupBackLabel =
     lookupBackLabelOverride ??
     (registrationOnly || !paymentInfo ? "חזרה" : "חזרה להרשמה");
@@ -191,6 +206,10 @@ function PaymentForm({
     }
 
     if (currentStep === 2) {
+      if (isFreeActivity) {
+        await handleFreeRegistration();
+        return;
+      }
       goToPaymentMethodStep();
       return;
     }
@@ -202,6 +221,77 @@ function PaymentForm({
 
     if (currentStep === 4) {
       await handlePayment(e);
+    }
+  };
+
+  const handleFreeRegistration = async () => {
+    setFormError("");
+
+    const validation = validateRegistrationDetails(formData);
+    if (!validation.valid) {
+      setFormError(validation.message);
+      return;
+    }
+
+    const { firstName, idNumber, phone } = validation;
+
+    if (!paymentInfo?.activityId) {
+      setFormError("לא נטענו פרטי פעילות. בדקו את הקישור להרשמה.");
+      return;
+    }
+
+    const resolvedProgramId =
+      programId || paymentInfo.programId || "";
+
+    const registrationPayload = {
+      firstName,
+      idNumber,
+      phone,
+      activityId: paymentInfo.activityId,
+      programId: resolvedProgramId || undefined,
+    };
+
+    const persistRegistrationContext = () => {
+      localStorage.setItem("paymentAmount", "0");
+      localStorage.setItem("paymentCurrency", paymentInfo.currency);
+      localStorage.setItem("activityTitle", paymentInfo.title);
+      if (activityId) {
+        localStorage.setItem("activityId", activityId);
+      }
+      if (resolvedProgramId) {
+        localStorage.setItem("programId", resolvedProgramId);
+      }
+    };
+
+    setIsSubmitting(true);
+
+    try {
+      const { response, data } = await apiPost(
+        "/save-free-registration",
+        registrationPayload
+      );
+
+      if (response.status === 404) {
+        setFormError(
+          "שרת התשלומים לא מעודכן. הפעילו מחדש: cd server && npm run start:payment"
+        );
+        return;
+      }
+
+      if (data.success && data.paymentId) {
+        persistRegistrationContext();
+        saveCompletedRegistration(data.paymentId, "free");
+      } else {
+        notifyRegistrationBlock(
+          data.message || "הייתה שגיאה בהשלמת ההרשמה",
+          setFormError
+        );
+      }
+    } catch (error) {
+      console.error(error);
+      setFormError(error.message || "שגיאה בחיבור לשרת");
+    } finally {
+      setIsSubmitting(false);
     }
   };
 
@@ -437,7 +527,7 @@ function PaymentForm({
   if (completedPaymentId && showPaymentConfirmation && !showLookupScreen) {
     return (
       <PaymentFlowShell>
-        <RegistrationStepper currentStep={successStep} />
+        <RegistrationStepper currentStep={successStep} steps={activeSteps} />
         <PaymentStepHeader title="סיום" hint="ההרשמה הושלמה בהצלחה" />
         <PaymentSuccessMessage paymentMethod={completedPaymentMethod} />
         <PaymentFlowActions>
@@ -540,10 +630,10 @@ function PaymentForm({
                         {registration.amount != null && (
                           <p className="lookup-registration-meta">
                             סכום:{" "}
-                            {formatDisplayPrice(
-                              registration.amount,
-                              registration.currency
-                            )}
+                            {formatActivityPrice(
+                    registration.amount,
+                    registration.currency
+                  )}
                           </p>
                         )}
                       </div>
@@ -689,7 +779,7 @@ function PaymentForm({
 
   return (
     <PaymentFlowShell>
-      <RegistrationStepper currentStep={currentStep} />
+      <RegistrationStepper currentStep={currentStep} steps={activeSteps} />
 
       <form className="payment-form" onSubmit={handleFormSubmit}>
         {formError && (
@@ -755,7 +845,11 @@ function PaymentForm({
           <>
             <PaymentStepHeader
               title="פרטים אישיים"
-              hint="השלימו או עדכנו את הפרטים של המשתתף/ת"
+              hint={
+                isFreeActivity
+                  ? "פעילות זו ללא תשלום — השלימו את הפרטים להרשמה"
+                  : "השלימו או עדכנו את הפרטים של המשתתף/ת"
+              }
             />
 
             <div className="form-field">
@@ -804,9 +898,16 @@ function PaymentForm({
               <button
                 type="button"
                 className="primary-btn payment-flow-btn"
-                onClick={goToPaymentMethodStep}
+                onClick={
+                  isFreeActivity ? handleFreeRegistration : goToPaymentMethodStep
+                }
+                disabled={isSubmitting}
               >
-                המשך
+                {isFreeActivity
+                  ? isSubmitting
+                    ? "שולח..."
+                    : "השלמת הרשמה"
+                  : "המשך"}
                 <span className="payment-flow-btn__chevron" aria-hidden="true">
                   ‹
                 </span>
@@ -815,7 +916,7 @@ function PaymentForm({
           </>
         )}
 
-        {currentStep === 3 && (
+        {currentStep === 3 && !isFreeActivity && (
           <>
             <PaymentStepHeader title="אמצעי תשלום" hint="בחרו כיצד תשלמו" />
 
@@ -860,7 +961,7 @@ function PaymentForm({
           </>
         )}
 
-        {currentStep === 4 && (
+        {currentStep === 4 && !isFreeActivity && (
           <>
             <PaymentStepHeader title="אישור ותשלום" hint="בדקו את הפרטים ולחצו להשלמה" />
 
@@ -887,7 +988,7 @@ function PaymentForm({
               <div className="payment-summary__row payment-summary__row--total">
                 <dt>לתשלום</dt>
                 <dd>
-                  {formatDisplayPrice(paymentInfo.price, paymentInfo.currency)}
+                  {formatActivityPrice(paymentInfo.price, paymentInfo.currency)}
                 </dd>
               </div>
             </dl>

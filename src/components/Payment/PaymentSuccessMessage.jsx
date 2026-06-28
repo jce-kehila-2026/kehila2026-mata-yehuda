@@ -3,6 +3,15 @@ import { BIT_TRANSFER_PHONE } from "../../config/Payment/payment";
 function PaymentSuccessMessage({ paymentMethod }) {
   const method = (paymentMethod || "").toLowerCase();
 
+  if (method === "free") {
+    return (
+      <div className="payment-success-message">
+        <p className="payment-success-lead">ההרשמה הושלמה בהצלחה!</p>
+        <p>נרשמתם לפעילות החינמית. נתראה בפעילות!</p>
+      </div>
+    );
+  }
+
   if (method === "cash") {
     return (
       <div className="payment-success-message">

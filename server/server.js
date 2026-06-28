@@ -795,18 +795,43 @@ function resolveProgramId(clientProgramId, activityProgramIdOrData) {
 }
 
 function parseActivityPricing(data) {
-  const price = data.price ?? data.amount;
-  if (price == null || Number(price) <= 0) {
-    return null;
-  }
   const description =
     data.description || data.shortDescription || data.summary || "";
-
-  return {
-    price: Number(price),
+  const base = {
     currency: String(data.currency || "ILS").toUpperCase(),
     title: data.title || data.name || "פעילות",
     description: typeof description === "string" ? description.trim() : "",
+  };
+
+  const rawPrice = data.price ?? data.amount;
+  if (rawPrice == null || rawPrice === "") {
+    return {
+      ...base,
+      price: 0,
+      isFree: true,
+    };
+  }
+
+  const normalized =
+    typeof rawPrice === "string" ? rawPrice.trim() : rawPrice;
+
+  if (normalized === "") {
+    return {
+      ...base,
+      price: 0,
+      isFree: true,
+    };
+  }
+
+  const price = Number(normalized);
+  if (!Number.isFinite(price) || price < 0) {
+    return null;
+  }
+
+  return {
+    ...base,
+    price,
+    isFree: price === 0,
   };
 }
 
@@ -832,7 +857,7 @@ async function getActivityForPayment(activityDocId) {
 
   const pricing = parseActivityPricing(data);
   if (!pricing) {
-    throw new Error("לפעילות זו לא הוגדר מחיר");
+    throw new Error("מחיר הפעילות לא תקין");
   }
 
   return {
@@ -888,6 +913,7 @@ app.get("/activities", async (req, res) => {
           activityId: doc.id,
           title: pricing.title,
           price: pricing.price,
+          isFree: pricing.isFree,
           currency: pricing.currency,
           description: pricing.description,
           programId: readProgramIdFromActivityData(data),
@@ -958,6 +984,13 @@ app.post("/create-paypal-order", async (req, res) => {
   try {
     const { activityId, idNumber } = req.body;
     const activity = await getActivityForPayment(activityId);
+
+    if (activity.isFree) {
+      return res.status(400).json({
+        success: false,
+        message: "פעילות חינמית — אין צורך בתשלום",
+      });
+    }
 
     if (idNumber) {
       await assertNoDuplicateRegistration(idNumber, activity.activityId);
@@ -1231,6 +1264,13 @@ app.post("/save-cash-payment", async (req, res) => {
     } = req.body;
 
     const activity = await getActivityForPayment(activityId);
+    if (activity.isFree) {
+      return res.status(400).json({
+        success: false,
+        message: "פעילות חינמית — השתמשו בהרשמה חינמית",
+      });
+    }
+
     const resolvedProgramId = resolveProgramId(programId, activity.programId);
 
     const result = await savePaymentWithRegistration({
@@ -1276,6 +1316,13 @@ app.post("/save-bit-payment", async (req, res) => {
     } = req.body;
 
     const activity = await getActivityForPayment(activityId);
+    if (activity.isFree) {
+      return res.status(400).json({
+        success: false,
+        message: "פעילות חינמית — השתמשו בהרשמה חינמית",
+      });
+    }
+
     const resolvedProgramId = resolveProgramId(programId, activity.programId);
 
     const result = await savePaymentWithRegistration({
@@ -1304,16 +1351,70 @@ app.post("/save-bit-payment", async (req, res) => {
   }
 });
 
+app.post("/save-free-registration", async (req, res) => {
+  try {
+    const { firstName, idNumber, phone, activityId, programId } = req.body;
+
+    const activity = await getActivityForPayment(activityId);
+    if (!activity.isFree) {
+      return res.status(400).json({
+        success: false,
+        message: "לפעילות זו נדרש תשלום",
+      });
+    }
+
+    const resolvedProgramId = resolveProgramId(programId, activity.programId);
+
+    const result = await savePaymentWithRegistration({
+      firstName,
+      idNumber,
+      phone,
+      paymentMethod: "free",
+      amount: 0,
+      activityId: activity.activityId,
+      programId: resolvedProgramId,
+      currency: activity.currency,
+      activityTitle: activity.title,
+      status: "COMPLETED",
+      extraFields: {
+        message: "Free activity registration completed.",
+      },
+    });
+
+    res.json({
+      success: true,
+      message: "Free registration saved",
+      paymentId: result.paymentId,
+      registrationId: result.registrationId,
+      participantId: result.participantId,
+    });
+  } catch (error) {
+    console.error(error);
+    return handlePaymentRouteError(res, error, "שגיאה בשמירת הרשמה חינמית");
+  }
+});
+
 // =========================
 // Donations
 // =========================
 
 function parseDonationAmount(raw) {
   const amount = Number(raw);
-  if (!Number.isFinite(amount) || amount <= 0) {
+  if (!Number.isFinite(amount) || amount < 0) {
+    return null;
+  }
+  if (amount === 0) {
     return null;
   }
   return Math.round(amount * 100) / 100;
+}
+
+function donationAmountErrorMessage(raw) {
+  const amount = Number(raw);
+  if (Number.isFinite(amount) && amount === 0) {
+    return "לא ניתן לתרום 0 שקלים";
+  }
+  return "סכום תרומה לא תקין";
 }
 
 const DONATION_PAYMENT_LABELS = {
@@ -1438,7 +1539,7 @@ app.post("/donations/create-paypal-order", async (req, res) => {
     if (!amount) {
       return res.status(400).json({
         success: false,
-        message: "סכום תרומה לא תקין",
+        message: donationAmountErrorMessage(req.body?.amount),
       });
     }
 
@@ -1616,7 +1717,7 @@ app.post("/donations/capture-paypal-order", async (req, res) => {
     if (error.message === "INVALID_DONATION_AMOUNT") {
       return res.status(400).json({
         success: false,
-        message: "סכום תרומה לא תקין",
+        message: donationAmountErrorMessage(amount),
       });
     }
     return handlePaymentRouteError(res, error, "שגיאה באישור תשלום תרומה");
@@ -1631,7 +1732,7 @@ app.post("/donations/save-cash-payment", async (req, res) => {
     if (!parsedAmount) {
       return res.status(400).json({
         success: false,
-        message: "סכום תרומה לא תקין",
+        message: donationAmountErrorMessage(req.body?.amount),
       });
     }
 
@@ -1667,7 +1768,7 @@ app.post("/donations/save-bit-payment", async (req, res) => {
     if (!parsedAmount) {
       return res.status(400).json({
         success: false,
-        message: "סכום תרומה לא תקין",
+        message: donationAmountErrorMessage(req.body?.amount),
       });
     }
 

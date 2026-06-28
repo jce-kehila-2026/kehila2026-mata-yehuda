@@ -1,4 +1,4 @@
-import { collection, getDocs } from "firebase/firestore";
+import { collection, doc, getDoc, getDocs } from "firebase/firestore";
 import { db } from "../../config/firebase";
 
 export async function getAllActivities() {
@@ -8,4 +8,21 @@ export async function getAllActivities() {
     id: doc.id,
     ...doc.data(),
   }));
+}
+
+export async function getActivityById(activityId) {
+  if (!activityId) {
+    return null;
+  }
+
+  const snapshot = await getDoc(doc(db, "activities", activityId));
+
+  if (!snapshot.exists()) {
+    return null;
+  }
+
+  return {
+    id: snapshot.id,
+    ...snapshot.data(),
+  };
 }
