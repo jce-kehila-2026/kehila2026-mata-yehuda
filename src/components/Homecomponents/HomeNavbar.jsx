@@ -49,16 +49,23 @@ function HomeNavbar() {
         </button>
 
         <nav className="home-navbar__nav" aria-label="ניווט ראשי">
-          {NAV_ITEMS.map((item) => (
-            <button
-              key={item.id}
-              type="button"
-              className="home-navbar__link"
-              onClick={() => handleNavClick(item)}
-            >
-              {item.label}
-            </button>
-          ))}
+          {NAV_ITEMS.map((item) => {
+            const isActive = item.type === "page" && location.pathname === item.path;
+
+            return (
+              <button
+                key={item.id}
+                type="button"
+                className={`home-navbar__link${
+                  isActive ? " home-navbar__link--active" : ""
+                }`}
+                aria-current={isActive ? "page" : undefined}
+                onClick={() => handleNavClick(item)}
+              >
+                {item.label}
+              </button>
+            );
+          })}
         </nav>
 
         <div className="home-navbar__actions">
