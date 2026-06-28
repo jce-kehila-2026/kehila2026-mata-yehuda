@@ -29,3 +29,30 @@
   background: #fff8e1;
   border: 2px solid #e0c3a0;
 }
+
+/* ===== Staff-styled volunteer form: duplicate-id prompt =====
+   Scoped under the shared .community-join-staff-page root (same design
+   system as the Community Join page). The "עדכון פרטים" button inherits
+   the primary submit-button style from CommunityJoinForm.css.
+   UI only — duplicate handling/logic unchanged. */
+.community-join-staff-page .duplicate-prompt {
+  display: flex;
+  flex-direction: column;
+  gap: 0.85rem;
+}
+
+.community-join-staff-page .duplicate-prompt-actions {
+  display: flex;
+}
+
+.community-join-staff-page .form-message--prompt {
+  color: #8a6200;
+  background: #fff7df;
+  border: 1px solid #f2df9f;
+}
+
+@media (max-width: 768px) {
+  .community-join-staff-page .duplicate-prompt-actions {
+    width: 100%;
+  }
+}
