@@ -43,6 +43,15 @@ body {
   border: none;
 }
 
+#root:has(.day-center-page),
+#root:has(.community-join-staff-page) {
+  width: 100%;
+  max-width: none;
+  margin: 0;
+  padding: 0;
+  border: none;
+}
+
 @media (max-width: 768px) {
   #root {
     width: 100%;
