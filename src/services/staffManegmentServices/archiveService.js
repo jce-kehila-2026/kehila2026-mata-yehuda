@@ -4,7 +4,8 @@ import { deleteDoc, doc, serverTimestamp, updateDoc } from "firebase/firestore";
 export const ARCHIVE_COLLECTIONS = {
     activities: "activities",
     programs: "programs",
-    participants: "participants"
+    participants: "participants",
+    communitySubscriptions: "communitySubscriptions"
 };
 
 export async function archiveDocument(collectionName, documentId) {

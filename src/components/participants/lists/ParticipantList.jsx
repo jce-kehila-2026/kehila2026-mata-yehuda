@@ -19,15 +19,14 @@ import {
 } from "../../admin/AdminTableActions";
 import { useAdminList } from "../../../hooks/useAdminList";
 import {
+    archiveParticipantRecord,
     countParticipantRecords,
-    deleteParticipant,
     fetchParticipantsForAdminList,
     filterParticipantsList,
     getParticipantSortValue
 } from "../../../services/staffManegmentServices/participantService";
 import { fetchProgramsForAdminList } from "../../../services/staffManegmentServices/programService";
 import { formatDate } from "../../../utils/staffManegmentUtils/dateUtils";
-import { maskIdNumber } from "../../../utils/staffManegmentUtils/maskIdNumber";
 import { computeParticipantListStats } from "../../../utils/staffManegmentUtils/participantListStats";
 import {
     resolveCanonicalProgramId,
@@ -158,7 +157,7 @@ function ParticipantList({
         setArchiving(true);
 
         try {
-            await deleteParticipant(pendingArchiveParticipant.id);
+            await archiveParticipantRecord(pendingArchiveParticipant);
             setActionMessage("המשתתף הועבר לארכיון בהצלחה");
             await loadParticipants();
         } catch (err) {
@@ -401,9 +400,11 @@ function ParticipantList({
                                             </td>
                                             <td className="admin-data-table__numeric">
                                                 <MaskedIdDisplay
-                                                    idNumber={maskIdNumber(
-                                                        participant.id_number
-                                                    )}
+                                                    idNumber={
+                                                        toSafeString(
+                                                            participant.id_number
+                                                        ) || "—"
+                                                    }
                                                 />
                                             </td>
                                             <td className="admin-data-table__numeric">

@@ -116,7 +116,11 @@ export function resolveEditParticipantRegistration(
     if (programId || participant?.registrationId || embedded?.id) {
         return {
             id: participant?.registrationId || embedded?.id || null,
-            participant_id: participant?.id || "",
+            participant_id:
+                participant?.participantDocId ||
+                participant?.participant_id ||
+                participant?.id ||
+                "",
             program_id: programId || getRegistrationProgramId(embedded),
             activity_id: activityId || getRegistrationActivityId(embedded),
             registration_status:

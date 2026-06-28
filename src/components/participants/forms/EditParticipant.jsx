@@ -1,6 +1,7 @@
 import { useEffect, useState } from "react";
 import {
     completeParticipantRegistration,
+    getParticipantDocumentId,
     updateParticipant
 } from "../../../services/staffManegmentServices/participantService";
 import { fetchRegistrationByParticipantId } from "../../../services/staffManegmentServices/registrationService";
@@ -39,7 +40,9 @@ function EditParticipant({
         let cancelled = false;
 
         async function loadLinkedRegistration() {
-            if (!participant?.id) {
+            const participantDocId = getParticipantDocumentId(participant);
+
+            if (!participantDocId) {
                 return;
             }
 
@@ -47,7 +50,7 @@ function EditParticipant({
 
             try {
                 registration = await fetchRegistrationByParticipantId(
-                    participant.id
+                    participantDocId
                 );
             } catch (err) {
                 console.log(err);
@@ -76,7 +79,13 @@ function EditParticipant({
         return () => {
             cancelled = true;
         };
-    }, [participant?.id, participant?.registration, participant?.registrationId]);
+    }, [
+        participant,
+        participant?.id,
+        participant?.participantDocId,
+        participant?.registration,
+        participant?.registrationId
+    ]);
 
     useEffect(() => {
         if (!participant?.id) {
@@ -164,15 +173,17 @@ function EditParticipant({
         }
 
         try {
+            const participantDocId = getParticipantDocumentId(participant);
+
             if (completeRegistration) {
                 await completeParticipantRegistration(
-                    participant.id,
+                    participantDocId,
                     form,
                     registrationId || participant.registrationId
                 );
                 setSuccess("הרישום הושלם בהצלחה");
             } else {
-                await updateParticipant(participant.id, form);
+                await updateParticipant(participantDocId, form);
                 setSuccess("המשתתף עודכן בהצלחה");
             }
             setError("");

@@ -19,7 +19,17 @@ import {
     permanentlyDeleteDocument,
     restoreDocument
 } from "./archiveService";
-import { resolveCanonicalProgramId } from "../../utils/staffManegmentUtils/programConstants";
+import {
+    resolveCanonicalProgramId,
+    SUPPORTIVE_COMMUNITY_ID
+} from "../../utils/staffManegmentUtils/programConstants";
+import {
+    fetchArchivedCommunitySubscriptionsForAdminList,
+    fetchCommunitySubscriptionsForAdminList,
+    getParticipantDocumentId,
+    isCommunitySubscriptionRecord,
+    resolveParticipantArchiveTarget
+} from "./communitySubscriptionService";
 import { toSafeString, matchesPaymentStatusFilter, matchesRegistrationStatusFilter } from "../../utils/staffManegmentUtils/participantStatusLabels";
 import { shouldShowParticipantAsInitialRequest } from "../../utils/staffManegmentUtils/initialRequestFilters";
 import {
@@ -155,10 +165,51 @@ function mergeParticipantRegistrations(participants, registrations) {
     });
 }
 
-export async function countParticipantRecords() {
-    const participants = await fetchParticipantsForAdminList();
-    return participants.length;
+function isSupportiveCommunityParticipant(participant) {
+    return (
+        resolveCanonicalProgramId(participant?.program_id) ===
+        SUPPORTIVE_COMMUNITY_ID
+    );
 }
+
+async function fetchNonSupportiveCommunityParticipantsForAdminList() {
+    const [participants, registrations] = await Promise.all([
+        fetchAllParticipantsOrdered(),
+        fetchRegistrations()
+    ]);
+
+    return mergeParticipantRegistrations(
+        filterActiveRecords(participants),
+        registrations
+    ).filter((participant) => !isSupportiveCommunityParticipant(participant));
+}
+
+async function fetchNonSupportiveCommunityArchivedParticipantsForAdminList() {
+    const [participants, registrations] = await Promise.all([
+        fetchAllParticipantsOrdered(),
+        fetchRegistrations()
+    ]);
+
+    return mergeParticipantRegistrations(
+        filterArchivedRecords(participants),
+        registrations
+    ).filter((participant) => !isSupportiveCommunityParticipant(participant));
+}
+
+export async function countParticipantRecords() {
+    const [participantCount, communitySubscriptionCount] = await Promise.all([
+        fetchNonSupportiveCommunityParticipantsForAdminList().then(
+            (records) => records.length
+        ),
+        fetchCommunitySubscriptionsForAdminList().then(
+            (records) => records.length
+        )
+    ]);
+
+    return participantCount + communitySubscriptionCount;
+}
+
+export { getParticipantDocumentId, isCommunitySubscriptionRecord };
 
 async function fetchAllParticipantsOrdered() {
     const participantSnapshot = await getDocs(
@@ -170,33 +221,33 @@ async function fetchAllParticipantsOrdered() {
     );
 
     return participantSnapshot.docs.map((participantDoc) => ({
-        id: participantDoc.id,
-        ...participantDoc.data()
+        ...participantDoc.data(),
+        id: participantDoc.id
     }));
 }
 
 export async function fetchParticipantsForAdminList() {
-    const [participants, registrations] = await Promise.all([
-        fetchAllParticipantsOrdered(),
-        fetchRegistrations()
+    const [participantRecords, communitySubscriptions] = await Promise.all([
+        fetchNonSupportiveCommunityParticipantsForAdminList(),
+        fetchCommunitySubscriptionsForAdminList()
     ]);
 
-    return mergeParticipantRegistrations(
-        filterActiveRecords(participants),
-        registrations
-    );
+    return filterActiveRecords([
+        ...participantRecords,
+        ...communitySubscriptions
+    ]);
 }
 
 export async function fetchArchivedParticipantsForAdminList() {
-    const [participants, registrations] = await Promise.all([
-        fetchAllParticipantsOrdered(),
-        fetchRegistrations()
+    const [participantRecords, communitySubscriptions] = await Promise.all([
+        fetchNonSupportiveCommunityArchivedParticipantsForAdminList(),
+        fetchArchivedCommunitySubscriptionsForAdminList()
     ]);
 
-    return mergeParticipantRegistrations(
-        filterArchivedRecords(participants),
-        registrations
-    );
+    return filterArchivedRecords([
+        ...participantRecords,
+        ...communitySubscriptions
+    ]);
 }
 
 export {
@@ -316,10 +367,20 @@ export async function deleteParticipant(participantId) {
     return archiveDocument("participants", participantId);
 }
 
-export async function restoreParticipant(participantId) {
-    return restoreDocument("participants", participantId);
+export async function archiveParticipantRecord(record) {
+    const { collectionName, documentId } = resolveParticipantArchiveTarget(record);
+
+    return archiveDocument(collectionName, documentId);
 }
 
-export async function permanentlyDeleteParticipant(participantId) {
-    return permanentlyDeleteDocument("participants", participantId);
+export async function restoreParticipantRecord(record) {
+    const { collectionName, documentId } = resolveParticipantArchiveTarget(record);
+
+    return restoreDocument(collectionName, documentId);
+}
+
+export async function permanentlyDeleteParticipantRecord(record) {
+    const { collectionName, documentId } = resolveParticipantArchiveTarget(record);
+
+    return permanentlyDeleteDocument(collectionName, documentId);
 }
