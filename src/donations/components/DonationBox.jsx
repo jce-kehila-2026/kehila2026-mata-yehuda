@@ -1,27 +1,12 @@
 import { useNavigate } from "react-router-dom";
 import DonationAmountPicker from "./DonationAmountPicker";
 import { formatDisplayPrice } from "../../services/Payment/formatPrice";
+import { getDonationAmountValidation, resolveDonationAmount } from "../utils/donationAmount";
 import { useMemo, useState } from "react";
 import "../styles/donations.css";
 
 const DONATION_JAR_IMAGE =
   "/images/community-staff-dashboard/donations.png";
-
-function resolveAmount(selectedAmount, customAmount) {
-  if (customAmount !== "") {
-    const parsed = Number(customAmount);
-    if (!Number.isFinite(parsed) || parsed <= 0) {
-      return null;
-    }
-    return Math.round(parsed * 100) / 100;
-  }
-
-  if (typeof selectedAmount === "number" && selectedAmount > 0) {
-    return selectedAmount;
-  }
-
-  return null;
-}
 
 function DonationBox() {
   const navigate = useNavigate();
@@ -30,7 +15,7 @@ function DonationBox() {
   const [error, setError] = useState("");
 
   const amount = useMemo(
-    () => resolveAmount(selectedAmount, customAmount),
+    () => resolveDonationAmount(selectedAmount, customAmount),
     [selectedAmount, customAmount]
   );
 
@@ -48,12 +33,15 @@ function DonationBox() {
   const handleDonate = () => {
     setError("");
 
-    if (!amount) {
-      setError("אנא בחרו סכום תרומה");
+    const { amount: validAmount, error: amountError } =
+      getDonationAmountValidation(selectedAmount, customAmount);
+
+    if (!validAmount) {
+      setError(amountError);
       return;
     }
 
-    navigate(`/donations?amount=${amount}`);
+    navigate(`/donations?amount=${validAmount}`);
   };
 
   return (
