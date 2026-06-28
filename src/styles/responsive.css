@@ -5,6 +5,7 @@
   --app-padding-y: clamp(0.75rem, 2vw, 1.8rem);
   --app-section-gap: clamp(0.75rem, 2vw, 1.5rem);
   --app-content-max: min(100%, 1280px);
+  --home-navbar-height: clamp(4.25rem, 11vw, 5.25rem);
   --bp-tablet: 768px;
   --bp-desktop: 1024px;
 }
@@ -98,13 +99,13 @@ svg:not(:root) {
 /* ── Tablet and below ── */
 @media (max-width: 1024px) {
   .home-navbar__inner {
-    flex-wrap: wrap;
-    row-gap: 0.65rem;
+    flex-wrap: nowrap;
+    gap: clamp(0.35rem, 1.5vw, 0.55rem);
   }
 
   .home-navbar__nav {
-    flex: 1 1 100%;
-    order: 3;
+    flex: 1 1 auto;
+    order: 0;
     justify-content: flex-start;
   }
 }
@@ -113,6 +114,7 @@ svg:not(:root) {
 @media (max-width: 768px) {
   :root {
     --app-padding-x: clamp(0.75rem, 3.5vw, 1.25rem);
+    --home-navbar-height: clamp(3.65rem, 10vw, 4.35rem);
   }
 
   .staff-dashboard-panel__item--with-action {

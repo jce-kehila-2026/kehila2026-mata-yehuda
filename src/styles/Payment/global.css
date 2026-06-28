@@ -43,6 +43,14 @@ body {
   border: none;
 }
 
+@media (max-width: 768px) {
+  #root {
+    width: 100%;
+    max-width: none;
+    padding: 0;
+  }
+}
+
 .visually-hidden {
   position: absolute;
   width: 1px;

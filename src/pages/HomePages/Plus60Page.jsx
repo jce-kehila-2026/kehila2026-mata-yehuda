@@ -166,7 +166,9 @@ function Plus60Page() {
             לחוגים, מפגשים ואירועים מיוחדים המותאמים לחברי הקהילה.
           </p>
         </div>
+      </section>
 
+      <div className="plus60-main">
         <div
           className="plus60-view-tabs"
           role="tablist"
@@ -207,9 +209,7 @@ function Plus60Page() {
             תצוגת הפעילויות
           </button>
         </div>
-      </section>
 
-      <div className="plus60-main">
         {viewMode === "calendar" ? (
           <div
             id="plus60-panel-calendar"
