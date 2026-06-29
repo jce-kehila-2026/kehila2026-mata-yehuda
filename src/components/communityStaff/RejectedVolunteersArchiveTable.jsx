@@ -1,19 +1,21 @@
 import { useCallback, useEffect, useMemo, useState } from "react";
-import { Users, Clock, PlusCircle } from "lucide-react";
+import { Archive } from "lucide-react";
 import {
-  approveVolunteer,
-  getPendingVolunteerRequests,
-  rejectVolunteer,
+  deleteVolunteerRequest,
+  getRejectedVolunteerRequests,
+  restoreVolunteerRequest,
 } from "../../services/communityStaff/communityStaffService";
 import CommunityStaffMessage, {
   useCommunityStaffMessage,
 } from "./CommunityStaffMessage";
 import {
-  CommunityStaffCompactCard,
   CommunityStaffEmptyState,
   CommunityStaffStatusBadge,
-  getCommunityStaffStatusVariant,
 } from "./CommunityStaffListUi.jsx";
+import {
+  AdminTableActions,
+  AdminTableViewButton,
+} from "../admin/AdminTableActions.jsx";
 import VolunteerRequestDetailsModal from "./VolunteerRequestDetailsModal.jsx";
 
 const PAGE_SIZE_OPTIONS = [5, 10, 20];
@@ -37,7 +39,7 @@ function matchesSearch(volunteer, searchTerm) {
   );
 }
 
-function VolunteerRequestsTable() {
+function RejectedVolunteersArchiveTable() {
   const [volunteers, setVolunteers] = useState([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
@@ -45,8 +47,8 @@ function VolunteerRequestsTable() {
   const [pageSize, setPageSize] = useState(10);
   const [currentPage, setCurrentPage] = useState(1);
   const [selectedVolunteer, setSelectedVolunteer] = useState(null);
-  const [isApproving, setIsApproving] = useState(false);
-  const [isRejecting, setIsRejecting] = useState(false);
+  const [isRestoring, setIsRestoring] = useState(false);
+  const [isDeleting, setIsDeleting] = useState(false);
   const { message, showSuccess, showError, clearMessage } =
     useCommunityStaffMessage();
 
@@ -55,11 +57,11 @@ function VolunteerRequestsTable() {
     setError(null);
 
     try {
-      const pendingVolunteers = await getPendingVolunteerRequests();
-      setVolunteers(pendingVolunteers);
+      const rejectedVolunteers = await getRejectedVolunteerRequests();
+      setVolunteers(rejectedVolunteers);
     } catch (err) {
-      console.error("Failed to load volunteer requests:", err);
-      setError("שגיאה בטעינת בקשות ההתנדבות");
+      console.error("Failed to load rejected volunteer requests:", err);
+      setError("שגיאה בטעינת ארכיון בקשות ההתנדבות");
     } finally {
       setLoading(false);
     }
@@ -96,52 +98,35 @@ function VolunteerRequestsTable() {
     }
   }, [currentPage, totalPages]);
 
-  const volunteerStats = useMemo(() => {
-    let pending = 0;
-    let withOtherService = 0;
-
-    volunteers.forEach((volunteer) => {
-      if (getCommunityStaffStatusVariant(volunteer.status) === "pending") {
-        pending += 1;
-      }
-
-      if (volunteer.otherService) {
-        withOtherService += 1;
-      }
-    });
-
-    return { total: volunteers.length, pending, withOtherService };
-  }, [volunteers]);
-
-  const handleApprove = async (volunteerId) => {
-    setIsApproving(true);
+  const handleRestore = async (volunteerId) => {
+    setIsRestoring(true);
 
     try {
-      await approveVolunteer(volunteerId);
+      await restoreVolunteerRequest(volunteerId);
       setSelectedVolunteer(null);
-      showSuccess("המתנדב אושר בהצלחה");
+      showSuccess("הבקשה שוחזרה לרשימת הבקשות הממתינות");
       await loadVolunteers();
     } catch (err) {
-      console.error("Failed to approve volunteer:", err);
-      showError("אירעה שגיאה באישור המתנדב");
+      console.error("Failed to restore volunteer request:", err);
+      showError("אירעה שגיאה בשחזור הבקשה");
     } finally {
-      setIsApproving(false);
+      setIsRestoring(false);
     }
   };
 
-  const handleReject = async (volunteerId) => {
-    setIsRejecting(true);
+  const handleDelete = async (volunteerId) => {
+    setIsDeleting(true);
 
     try {
-      await rejectVolunteer(volunteerId);
+      await deleteVolunteerRequest(volunteerId);
       setSelectedVolunteer(null);
-      showSuccess("בקשת ההתנדבות נדחתה והועברה לארכיון");
+      showSuccess("הבקשה נמחקה לצמיתות");
       await loadVolunteers();
     } catch (err) {
-      console.error("Failed to reject volunteer:", err);
-      showError("אירעה שגיאה בדחיית הבקשה");
+      console.error("Failed to delete volunteer request:", err);
+      showError("אירעה שגיאה במחיקת הבקשה");
     } finally {
-      setIsRejecting(false);
+      setIsDeleting(false);
     }
   };
 
@@ -154,46 +139,20 @@ function VolunteerRequestsTable() {
       {!loading && !error ? (
         <section
           className="activities-mgmt-summary"
-          aria-label="סיכום בקשות התנדבות"
+          aria-label="סיכום ארכיון בקשות התנדבות"
         >
           <div className="activities-mgmt-summary__card activities-mgmt-summary__card--neutral">
             <span className="activities-mgmt-summary__icon">
-              <Users size={22} strokeWidth={2} aria-hidden="true" />
+              <Archive size={22} strokeWidth={2} aria-hidden="true" />
             </span>
             <span className="activities-mgmt-summary__value">
-              {volunteerStats.total}
-            </span>
-            <span className="activities-mgmt-summary__label">סה״כ בקשות</span>
-            <span className="activities-mgmt-summary__hint">
-              כל בקשות ההתנדבות שהתקבלו
-            </span>
-          </div>
-          <div className="activities-mgmt-summary__card activities-mgmt-summary__card--open">
-            <span className="activities-mgmt-summary__icon">
-              <Clock size={22} strokeWidth={2} aria-hidden="true" />
-            </span>
-            <span className="activities-mgmt-summary__value">
-              {volunteerStats.pending}
+              {volunteers.length}
             </span>
             <span className="activities-mgmt-summary__label">
-              ממתינות לאישור
+              בקשות שנדחו
             </span>
             <span className="activities-mgmt-summary__hint">
-              מתנדבים שטרם אושרו
-            </span>
-          </div>
-          <div className="activities-mgmt-summary__card activities-mgmt-summary__card--participants">
-            <span className="activities-mgmt-summary__icon">
-              <PlusCircle size={22} strokeWidth={2} aria-hidden="true" />
-            </span>
-            <span className="activities-mgmt-summary__value">
-              {volunteerStats.withOtherService}
-            </span>
-            <span className="activities-mgmt-summary__label">
-              כולל שירות אחר
-            </span>
-            <span className="activities-mgmt-summary__hint">
-              בקשות עם שירות נוסף
+              בקשות התנדבות שהועברו לארכיון
             </span>
           </div>
         </section>
@@ -201,9 +160,9 @@ function VolunteerRequestsTable() {
 
       <div className="admin-list-toolbar staff-form staff-list-filters">
         <div className="admin-list-toolbar__search">
-          <label htmlFor="volunteer-requests-search">חיפוש</label>
+          <label htmlFor="rejected-volunteers-search">חיפוש</label>
           <input
-            id="volunteer-requests-search"
+            id="rejected-volunteers-search"
             type="search"
             value={searchTerm}
             onChange={(event) => setSearchTerm(event.target.value)}
@@ -212,11 +171,11 @@ function VolunteerRequestsTable() {
         </div>
 
         <div className="admin-list-toolbar__page-size">
-          <label htmlFor="volunteer-requests-page-size">
+          <label htmlFor="rejected-volunteers-page-size">
             מספר בקשות בעמוד
           </label>
           <select
-            id="volunteer-requests-page-size"
+            id="rejected-volunteers-page-size"
             value={pageSize}
             onChange={(event) => setPageSize(Number(event.target.value))}
           >
@@ -234,36 +193,51 @@ function VolunteerRequestsTable() {
       ) : null}
 
       {loading ? (
-        <p className="activities-mgmt-loading">טוען בקשות התנדבות...</p>
+        <p className="activities-mgmt-loading">טוען ארכיון בקשות התנדבות...</p>
       ) : null}
 
       {!loading && !error ? (
         <div className="community-staff-request-list community-volunteer-requests__card">
           {filteredVolunteers.length === 0 ? (
             <CommunityStaffEmptyState
-              icon={Users}
+              icon={Archive}
               message={
                 volunteers.length === 0
-                  ? "אין בקשות ממתינות כרגע"
+                  ? "אין בקשות שנדחו בארכיון"
                   : "לא נמצאו בקשות התואמות לחיפוש"
               }
             />
           ) : (
             <ul className="community-staff-compact-list">
               {paginatedVolunteers.map((volunteer) => (
-                <CommunityStaffCompactCard
+                <li
                   key={volunteer.id}
-                  name={volunteer.fullNameDisplay}
-                  phone={volunteer.phone || "—"}
-                  status={
-                    <CommunityStaffStatusBadge status={volunteer.status} />
-                  }
-                  primaryLabel="אישור"
-                  viewLabel="צפייה"
-                  onPrimaryClick={() => setSelectedVolunteer(volunteer)}
-                  onViewDetails={() => setSelectedVolunteer(volunteer)}
-                  primaryDisabled={isApproving || isRejecting}
-                />
+                  className="community-staff-compact-card community-staff-compact-card--inactive"
+                >
+                  <div className="community-staff-compact-card__main">
+                    <div className="community-staff-compact-card__identity">
+                      <span className="community-staff-compact-card__name">
+                        {volunteer.fullNameDisplay}
+                      </span>
+                      <span className="community-staff-compact-card__phone">
+                        {volunteer.phone || "—"}
+                      </span>
+                    </div>
+                    <div className="community-staff-compact-card__status-wrap">
+                      <CommunityStaffStatusBadge status={volunteer.status} />
+                    </div>
+                  </div>
+
+                  <div className="community-staff-compact-card__actions">
+                    <AdminTableActions>
+                      <AdminTableViewButton
+                        onClick={() => setSelectedVolunteer(volunteer)}
+                        label="צפייה"
+                        disabled={isRestoring || isDeleting}
+                      />
+                    </AdminTableActions>
+                  </div>
+                </li>
               ))}
             </ul>
           )}
@@ -299,13 +273,13 @@ function VolunteerRequestsTable() {
       <VolunteerRequestDetailsModal
         volunteer={selectedVolunteer}
         onClose={() => setSelectedVolunteer(null)}
-        onApprove={handleApprove}
-        isApproving={isApproving}
-        onReject={handleReject}
-        isRejecting={isRejecting}
+        onRestore={handleRestore}
+        isRestoring={isRestoring}
+        onDelete={handleDelete}
+        isDeleting={isDeleting}
       />
     </div>
   );
 }
 
-export default VolunteerRequestsTable;
+export default RejectedVolunteersArchiveTable;

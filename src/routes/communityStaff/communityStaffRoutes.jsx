@@ -4,6 +4,7 @@ import CommunityJoinRequestsPage from "../../pages/communityStaff/CommunityJoinR
 import CommunityMembersPage from "../../pages/communityStaff/CommunityMembersPage";
 import CommunitySettingsPage from "../../pages/communityStaff/CommunitySettingsPage";
 import VolunteerRequestsPage from "../../pages/communityStaff/VolunteerRequestsPage";
+import RejectedVolunteersArchivePage from "../../pages/communityStaff/RejectedVolunteersArchivePage";
 import VolunteersManagementPage from "../../pages/communityStaff/VolunteersManagementPage";
 import ActiveVolunteerMatchesPage from "../../pages/communityStaff/ActiveVolunteerMatchesPage";
 import { withStaffAuthGate } from "../../components/staff/StaffAuthGate";
@@ -24,6 +25,10 @@ const communityStaffRoutes = [
   {
     path: "/community-staff/volunteer-requests",
     Component: withStaffAuthGate(VolunteerRequestsPage),
+  },
+  {
+    path: "/community-staff/volunteer-requests/archive",
+    Component: withStaffAuthGate(RejectedVolunteersArchivePage),
   },
   {
     path: "/community-staff/volunteers",
