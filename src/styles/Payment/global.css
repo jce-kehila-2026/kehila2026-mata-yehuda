@@ -21,30 +21,45 @@ body {
 }
 
 #root {
-  width: 1126px;
-  max-width: 100%;
+  width: 100%;
+  max-width: min(100%, 1126px);
   margin: 0 auto;
   min-height: 100svh;
   box-sizing: border-box;
-  padding: 0 16px;
+  padding: 0 clamp(0.75rem, 3vw, 1rem);
   direction: rtl;
   text-align: right;
 }
 
-#root:has(.supportive-community-page) {
-  width: 100%;
-  max-width: none;
-  margin: 0;
-  padding: 0;
-  border: none;
-}
-
+#root:has(.home-page),
+#root:has(.plus60-page),
+#root:has(.info-page),
+#root:has(.day-center-page),
+#root:has(.supportive-community-page),
+#root:has(.community-join-staff-page),
 #root:has(.staff-dashboard-root) {
   width: 100%;
   max-width: none;
   margin: 0;
   padding: 0;
   border: none;
+}
+
+#root:has(.day-center-page),
+#root:has(.community-join-staff-page) {
+  width: 100%;
+  max-width: none;
+  margin: 0;
+  padding: 0;
+  border: none;
+}
+
+@media (max-width: 768px) {
+  #root {
+    width: 100%;
+    max-width: none;
+    padding: 0;
+  }
 }
 
 .visually-hidden {

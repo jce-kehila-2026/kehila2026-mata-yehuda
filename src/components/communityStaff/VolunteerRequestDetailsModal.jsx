@@ -34,13 +34,38 @@ function formatGender(gender) {
   return gender || "—";
 }
 
+const CONFIRM_CONFIG = {
+  approve: {
+    message: "לאשר את המתנדב/ה?",
+    confirmLabel: "אישור",
+  },
+  reject: {
+    message: "לדחות את בקשת ההתנדבות?",
+    confirmLabel: "דחייה",
+  },
+  restore: {
+    message: "לשחזר את הבקשה לרשימת הבקשות הממתינות?",
+    confirmLabel: "שחזור",
+  },
+  delete: {
+    message: "למחוק לצמיתות את בקשת ההתנדבות? לא ניתן לשחזר פעולה זו.",
+    confirmLabel: "מחיקה לצמיתות",
+  },
+};
+
 function VolunteerRequestDetailsModal({
   volunteer,
   onClose,
   onApprove,
-  isApproving,
+  isApproving = false,
+  onReject,
+  isRejecting = false,
+  onRestore,
+  isRestoring = false,
+  onDelete,
+  isDeleting = false,
 }) {
-  const [showApproveConfirm, setShowApproveConfirm] = useState(false);
+  const [confirmAction, setConfirmAction] = useState(null);
 
   if (!volunteer) {
     return null;
@@ -52,10 +77,23 @@ function VolunteerRequestDetailsModal({
       ? `${servicesDisplay}, ${volunteer.otherService}`
       : volunteer.otherService || servicesDisplay;
 
-  const handleConfirmApprove = () => {
-    onApprove(volunteer.id);
-    setShowApproveConfirm(false);
+  const busy = isApproving || isRejecting || isRestoring || isDeleting;
+
+  const handleConfirm = () => {
+    if (confirmAction === "approve") {
+      onApprove?.(volunteer.id);
+    } else if (confirmAction === "reject") {
+      onReject?.(volunteer.id);
+    } else if (confirmAction === "restore") {
+      onRestore?.(volunteer.id);
+    } else if (confirmAction === "delete") {
+      onDelete?.(volunteer.id);
+    }
+
+    setConfirmAction(null);
   };
+
+  const activeConfirm = confirmAction ? CONFIRM_CONFIG[confirmAction] : null;
 
   return (
     <>
@@ -64,14 +102,51 @@ function VolunteerRequestDetailsModal({
         titleId="volunteer-request-details-title"
         onClose={onClose}
         footer={
-          <button
-            type="button"
-            className="community-volunteer-requests__approve-btn"
-            onClick={() => setShowApproveConfirm(true)}
-            disabled={isApproving}
-          >
-            {isApproving ? "שומר..." : "אישור / שמירת מתנדב"}
-          </button>
+          <>
+            {onRestore ? (
+              <button
+                type="button"
+                className="community-volunteer-requests__approve-btn"
+                onClick={() => setConfirmAction("restore")}
+                disabled={busy}
+              >
+                {isRestoring ? "משחזר..." : "שחזור בקשה"}
+              </button>
+            ) : null}
+
+            {onApprove ? (
+              <button
+                type="button"
+                className="community-volunteer-requests__approve-btn"
+                onClick={() => setConfirmAction("approve")}
+                disabled={busy}
+              >
+                {isApproving ? "שומר..." : "אישור / שמירת מתנדב"}
+              </button>
+            ) : null}
+
+            {onReject ? (
+              <button
+                type="button"
+                className="community-volunteer-requests__reject-btn"
+                onClick={() => setConfirmAction("reject")}
+                disabled={busy}
+              >
+                {isRejecting ? "דוחה..." : "דחיית בקשה"}
+              </button>
+            ) : null}
+
+            {onDelete ? (
+              <button
+                type="button"
+                className="community-volunteer-requests__reject-btn"
+                onClick={() => setConfirmAction("delete")}
+                disabled={busy}
+              >
+                {isDeleting ? "מוחק..." : "מחיקה לצמיתות"}
+              </button>
+            ) : null}
+          </>
         }
       >
         <dl className="community-staff-details-grid">
@@ -105,10 +180,11 @@ function VolunteerRequestDetailsModal({
       </CommunityStaffDetailsModal>
 
       <CommunityStaffConfirmModal
-        message={showApproveConfirm ? "לאשר את המתנדב/ה?" : null}
-        onConfirm={handleConfirmApprove}
-        onCancel={() => setShowApproveConfirm(false)}
-        confirming={isApproving}
+        message={activeConfirm?.message || null}
+        confirmLabel={activeConfirm?.confirmLabel}
+        onConfirm={handleConfirm}
+        onCancel={() => setConfirmAction(null)}
+        confirming={busy}
       />
     </>
   );

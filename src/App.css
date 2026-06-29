@@ -63,8 +63,11 @@ button:active {
     display: flex;
     flex-direction: column;
     gap: 15px;
-    width: 300px;
+    width: min(100%, 300px);
+    max-width: 100%;
     margin: 20px auto;
+    padding-inline: var(--app-padding-x, 1rem);
+    box-sizing: border-box;
 }
 
 .dashboard-buttons button {

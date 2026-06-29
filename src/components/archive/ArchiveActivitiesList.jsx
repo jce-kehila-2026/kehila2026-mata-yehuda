@@ -146,7 +146,7 @@ function ArchiveActivitiesList({ refreshKey = 0, onActionMessage }) {
     }
 
     return (
-        <div className="staff-list-section admin-list-section admin-list-section--archive-activities">
+        <div className="staff-list-section admin-list-section admin-list-section--archive admin-list-section--archive-activities">
             <div className="admin-list-header">
                 <h2 className="admin-list-header__title">ארכיון פעילויות</h2>
             </div>
@@ -175,7 +175,7 @@ function ArchiveActivitiesList({ refreshKey = 0, onActionMessage }) {
                 <p className="staff-alert staff-alert--error">{loadError}</p>
             ) : null}
 
-            {loading ? <p>טוען...</p> : null}
+            {loading ? <p className="admin-archive-loading">טוען...</p> : null}
 
             {!loading && emptyState}
 

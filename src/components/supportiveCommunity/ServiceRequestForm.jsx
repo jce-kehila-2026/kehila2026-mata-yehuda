@@ -19,14 +19,24 @@ function validateServiceRequest(form) {
   return "";
 }
 
-function ServiceRequestForm({ participantDocId, subscriptionDocId }) {
+function ServiceRequestForm({
+  participantDocId,
+  subscriptionDocId,
+  initialServices = [],
+  initialLanguages = [],
+  initialOtherService = "",
+}) {
   const [serviceRequest, setServiceRequest] = useState({
-    services: [],
-    otherService: "",
-    languages: [],
+    services: Array.isArray(initialServices) ? [...initialServices] : [],
+    otherService: initialOtherService || "",
+    languages: Array.isArray(initialLanguages) ? [...initialLanguages] : [],
     notes: "",
   });
   const [message, setMessage] = useState({ type: "", text: "" });
+
+  const hasPreviousSelections =
+    (Array.isArray(initialServices) && initialServices.length > 0) ||
+    (Array.isArray(initialLanguages) && initialLanguages.length > 0);
 
   const updateField = (field, value) => {
     setServiceRequest((prev) => ({
@@ -100,6 +110,12 @@ function ServiceRequestForm({ participantDocId, subscriptionDocId }) {
             בחרו את סוג העזרה הדרושה. צוות העמותה יבדוק את הבקשה ויתאם מתנדב
             מתאים.
           </p>
+
+          {hasPreviousSelections && (
+            <p className="form-hint">
+              הבחירות הקודמות שלכם מסומנות — ניתן לעדכן אותן לפי הצורך.
+            </p>
+          )}
 
           <HelpServicesSelector
             selectedServices={serviceRequest.services}

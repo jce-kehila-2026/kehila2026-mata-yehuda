@@ -17,7 +17,7 @@
   --radius-lg: 16px;
   --content-max: 1140px;
   --hero-max: 1400px;
-  --hero-width: min(92%, calc(100vw - 1.5rem));
+  --hero-width: min(92%, 100%);
   --hero-pad-x: clamp(0.65rem, 2vw, 1rem);
   --hero-aspect: 16 / 7;
   --prose-max: 52ch;
@@ -885,7 +885,7 @@
 
 @media (min-width: 640px) {
   .supportive-community-page {
-    --hero-width: min(90%, calc(100vw - 1.5rem));
+    --hero-width: min(90%, 100%);
     --hero-pad-x: 0.65rem;
   }
 
@@ -910,7 +910,7 @@
 @media (min-width: 900px) {
   .supportive-community-page {
     --hero-max: 1400px;
-    --hero-width: min(88%, calc(100vw - 2rem));
+    --hero-width: min(88%, 100%);
     --hero-pad-x: 0.5rem;
     --hero-aspect: 16 / 7;
   }
@@ -1011,7 +1011,7 @@
 
 @media (min-width: 1280px) {
   .supportive-community-page {
-    --hero-width: min(90%, calc(100vw - 2.5rem));
+    --hero-width: min(90%, 100%);
   }
 
   .supportive-community-page .hero-panel {

@@ -4,13 +4,16 @@
   margin: 0 auto;
   width: 100%;
   max-width: 100%;
-  padding: 0 var(--app-padding-x, clamp(0.85rem, 3vw, 2rem)) 0;
+  min-width: 0;
+  padding: var(--home-navbar-height, clamp(4.25rem, 11vw, 5.25rem))
+    var(--app-padding-x, clamp(0.85rem, 3vw, 2rem)) 0;
   box-sizing: border-box;
+  overflow-x: hidden;
 }
 
 .home-section-anchor,
 #contact {
-  scroll-margin-top: clamp(5rem, 14vw, 6.5rem);
+  scroll-margin-top: var(--home-navbar-height, clamp(4.25rem, 11vw, 5.25rem));
 }
 
 .home-section-eyebrow {
@@ -36,14 +39,18 @@
 
 /* Navbar */
 .home-navbar {
-  position: sticky;
+  position: fixed;
   top: 0;
-  z-index: 1000;
-  margin: 0 calc(-1 * var(--app-padding-x, clamp(0.85rem, 3vw, 2rem))) 2rem;
+  left: 0;
+  right: 0;
+  width: 100%;
+  z-index: 1100;
+  margin: 0;
   background: rgba(255, 255, 255, 0.96);
   border-bottom: 1px solid rgba(45, 125, 70, 0.12);
   box-shadow: 0 8px 24px rgba(24, 84, 57, 0.08);
   backdrop-filter: blur(10px);
+  box-sizing: border-box;
 }
 
 .home-navbar__inner {
@@ -129,16 +136,11 @@
   margin-bottom: 0;
 }
 
-.home-page .programs-grid .program-card,
-.home-action-cards .request-box,
-.home-action-cards .home-donations-section .donation-box {
-  background-color: var(--color-accent-light);
-}
-
 .home-page .programs-grid .program-card {
-  border: 1.5px solid var(--color-border);
-  border-radius: var(--radius);
-  box-shadow: none;
+  background: var(--color-accent-light, #faf4ec);
+  border: 1px solid rgba(229, 194, 159, 0.45);
+  border-radius: 22px;
+  box-shadow: 0 10px 28px rgba(31, 92, 56, 0.08);
 }
 
 .home-programs-actions {
@@ -189,12 +191,21 @@
 }
 
 .home-page .program-card__title {
-  font-weight: 700;
+  font-weight: 800;
+  color: #1f2a24;
+}
+
+.home-page .program-card__description {
+  display: block;
+  overflow: visible;
+  -webkit-line-clamp: unset;
+  -webkit-box-orient: unset;
+  text-overflow: unset;
 }
 
 .home-services-header {
   direction: rtl;
-  margin: 0 0 1.25rem;
+  margin: 0 0 0.65rem;
   padding: 0;
 }
 
@@ -251,7 +262,7 @@
 
 @media (max-width: 700px) {
   .home-services-header {
-    margin-bottom: 1rem;
+    margin-bottom: 0.5rem;
     padding-inline: 0.15rem;
   }
 
@@ -452,7 +463,7 @@
 .home-hero-block {
   position: relative;
   width: 100%;
-  margin-bottom: 0.35rem;
+  margin-bottom: 0;
 }
 
 .hero-section {
@@ -1550,30 +1561,105 @@
 
 /* Services */
 .home-services-section {
-  margin-bottom: 2.5rem;
+  position: relative;
+  z-index: 3;
+  margin: calc(-1 * clamp(0.85rem, 2.5vw, 1.75rem)) 0 2.5rem;
+  padding: clamp(0.85rem, 2vw, 1.15rem) clamp(0.85rem, 2.5vw, 1.5rem)
+    clamp(1.5rem, 3vw, 2rem);
+  border-radius: clamp(22px, 3vw, 30px);
+  background:
+    radial-gradient(ellipse 90% 55% at 100% 0%, rgba(45, 125, 70, 0.1), transparent 58%),
+    radial-gradient(ellipse 75% 50% at 0% 100%, rgba(216, 145, 94, 0.08), transparent 52%),
+    linear-gradient(165deg, #f7fbf8 0%, #faf4ec 48%, #f2f8f4 100%);
+  border: 1px solid rgba(45, 125, 70, 0.11);
+  box-shadow:
+    0 18px 42px rgba(24, 84, 57, 0.07),
+    inset 0 1px 0 rgba(255, 255, 255, 0.75);
+  overflow: visible;
+  isolation: isolate;
+}
+
+.home-services-section::before {
+  content: "";
+  position: absolute;
+  inset: 0;
+  border-radius: inherit;
+  background:
+    radial-gradient(circle at 18% 22%, rgba(91, 169, 107, 0.1) 0%, transparent 24%),
+    radial-gradient(circle at 82% 78%, rgba(45, 125, 70, 0.08) 0%, transparent 26%);
+  pointer-events: none;
+  z-index: 0;
+}
+
+.home-services-section::after {
+  content: "";
+  position: absolute;
+  top: -28%;
+  right: -12%;
+  left: auto;
+  width: min(380px, 52vw);
+  height: min(380px, 52vw);
+  border-radius: 50%;
+  background: radial-gradient(circle, rgba(184, 224, 196, 0.28) 0%, transparent 70%);
+  pointer-events: none;
+  z-index: 0;
+}
+
+.home-services-section > *:not(.home-services-section__heart-deco) {
+  position: relative;
+  z-index: 1;
+}
+
+.home-services-section__heart-deco {
+  position: absolute;
+  right: clamp(-0.5rem, -0.8vw, 0rem);
+  left: auto;
+  top: clamp(-1.5rem, -3vw, -0.5rem);
+  width: clamp(165px, 24vw, 290px);
+  height: auto;
+  object-fit: contain;
+  pointer-events: none;
+  z-index: 0;
+  opacity: 0.9;
+  background: transparent;
+  transform: scaleX(-1);
 }
 
 .home-services-section__header {
   text-align: center;
-  margin-bottom: 1.75rem;
+  margin-bottom: clamp(0.55rem, 1.6vw, 0.85rem);
 }
 
 .home-services-section__subtitle {
   margin: 0 auto;
   max-width: 40rem;
   color: #4d5c52;
-  line-height: 1.7;
+  line-height: 1.6;
   font-size: clamp(0.98rem, 2.5vw, 1.08rem);
+  text-align: center;
 }
 
-.programs-grid {
-  display: grid;
-  grid-template-columns: repeat(3, minmax(0, 1fr));
-  gap: var(--app-section-gap, 1.5rem);
+@media (max-width: 900px) {
+  .home-services-section__heart-deco {
+    width: clamp(130px, 24vw, 185px);
+    top: clamp(-1.1rem, -2.5vw, -0.35rem);
+    opacity: 0.82;
+  }
 }
 
-.programs-grid .program-card {
-  margin-bottom: 0;
+@media (max-width: 640px) {
+  .home-services-section__heart-deco {
+    width: clamp(110px, 30vw, 145px);
+    right: -0.25rem;
+    left: auto;
+    top: clamp(-0.75rem, -2vw, -0.2rem);
+    opacity: 0.78;
+  }
+}
+
+.home-action-cards .request-box,
+.home-action-cards .home-donations-section .donation-box {
+  background-color: var(--color-accent-light);
 }
 
 /* Location map modal */
@@ -1926,21 +2012,50 @@
 @media (max-width: 900px) {
   .home-navbar__inner {
     flex-wrap: nowrap;
-    gap: 0.5rem;
+    align-items: center;
+    gap: clamp(0.35rem, 1.5vw, 0.55rem);
+    padding-top: 0.65rem;
+    padding-bottom: 0.65rem;
+  }
+
+  .home-navbar__brand {
+    gap: 0.4rem;
+    min-width: 0;
+    flex: 0 1 auto;
   }
 
   .home-navbar__nav {
-    gap: clamp(1rem, 2.8vw, 1.75rem);
-    justify-content: center;
+    flex: 1 1 auto;
+    order: 0;
+    gap: clamp(0.45rem, 2vw, 0.85rem);
+    justify-content: flex-start;
+    padding-inline: 0.1rem;
+  }
+
+  .home-navbar button.home-navbar__link {
+    padding: 0.38rem 0.55rem;
+    font-size: clamp(0.7rem, 2.6vw, 0.84rem);
+    white-space: nowrap;
+    flex-shrink: 0;
   }
 
   .home-navbar__title {
-    font-size: 0.9rem;
+    font-size: clamp(0.78rem, 2.4vw, 0.9rem);
+    overflow: hidden;
+    text-overflow: ellipsis;
+    max-width: 7.5rem;
   }
 
   .home-navbar__login {
-    padding: 0.45rem 0.85rem;
-    font-size: 0.85rem;
+    padding: 0.38rem 0.65rem;
+    font-size: clamp(0.72rem, 2.5vw, 0.82rem);
+    white-space: nowrap;
+  }
+
+  .home-navbar__logo {
+    width: 34px;
+    height: 34px;
+    transform: scale(1.35);
   }
 }
 
@@ -1949,15 +2064,28 @@
     display: none;
   }
 
+  .home-navbar__inner {
+    gap: 0.3rem;
+  }
+
   .home-navbar__nav {
-    gap: clamp(0.85rem, 3.5vw, 1.25rem);
-    justify-content: flex-start;
+    gap: clamp(0.35rem, 2.2vw, 0.65rem);
+  }
+
+  .home-navbar button.home-navbar__link {
+    padding: 0.35rem 0.45rem;
+    font-size: clamp(0.66rem, 3vw, 0.78rem);
+  }
+
+  .home-navbar__login {
+    padding: 0.35rem 0.55rem;
+    font-size: 0.72rem;
   }
 
   .home-navbar__logo {
-    width: 36px;
-    height: 36px;
-    transform: scale(1.55);
+    width: 32px;
+    height: 32px;
+    transform: scale(1.3);
   }
 }
 
@@ -2012,7 +2140,7 @@
 .home-requests-wrap {
   width: calc(100% + 2 * var(--app-padding-x, clamp(0.85rem, 3vw, 2rem)));
   margin-inline: calc(-1 * var(--app-padding-x, clamp(0.85rem, 3vw, 2rem)));
-  scroll-margin-top: clamp(4.5rem, 14vw, 6.5rem);
+  scroll-margin-top: var(--home-navbar-height, clamp(4.25rem, 11vw, 5.25rem));
 }
 
 .home-action-cards .contact-request-grid {
@@ -2027,7 +2155,7 @@
   position: relative;
   z-index: 2;
   margin-bottom: 0;
-  scroll-margin-top: clamp(4.5rem, 14vw, 6.5rem);
+  scroll-margin-top: var(--home-navbar-height, clamp(4.25rem, 11vw, 5.25rem));
 }
 
 .home-donations-wrap .donation-box-section {

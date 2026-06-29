@@ -1343,7 +1343,16 @@
 }
 
 .community-join-requests__search input {
-  min-width: 320px;
+  min-width: 0;
+  width: 100%;
+  max-width: 100%;
+  box-sizing: border-box;
+}
+
+@media (min-width: 769px) {
+  .community-join-requests__search input {
+    min-width: 280px;
+  }
 }
 
 .community-join-requests__search input:focus,
@@ -2065,6 +2074,33 @@
 
 .community-volunteer-requests__approve-btn:focus-visible {
   outline: 2px solid #2d7d46;
+  outline-offset: 2px;
+}
+
+.community-volunteer-requests__reject-btn {
+  font-family: inherit;
+  font-size: 0.95rem;
+  font-weight: 600;
+  color: #b42318;
+  background: #ffffff;
+  border: 1px solid #b42318;
+  border-radius: 4px;
+  padding: 0.65rem 1rem;
+  cursor: pointer;
+}
+
+.community-volunteer-requests__reject-btn:hover:not(:disabled) {
+  color: #8f1d14;
+  background: rgba(180, 35, 24, 0.06);
+}
+
+.community-volunteer-requests__reject-btn:disabled {
+  opacity: 0.7;
+  cursor: not-allowed;
+}
+
+.community-volunteer-requests__reject-btn:focus-visible {
+  outline: 2px solid #b42318;
   outline-offset: 2px;
 }
 
@@ -2896,6 +2932,7 @@
   .community-staff-details-modal__footer .community-members__action-btn,
   .community-staff-details-modal__footer .community-join-requests__complete-btn,
   .community-staff-details-modal__footer .community-volunteer-requests__approve-btn,
+  .community-staff-details-modal__footer .community-volunteer-requests__reject-btn,
   .community-staff-details-modal__footer .community-help-requests__match-btn,
   .community-staff-details-modal__footer .community-volunteers-mgmt__action-btn,
   .community-staff-details-modal__footer .community-active-matches__action-btn {

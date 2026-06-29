@@ -1,4 +1,5 @@
 import { useEffect, useRef, useState } from "react";
+import { createPortal } from "react-dom";
 import { useNavigate } from "react-router-dom";
 import Calendar from "react-calendar";
 import "react-calendar/dist/Calendar.css";
@@ -6,10 +7,33 @@ import { getActivityColorIndex } from "../../utils/HomeUtils/activityColorUtils"
 import { isFreeActivityData } from "../../utils/HomeUtils/activityPricing";
 import { formatActivityPrice } from "../../services/Payment/formatPrice";
 
+const COMPACT_CALENDAR_BREAKPOINT = 1180;
+
+function useIsCompactCalendar(breakpoint = COMPACT_CALENDAR_BREAKPOINT) {
+  const [isCompact, setIsCompact] = useState(() => {
+    if (typeof window === "undefined") {
+      return false;
+    }
+
+    return window.matchMedia(`(max-width: ${breakpoint}px)`).matches;
+  });
+
+  useEffect(() => {
+    const mediaQuery = window.matchMedia(`(max-width: ${breakpoint}px)`);
+    const handleChange = (event) => setIsCompact(event.matches);
+
+    mediaQuery.addEventListener("change", handleChange);
+    return () => mediaQuery.removeEventListener("change", handleChange);
+  }, [breakpoint]);
+
+  return isCompact;
+}
+
 function ActivityCalendar({ activities }) {
   const navigate = useNavigate();
   const layoutRef = useRef(null);
   const mainRef = useRef(null);
+  const isCompact = useIsCompactCalendar();
   const [selectedDate, setSelectedDate] = useState(null);
   const [focusedActivityId, setFocusedActivityId] = useState(null);
 
@@ -46,11 +70,19 @@ function ActivityCalendar({ activities }) {
     ? getActivitiesByDate(selectedDate)
     : [];
 
+  const isCompactSidebarOpen = isCompact && Boolean(selectedDate);
+
+  function closeSidebar() {
+    setSelectedDate(null);
+    setFocusedActivityId(null);
+  }
+
   useEffect(() => {
     const mainEl = mainRef.current;
     const layoutEl = layoutRef.current;
 
-    if (!mainEl || !layoutEl) {
+    if (!mainEl || !layoutEl || isCompact) {
+      layoutEl?.style.removeProperty("--calendar-main-height");
       return;
     }
 
@@ -71,7 +103,20 @@ function ActivityCalendar({ activities }) {
       resizeObserver.disconnect();
       window.removeEventListener("resize", syncCalendarHeight);
     };
-  }, [activities, selectedDate]);
+  }, [activities, selectedDate, isCompact]);
+
+  useEffect(() => {
+    if (!isCompactSidebarOpen) {
+      return;
+    }
+
+    const previousOverflow = document.body.style.overflow;
+    document.body.style.overflow = "hidden";
+
+    return () => {
+      document.body.style.overflow = previousOverflow;
+    };
+  }, [isCompactSidebarOpen]);
 
   useEffect(() => {
     if (!focusedActivityId) {
@@ -83,17 +128,156 @@ function ActivityCalendar({ activities }) {
       ?.scrollIntoView({ behavior: "smooth", block: "nearest" });
   }, [focusedActivityId, selectedDate]);
 
+  function renderSidebarPanel() {
+    if (!selectedDate) {
+      return (
+        <div className="calendar-sidebar-panel calendar-sidebar-panel--empty">
+          <p>בחרו יום או פעילות בלוח השנה לצפייה בפרטים</p>
+        </div>
+      );
+    }
+
+    return (
+      <div className="calendar-sidebar-panel">
+        <button
+          className="popup-close"
+          onClick={closeSidebar}
+          aria-label="סגירת פאנל הפעילויות"
+        >
+          ×
+        </button>
+
+        <h3>
+          {selectedDate.toLocaleDateString("he-IL", {
+            weekday: "long",
+            day: "numeric",
+            month: "long",
+            year: "numeric",
+          })}
+        </h3>
+
+        <p className="calendar-sidebar-panel__count">
+          {selectedDayActivities.length === 0
+            ? "אין אירועים ביום זה"
+            : `${selectedDayActivities.length} אירועים ביום זה`}
+        </p>
+
+        {selectedDayActivities.length === 0 ? (
+          <p className="calendar-sidebar-panel__empty-day">
+            אין פעילויות ביום זה
+          </p>
+        ) : (
+          <div className="calendar-sidebar-panel__list">
+            {selectedDayActivities.map((activity) => {
+              const start = activity.start_date.toDate();
+              const end = activity.end_date.toDate();
+
+              return (
+                <div
+                  key={activity.id}
+                  id={`calendar-activity-${activity.id}`}
+                  className={`calendar-sidebar-card${
+                    focusedActivityId === activity.id
+                      ? " calendar-sidebar-card--focused"
+                      : ""
+                  }`}
+                >
+                  <div className="calendar-sidebar-card__head">
+                    <div>
+                      <strong>{activity.name}</strong>
+                      <p className="calendar-sidebar-card__meta">
+                        <span>
+                          {start.toLocaleTimeString("he-IL", {
+                            hour: "2-digit",
+                            minute: "2-digit",
+                          })}
+                          {" - "}
+                          {end.toLocaleTimeString("he-IL", {
+                            hour: "2-digit",
+                            minute: "2-digit",
+                          })}
+                        </span>
+                        <span>{formatActivityPrice(activity.price)}</span>
+                      </p>
+                    </div>
+                  </div>
+
+                  {activity.description && (
+                    <p className="calendar-sidebar-card__desc">
+                      {activity.description}
+                    </p>
+                  )}
+
+                  <button
+                    type="button"
+                    className="calendar-sidebar-card__register"
+                    onClick={() => {
+                      const params = new URLSearchParams({
+                        activityId: activity.id,
+                      });
+                      const programId =
+                        activity.program_id || activity.programId || "";
+                      if (programId) {
+                        params.set("programId", programId);
+                      }
+                      if (isFreeActivityData(activity)) {
+                        params.set("free", "1");
+                      }
+                      navigate(`/pay?${params.toString()}`);
+                    }}
+                  >
+                    להרשמה
+                  </button>
+                </div>
+              );
+            })}
+          </div>
+        )}
+      </div>
+    );
+  }
+
+  const compactSidebarPortal =
+    isCompactSidebarOpen && typeof document !== "undefined"
+      ? createPortal(
+          <div className="activities-calendar__mobile-sheet">
+            <button
+              type="button"
+              className="activities-calendar__sidebar-backdrop"
+              aria-label="סגירת פאנל הפעילויות"
+              onClick={closeSidebar}
+            />
+            <aside
+              className="activities-calendar__sidebar activities-calendar__sidebar--mobile-open"
+              aria-live="polite"
+            >
+              {renderSidebarPanel()}
+            </aside>
+          </div>,
+          document.body
+        )
+      : null;
+
   return (
     <div className="activities-calendar">
       <h2>לוח פעילויות</h2>
 
-      <div className="activities-calendar__layout" ref={layoutRef}>
+      <div
+        className={`activities-calendar__layout${
+          !isCompact && !selectedDate
+            ? " activities-calendar__layout--calendar-only"
+            : ""
+        }`}
+        ref={layoutRef}
+      >
         <div className="activities-calendar__main" ref={mainRef}>
           <div className="activities-calendar__card">
             <div className="activities-calendar__card-header">
               <h3 className="activities-calendar__card-title">לוח שנה</h3>
               <p className="activities-calendar__today-hint">
-                לחצו על פעילות או על יום לצפייה בפרטים
+                {isCompact
+                  ? "לחצו על יום או פעילות לצפייה בפרטים"
+                  : "לחצו על פעילות או על יום לצפייה בפרטים"}
               </p>
             </div>
 
@@ -167,116 +351,14 @@ function ActivityCalendar({ activities }) {
           </div>
         </div>
 
-        <aside className="activities-calendar__sidebar" aria-live="polite">
-          {selectedDate ? (
-            <div className="calendar-sidebar-panel">
-              <button
-                className="popup-close"
-                onClick={() => {
-                  setSelectedDate(null);
-                  setFocusedActivityId(null);
-                }}
-                aria-label="סגירת פאנל הפעילויות"
-              >
-                ×
-              </button>
-
-              <h3>
-                {selectedDate.toLocaleDateString("he-IL", {
-                  weekday: "long",
-                  day: "numeric",
-                  month: "long",
-                  year: "numeric",
-                })}
-              </h3>
-
-              <p className="calendar-sidebar-panel__count">
-                {selectedDayActivities.length === 0
-                  ? "אין אירועים ביום זה"
-                  : `${selectedDayActivities.length} אירועים ביום זה`}
-              </p>
-
-              {selectedDayActivities.length === 0 ? (
-                <p className="calendar-sidebar-panel__empty-day">
-                  אין פעילויות ביום זה
-                </p>
-              ) : (
-                <div className="calendar-sidebar-panel__list">
-                  {selectedDayActivities.map((activity) => {
-                    const start = activity.start_date.toDate();
-                    const end = activity.end_date.toDate();
-
-                    return (
-                      <div
-                        key={activity.id}
-                        id={`calendar-activity-${activity.id}`}
-                        className={`calendar-sidebar-card${
-                          focusedActivityId === activity.id
-                            ? " calendar-sidebar-card--focused"
-                            : ""
-                        }`}
-                      >
-                        <div className="calendar-sidebar-card__head">
-                          <div>
-                            <strong>{activity.name}</strong>
-                            <p className="calendar-sidebar-card__meta">
-                              <span>
-                                {start.toLocaleTimeString("he-IL", {
-                                  hour: "2-digit",
-                                  minute: "2-digit",
-                                })}
-                                {" - "}
-                                {end.toLocaleTimeString("he-IL", {
-                                  hour: "2-digit",
-                                  minute: "2-digit",
-                                })}
-                              </span>
-                              <span>
-                                {formatActivityPrice(activity.price)}
-                              </span>
-                            </p>
-                          </div>
-                        </div>
-
-                        {activity.description && (
-                          <p className="calendar-sidebar-card__desc">
-                            {activity.description}
-                          </p>
-                        )}
-
-                        <button
-                          type="button"
-                          className="calendar-sidebar-card__register"
-                          onClick={() => {
-                            const params = new URLSearchParams({
-                              activityId: activity.id,
-                            });
-                            const programId =
-                              activity.program_id || activity.programId || "";
-                            if (programId) {
-                              params.set("programId", programId);
-                            }
-                            if (isFreeActivityData(activity)) {
-                              params.set("free", "1");
-                            }
-                            navigate(`/pay?${params.toString()}`);
-                          }}
-                        >
-                          להרשמה
-                        </button>
-                      </div>
-                    );
-                  })}
-                </div>
-              )}
-            </div>
-          ) : (
-            <div className="calendar-sidebar-panel calendar-sidebar-panel--empty">
-              <p>בחרו יום או פעילות בלוח השנה לצפייה בפרטים</p>
-            </div>
-          )}
-        </aside>
+        {!isCompact && selectedDate ? (
+          <aside className="activities-calendar__sidebar" aria-live="polite">
+            {renderSidebarPanel()}
+          </aside>
+        ) : null}
       </div>
+
+      {compactSidebarPortal}
     </div>
   );
 }

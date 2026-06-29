@@ -49,6 +49,10 @@
   font-weight: 700;
 }
 
+.community-join-staff-page .help-services-wrapper .form-selector h3::after {
+  content: none;
+}
+
 .supportive-community-page .community-join-form .field-error {
   color: #c0392b;
   font-size: 1rem;
@@ -338,12 +342,14 @@
 }
 
 .community-join-staff-page input.field-invalid,
+.community-join-staff-page select.field-invalid,
 .community-join-staff-page textarea.field-invalid {
   border-color: #b42318;
   background: #fff7f6;
 }
 
 .community-join-staff-page input.field-invalid:focus,
+.community-join-staff-page select.field-invalid:focus,
 .community-join-staff-page textarea.field-invalid:focus {
   border-color: #b42318;
   box-shadow: 0 0 0 3px rgba(180, 35, 24, 0.15);
