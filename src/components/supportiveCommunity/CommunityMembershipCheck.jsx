@@ -21,8 +21,8 @@ function CommunityMembershipCheck({ onVerified }) {
       return;
     }
 
-    if (!/^05\d{8}$/.test(phone)) {
-      setMessage("מספר טלפון חייב להיות תקין");
+    if (!/^0\d{8,9}$/.test(phone)) {
+      setMessage("מספר הטלפון חייב להתחיל ב-0 ולהכיל 9 או 10 ספרות");
       return;
     }
 
@@ -37,6 +37,7 @@ function CommunityMembershipCheck({ onVerified }) {
       onVerified({
         participantDocId: result.participantDocId,
         subscriptionDocId: result.subscriptionDocId,
+        subscriptionData: result.subscriptionData,
       });
     } catch (error) {
       console.error("Error checking membership:", error);

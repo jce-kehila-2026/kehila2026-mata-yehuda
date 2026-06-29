@@ -1,5 +1,6 @@
 import { useState } from "react";
 import { registerToProgram } from "../../services/HomeServices/programRegistrationService";
+import { nameContainsNumber } from "../../utils/nameValidation";
 
 function ProgramRegistrationForm({ onClose, program }) {
   const [firstName, setFirstName] = useState("");
@@ -17,6 +18,12 @@ function ProgramRegistrationForm({ onClose, program }) {
       phone === ""
     ) {
       setMessage("נא למלא את כל השדות");
+      setMessageType("error");
+      return;
+    }
+
+    if (nameContainsNumber(firstName) || nameContainsNumber(lastName)) {
+      setMessage("השם אינו יכול להכיל מספרים");
       setMessageType("error");
       return;
     }

@@ -68,6 +68,15 @@ function ServiceRequestPage() {
           <ServiceRequestForm
             participantDocId={verifiedMember.participantDocId}
             subscriptionDocId={verifiedMember.subscriptionDocId}
+            initialServices={
+              verifiedMember.subscriptionData?.requestedServices ??
+              verifiedMember.subscriptionData?.requestedHelpTypes ??
+              []
+            }
+            initialLanguages={verifiedMember.subscriptionData?.languages ?? []}
+            initialOtherService={
+              verifiedMember.subscriptionData?.otherService ?? ""
+            }
           />
         )}
       </div>

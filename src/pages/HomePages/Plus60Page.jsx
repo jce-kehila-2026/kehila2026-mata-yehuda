@@ -5,7 +5,7 @@ import { getAllActivities } from "../../services/HomeServices/activitiesService"
 import { PROGRAM_60_PLUS_MINUS_ID } from "../../utils/staffManegmentUtils/programConstants";
 import { toActivityDate } from "../../utils/staffManegmentUtils/dateUtils";
 import { isActivityRegistrationAvailable } from "../../utils/staffManegmentUtils/activityStatus";
-import ActivityCalendar from "../../components/Homecomponents/ActivityCalendar"; 
+import ActivityCalendar from "../../components/Homecomponents/ActivityCalendar";
 
 import "../../styles/HomeStyle/Plus60Page.css";
 import "../../styles/HomeStyle/ActivityCard.css";
@@ -45,74 +45,83 @@ function sortUpcomingActivities(activities) {
   });
 }
 
+function isArchivedActivity(activity) {
+  return (
+    activity?.isArchived === true ||
+    activity?.data?.isArchived === true ||
+    activity?.data?.data?.isArchived === true
+  );
+}
+
 function Plus60Page() {
-    const navigate = useNavigate();
-    const [activities, setActivities] = useState([]);
-    const [viewMode, setViewMode] = useState("calendar");
-    const [cardsVisibleCount, setCardsVisibleCount] = useState(6);
-    const [upcomingVisibleCount, setUpcomingVisibleCount] = useState(3);
+  const navigate = useNavigate();
+  const [activities, setActivities] = useState([]);
+  const [viewMode, setViewMode] = useState("calendar");
+  const [cardsVisibleCount, setCardsVisibleCount] = useState(6);
+  const [upcomingVisibleCount, setUpcomingVisibleCount] = useState(3);
 
-    const CARDS_PAGE_SIZE = 6;
-    const UPCOMING_PAGE_SIZE = 3;
+  const CARDS_PAGE_SIZE = 6;
+  const UPCOMING_PAGE_SIZE = 3;
 
-    useEffect(() => {
-        async function loadActivities() {
-        const data = await getAllActivities();
+  useEffect(() => {
+    async function loadActivities() {
+      const data = await getAllActivities();
 
-        const plus60Activities = sortUpcomingActivities(
-          data.filter((activity) => {
-            const activityProgramId =
-              activity.program_id || activity.programId || "";
-            return (
-              !activityProgramId ||
-              activityProgramId === PROGRAM_60_PLUS_MINUS_ID
-            );
-          })
-        );
-        setActivities(plus60Activities);
-        }
-
-        loadActivities();
-    }, []);
-
-      const activeActivities = useMemo(
-        () =>
-          sortUpcomingActivities(
-            activities.filter(
-              (activity) =>
-                isUpcomingActivity(activity) &&
-                isActivityRegistrationAvailable(activity)
-            )
-          ),
-        [activities]
+      const plus60Activities = sortUpcomingActivities(
+        data.filter((activity) => {
+          const activityProgramId =
+            activity.program_id || activity.programId || "";
+          return (
+            !activityProgramId ||
+            activityProgramId === PROGRAM_60_PLUS_MINUS_ID
+          );
+        })
       );
+      setActivities(plus60Activities);
+    }
 
-      const visibleCardsActivities = activeActivities.slice(
-        0,
-        cardsVisibleCount
-      );
-      const visibleUpcomingActivities = activeActivities.slice(
-        0,
-        upcomingVisibleCount
-      );
+    loadActivities();
+  }, []);
 
-      function handleShowMoreCards() {
-        setCardsVisibleCount(activeActivities.length);
-      }
+  const activeActivities = useMemo(
+    () =>
+      sortUpcomingActivities(
+        activities.filter(
+          (activity) =>
+            !isArchivedActivity(activity) &&
+            isUpcomingActivity(activity) &&
+            isActivityRegistrationAvailable(activity)
+        )
+      ),
+    [activities]
+  );
 
-      function handleShowLessCards() {
-        setCardsVisibleCount(CARDS_PAGE_SIZE);
-      }
+  const visibleCardsActivities = activeActivities.slice(
+    0,
+    cardsVisibleCount
+  );
+  const visibleUpcomingActivities = activeActivities.slice(
+    0,
+    upcomingVisibleCount
+  );
 
-      function handleShowMoreUpcoming() {
-        setUpcomingVisibleCount(activeActivities.length);
-      }
+  function handleShowMoreCards() {
+    setCardsVisibleCount(activeActivities.length);
+  }
 
-      function handleShowLessUpcoming() {
-        setUpcomingVisibleCount(UPCOMING_PAGE_SIZE);
-      }
+  function handleShowLessCards() {
+    setCardsVisibleCount(CARDS_PAGE_SIZE);
+  }
 
-    return (
+  function handleShowMoreUpcoming() {
+    setUpcomingVisibleCount(activeActivities.length);
+  }
+
+  function handleShowLessUpcoming() {
+    setUpcomingVisibleCount(UPCOMING_PAGE_SIZE);
+  }
+
+  return (
     <div className="plus60-page">
       <section className="plus60-hero">
         <div className="plus60-hero__photo-wrap" aria-hidden="true">
@@ -171,9 +180,8 @@ function Plus60Page() {
             id="plus60-tab-calendar"
             aria-selected={viewMode === "calendar"}
             aria-controls="plus60-panel-calendar"
-            className={`plus60-view-tabs__tab${
-              viewMode === "calendar" ? " plus60-view-tabs__tab--active" : ""
-            }`}
+            className={`plus60-view-tabs__tab${viewMode === "calendar" ? " plus60-view-tabs__tab--active" : ""
+              }`}
             onClick={() => setViewMode("calendar")}
           >
             <svg viewBox="0 0 24 24" aria-hidden="true">
@@ -188,9 +196,8 @@ function Plus60Page() {
             id="plus60-tab-cards"
             aria-selected={viewMode === "cards"}
             aria-controls="plus60-panel-cards"
-            className={`plus60-view-tabs__tab${
-              viewMode === "cards" ? " plus60-view-tabs__tab--active" : ""
-            }`}
+            className={`plus60-view-tabs__tab${viewMode === "cards" ? " plus60-view-tabs__tab--active" : ""
+              }`}
             onClick={() => setViewMode("cards")}
           >
             <svg viewBox="0 0 24 24" aria-hidden="true">
@@ -318,7 +325,7 @@ function Plus60Page() {
         </section>
       )}
     </div>
-    );
+  );
 }
 
 export default Plus60Page;

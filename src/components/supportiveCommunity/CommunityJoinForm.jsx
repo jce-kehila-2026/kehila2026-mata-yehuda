@@ -6,6 +6,11 @@ import LanguagesSelector from "./LanguagesSelector";
 import "../../styles/supportive community/CommunityJoinPage.css";
 import "../../styles/supportive community/CommunityJoinForm.css";
 import { saveCommunityJoinRequest } from "../../services/supportive community/supportiveCommunityService";
+import {
+  INVALID_ADDRESS_MESSAGE,
+  isValidAddress,
+  nameContainsNumber,
+} from "../../utils/nameValidation";
 
 const VALIDATION_SUMMARY = "יש לתקן את השדות המסומנים באדום";
 
@@ -14,6 +19,8 @@ function validateJoinForm(form) {
 
   if (!form.participantName.trim()) {
     errors.participantName = "שגיאה: נא למלא את כל שדות החובה";
+  } else if (nameContainsNumber(form.participantName)) {
+    errors.participantName = "השם אינו יכול להכיל מספרים";
   }
 
   if (!form.participantId.trim()) {
@@ -24,16 +31,14 @@ function validateJoinForm(form) {
 
   if (!form.phone.trim()) {
     errors.phone = "שגיאה: נא למלא את כל שדות החובה";
-  } else if (!/^05\d{8}$/.test(form.phone)) {
-    errors.phone = "מספר טלפון חייב להיות מספר תקין בן 10 ספרות";
+  } else if (!/^0\d{8,9}$/.test(form.phone)) {
+    errors.phone = "מספר הטלפון חייב להתחיל ב-0 ולהכיל 9 או 10 ספרות";
   }
 
   if (!form.address.trim()) {
     errors.address = "שגיאה: נא למלא את כל שדות החובה";
-  }
-
-  if (form.services.length === 0) {
-    errors.services = "שגיאה: נא לבחור לפחות סוג עזרה אחד";
+  } else if (!isValidAddress(form.address)) {
+    errors.address = INVALID_ADDRESS_MESSAGE;
   }
 
   if (form.services.includes("other") && !form.otherService.trim()) {
@@ -275,7 +280,9 @@ function CommunityJoinForm() {
         <section className="form-section">
           <div
             className={
-              fieldErrors.services ? "form-selector-wrapper form-selector--invalid" : "form-selector-wrapper"
+              fieldErrors.services
+                ? "form-selector-wrapper help-services-wrapper form-selector--invalid"
+                : "form-selector-wrapper help-services-wrapper"
             }
           >
             <HelpServicesSelector

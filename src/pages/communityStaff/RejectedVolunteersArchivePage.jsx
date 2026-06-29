@@ -1,9 +1,8 @@
 import { useNavigate } from "react-router-dom";
-import { Archive } from "lucide-react";
-import VolunteerRequestsTable from "../../components/communityStaff/VolunteerRequestsTable.jsx";
+import RejectedVolunteersArchiveTable from "../../components/communityStaff/RejectedVolunteersArchiveTable.jsx";
 import "../../styles/communityStaff/CommunityStaffDashboard.css";
 
-function VolunteerRequestsPage() {
+function RejectedVolunteersArchivePage() {
   const navigate = useNavigate();
 
   return (
@@ -34,44 +33,30 @@ function VolunteerRequestsPage() {
         <header className="activities-mgmt-page__header">
           <div className="activities-mgmt-page__header-main">
             <h1 className="activities-mgmt-page__title">
-              בקשות התנדבות לקהילה תומכת
+              ארכיון בקשות התנדבות שנדחו
             </h1>
             <p className="activities-mgmt-page__subtitle">
-              ניהול ואישור בקשות מתנדבים חדשות לקהילה התומכת
+              בקשות מתנדבים שנדחו. ניתן לשחזר בקשה לרשימת הממתינות או למחוק לצמיתות.
             </p>
           </div>
           <div className="activities-mgmt-page__actions">
             <button
               type="button"
-              className="activities-mgmt-page__action activities-mgmt-page__action--archive"
-              onClick={() =>
-                navigate("/community-staff/volunteer-requests/archive")
-              }
-            >
-              <Archive
-                className="activities-mgmt-page__action-icon"
-                strokeWidth={2.25}
-                aria-hidden="true"
-              />
-              <span>צפייה בארכיון</span>
-            </button>
-            <button
-              type="button"
               className="staff-back-button"
-              onClick={() => navigate("/community-staff")}
+              onClick={() => navigate("/community-staff/volunteer-requests")}
             >
               <span className="staff-back-button__icon" aria-hidden="true">
                 →
               </span>
-              חזרה ללוח הבקרה
+              חזרה לבקשות ההתנדבות
             </button>
           </div>
         </header>
 
-        <VolunteerRequestsTable />
+        <RejectedVolunteersArchiveTable />
       </div>
     </div>
   );
 }
 
-export default VolunteerRequestsPage;
+export default RejectedVolunteersArchivePage;

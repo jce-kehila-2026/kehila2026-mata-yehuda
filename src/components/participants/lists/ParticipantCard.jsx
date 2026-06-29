@@ -1,5 +1,4 @@
 import { formatDate } from "../../../utils/staffManegmentUtils/dateUtils";
-import { maskIdNumber } from "../../../utils/staffManegmentUtils/maskIdNumber";
 import {
     resolveCanonicalProgramId,
     resolveProgramDisplayTitle
@@ -58,7 +57,7 @@ function ParticipantCard({
                     <p className="participant-card__meta">
                         ת.ז.:{" "}
                         <MaskedIdDisplay
-                            idNumber={maskIdNumber(participant.id_number)}
+                            idNumber={toSafeString(participant.id_number)}
                         />
                     </p>
                 )}

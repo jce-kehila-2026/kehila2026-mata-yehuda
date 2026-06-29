@@ -5,6 +5,7 @@ import {
 } from "../../config/staffRoles";
 import { addStaffMember } from "../../services/staffManegmentServices/staffService";
 import FormActionRow from "../shared/FormActionRow";
+import { nameContainsNumber } from "../../utils/nameValidation";
 
 function AddStaffMember({ onSuccess, onCancel }) {
     const [fullName, setFullName] = useState("");
@@ -20,6 +21,12 @@ function AddStaffMember({ onSuccess, onCancel }) {
     function validateStaff() {
         if (!fullName.trim()) {
             setError("יש להזין שם מלא");
+            setSuccess("");
+            return false;
+        }
+
+        if (nameContainsNumber(fullName)) {
+            setError("השם אינו יכול להכיל מספרים");
             setSuccess("");
             return false;
         }

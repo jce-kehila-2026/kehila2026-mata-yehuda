@@ -1,18 +1,37 @@
-import { useState } from "react";
+import { useEffect, useState } from "react";
+import { useLocation, useNavigate } from "react-router-dom";
 import { ClipboardCheck, ScrollText } from "lucide-react";
 import TakeAttendancePage from "./TakeAttendancePage";
 import AttendanceRecordsPage from "./AttendanceRecordsPage";
 import "../../styles/attendance/AttendancePage.css";
 
 function AttendancePage({ onBackToDashboard }) {
-  const [currentPage, setCurrentPage] = useState("menu");
+  const navigate = useNavigate();
+  const location = useLocation();
+
+  const searchParams = new URLSearchParams(location.search);
+  const currentPage = searchParams.get("view") || "menu";
+
+  const goToPage = (page) => {
+    navigate({
+      pathname: location.pathname,
+      search: `?view=${page}`,
+    });
+  };
+
+  const goBackToMenu = () => {
+    navigate({
+      pathname: location.pathname,
+      search: "",
+    });
+  };
 
   if (currentPage === "take") {
-    return <TakeAttendancePage onBack={() => setCurrentPage("menu")} />;
+    return <TakeAttendancePage onBack={goBackToMenu} />;
   }
 
   if (currentPage === "records") {
-    return <AttendanceRecordsPage onBack={() => setCurrentPage("menu")} />;
+    return <AttendanceRecordsPage onBack={goBackToMenu} />;
   }
 
   return (
@@ -64,7 +83,7 @@ function AttendancePage({ onBackToDashboard }) {
           <button
             type="button"
             className="attendance-page__card attendance-page__card--take"
-            onClick={() => setCurrentPage("take")}
+            onClick={() => goToPage("take")}
             role="listitem"
           >
             <span className="attendance-page__card-icon" aria-hidden="true">
@@ -81,7 +100,7 @@ function AttendancePage({ onBackToDashboard }) {
           <button
             type="button"
             className="attendance-page__card attendance-page__card--records"
-            onClick={() => setCurrentPage("records")}
+            onClick={() => goToPage("records")}
             role="listitem"
           >
             <span className="attendance-page__card-icon" aria-hidden="true">
