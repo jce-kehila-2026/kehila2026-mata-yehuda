@@ -165,14 +165,14 @@ function AboutPage() {
             <span className="about2-head__core">
               <img
                 className="about2-head__leaf"
-                src="/images/leaf-decoration.png"
+                src="/images/minitree.png"
                 alt=""
                 aria-hidden="true"
               />
               <h2 className="about2-head__title">רגעים מהקהילה</h2>
               <img
                 className="about2-head__leaf about2-head__leaf--end"
-                src="/images/leaf-decoration.png"
+                src="/images/minitree.png"
                 alt=""
                 aria-hidden="true"
               />

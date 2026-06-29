@@ -289,13 +289,11 @@
   }
 
   .request-box {
-    order: 1;
     justify-self: stretch;
     width: 100%;
   }
 
   .request-section__visual {
-    order: 2;
     min-height: clamp(320px, 55vw, 400px);
   }
 

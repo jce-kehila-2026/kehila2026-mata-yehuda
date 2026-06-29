@@ -75,13 +75,44 @@
 
 .activity-info p {
   margin: 0;
+}
+
+.activity-card__description {
+  margin: 0;
   line-height: 1.5;
   color: #5f6f63;
   font-size: 0.8rem;
+}
+
+.activity-card__description--collapsed,
+.expandable-description__text--collapsed.activity-card__description {
   display: -webkit-box;
   -webkit-line-clamp: 2;
   -webkit-box-orient: vertical;
   overflow: hidden;
+}
+
+.activity-card__desc-toggle,
+.expandable-description__toggle.activity-card__desc-toggle {
+  align-self: flex-start;
+  margin: 0.15rem 0 0;
+  padding: 0;
+  border: none;
+  background: transparent;
+  color: #2d7d46;
+  font-family: inherit;
+  font-size: 0.78rem;
+  font-weight: 700;
+  line-height: 1.4;
+  cursor: pointer;
+  text-decoration: underline;
+  text-underline-offset: 0.12em;
+}
+
+.activity-card__desc-toggle:hover,
+.activity-card__desc-toggle:active {
+  color: #236b38;
+  background: transparent;
 }
 
 .activity-card__date {
@@ -174,9 +205,21 @@
   }
 
   .activity-info p {
+    margin: 0;
+  }
+
+  .activity-card__description {
     font-size: 0.94rem;
     line-height: 1.6;
+  }
+
+  .activity-card__description--collapsed,
+  .expandable-description__text--collapsed.activity-card__description {
     -webkit-line-clamp: 3;
+  }
+
+  .activity-card__desc-toggle {
+    font-size: 0.88rem;
   }
 
   .activity-card__date {
@@ -221,7 +264,7 @@
     font-size: 1.1rem;
   }
 
-  .activity-info p {
+  .activity-card__description {
     font-size: 0.9rem;
   }
 

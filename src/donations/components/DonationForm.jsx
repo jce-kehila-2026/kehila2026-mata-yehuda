@@ -134,6 +134,17 @@ function DonationForm({ initialAmount = null, showBackToHome = false }) {
     );
   };
 
+  const handleFormSubmit = (event) => {
+    event.preventDefault();
+
+    if (step === 1) {
+      goToPaymentStep();
+      return;
+    }
+
+    handleSubmitDonation(event);
+  };
+
   const handleSubmitDonation = async (event) => {
     event.preventDefault();
     setFormError("");
@@ -255,7 +266,7 @@ function DonationForm({ initialAmount = null, showBackToHome = false }) {
         ariaLabel="התקדמות תרומה"
       />
 
-      <form className="donation-form payment-form" onSubmit={handleSubmitDonation}>
+      <form className="donation-form payment-form" onSubmit={handleFormSubmit}>
         {formError && (
           <p className="form-error" role="alert">
             {formError}

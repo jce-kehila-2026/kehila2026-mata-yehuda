@@ -410,6 +410,24 @@
   border-color: transparent;
 }
 
+.home-navbar__link--active {
+  position: relative;
+  color: var(--color-primary, #2d7d46);
+  font-weight: 700;
+}
+
+.home-navbar__link--active::after {
+  content: "";
+  position: absolute;
+  bottom: 0.2rem;
+  left: 50%;
+  transform: translateX(-50%);
+  width: 1.4rem;
+  height: 3px;
+  border-radius: 999px;
+  background: var(--color-primary, #2d7d46);
+}
+
 .home-navbar__actions {
   position: relative;
   flex-shrink: 0;
