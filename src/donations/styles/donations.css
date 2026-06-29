@@ -35,8 +35,8 @@
   padding-inline-start: clamp(1rem, 2vw, 1.35rem);
   padding-inline-end: clamp(0.35rem, 0.75vw, 0.6rem);
   border-radius: clamp(18px, 2.5vw, 28px);
-  border: 1.5px solid rgba(229, 194, 159, 0.85);
-  background: var(--color-accent-light, #faf4ec);
+  border: 1.5px solid rgba(45, 125, 70, 0.14);
+  background: #eff3ea;
   box-shadow: 0 4px 18px rgba(31, 77, 51, 0.06);
 }
 

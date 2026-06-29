@@ -163,8 +163,8 @@
   justify-self: stretch;
   width: 100%;
   max-width: none;
-  background: var(--color-accent-light, #faf4ec);
-  border: 1.5px solid rgba(229, 194, 159, 0.85);
+  background: #eff3ea;
+  border: 1.5px solid rgba(45, 125, 70, 0.14);
   border-radius: 18px;
   padding: clamp(1.4rem, 2.8vw, 2.1rem);
   display: flex;

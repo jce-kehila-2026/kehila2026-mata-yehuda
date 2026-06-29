@@ -24,9 +24,6 @@ const HOME_PROGRAM_TITLES = {
 
 const PROGRAMS_PAGE_SIZE = 3;
 
-const HOME_SERVICES_SUBTITLE =
-  "מקום לבני הגיל השלישי – לחיים פעילים, משמעותיים ומלאי חום אנושי";
-
 function Home() {
   const navigate = useNavigate();
   const [programs, setPrograms] = useState([]);
@@ -174,13 +171,6 @@ function Home() {
         className="home-services-section home-section-anchor"
         aria-labelledby="home-services-title"
       >
-        <img
-          src="/images/heartimage-clear.png"
-          alt=""
-          className="home-services-section__heart-deco"
-          aria-hidden="true"
-        />
-
         <header className="home-services-header home-services-section__header">
           <div className="home-services-header__divider">
             <span className="home-services-header__line" aria-hidden="true" />
@@ -203,8 +193,6 @@ function Home() {
             </div>
             <span className="home-services-header__line" aria-hidden="true" />
           </div>
-
-          <p className="home-services-section__subtitle">{HOME_SERVICES_SUBTITLE}</p>
         </header>
 
         {loading && <p className="home-loading-text">טוען תוכניות...</p>}
