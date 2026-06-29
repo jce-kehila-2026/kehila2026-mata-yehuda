@@ -51,8 +51,8 @@ export function validateCommunityMemberParticipantForm(form) {
     return "נא למלא מספר טלפון";
   }
 
-  if (!/^05\d{8}$/.test(form.phone.trim())) {
-    return "מספר טלפון חייב להיות מספר תקין בן 10 ספרות";
+  if (!/^0\d{8,9}$/.test(form.phone.trim())) {
+    return "מספר הטלפון חייב להתחיל ב-0 ולהכיל 9 או 10 ספרות";
   }
 
   if (!form.birth_date) {
@@ -164,8 +164,8 @@ export function validateCreateVolunteerForm(form) {
     return "נא למלא מספר טלפון";
   }
 
-  if (!/^05\d{8}$/.test(form.phone.trim())) {
-    return "מספר טלפון חייב להיות מספר תקין בן 10 ספרות";
+  if (!/^0\d{8,9}$/.test(form.phone.trim())) {
+    return "מספר הטלפון חייב להתחיל ב-0 ולהכיל 9 או 10 ספרות";
   }
 
   if (!Array.isArray(form.languages) || form.languages.length === 0) {

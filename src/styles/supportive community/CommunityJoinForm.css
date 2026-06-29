@@ -49,6 +49,10 @@
   font-weight: 700;
 }
 
+.community-join-staff-page .help-services-wrapper .form-selector h3::after {
+  content: none;
+}
+
 .supportive-community-page .community-join-form .field-error {
   color: #c0392b;
   font-size: 1rem;

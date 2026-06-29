@@ -43,8 +43,8 @@ function validateVolunteerForm(form) {
     return { submit: "מספר תעודת זהות חייב להיות מספר בן 9 ספרות" };
   }
 
-  if (!/^05\d{8}$/.test(form.phone)) {
-    return { submit: "מספר טלפון חייב להיות מספר תקין בן 10 ספרות" };
+  if (!/^0\d{8,9}$/.test(form.phone)) {
+    return { submit: "מספר הטלפון חייב להתחיל ב-0 ולהכיל 9 או 10 ספרות" };
   }
 
   if (form.services.length === 0) {
