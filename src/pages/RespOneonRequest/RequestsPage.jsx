@@ -404,11 +404,11 @@ function RequestsPage({ onNavigate }) {
                 }}
                 onBack={() => setMobileDetailOpen(false)}
               />
-            ) : (
+            ) : activeList.length > 0 ? (
               <div className="requests-inbox__detail-empty">
                 <p>בחרי פנייה מהרשימה כדי לקרוא ולהשיב</p>
               </div>
-            )}
+            ) : null}
           </section>
         </div>
       </div>
