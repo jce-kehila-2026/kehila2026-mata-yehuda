@@ -37,6 +37,7 @@ function CommunityMembershipCheck({ onVerified }) {
       onVerified({
         participantDocId: result.participantDocId,
         subscriptionDocId: result.subscriptionDocId,
+        subscriptionData: result.subscriptionData,
       });
     } catch (error) {
       console.error("Error checking membership:", error);
