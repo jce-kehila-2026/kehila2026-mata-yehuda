@@ -106,7 +106,13 @@
 
 .activities-calendar .react-calendar__navigation button:enabled:hover,
 .activities-calendar .react-calendar__navigation button:enabled:focus {
-  background: var(--plus60-green-light, #dff5df);
+  background: var(--plus60-green, #2d7d46) !important;
+  color: #ffffff !important;
+}
+
+.activities-calendar .react-calendar__navigation button:enabled:active {
+  background: var(--plus60-green, #2d7d46) !important;
+  color: #fff !important;
 }
 
 .activities-calendar .react-calendar__navigation__label {
@@ -186,7 +192,25 @@
 
 .activities-calendar .react-calendar__tile:enabled:hover,
 .activities-calendar .react-calendar__tile:enabled:focus {
-  background: var(--plus60-green-pale, #f3faf5);
+  background: var(--plus60-green, #2d7d46) !important;
+  color: #fff !important;
+}
+
+.activities-calendar .react-calendar__tile:enabled:hover > abbr,
+.activities-calendar .react-calendar__tile:enabled:focus > abbr {
+  background: rgba(255, 255, 255, 0.22) !important;
+  color: #fff !important;
+}
+
+.activities-calendar .react-calendar__tile:enabled:active {
+  background: var(--plus60-green, #2d7d46) !important;
+  color: #fff !important;
+  box-shadow: none;
+}
+
+.activities-calendar .react-calendar__tile:enabled:active > abbr {
+  background: rgba(255, 255, 255, 0.22) !important;
+  color: #fff !important;
 }
 
 .activities-calendar .react-calendar__tile--now {
@@ -240,11 +264,56 @@
   text-align: right;
   cursor: pointer;
   transition: transform 0.15s ease, box-shadow 0.15s ease, border-color 0.15s ease;
+  -webkit-tap-highlight-color: transparent;
 }
 
 .calendar-activity-pill:hover {
+  background: var(--plus60-green, #2d7d46) !important;
+  color: #ffffff !important;
+  -webkit-text-fill-color: #ffffff !important;
+  border-color: var(--plus60-green, #2d7d46) !important;
   transform: translateY(-1px);
-  box-shadow: 0 3px 8px rgba(31, 92, 56, 0.12);
+  box-shadow: 0 3px 8px rgba(31, 92, 56, 0.18);
+}
+
+.activities-calendar button.calendar-activity-pill:hover,
+.plus60-page .activities-calendar button.calendar-activity-pill:hover,
+.activities-calendar button.calendar-activity-pill--active:hover,
+.plus60-page .activities-calendar button.calendar-activity-pill--active:hover {
+  background: var(--plus60-green, #2d7d46) !important;
+  color: #ffffff !important;
+  -webkit-text-fill-color: #ffffff !important;
+  border-color: var(--plus60-green, #2d7d46) !important;
+}
+
+.activities-calendar button.calendar-activity-pill:hover .calendar-activity-pill__name,
+.activities-calendar button.calendar-activity-pill:hover .calendar-activity-pill__time,
+.plus60-page .activities-calendar button.calendar-activity-pill:hover .calendar-activity-pill__name,
+.plus60-page .activities-calendar button.calendar-activity-pill:hover .calendar-activity-pill__time {
+  color: #ffffff !important;
+  -webkit-text-fill-color: #ffffff !important;
+  opacity: 1 !important;
+}
+
+.activities-calendar button.calendar-activity-pill:active,
+.plus60-page .activities-calendar button.calendar-activity-pill:active,
+.activities-calendar button.calendar-activity-pill--active:active,
+.plus60-page .activities-calendar button.calendar-activity-pill--active:active {
+  background: var(--plus60-green, #2d7d46) !important;
+  color: #ffffff !important;
+  -webkit-text-fill-color: #ffffff !important;
+  border-color: var(--plus60-green, #2d7d46) !important;
+  transform: none;
+  box-shadow: none !important;
+}
+
+.activities-calendar button.calendar-activity-pill:active .calendar-activity-pill__name,
+.activities-calendar button.calendar-activity-pill:active .calendar-activity-pill__time,
+.plus60-page .activities-calendar button.calendar-activity-pill:active .calendar-activity-pill__name,
+.plus60-page .activities-calendar button.calendar-activity-pill:active .calendar-activity-pill__time {
+  color: #ffffff !important;
+  -webkit-text-fill-color: #ffffff !important;
+  opacity: 1 !important;
 }
 
 .calendar-activity-pill--active {
