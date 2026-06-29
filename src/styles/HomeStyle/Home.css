@@ -1612,7 +1612,8 @@
 
 .home-services-section__heart-deco {
   position: absolute;
-  left: clamp(-0.5rem, -0.8vw, 0rem);
+  right: clamp(-0.5rem, -0.8vw, 0rem);
+  left: auto;
   top: clamp(-1.5rem, -3vw, -0.5rem);
   width: clamp(165px, 24vw, 290px);
   height: auto;
@@ -1621,6 +1622,7 @@
   z-index: 0;
   opacity: 0.9;
   background: transparent;
+  transform: scaleX(-1);
 }
 
 .home-services-section__header {
@@ -1648,7 +1650,8 @@
 @media (max-width: 640px) {
   .home-services-section__heart-deco {
     width: clamp(110px, 30vw, 145px);
-    left: -0.25rem;
+    right: -0.25rem;
+    left: auto;
     top: clamp(-0.75rem, -2vw, -0.2rem);
     opacity: 0.78;
   }
