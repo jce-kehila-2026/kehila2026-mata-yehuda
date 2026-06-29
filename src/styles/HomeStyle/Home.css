@@ -137,8 +137,8 @@
 }
 
 .home-page .programs-grid .program-card {
-  background: var(--color-accent-light, #faf4ec);
-  border: 1px solid rgba(229, 194, 159, 0.45);
+  background: #eff3ea;
+  border: 1px solid rgba(45, 125, 70, 0.14);
   border-radius: 22px;
   box-shadow: 0 10px 28px rgba(31, 92, 56, 0.08);
 }
@@ -191,8 +191,9 @@
 }
 
 .home-page .program-card__title {
-  font-weight: 800;
-  color: #1f2a24;
+  font-weight: 700;
+  color: var(--color-primary);
+  letter-spacing: -0.02em;
 }
 
 .home-page .program-card__description {
@@ -1567,26 +1568,23 @@
   padding: clamp(0.85rem, 2vw, 1.15rem) clamp(0.85rem, 2.5vw, 1.5rem)
     clamp(1.5rem, 3vw, 2rem);
   border-radius: clamp(22px, 3vw, 30px);
-  background:
-    radial-gradient(ellipse 90% 55% at 100% 0%, rgba(45, 125, 70, 0.1), transparent 58%),
-    radial-gradient(ellipse 75% 50% at 0% 100%, rgba(216, 145, 94, 0.08), transparent 52%),
-    linear-gradient(165deg, #f7fbf8 0%, #faf4ec 48%, #f2f8f4 100%);
-  border: 1px solid rgba(45, 125, 70, 0.11);
-  box-shadow:
-    0 18px 42px rgba(24, 84, 57, 0.07),
-    inset 0 1px 0 rgba(255, 255, 255, 0.75);
-  overflow: visible;
+  background: #e3f1e8;
+  border: 1px solid rgba(45, 125, 70, 0.12);
+  box-shadow: 0 18px 42px rgba(24, 84, 57, 0.07);
+  overflow: hidden;
   isolation: isolate;
 }
 
+/* Decorative leaves — matches the Staff Dashboard background */
 .home-services-section::before {
   content: "";
   position: absolute;
-  inset: 0;
-  border-radius: inherit;
-  background:
-    radial-gradient(circle at 18% 22%, rgba(91, 169, 107, 0.1) 0%, transparent 24%),
-    radial-gradient(circle at 82% 78%, rgba(45, 125, 70, 0.08) 0%, transparent 26%);
+  bottom: clamp(0.75rem, 2.5vh, 2rem);
+  left: clamp(0.15rem, 1vw, 1rem);
+  width: clamp(118px, 15vw, 192px);
+  height: clamp(118px, 15vw, 192px);
+  background: url("/images/minitree.png") no-repeat left bottom / contain;
+  opacity: 0.4;
   pointer-events: none;
   z-index: 0;
 }
@@ -1594,13 +1592,12 @@
 .home-services-section::after {
   content: "";
   position: absolute;
-  top: -28%;
-  right: -12%;
-  left: auto;
-  width: min(380px, 52vw);
-  height: min(380px, 52vw);
-  border-radius: 50%;
-  background: radial-gradient(circle, rgba(184, 224, 196, 0.28) 0%, transparent 70%);
+  top: clamp(0.5rem, 2vw, 1.5rem);
+  right: clamp(0.35rem, 1vw, 1rem);
+  width: clamp(105px, 11vw, 168px);
+  height: clamp(105px, 11vw, 168px);
+  background: url("/images/minitree.png") no-repeat right top / contain;
+  opacity: 0.45;
   pointer-events: none;
   z-index: 0;
 }
@@ -1631,12 +1628,13 @@
 }
 
 .home-services-section__subtitle {
-  margin: 0 auto;
+  margin: 0.85rem auto 0;
   max-width: 40rem;
   color: #4d5c52;
   line-height: 1.6;
   font-size: clamp(0.98rem, 2.5vw, 1.08rem);
   text-align: center;
+  text-wrap: balance;
 }
 
 @media (max-width: 900px) {
@@ -1657,9 +1655,9 @@
   }
 }
 
-.home-action-cards .request-box,
-.home-action-cards .home-donations-section .donation-box {
-  background-color: var(--color-accent-light);
+.home-action-cards .request-box {
+  background-color: #eff3ea;
+  border-color: rgba(45, 125, 70, 0.14);
 }
 
 /* Location map modal */
