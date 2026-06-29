@@ -34,7 +34,9 @@ body {
 #root:has(.home-page),
 #root:has(.plus60-page),
 #root:has(.info-page),
+#root:has(.day-center-page),
 #root:has(.supportive-community-page),
+#root:has(.community-join-staff-page),
 #root:has(.staff-dashboard-root) {
   width: 100%;
   max-width: none;

@@ -24,6 +24,9 @@ const HOME_PROGRAM_TITLES = {
 
 const PROGRAMS_PAGE_SIZE = 3;
 
+const HOME_SERVICES_SUBTITLE =
+  "מקום לבני הגיל השלישי – לחיים פעילים, משמעותיים ומלאי חום אנושי";
+
 function Home() {
   const navigate = useNavigate();
   const [programs, setPrograms] = useState([]);
@@ -85,7 +88,11 @@ function Home() {
   function renderProgramButtons(program) {
     if (program.id === "supportive_community") {
       return (
-        <button onClick={() => navigate("/supportive-community")}>
+        <button
+          type="button"
+          className="program-card__btn program-card__btn--primary"
+          onClick={() => navigate("/supportive-community")}
+        >
           מידע נוסף והרשמה
         </button>
       );
@@ -93,18 +100,29 @@ function Home() {
 
     if (program.id === "60_plus_minus") {
       return (
-        <button onClick={() => navigate("/plus60")}>הצג פעילויות</button>
+        <button
+          type="button"
+          className="program-card__btn program-card__btn--primary"
+          onClick={() => navigate("/plus60")}
+        >
+          הצג פעילויות
+        </button>
       );
     }
 
     if (program.id === "day_center") {
       return (
         <div className="program-card__day-actions">
-          <button onClick={() => navigate("/day-center")}>
+          <button
+            type="button"
+            className="program-card__btn program-card__btn--primary"
+            onClick={() => navigate("/day-center")}
+          >
             מידע נוסף והרשמה
           </button>
           <button
-            className="volunteer-btn"
+            type="button"
+            className="program-card__btn program-card__btn--volunteer"
             onClick={() => setShowVolunteerForm(true)}
           >
             התנדב
@@ -113,7 +131,15 @@ function Home() {
       );
     }
 
-    return <button onClick={() => setSelectedProgram(program)}>הרשמה</button>;
+    return (
+      <button
+        type="button"
+        className="program-card__btn program-card__btn--primary"
+        onClick={() => setSelectedProgram(program)}
+      >
+        הרשמה
+      </button>
+    );
   }
 
   return (
@@ -143,66 +169,84 @@ function Home() {
         </div>
       </div>
 
-      <header id="services" className="home-services-header">
-        <div className="home-services-header__divider">
-          <span className="home-services-header__line" aria-hidden="true" />
-          <div className="home-services-header__core">
-            <img
-              src="/images/minitree.png"
-              alt=""
-              className="home-services-header__leaf"
-              aria-hidden="true"
-            />
-            <h2 className="home-services-header__title">השירותים שלנו</h2>
-            <img
-              src="/images/minitree.png"
-              alt=""
-              className="home-services-header__leaf home-services-header__leaf--flip"
-              aria-hidden="true"
-            />
+      <section
+        id="services"
+        className="home-services-section home-section-anchor"
+        aria-labelledby="home-services-title"
+      >
+        <img
+          src="/images/heartimage-clear.png"
+          alt=""
+          className="home-services-section__heart-deco"
+          aria-hidden="true"
+        />
+
+        <header className="home-services-header home-services-section__header">
+          <div className="home-services-header__divider">
+            <span className="home-services-header__line" aria-hidden="true" />
+            <div className="home-services-header__core">
+              <img
+                src="/images/minitree.png"
+                alt=""
+                className="home-services-header__leaf"
+                aria-hidden="true"
+              />
+              <h2 id="home-services-title" className="home-services-header__title">
+                השירותים שלנו
+              </h2>
+              <img
+                src="/images/minitree.png"
+                alt=""
+                className="home-services-header__leaf home-services-header__leaf--flip"
+                aria-hidden="true"
+              />
+            </div>
+            <span className="home-services-header__line" aria-hidden="true" />
           </div>
-          <span className="home-services-header__line" aria-hidden="true" />
+
+          <p className="home-services-section__subtitle">{HOME_SERVICES_SUBTITLE}</p>
+        </header>
+
+        {loading && <p className="home-loading-text">טוען תוכניות...</p>}
+
+        <div className="programs-grid">
+          {visiblePrograms.map((program) => (
+            <ProgramCard
+              key={program.id}
+              program={{
+                ...program,
+                title: HOME_PROGRAM_TITLES[program.id] || program.title,
+              }}
+              buttons={renderProgramButtons(program)}
+            />
+          ))}
         </div>
-      </header>
 
-      {loading && <p>טוען תוכניות...</p>}
+        {hasMorePrograms && (
+          <div className="home-programs-actions">
+            {canShowMorePrograms ? (
+              <button
+                type="button"
+                className="home-programs-more-btn"
+                onClick={handleShowMorePrograms}
+                aria-label="הצג עוד תוכניות"
+              >
+                ↓
+              </button>
+            ) : (
+              <button
+                type="button"
+                className="home-programs-more-btn"
+                onClick={handleShowLessPrograms}
+                aria-label="הצג פחות תוכניות"
+              >
+                ↑
+              </button>
+            )}
+          </div>
+        )}
 
-      <div className="programs-grid">
-        {visiblePrograms.map((program) => (
-          <ProgramCard
-            key={program.id}
-            program={{
-              ...program,
-              title: HOME_PROGRAM_TITLES[program.id] || program.title,
-            }}
-            buttons={renderProgramButtons(program)}
-          />
-        ))}
-      </div>
-
-      {hasMorePrograms && (
-        <div className="home-programs-actions">
-          {canShowMorePrograms ? (
-            <button
-              type="button"
-              className="home-programs-more-btn"
-              onClick={handleShowMorePrograms}
-              aria-label="הצג עוד תוכניות"
-            >
-              ↓
-            </button>
-          ) : (
-            <button
-              type="button"
-              className="home-programs-more-btn"
-              onClick={handleShowLessPrograms}
-              aria-label="הצג פחות תוכניות"
-            >
-              ↑
-            </button>
-          )}
-        </div>
-      )}
+      </section>
 
       <div className="home-action-cards">
         <div id="requests" className="home-requests-wrap home-section-anchor">
