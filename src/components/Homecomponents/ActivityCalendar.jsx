@@ -6,6 +6,7 @@ import "react-calendar/dist/Calendar.css";
 import { getActivityColorIndex } from "../../utils/HomeUtils/activityColorUtils";
 import { isFreeActivityData } from "../../utils/HomeUtils/activityPricing";
 import { formatActivityPrice } from "../../services/Payment/formatPrice";
+import ExpandableDescription from "./ExpandableDescription";
 
 const COMPACT_CALENDAR_BREAKPOINT = 1180;
 
@@ -202,11 +203,11 @@ function ActivityCalendar({ activities }) {
                     </div>
                   </div>
 
-                  {activity.description && (
-                    <p className="calendar-sidebar-card__desc">
-                      {activity.description}
-                    </p>
-                  )}
+                  <ExpandableDescription
+                    text={activity.description}
+                    textClassName="calendar-sidebar-card__desc"
+                    toggleClassName="calendar-sidebar-card__desc-toggle"
+                  />
 
                   <button
                     type="button"

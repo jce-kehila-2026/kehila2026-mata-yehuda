@@ -66,7 +66,7 @@
   width: 100%;
   height: var(--dc-hero-height);
   object-fit: cover;
-  object-position: center;
+  object-position: center 20%;
 }
 
 .day-center-hero__overlay {

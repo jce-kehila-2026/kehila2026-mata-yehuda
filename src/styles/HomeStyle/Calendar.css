@@ -436,6 +436,36 @@
   line-height: 1.5;
 }
 
+.expandable-description__text--collapsed.calendar-sidebar-card__desc {
+  display: -webkit-box;
+  -webkit-line-clamp: 3;
+  -webkit-box-orient: vertical;
+  overflow: hidden;
+  margin-bottom: 0.35rem;
+}
+
+.calendar-sidebar-card__desc-toggle {
+  display: inline-flex;
+  margin: 0 0 0.65rem;
+  padding: 0;
+  border: none;
+  background: transparent;
+  color: var(--plus60-green, #2d7d46);
+  font-family: inherit;
+  font-size: 0.8rem;
+  font-weight: 700;
+  line-height: 1.4;
+  cursor: pointer;
+  text-decoration: underline;
+  text-underline-offset: 0.12em;
+}
+
+.calendar-sidebar-card__desc-toggle:hover,
+.calendar-sidebar-card__desc-toggle:active {
+  color: #236b38;
+  background: transparent;
+}
+
 .calendar-sidebar-card__register {
   width: 100%;
   border-radius: 999px;
