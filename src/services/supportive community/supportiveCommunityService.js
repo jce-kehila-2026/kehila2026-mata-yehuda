@@ -23,13 +23,6 @@ function cleanStringArray(values) {
   ];
 }
 
-function mergeUniqueStringArrays(existingValues, newValues) {
-  return cleanStringArray([
-    ...(Array.isArray(existingValues) ? existingValues : []),
-    ...cleanStringArray(newValues),
-  ]);
-}
-
 function getParticipantRefId(participantRef) {
   if (!participantRef) {
     return "";
@@ -537,17 +530,9 @@ export const saveHomeHelpRequest = async (requestData) => {
   const subscriptionSnapshot = await getDoc(subscriptionRef);
 
   if (subscriptionSnapshot.exists()) {
-    const existingSubscription = subscriptionSnapshot.data();
-
     await updateDoc(subscriptionRef, {
-      requestedServices: mergeUniqueStringArrays(
-        existingSubscription.requestedServices,
-        requestedHelpTypes
-      ),
-      languages: mergeUniqueStringArrays(
-        existingSubscription.languages,
-        languages
-      ),
+      requestedServices: requestedHelpTypes,
+      languages,
     });
   }
 
@@ -558,15 +543,8 @@ export const saveHomeHelpRequest = async (requestData) => {
     const existingRequestData = existingHomeHelpRequest.data();
 
     await updateDoc(existingHomeHelpRequest.ref, {
-      requestedHelpTypes: mergeUniqueStringArrays(
-        existingRequestData.requestedHelpTypes ??
-          existingRequestData.requestedServices,
-        requestedHelpTypes
-      ),
-      languages: mergeUniqueStringArrays(
-        existingRequestData.languages,
-        languages
-      ),
+      requestedHelpTypes,
+      languages,
       description: mergeDescription(
         existingRequestData.description,
         description
