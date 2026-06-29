@@ -37,7 +37,13 @@ body {
 #root:has(.day-center-page),
 #root:has(.supportive-community-page),
 #root:has(.community-join-staff-page),
-#root:has(.staff-dashboard-root) {
+#root:has(.staff-dashboard-root),
+#root:has(.attendance-page),
+#root:has(.take-attendance-page),
+#root:has(.attendance-records-page),
+#root:has(.requests-inbox),
+#root:has(.community-staff-dashboard),
+#root:has(.activities-mgmt-page) {
   width: 100%;
   max-width: none;
   margin: 0;
