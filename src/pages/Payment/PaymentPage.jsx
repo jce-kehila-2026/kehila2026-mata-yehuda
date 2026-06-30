@@ -2,8 +2,13 @@ import { useEffect, useState } from "react";
 import { useNavigate, useSearchParams } from "react-router-dom";
 import PaymentForm from "../../components/Payment/PaymentForm";
 import { apiGet } from "../../services/Payment/api";
-import { formatDisplayPrice } from "../../services/Payment/formatPrice";
+import { formatActivityPrice } from "../../services/Payment/formatPrice";
 import { buildActivityPaymentPath } from "../../services/Payment/paymentLink";
+import { getActivityById } from "../../services/HomeServices/activitiesService";
+import {
+  buildPaymentInfoFromActivity,
+  isActivityPricingErrorMessage,
+} from "../../utils/HomeUtils/activityPricing";
 function PaymentPage() {
   const navigate = useNavigate();
   const [searchParams] = useSearchParams();
@@ -13,6 +18,7 @@ function PaymentPage() {
     searchParams.get("cancelRegistration") === "1" ||
     searchParams.get("cancel") === "1";
   const returnTo = searchParams.get("returnTo") || "";
+  const isFreeHint = searchParams.get("free") === "1";
 
   const [loading, setLoading] = useState(Boolean(activityId));
   const [loadError, setLoadError] = useState("");
@@ -80,10 +86,31 @@ function PaymentPage() {
 
     let cancelled = false;
 
+    async function loadActivityFromFirestore() {
+      const activity = await getActivityById(activityId);
+      if (!activity) {
+        return null;
+      }
+
+      return buildPaymentInfoFromActivity(activity, activityId, programId);
+    }
+
     async function loadActivity() {
       setLoading(true);
       setLoadError("");
       setPaymentInfo(null);
+
+      if (isFreeHint) {
+        const fallbackInfo = await loadActivityFromFirestore();
+        if (cancelled) {
+          return;
+        }
+        if (fallbackInfo?.isFree) {
+          setPaymentInfo(fallbackInfo);
+          setLoading(false);
+          return;
+        }
+      }
 
       try {
         const { response, data } = await apiGet(
@@ -95,7 +122,18 @@ function PaymentPage() {
         }
 
         if (!response.ok || !data.success) {
-          setLoadError(data.message || "לא ניתן לטעון את פרטי הפעילות");
+          const message = data.message || "לא ניתן לטעון את פרטי הפעילות";
+
+          if (isActivityPricingErrorMessage(message)) {
+            const fallbackInfo = await loadActivityFromFirestore();
+            if (fallbackInfo?.isFree) {
+              setPaymentInfo(fallbackInfo);
+              setLoadError("");
+              return;
+            }
+          }
+
+          setLoadError(message);
           return;
         }
 
@@ -103,12 +141,20 @@ function PaymentPage() {
           activityId: data.activityId,
           title: data.title,
           price: data.price,
+          isFree: Boolean(data.isFree) || data.price == null || Number(data.price) === 0,
           currency: data.currency,
           description: data.description || "",
           programId: data.programId || programId || "",
         });
       } catch (error) {
         if (!cancelled) {
+          const fallbackInfo = await loadActivityFromFirestore();
+          if (fallbackInfo?.isFree) {
+            setPaymentInfo(fallbackInfo);
+            setLoadError("");
+            return;
+          }
+
           setLoadError(error.message || "שגיאה בטעינת הפעילות");
         }
       } finally {
@@ -123,7 +169,7 @@ function PaymentPage() {
     return () => {
       cancelled = true;
     };
-  }, [activityId, wantsCancelRegistration]);
+  }, [activityId, wantsCancelRegistration, programId, isFreeHint]);
 
   const handleLookupBack = () => {
     if (returnTo === "plus60") {
@@ -186,7 +232,7 @@ function PaymentPage() {
                   {activity.description && <p>{activity.description}</p>}
                   <p>
                     <strong>
-                      {formatDisplayPrice(activity.price, activity.currency)}
+                      {formatActivityPrice(activity.price, activity.currency)}
                     </strong>
                   </p>
                   <button
@@ -215,8 +261,8 @@ function PaymentPage() {
 
           {!activitiesLoading && !activitiesError && activities.length === 0 && (
             <p className="form-error" role="alert">
-              לא נמצאו פעילויות עם מחיר. הוסיפו מסמך ב-Firestore תחת{" "}
-              <code dir="ltr">activities</code> עם שדות title ו-price.
+              לא נמצאו פעילויות זמינות להרשמה. הוסיפו מסמך ב-Firestore תחת{" "}
+              <code dir="ltr">activities</code> עם שדות title ו-price (0 לפעילות חינמית).
             </p>
           )}
         </section>

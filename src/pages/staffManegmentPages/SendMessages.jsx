@@ -16,7 +16,7 @@ import {
     sendPushNotification
 } from "../../services/staffManegmentServices/notificationService";
 
-function SendMessages() {
+function SendMessages({ onBack }) {
     const [title, setTitle] = useState("מטה יהודה");
     const [body, setBody] = useState("");
     const [targetGroup, setTargetGroup] = useState("all");
@@ -124,17 +124,61 @@ function SendMessages() {
     }
 
     return (
-        <div className="staff-page staff-page--messages">
-            <header className="notifications-page-header staff-header">
-                <div className="notifications-page-header__inner">
-                    <h1>שליחת הודעות ועדכונים</h1>
-                    <p>
-                        שליחת הודעות push למשתתפים שנרשמו לקבלת עדכונים בדפדפן
-                    </p>
-                </div>
-            </header>
+        <div
+            className="staff-page staff-page--messages messages-mgmt-page"
+            dir="rtl"
+        >
+            <img
+                src="/images/minitree.png"
+                alt=""
+                aria-hidden="true"
+                className="messages-mgmt-decoration messages-mgmt-decoration--top"
+            />
+            <img
+                src="/images/minitree.png"
+                alt=""
+                aria-hidden="true"
+                className="messages-mgmt-decoration messages-mgmt-decoration--left"
+            />
+            <img
+                src="/images/minitree.png"
+                alt=""
+                aria-hidden="true"
+                className="messages-mgmt-decoration messages-mgmt-decoration--bottom"
+            />
 
-            <div className="notifications-page">
+            <div className="staff-container staff-container--messages">
+                <header className="messages-mgmt-page__header">
+                    <div className="messages-mgmt-page__header-main">
+                        <h1 className="messages-mgmt-page__title">
+                            שליחת הודעות ועדכונים
+                        </h1>
+                        <p className="messages-mgmt-page__subtitle">
+                            שליחת הודעות push למשתתפים שנרשמו לקבלת עדכונים בדפדפן
+                        </p>
+                    </div>
+                    {onBack ? (
+                        <div className="messages-mgmt-page__actions">
+                            <button
+                                type="button"
+                                className="staff-back-button"
+                                onClick={onBack}
+                            >
+                                <span
+                                    className="staff-back-button__icon"
+                                    aria-hidden="true"
+                                >
+                                    →
+                                </span>
+                                <span className="staff-back-button__label">
+                                    חזרה ללוח הבקרה
+                                </span>
+                            </button>
+                        </div>
+                    ) : null}
+                </header>
+
+                <div className="notifications-page">
                 <NotificationStatsCards stats={stats} loading={dashboardLoading} />
 
                 <div className="notifications-page__layout">
@@ -176,6 +220,7 @@ function SendMessages() {
                         items={recentNotifications}
                         loading={dashboardLoading}
                     />
+                </div>
                 </div>
             </div>
         </div>

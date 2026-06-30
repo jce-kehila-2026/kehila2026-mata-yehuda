@@ -236,10 +236,71 @@
   height: 1.15rem;
 }
 
+.staff-login-forgot-password {
+  align-self: flex-start;
+  margin: -0.15rem 0 0;
+  padding: 0;
+  border: none;
+  background: none;
+  font-family: inherit;
+  font-size: 0.88rem;
+  font-weight: 500;
+  line-height: 1.45;
+  color: var(--color-primary);
+  text-align: right;
+  direction: rtl;
+  cursor: pointer;
+  text-decoration: underline;
+  text-underline-offset: 0.18em;
+  transition:
+    color 0.25s ease,
+    background-color 0.25s ease,
+    opacity 0.25s ease;
+}
+
+.staff-login-forgot-password:hover:not(:disabled) {
+  color: #ffffff;
+  background-color: var(--color-primary);
+}
+
+.staff-login-forgot-password:focus-visible {
+  outline: 2px solid rgba(45, 125, 70, 0.28);
+  outline-offset: 2px;
+  border-radius: 4px;
+}
+
+.staff-login-forgot-password:disabled {
+  cursor: wait;
+  opacity: 0.72;
+  text-decoration: none;
+}
+
 .staff-login-form__alert {
   margin: 0.1rem 0 0.15rem;
   font-size: 0.95rem;
   line-height: 1.5;
+}
+
+.staff-login-form__alert--success {
+  direction: rtl;
+  text-align: right;
+  margin: 0.35rem 0 0.2rem;
+  padding: 0.95rem 1.1rem;
+  color: #1a5c32;
+  background: #e8f5ec;
+  border: 1.5px solid #2d7d46;
+  border-radius: 12px;
+  font-size: 0.98rem;
+  line-height: 1.65;
+  box-shadow: 0 2px 8px rgba(45, 125, 70, 0.08);
+}
+
+.staff-login-form__alert--success p {
+  margin: 0;
+}
+
+.staff-login-form__alert--success p + p {
+  margin-top: 0.55rem;
 }
 
 .staff-login-submit {
@@ -319,6 +380,12 @@
 
   .staff-login-body {
     padding: 1.15rem 1rem 1.25rem;
+  }
+
+  .staff-login-form__alert--success {
+    padding: 0.9rem 1rem;
+    font-size: 0.95rem;
+    line-height: 1.6;
   }
 }
 

@@ -1,46 +1,53 @@
+import { useEffect, useState } from "react";
 import { useLocation, useNavigate } from "react-router-dom";
+import { scrollToHomeSection } from "../../utils/homeSectionScroll";
+
+const HOME_SECTION_IDS = ["requests", "donations", "contact"];
 
 const NAV_ITEMS = [
   { id: "about", label: "מי אנחנו", type: "page", path: "/about" },
+  { id: "requests", label: "פניות ובקשות", type: "section" },
   { id: "donations", label: "תרומות", type: "section" },
   { id: "contact", label: "יצירת קשר", type: "section" },
 ];
 
-function scrollToHomeSection(sectionId) {
-  const element = document.getElementById(sectionId);
-  if (!element) {
-    return false;
-  }
-
-  element.scrollIntoView({ behavior: "smooth", block: "start" });
-  element.classList.add("section-highlight");
-
-  window.setTimeout(() => {
-    element.classList.remove("section-highlight");
-  }, 2000);
-
-  return true;
-}
-
 function HomeNavbar() {
   const navigate = useNavigate();
   const location = useLocation();
+  const [activeSection, setActiveSection] = useState("");
+
+  useEffect(() => {
+    if (location.pathname !== "/") {
+      setActiveSection("");
+      return;
+    }
+
+    const hash = location.hash.replace("#", "");
+    if (HOME_SECTION_IDS.includes(hash)) {
+      setActiveSection(hash);
+    }
+  }, [location.pathname, location.hash]);
 
   const handleNavClick = (item) => {
     if (item.type === "page") {
+      setActiveSection("");
       navigate(item.path);
       return;
     }
+
+    setActiveSection(item.id);
 
     if (location.pathname === "/") {
       scrollToHomeSection(item.id);
       return;
     }
 
-    navigate(`/#${item.id}`);
+    navigate({ pathname: "/", hash: item.id });
   };
 
   const handleBrandClick = () => {
+    setActiveSection("");
+
     if (location.pathname !== "/") {
       navigate("/");
       return;
@@ -63,16 +70,26 @@ function HomeNavbar() {
         </button>
 
         <nav className="home-navbar__nav" aria-label="ניווט ראשי">
-          {NAV_ITEMS.map((item) => (
-            <button
-              key={item.id}
-              type="button"
-              className="home-navbar__link"
-              onClick={() => handleNavClick(item)}
-            >
-              {item.label}
-            </button>
-          ))}
+          {NAV_ITEMS.map((item) => {
+            const isActive =
+              item.type === "page"
+                ? location.pathname === item.path
+                : location.pathname === "/" && activeSection === item.id;
+
+            return (
+              <button
+                key={item.id}
+                type="button"
+                className={`home-navbar__link${
+                  isActive ? " home-navbar__link--active" : ""
+                }`}
+                aria-current={isActive ? "page" : undefined}
+                onClick={() => handleNavClick(item)}
+              >
+                {item.label}
+              </button>
+            );
+          })}
         </nav>
 
         <div className="home-navbar__actions">

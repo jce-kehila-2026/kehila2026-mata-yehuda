@@ -1,0 +1,902 @@
+/* ============================================================
+   About page — premium green/cream design system
+   (shared visual language with Plus60Page). Scoped under .about2.
+   Hero with organic photo + soft green glow, wave divider,
+   spacious about text, floating quote card, line-icon value cards.
+   ============================================================ */
+
+.about2 {
+  --g-dark: #1f7a3a;
+  --g: #2d7d46;
+  --g-soft: #3d8f5a;
+  --g-light: #dff5df;
+  --g-pale: #f3faf5;
+  --g-mist: #eef6f0;
+  --cream: #faf7f2;
+  --cream-warm: #f6f1e8;
+  --gold: #c9a227;
+  --gold-soft: #e3c878;
+  --white: #ffffff;
+  --text: #2c3e30;
+  --muted: #5f6f63;
+  --shadow: 0 14px 40px rgba(31, 92, 56, 0.1);
+  --shadow-soft: 0 6px 22px rgba(31, 92, 56, 0.07);
+  --shadow-strong: 0 26px 56px rgba(31, 92, 56, 0.14);
+  --radius: 22px;
+  --radius-lg: 32px;
+  --radius-sm: 14px;
+
+  position: relative;
+  overflow: hidden;
+}
+
+/* higher specificity than .home-page so the soft gradient always wins */
+.home-page.about2 {
+  background:
+    radial-gradient(circle at 8% 4%, rgba(123, 201, 149, 0.12), transparent 26%),
+    radial-gradient(circle at 94% 2%, rgba(45, 125, 70, 0.07), transparent 22%),
+    linear-gradient(180deg, var(--cream) 0%, var(--g-pale) 46%, var(--g-mist) 100%);
+}
+
+.about2 > section {
+  position: relative;
+  z-index: 1;
+}
+
+/* ── Page-level botanical decorations ── */
+.about2__deco {
+  position: absolute;
+  z-index: 0;
+  pointer-events: none;
+  user-select: none;
+  height: auto;
+  object-fit: contain;
+}
+
+.about2__deco--tr {
+  top: clamp(5rem, 11vw, 9rem);
+  inset-inline-end: clamp(-2.5rem, -2vw, -1rem);
+  width: clamp(150px, 22vw, 320px);
+  opacity: 0.1;
+  transform: scaleX(-1);
+}
+
+.about2__deco--bl {
+  bottom: clamp(12rem, 24vw, 18rem);
+  inset-inline-start: clamp(-3rem, -3vw, -1.5rem);
+  width: clamp(150px, 22vw, 300px);
+  opacity: 0.08;
+}
+
+/* tighten the gap between the navbar and the hero (About page only) */
+.about2 .home-navbar {
+  margin-bottom: clamp(0.75rem, 2vw, 1.25rem);
+}
+
+/* shared pill */
+.about2-eyebrow {
+  display: inline-block;
+  margin: 0;
+  padding: 0.42rem 1.15rem;
+  border-radius: 999px;
+  background: var(--g-light);
+  color: var(--g-dark);
+  font-size: clamp(0.85rem, 1.8vw, 0.98rem);
+  font-weight: 700;
+  letter-spacing: 0.02em;
+}
+
+/* ============================================================
+   1. HERO — photo (left) + title (right), soft cream/green
+   ============================================================ */
+.about2-hero {
+  position: relative;
+  overflow: hidden;
+  margin: 0 calc(-1 * var(--app-padding-x, clamp(0.85rem, 3vw, 2rem)))
+    clamp(0.2rem, 0.8vw, 0.5rem);
+  /* small left padding so the photo/cards sit near (not glued to) the left edge */
+  padding: clamp(0.5rem, 1.5vw, 1rem) clamp(1.5rem, 5vw, 3.5rem)
+    clamp(1rem, 2.5vw, 1.85rem) clamp(1rem, 3vw, 2.25rem);
+  background:
+    radial-gradient(circle at 78% -10%, rgba(123, 201, 149, 0.28), transparent 48%),
+    radial-gradient(circle at 6% 110%, rgba(45, 125, 70, 0.12), transparent 52%),
+    linear-gradient(180deg, var(--cream) 0%, #fbf8f1 55%, var(--g-pale) 100%);
+}
+
+.about2-hero__foliage {
+  position: absolute;
+  top: clamp(-1.5rem, -2vw, 0rem);
+  inset-inline-end: clamp(-2rem, -2vw, 0rem);
+  width: clamp(180px, 26vw, 360px);
+  height: auto;
+  opacity: 0.32;
+  pointer-events: none;
+  z-index: 0;
+}
+
+.about2-hero__inner {
+  position: relative;
+  z-index: 3;
+  display: grid;
+  /* left column sized to the photo/cards (pushed to the far left),
+     right column takes the remaining (wider) space for the text */
+  grid-template-columns: minmax(0, clamp(380px, 40vw, 600px)) minmax(0, 1fr);
+  gap: clamp(1.5rem, 3.5vw, 3rem);
+  align-items: start;
+  width: 100%;
+  direction: ltr;
+}
+
+/* LEFT column: photo + three compact feature cards */
+.about2-hero__left {
+  display: flex;
+  flex-direction: column;
+  gap: clamp(0.85rem, 2vw, 1.25rem);
+}
+
+.about2-hero__media {
+  position: relative;
+  display: block;
+}
+
+.about2-hero__photo {
+  display: block;
+  width: 100%;
+  /* fill the full left column (wider, reaching toward the page's left side) */
+  aspect-ratio: 16 / 10;
+  max-height: clamp(280px, 32vw, 380px);
+  object-fit: cover;
+  object-position: center center;
+  border-radius: 16px;
+  border: 4px solid var(--white);
+  box-shadow: 0 14px 28px rgba(31, 92, 56, 0.16);
+}
+
+.about2-hero__cards {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: clamp(0.65rem, 1.4vw, 1rem);
+}
+
+.about2-mini-card {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  text-align: center;
+  padding: clamp(0.7rem, 1.6vw, 1rem) clamp(0.5rem, 1.2vw, 0.75rem);
+  border-radius: 16px;
+  background: var(--white);
+  border: 1px solid rgba(45, 125, 70, 0.1);
+  box-shadow: var(--shadow-soft);
+  transition: transform 0.25s ease, box-shadow 0.25s ease;
+}
+
+.about2-mini-card:hover {
+  transform: translateY(-4px);
+  box-shadow: var(--shadow);
+}
+
+.about2-mini-card__icon {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 2.6rem;
+  height: 2.6rem;
+  margin-bottom: 0.5rem;
+  border-radius: 50%;
+  background: var(--g-light);
+  color: var(--g-dark);
+}
+
+.about2-mini-card__icon svg {
+  width: 1.35rem;
+  height: 1.35rem;
+  fill: none;
+  stroke: currentColor;
+  stroke-width: 1.7;
+  stroke-linecap: round;
+  stroke-linejoin: round;
+}
+
+.about2-mini-card__title {
+  margin: 0 0 0.3rem;
+  color: var(--g-dark);
+  font-size: clamp(0.82rem, 1.6vw, 0.95rem);
+  font-weight: 800;
+  line-height: 1.25;
+}
+
+.about2-mini-card__text {
+  margin: 0;
+  color: var(--muted);
+  font-size: clamp(0.72rem, 1.3vw, 0.82rem);
+  line-height: 1.5;
+}
+
+/* RIGHT column: intro (centered) + about description + quote (right-aligned) */
+.about2-hero__content {
+  direction: rtl;
+  display: flex;
+  flex-direction: column;
+  gap: clamp(0.9rem, 2vw, 1.35rem);
+  text-align: right;
+}
+
+.about2-hero__intro {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  text-align: center;
+  gap: 0.4rem;
+}
+
+.about2-hero__heart {
+  display: block;
+  width: clamp(64px, 8vw, 88px);
+  height: auto;
+  color: var(--gold);
+  pointer-events: none;
+}
+
+.about2-hero__heart path {
+  fill: none;
+  stroke: currentColor;
+  stroke-width: 5;
+  stroke-linecap: round;
+  stroke-linejoin: round;
+}
+
+.about2-hero__title {
+  margin: 0.1rem 0 0;
+  color: var(--g-dark);
+  font-family: "Heebo", system-ui, sans-serif;
+  font-size: clamp(2rem, 5vw, 3rem);
+  font-weight: 800;
+  line-height: 1.1;
+  letter-spacing: -0.025em;
+}
+
+.about2-hero__lead {
+  margin: 0.2rem 0 0;
+  max-width: 28rem;
+  color: var(--muted);
+  font-size: clamp(1rem, 2.2vw, 1.14rem);
+  line-height: 1.75;
+}
+
+/* ── Wave divider at the bottom of the hero ── */
+.about2-hero__wave {
+  position: absolute;
+  z-index: 1;
+  left: 0;
+  bottom: -1px;
+  width: 100%;
+  height: clamp(16px, 2.5vw, 32px);
+  display: block;
+}
+
+.about2-hero__wave path {
+  fill: var(--g-pale);
+}
+
+/* ============================================================
+   2. ABOUT — spacious text (right) + floating quote (side)
+   ============================================================ */
+.about2-about-section {
+  width: min(100%, 1100px);
+  margin: 0 auto clamp(1.75rem, 4vw, 2.75rem);
+}
+
+.about2-about {
+  display: grid;
+  grid-template-columns: minmax(0, 1.35fr) minmax(0, 1fr);
+  gap: clamp(1.75rem, 4vw, 3.25rem);
+  align-items: center;
+  width: 100%;
+  margin: 0 0 clamp(1.25rem, 3vw, 1.85rem);
+  direction: rtl;
+}
+
+.about2-about__text {
+  text-align: right;
+}
+
+.about2-about__kicker {
+  display: block;
+  margin: 0 0 0.2rem;
+  color: var(--g);
+  font-size: clamp(0.85rem, 1.8vw, 0.95rem);
+  font-weight: 700;
+  letter-spacing: 0.02em;
+}
+
+.about2-about__title {
+  margin: 0.15rem 0 0.65rem;
+  color: var(--g-dark);
+  font-family: "Heebo", system-ui, sans-serif;
+  font-size: clamp(1.35rem, 3vw, 1.9rem);
+  font-weight: 800;
+  line-height: 1.2;
+  letter-spacing: -0.02em;
+  position: relative;
+  padding-bottom: 0.65rem;
+}
+
+/* gold accent line under heading */
+.about2-about__title::after {
+  content: "";
+  position: absolute;
+  inset-inline-end: 0;
+  bottom: 0;
+  width: 4.5rem;
+  height: 3px;
+  border-radius: 999px;
+  background: linear-gradient(90deg, var(--gold), var(--gold-soft));
+}
+
+.about2-about__lead {
+  margin: 0 0 0.75rem;
+  color: var(--text);
+  font-size: clamp(1rem, 2.2vw, 1.12rem);
+  line-height: 1.85;
+  font-weight: 500;
+}
+
+.about2-about__paragraph {
+  margin: 0 0 1rem;
+  color: var(--muted);
+  font-size: clamp(0.95rem, 2vw, 1.05rem);
+  line-height: 1.85;
+}
+
+.about2-about__audience {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.5rem;
+  margin: 0;
+  padding: 0.7rem 1.25rem;
+  border-radius: 999px;
+  background: var(--g-light);
+  color: var(--g-dark);
+  font-size: clamp(0.95rem, 2vw, 1.05rem);
+  line-height: 1.4;
+}
+
+.about2-about__audience strong {
+  font-weight: 800;
+}
+
+/* Floating quote card with offset green layer behind */
+.about2-quote {
+  position: relative;
+  direction: rtl;
+}
+
+.about2-quote__layer {
+  position: absolute;
+  z-index: 0;
+  inset: 0;
+  border-radius: var(--radius-lg);
+  background: linear-gradient(150deg, var(--g-light), rgba(123, 201, 149, 0.45));
+  transform: translate(-14px, 18px);
+}
+
+.about2-quote__card {
+  position: relative;
+  z-index: 1;
+  margin: 0;
+  padding: 0;
+  border: none;
+  border-radius: 0;
+  background: none;
+  box-shadow: none;
+  text-align: center;
+}
+
+.about2-quote__badge {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 3.4rem;
+  height: 3.4rem;
+  margin-bottom: 1rem;
+  border-radius: 50%;
+  background: var(--g);
+  color: #fff;
+  box-shadow: 0 12px 26px rgba(45, 125, 70, 0.3);
+}
+
+.about2-quote__badge svg {
+  width: 1.7rem;
+  height: 1.7rem;
+}
+
+/* small gold decorative line inside the card */
+.about2-quote__rule {
+  width: 3rem;
+  height: 3px;
+  margin: 0 auto 1rem;
+  border-radius: 999px;
+  background: linear-gradient(90deg, var(--gold-soft), var(--gold), var(--gold-soft));
+}
+
+.about2-quote__text {
+  margin: 0 auto 0.75rem;
+  max-width: 22rem;
+  color: var(--g-dark);
+  font-family: "Heebo", system-ui, sans-serif;
+  font-size: clamp(1.25rem, 2.8vw, 1.6rem);
+  font-weight: 800;
+  line-height: 1.55;
+  letter-spacing: -0.01em;
+}
+
+.about2-quote__cite {
+  display: block;
+  color: var(--muted);
+  font-size: clamp(0.92rem, 2vw, 1.02rem);
+  font-style: normal;
+  font-weight: 600;
+}
+
+/* ============================================================
+   3. COMMUNITY note — soft banner
+   ============================================================ */
+.about2-community {
+  width: min(100%, 920px);
+  margin: 0 auto clamp(1.75rem, 4vw, 2.75rem);
+}
+
+.about2-community__inner {
+  display: flex;
+  align-items: center;
+  gap: clamp(1rem, 3vw, 1.75rem);
+  padding: clamp(1.5rem, 3.5vw, 2.25rem) clamp(1.5rem, 4vw, 2.75rem);
+  border-radius: var(--radius-lg);
+  background: linear-gradient(135deg, var(--g-pale) 0%, var(--g-light) 100%);
+  border: 1px solid rgba(45, 125, 70, 0.12);
+  box-shadow: var(--shadow-soft);
+  direction: rtl;
+}
+
+.about2-community__icon {
+  flex-shrink: 0;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 3.5rem;
+  height: 3.5rem;
+  border-radius: 50%;
+  background: var(--white);
+  color: var(--g);
+  box-shadow: var(--shadow-soft);
+}
+
+.about2-community__icon svg {
+  width: 1.85rem;
+  height: 1.85rem;
+}
+
+.about2-community__text {
+  margin: 0;
+  color: var(--text);
+  font-size: clamp(1rem, 2.2vw, 1.12rem);
+  line-height: 1.85;
+  text-align: right;
+}
+
+/* ============================================================
+   Elegant section header (decorative lines + leaves)
+   ============================================================ */
+.about2-head {
+  text-align: center;
+  margin-bottom: clamp(1.25rem, 3vw, 1.85rem);
+}
+
+.about2-head__divider {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: clamp(0.85rem, 2.5vw, 1.35rem);
+  width: 100%;
+}
+
+.about2-head__line {
+  flex: 1 1 0;
+  max-width: 8rem;
+  height: 2px;
+  border-radius: 999px;
+  background: linear-gradient(90deg, rgba(45, 125, 70, 0), var(--g) 85%);
+}
+
+.about2-head__line:last-child {
+  background: linear-gradient(90deg, var(--g) 15%, rgba(45, 125, 70, 0));
+}
+
+.about2-head__core {
+  display: inline-flex;
+  align-items: center;
+  gap: clamp(0.65rem, 2vw, 1.15rem);
+  flex-shrink: 0;
+}
+
+.about2-head__leaf {
+  width: clamp(68px, 11vw, 110px);
+  height: auto;
+  object-fit: contain;
+  pointer-events: none;
+  display: block;
+  flex-shrink: 0;
+}
+
+.about2-head__leaf--end {
+  transform: scaleX(-1);
+}
+
+.about2-head__title {
+  margin: 0;
+  color: var(--g-dark);
+  font-family: "Heebo", system-ui, sans-serif;
+  font-size: clamp(1.85rem, 4.5vw, 2.5rem);
+  font-weight: 800;
+  line-height: 1.2;
+  letter-spacing: -0.02em;
+}
+
+.about2-head__subtitle {
+  margin: 0.8rem auto 0;
+  max-width: 36rem;
+  color: var(--muted);
+  font-size: clamp(1rem, 2.1vw, 1.12rem);
+  line-height: 1.75;
+}
+
+/* ============================================================
+   4. VALUES — clean cards, circular pale-green line icons
+   ============================================================ */
+.about2-values {
+  width: min(100%, 1080px);
+  margin: 0 auto clamp(2rem, 5vw, 3rem);
+}
+
+.about2-values__grid {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: clamp(1.25rem, 3vw, 2rem);
+}
+
+.about2-value {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  text-align: center;
+  padding: clamp(1.85rem, 3vw, 2.6rem) clamp(1.35rem, 2.5vw, 1.9rem);
+  border-radius: var(--radius);
+  background: var(--white);
+  border: 1px solid rgba(45, 125, 70, 0.1);
+  box-shadow: var(--shadow-soft);
+  transition: transform 0.28s ease, box-shadow 0.28s ease, border-color 0.28s ease;
+}
+
+.about2-value:hover {
+  transform: translateY(-6px);
+  box-shadow: var(--shadow);
+  border-color: rgba(45, 125, 70, 0.22);
+}
+
+.about2-value__icon {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 4.5rem;
+  height: 4.5rem;
+  margin-bottom: 1.25rem;
+  border-radius: 50%;
+  background: var(--g-light);
+  color: var(--g-dark);
+  transition: transform 0.28s ease, background 0.28s ease;
+}
+
+.about2-value:hover .about2-value__icon {
+  transform: scale(1.06);
+  background: #cfeed9;
+}
+
+.about2-value__icon svg {
+  width: 2.15rem;
+  height: 2.15rem;
+  fill: none;
+  stroke: currentColor;
+  stroke-width: 1.7;
+  stroke-linecap: round;
+  stroke-linejoin: round;
+}
+
+.about2-value__title {
+  margin: 0 0 0.65rem;
+  color: var(--g-dark);
+  font-size: clamp(1.15rem, 2.4vw, 1.35rem);
+  font-weight: 800;
+  line-height: 1.3;
+}
+
+.about2-value__text {
+  margin: 0;
+  color: var(--muted);
+  font-size: clamp(0.95rem, 2vw, 1.02rem);
+  line-height: 1.8;
+}
+
+/* ============================================================
+   5. GALLERY — modern rounded cards
+   ============================================================ */
+.about2-gallery {
+  width: min(100%, 1000px);
+  margin: 0 auto clamp(2rem, 5vw, 3rem);
+}
+
+.about2-gallery__grid {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: clamp(1.25rem, 3vw, 2rem);
+}
+
+.about2-gallery__card {
+  margin: 0;
+  display: flex;
+  flex-direction: column;
+  padding: 0.55rem 0.55rem 0.85rem;
+  border-radius: var(--radius);
+  background: linear-gradient(180deg, var(--white) 0%, var(--g-pale) 100%);
+  border: 1px solid rgba(45, 125, 70, 0.1);
+  box-shadow: var(--shadow-soft);
+  overflow: hidden;
+  transition: transform 0.32s ease, box-shadow 0.32s ease;
+}
+
+.about2-gallery__card:hover {
+  transform: translateY(-6px);
+  box-shadow: var(--shadow);
+}
+
+.about2-gallery__media {
+  width: 100%;
+  aspect-ratio: 3 / 4;
+  overflow: hidden;
+  border-radius: var(--radius-sm);
+  border: 1px solid rgba(45, 125, 70, 0.12);
+  background: var(--g-pale);
+}
+
+.about2-gallery__media img {
+  display: block;
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  object-position: center center;
+  transition: transform 0.4s ease;
+}
+
+.about2-gallery__card:hover .about2-gallery__media img {
+  transform: scale(1.06);
+}
+
+.about2-gallery__caption {
+  margin: 0.85rem 0 0;
+  padding: 0 0.25rem;
+  font-family: "Heebo", system-ui, sans-serif;
+  font-size: clamp(1rem, 2.2vw, 1.15rem);
+  font-weight: 800;
+  color: var(--g-dark);
+  line-height: 1.3;
+  text-align: center;
+}
+
+.about2-gallery__actions {
+  display: flex;
+  justify-content: center;
+  margin-top: clamp(1.75rem, 3.5vw, 2.5rem);
+}
+
+.about2-gallery__btn {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.55rem;
+  font-family: "Heebo", system-ui, sans-serif;
+  font-size: 1rem;
+  font-weight: 700;
+  padding: 0.78rem 1.85rem;
+  border: 1.5px solid rgba(45, 125, 70, 0.25);
+  border-radius: 999px;
+  background: var(--white);
+  color: var(--g);
+  cursor: pointer;
+  box-shadow: var(--shadow-soft);
+  transition: transform 0.18s ease, box-shadow 0.18s ease, background 0.18s ease;
+}
+
+.about2-gallery__btn:hover {
+  transform: translateY(-2px);
+  background: var(--g-pale);
+  box-shadow: var(--shadow);
+}
+
+/* ============================================================
+   6. CTA — full-width green band ending
+   ============================================================ */
+.about2-cta {
+  position: relative;
+  overflow: hidden;
+  width: min(100%, 1080px);
+  margin: 0 auto clamp(1.5rem, 4vw, 2.5rem);
+  padding: clamp(2.5rem, 5vw, 3.75rem) clamp(1.5rem, 5vw, 3.25rem);
+  border-radius: var(--radius-lg);
+  background:
+    radial-gradient(circle at top left, rgba(255, 255, 255, 0.1), transparent 34%),
+    linear-gradient(135deg, var(--g) 0%, var(--g-dark) 100%);
+  box-shadow: 0 22px 48px rgba(31, 92, 56, 0.22);
+  text-align: center;
+}
+
+.about2-cta__inner {
+  position: relative;
+  z-index: 1;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  flex-wrap: wrap;
+  gap: clamp(1rem, 3vw, 2rem);
+  direction: rtl;
+  text-align: right;
+}
+
+.about2-cta__text {
+  flex: 1 1 20rem;
+}
+
+.about2-cta__title {
+  margin: 0 0 0.4rem;
+  color: #fff;
+  font-family: "Heebo", system-ui, sans-serif;
+  font-size: clamp(1.5rem, 3.5vw, 2.25rem);
+  font-weight: 800;
+  line-height: 1.25;
+  letter-spacing: -0.01em;
+}
+
+.about2-cta__subtitle {
+  margin: 0;
+  color: rgba(255, 255, 255, 0.85);
+  font-size: clamp(0.98rem, 2vw, 1.1rem);
+  line-height: 1.7;
+}
+
+.about2-cta__btn {
+  font-family: "Heebo", system-ui, sans-serif;
+  font-size: 1.1rem;
+  font-weight: 700;
+  padding: 0.9rem 2.25rem;
+  border: none;
+  border-radius: 999px;
+  background: #fff;
+  color: var(--g-dark);
+  cursor: pointer;
+  box-shadow: 0 12px 26px rgba(0, 0, 0, 0.18);
+  transition: transform 0.18s ease, box-shadow 0.18s ease, background 0.18s ease;
+}
+
+.about2-cta__btn:hover {
+  transform: translateY(-2px);
+  background: var(--g-pale);
+  box-shadow: 0 16px 32px rgba(0, 0, 0, 0.24);
+}
+
+.about2-cta__leaf {
+  position: absolute;
+  z-index: 0;
+  bottom: -0.85rem;
+  width: clamp(130px, 20vw, 230px);
+  height: auto;
+  object-fit: contain;
+  opacity: 0.45;
+  pointer-events: none;
+}
+
+.about2-cta__leaf--start {
+  inset-inline-start: -1.5rem;
+  transform: rotate(-8deg);
+}
+
+.about2-cta__leaf--end {
+  inset-inline-end: -1.5rem;
+  transform: scaleX(-1) rotate(-8deg);
+}
+
+/* ============================================================
+   Responsive
+   ============================================================ */
+@media (max-width: 900px) {
+  .about2-hero__inner {
+    grid-template-columns: 1fr;
+    gap: clamp(1.5rem, 4vw, 2.25rem);
+  }
+
+  .about2-hero {
+    padding-top: clamp(1.25rem, 3vw, 1.75rem);
+    padding-inline: clamp(1rem, 4vw, 2rem);
+  }
+
+  .about2-hero__left {
+    order: 1;
+    max-width: 34rem;
+    margin-inline: auto;
+    width: 100%;
+  }
+
+  .about2-hero__photo {
+    max-width: none;
+    border-radius: 18px;
+  }
+
+  .about2-hero__cards {
+    max-width: none;
+  }
+
+  .about2-hero__content {
+    order: 2;
+    text-align: center;
+    max-width: 40rem;
+    margin-inline: auto;
+  }
+
+  .about2-about__text {
+    text-align: center;
+  }
+
+  .about2-about__title::after {
+    inset-inline-end: 50%;
+    transform: translateX(50%);
+  }
+
+  .about2-community__inner {
+    flex-direction: column;
+    text-align: center;
+  }
+
+  .about2-community__text {
+    text-align: center;
+  }
+}
+
+@media (max-width: 620px) {
+  .about2-hero__photo {
+    border-radius: 16px;
+  }
+
+  .about2-hero__cards {
+    grid-template-columns: 1fr;
+  }
+
+  .about2-gallery__grid {
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+    gap: clamp(0.5rem, 2vw, 0.85rem);
+  }
+
+  .about2-gallery__card {
+    padding: 0.35rem 0.3rem 0.55rem;
+  }
+
+  .about2-gallery__caption {
+    margin-top: 0.5rem;
+    font-size: clamp(0.72rem, 2.6vw, 0.92rem);
+  }
+
+  .about2-cta__inner {
+    justify-content: center;
+    text-align: center;
+  }
+
+  .about2-cta__text {
+    flex-basis: 100%;
+  }
+}

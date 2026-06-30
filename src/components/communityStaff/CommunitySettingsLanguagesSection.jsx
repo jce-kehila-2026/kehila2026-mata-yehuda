@@ -6,16 +6,10 @@ import {
 import CommunitySettingsItemCard from "./CommunitySettingsItemCard.jsx";
 import LanguageFormModal from "./LanguageFormModal.jsx";
 import CommunityStaffConfirmModal from "./CommunityStaffConfirmModal.jsx";
-import {
-  CommunityStaffEmptyState,
-  CommunityStaffListToolbar,
-  CommunityStaffPagination,
-  CommunityStaffStatusOverview,
-  buildActiveInactiveOverviewItems,
-  Languages,
-} from "./CommunityStaffListUi.jsx";
+import { Languages, CheckCircle2, XCircle } from "lucide-react";
+import { CommunityStaffEmptyState } from "./CommunityStaffListUi.jsx";
 
-const PAGE_SIZE_OPTIONS = [5, 10, 25];
+const PAGE_SIZE_OPTIONS = [5, 10, 20];
 
 function matchesSearch(language, searchTerm) {
   if (!searchTerm) {
@@ -101,6 +95,24 @@ function CommunitySettingsLanguagesSection({ refreshKey = 0, onShowSuccess, onSh
     }
   }, [currentPage, totalPages]);
 
+  const languageStats = useMemo(() => {
+    let active = 0;
+
+    languages.forEach((language) => {
+      if (language.is_active === true) {
+        active += 1;
+      }
+    });
+
+    return {
+      total: languages.length,
+      active,
+      inactive: languages.length - active,
+    };
+  }, [languages]);
+
+  const safePage = Math.min(currentPage, totalPages);
+
   const handleConfirmToggle = async () => {
     if (!pendingToggleLanguage) {
       return;
@@ -156,32 +168,92 @@ function CommunitySettingsLanguagesSection({ refreshKey = 0, onShowSuccess, onSh
         </p>
       ) : (
         <>
-          <CommunityStaffStatusOverview
-            items={buildActiveInactiveOverviewItems(
-              languages,
-              (language) => language.is_active === true
-            )}
-          />
+          <section
+            className="activities-mgmt-summary"
+            aria-label="סיכום שפות"
+          >
+            <div className="activities-mgmt-summary__card activities-mgmt-summary__card--neutral">
+              <span className="activities-mgmt-summary__icon">
+                <Languages size={22} strokeWidth={2} aria-hidden="true" />
+              </span>
+              <span className="activities-mgmt-summary__value">
+                {languageStats.total}
+              </span>
+              <span className="activities-mgmt-summary__label">סה״כ שפות</span>
+              <span className="activities-mgmt-summary__hint">
+                כל השפות במערכת
+              </span>
+            </div>
+            <div className="activities-mgmt-summary__card activities-mgmt-summary__card--participants">
+              <span className="activities-mgmt-summary__icon">
+                <CheckCircle2 size={22} strokeWidth={2} aria-hidden="true" />
+              </span>
+              <span className="activities-mgmt-summary__value">
+                {languageStats.active}
+              </span>
+              <span className="activities-mgmt-summary__label">פעילות</span>
+              <span className="activities-mgmt-summary__hint">
+                שפות זמינות לשימוש
+              </span>
+            </div>
+            <div className="activities-mgmt-summary__card activities-mgmt-summary__card--open">
+              <span className="activities-mgmt-summary__icon">
+                <XCircle size={22} strokeWidth={2} aria-hidden="true" />
+              </span>
+              <span className="activities-mgmt-summary__value">
+                {languageStats.inactive}
+              </span>
+              <span className="activities-mgmt-summary__label">לא פעילות</span>
+              <span className="activities-mgmt-summary__hint">
+                שפות מושבתות כרגע
+              </span>
+            </div>
+          </section>
 
-          <CommunityStaffListToolbar
-            searchId="community-settings-languages-search"
-            searchValue={searchTerm}
-            onSearchChange={(event) => setSearchTerm(event.target.value)}
-            searchPlaceholder="חיפוש לפי שם שפה..."
-            filterId="community-settings-languages-filter"
-            filterValue={activeFilter}
-            onFilterChange={(event) => setActiveFilter(event.target.value)}
-            filterLabel="סטטוס"
-            filterOptions={[
-              { value: "all", label: "כל השפות" },
-              { value: "active", label: "פעילות" },
-              { value: "inactive", label: "לא פעילות" },
-            ]}
-            pageSizeId="community-settings-languages-page-size"
-            pageSizeValue={pageSize}
-            onPageSizeChange={(event) => setPageSize(Number(event.target.value))}
-            pageSizeOptions={PAGE_SIZE_OPTIONS}
-          />
+          <div className="admin-list-toolbar staff-form staff-list-filters">
+            <div className="admin-list-toolbar__search">
+              <label htmlFor="community-settings-languages-search">חיפוש</label>
+              <input
+                id="community-settings-languages-search"
+                type="search"
+                value={searchTerm}
+                onChange={(event) => setSearchTerm(event.target.value)}
+                placeholder="חיפוש לפי שם שפה..."
+              />
+            </div>
+
+            <div className="admin-list-toolbar__filters">
+              <div>
+                <label htmlFor="community-settings-languages-filter">סטטוס</label>
+                <select
+                  id="community-settings-languages-filter"
+                  value={activeFilter}
+                  onChange={(event) => setActiveFilter(event.target.value)}
+                >
+                  <option value="all">כל השפות</option>
+                  <option value="active">פעילות</option>
+                  <option value="inactive">לא פעילות</option>
+                </select>
+              </div>
+            </div>
+
+            <div className="admin-list-toolbar__page-size">
+              <label htmlFor="community-settings-languages-page-size">
+                מספר שפות בעמוד
+              </label>
+              <select
+                id="community-settings-languages-page-size"
+                value={pageSize}
+                onChange={(event) => setPageSize(Number(event.target.value))}
+              >
+                {PAGE_SIZE_OPTIONS.map((size) => (
+                  <option key={size} value={size}>
+                    {size}
+                  </option>
+                ))}
+              </select>
+            </div>
+          </div>
 
           <div className="community-staff-request-list community-settings-section__list">
             {filteredLanguages.length === 0 ? (
@@ -212,16 +284,31 @@ function CommunitySettingsLanguagesSection({ refreshKey = 0, onShowSuccess, onSh
             )}
           </div>
 
-          {filteredLanguages.length > 0 && (
-            <CommunityStaffPagination
-              currentPage={currentPage}
-              totalPages={totalPages}
-              onPrevious={() => setCurrentPage((page) => Math.max(1, page - 1))}
-              onNext={() =>
-                setCurrentPage((page) => Math.min(totalPages, page + 1))
-              }
-            />
-          )}
+          {filteredLanguages.length > 0 ? (
+            <div className="activities-mgmt-pagination">
+              <button
+                type="button"
+                className="activities-mgmt-pagination__btn"
+                onClick={() => setCurrentPage((page) => Math.max(1, page - 1))}
+                disabled={safePage <= 1}
+              >
+                הקודם
+              </button>
+              <span className="activities-mgmt-pagination__label">
+                עמוד {safePage} מתוך {totalPages}
+              </span>
+              <button
+                type="button"
+                className="activities-mgmt-pagination__btn"
+                onClick={() =>
+                  setCurrentPage((page) => Math.min(totalPages, page + 1))
+                }
+                disabled={safePage >= totalPages}
+              >
+                הבא
+              </button>
+            </div>
+          ) : null}
         </>
       )}
 

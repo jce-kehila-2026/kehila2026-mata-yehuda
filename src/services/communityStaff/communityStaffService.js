@@ -1,6 +1,7 @@
 import {
   addDoc,
   collection,
+  deleteDoc,
   doc,
   getDoc,
   getDocs,
@@ -420,6 +421,70 @@ export async function approveVolunteer(volunteerId) {
     is_active: true,
     status: "active",
   });
+}
+
+export async function rejectVolunteer(volunteerId) {
+  const volunteerRef = doc(db, "volunteers", volunteerId);
+  await updateDoc(volunteerRef, {
+    is_active: false,
+    status: "rejected",
+  });
+}
+
+export async function getRejectedVolunteerRequests() {
+  const volunteersRef = collection(db, "volunteers");
+  const rejectedQuery = query(volunteersRef, where("status", "==", "rejected"));
+  const snapshot = await getDocs(rejectedQuery);
+  const languageLookup = await loadLanguageLookup();
+
+  return snapshot.docs.map((volunteerDoc) => {
+    const volunteer = {
+      id: volunteerDoc.id,
+      ...volunteerDoc.data(),
+    };
+
+    return {
+      ...volunteer,
+      fullNameDisplay: getVolunteerFullName(volunteer),
+      languagesDisplay: resolveLanguageNames(volunteer.languages, languageLookup),
+    };
+  });
+}
+
+export async function restoreVolunteerRequest(volunteerId) {
+  const volunteerRef = doc(db, "volunteers", volunteerId);
+  await updateDoc(volunteerRef, {
+    is_active: false,
+    status: "pending",
+  });
+}
+
+export async function deleteVolunteerRequest(volunteerId) {
+  await deleteDoc(doc(db, "volunteers", volunteerId));
+}
+
+// Operational statistics for the "בקשות סיוע והתאמה" page, read straight from
+// the `homeHelpRequests` collection so the numbers always reflect Firestore:
+//   - total  : every home help request.
+//   - pending: requests still waiting for a volunteer match (status "pending").
+//   - matched: requests that already have an active match (status "matched").
+export async function getHelpRequestStatistics() {
+  const snapshot = await getDocs(collection(db, "homeHelpRequests"));
+
+  let pending = 0;
+  let matched = 0;
+
+  snapshot.docs.forEach((requestDoc) => {
+    const status = requestDoc.data().status;
+
+    if (status === "pending") {
+      pending += 1;
+    } else if (status === "matched") {
+      matched += 1;
+    }
+  });
+
+  return { total: snapshot.size, pending, matched };
 }
 
 export async function getPendingHomeHelpRequests() {

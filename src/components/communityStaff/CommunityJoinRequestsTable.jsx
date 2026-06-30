@@ -1,17 +1,14 @@
 import { useEffect, useMemo, useState } from "react";
+import { ClipboardList, Clock, PlusCircle } from "lucide-react";
 import { getPendingCommunityJoinRequests } from "../../services/communityStaff/communityStaffService";
 import {
-  ClipboardList,
   CommunityStaffCompactCard,
   CommunityStaffEmptyState,
-  CommunityStaffListToolbar,
-  CommunityStaffPagination,
   CommunityStaffStatusBadge,
-  CommunityStaffStatusOverview,
-  buildRequestStatusOverviewItems,
+  getCommunityStaffStatusVariant,
 } from "./CommunityStaffListUi.jsx";
 
-const PAGE_SIZE_OPTIONS = [5, 10, 25];
+const PAGE_SIZE_OPTIONS = [5, 10, 20];
 
 function getParticipantFullName(participant) {
   if (!participant) return "—";
@@ -134,81 +131,187 @@ function CommunityJoinRequestsTable({
     }
   }, [currentPage, totalPages]);
 
-  if (loading) {
-    return <p className="community-join-requests__loading">טוען בקשות הצטרפות...</p>;
-  }
+  const requestStats = useMemo(() => {
+    let pending = 0;
+    let withOtherService = 0;
 
-  if (error) {
-    return <p className="community-join-requests__error">{error}</p>;
-  }
+    requests.forEach((request) => {
+      if (getCommunityStaffStatusVariant(request.status) === "pending") {
+        pending += 1;
+      }
+
+      if (request.otherService) {
+        withOtherService += 1;
+      }
+    });
+
+    return { total: requests.length, pending, withOtherService };
+  }, [requests]);
+
+  const safePage = Math.min(currentPage, totalPages);
 
   return (
     <div className="community-join-requests">
-      <CommunityStaffStatusOverview
-        items={buildRequestStatusOverviewItems(requests)}
-      />
+      {!loading && !error ? (
+        <section
+          className="activities-mgmt-summary"
+          aria-label="סיכום בקשות הצטרפות"
+        >
+          <div className="activities-mgmt-summary__card activities-mgmt-summary__card--neutral">
+            <span className="activities-mgmt-summary__icon">
+              <ClipboardList size={22} strokeWidth={2} aria-hidden="true" />
+            </span>
+            <span className="activities-mgmt-summary__value">
+              {requestStats.total}
+            </span>
+            <span className="activities-mgmt-summary__label">סה״כ בקשות</span>
+            <span className="activities-mgmt-summary__hint">
+              כל הבקשות שהתקבלו
+            </span>
+          </div>
+          <div className="activities-mgmt-summary__card activities-mgmt-summary__card--open">
+            <span className="activities-mgmt-summary__icon">
+              <Clock size={22} strokeWidth={2} aria-hidden="true" />
+            </span>
+            <span className="activities-mgmt-summary__value">
+              {requestStats.pending}
+            </span>
+            <span className="activities-mgmt-summary__label">
+              ממתינות לטיפול
+            </span>
+            <span className="activities-mgmt-summary__hint">
+              בקשות שטרם הושלמו
+            </span>
+          </div>
+          <div className="activities-mgmt-summary__card activities-mgmt-summary__card--participants">
+            <span className="activities-mgmt-summary__icon">
+              <PlusCircle size={22} strokeWidth={2} aria-hidden="true" />
+            </span>
+            <span className="activities-mgmt-summary__value">
+              {requestStats.withOtherService}
+            </span>
+            <span className="activities-mgmt-summary__label">
+              כולל שירות אחר
+            </span>
+            <span className="activities-mgmt-summary__hint">
+              בקשות עם בקשה מיוחדת
+            </span>
+          </div>
+        </section>
+      ) : null}
 
-      <CommunityStaffListToolbar
-        searchId="join-requests-search"
-        searchValue={searchTerm}
-        onSearchChange={(event) => setSearchTerm(event.target.value)}
-        searchPlaceholder="חיפוש לפי שם, ת.ז., טלפון או שירות..."
-        filterId="join-requests-filter"
-        filterValue={serviceFilter}
-        onFilterChange={(event) => setServiceFilter(event.target.value)}
-        filterOptions={[
-          { value: "all", label: "כל הבקשות" },
-          { value: "with-other", label: "כולל שירות אחר" },
-          { value: "without-other", label: "ללא שירות אחר" },
-        ]}
-        pageSizeId="join-requests-page-size"
-        pageSizeValue={pageSize}
-        onPageSizeChange={(event) => setPageSize(Number(event.target.value))}
-        pageSizeOptions={PAGE_SIZE_OPTIONS}
-      />
-
-      <div className="community-staff-request-list community-join-requests__card">
-        {filteredRequests.length === 0 ? (
-          <CommunityStaffEmptyState
-            icon={ClipboardList}
-            message={
-              requests.length === 0
-                ? "אין בקשות ממתינות כרגע"
-                : "לא נמצאו בקשות התואמות לחיפוש"
-            }
+      <div className="admin-list-toolbar staff-form staff-list-filters">
+        <div className="admin-list-toolbar__search">
+          <label htmlFor="join-requests-search">חיפוש</label>
+          <input
+            id="join-requests-search"
+            type="search"
+            value={searchTerm}
+            onChange={(event) => setSearchTerm(event.target.value)}
+            placeholder="חיפוש לפי שם, ת.ז., טלפון או שירות..."
           />
-        ) : (
-          <ul className="community-staff-compact-list">
-            {paginatedRequests.map((request) => {
-              const participant = request.participant;
+        </div>
 
-              return (
-                <CommunityStaffCompactCard
-                  key={request.id}
-                  name={getParticipantFullName(participant)}
-                  phone={participant?.phone || "—"}
-                  status={<CommunityStaffStatusBadge status={request.status} />}
-                  primaryLabel="השלמת רישום"
-                  viewLabel="צפייה"
-                  onPrimaryClick={() => onCompleteRegistration?.(request)}
-                  onViewDetails={() => onViewDetails?.(request)}
-                />
-              );
-            })}
-          </ul>
-        )}
+        <div className="admin-list-toolbar__filters">
+          <div>
+            <label htmlFor="join-requests-filter">סינון שירות</label>
+            <select
+              id="join-requests-filter"
+              value={serviceFilter}
+              onChange={(event) => setServiceFilter(event.target.value)}
+            >
+              <option value="all">כל הבקשות</option>
+              <option value="with-other">כולל שירות אחר</option>
+              <option value="without-other">ללא שירות אחר</option>
+            </select>
+          </div>
+        </div>
+
+        <div className="admin-list-toolbar__page-size">
+          <label htmlFor="join-requests-page-size">מספר בקשות בעמוד</label>
+          <select
+            id="join-requests-page-size"
+            value={pageSize}
+            onChange={(event) => setPageSize(Number(event.target.value))}
+          >
+            {PAGE_SIZE_OPTIONS.map((size) => (
+              <option key={size} value={size}>
+                {size}
+              </option>
+            ))}
+          </select>
+        </div>
       </div>
 
-      {filteredRequests.length > 0 && (
-        <CommunityStaffPagination
-          currentPage={Math.min(currentPage, totalPages)}
-          totalPages={totalPages}
-          onPrevious={() => setCurrentPage((page) => Math.max(1, page - 1))}
-          onNext={() =>
-            setCurrentPage((page) => Math.min(totalPages, page + 1))
-          }
-        />
-      )}
+      {error ? (
+        <p className="staff-alert staff-alert--error">{error}</p>
+      ) : null}
+
+      {loading ? (
+        <p className="activities-mgmt-loading">טוען בקשות הצטרפות...</p>
+      ) : null}
+
+      {!loading && !error ? (
+        <div className="community-staff-request-list community-join-requests__card">
+          {filteredRequests.length === 0 ? (
+            <CommunityStaffEmptyState
+              icon={ClipboardList}
+              message={
+                requests.length === 0
+                  ? "אין בקשות ממתינות כרגע"
+                  : "לא נמצאו בקשות התואמות לחיפוש"
+              }
+            />
+          ) : (
+            <ul className="community-staff-compact-list">
+              {paginatedRequests.map((request) => {
+                const participant = request.participant;
+
+                return (
+                  <CommunityStaffCompactCard
+                    key={request.id}
+                    name={getParticipantFullName(participant)}
+                    phone={participant?.phone || "—"}
+                    status={
+                      <CommunityStaffStatusBadge status={request.status} />
+                    }
+                    primaryLabel="השלמת רישום"
+                    viewLabel="צפייה"
+                    onPrimaryClick={() => onCompleteRegistration?.(request)}
+                    onViewDetails={() => onViewDetails?.(request)}
+                  />
+                );
+              })}
+            </ul>
+          )}
+        </div>
+      ) : null}
+
+      {!loading && !error && filteredRequests.length > 0 ? (
+        <div className="activities-mgmt-pagination">
+          <button
+            type="button"
+            className="activities-mgmt-pagination__btn"
+            onClick={() => setCurrentPage((page) => Math.max(1, page - 1))}
+            disabled={safePage <= 1}
+          >
+            הקודם
+          </button>
+          <span className="activities-mgmt-pagination__label">
+            עמוד {safePage} מתוך {totalPages}
+          </span>
+          <button
+            type="button"
+            className="activities-mgmt-pagination__btn"
+            onClick={() =>
+              setCurrentPage((page) => Math.min(totalPages, page + 1))
+            }
+            disabled={safePage >= totalPages}
+          >
+            הבא
+          </button>
+        </div>
+      ) : null}
     </div>
   );
 }

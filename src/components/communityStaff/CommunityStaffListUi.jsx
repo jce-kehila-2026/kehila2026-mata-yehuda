@@ -15,6 +15,7 @@ import {
   AdminTableEditButton,
   AdminTableViewButton,
 } from "../admin/AdminTableActions.jsx";
+import ReactivateVolunteerButton from "../admin/ReactivateVolunteerButton.jsx";
 
 const STATUS_LABELS = {
   pending: "ממתינה",
@@ -360,15 +361,27 @@ export function CommunityStaffCompactCard({
   onDeactivate,
   deactivateLabel = "השבתה",
   deactivateDisabled = false,
+  onReactivate,
+  reactivateLabel = "הפעל מחדש",
+  inactive = false,
+  className = "",
+  extraIdentityContent = null,
 }) {
+  const showReactivate = inactive && onReactivate;
+
   return (
-    <li className="community-staff-compact-card">
+    <li
+      className={`community-staff-compact-card${
+        inactive ? " community-staff-compact-card--inactive" : ""
+      }${className ? ` ${className}` : ""}`}
+    >
       <div className="community-staff-compact-card__main">
         <div className="community-staff-compact-card__identity">
           <span className="community-staff-compact-card__name">{name}</span>
           {phone ? (
             <span className="community-staff-compact-card__phone">{phone}</span>
           ) : null}
+          {extraIdentityContent}
         </div>
         {status ? (
           <div className="community-staff-compact-card__status-wrap">{status}</div>
@@ -377,23 +390,45 @@ export function CommunityStaffCompactCard({
 
       <div className="community-staff-compact-card__actions">
         <AdminTableActions>
-          <AdminTableViewButton
-            onClick={onViewDetails}
-            label={viewLabel}
-            disabled={primaryDisabled}
-          />
-          <AdminTableEditButton
-            onClick={onPrimaryClick}
-            label={primaryLabel}
-            disabled={primaryDisabled}
-          />
-          {onDeactivate ? (
-            <AdminTableDeleteButton
-              onClick={onDeactivate}
-              label={deactivateLabel}
-              disabled={deactivateDisabled || primaryDisabled}
-            />
-          ) : null}
+          {showReactivate ? (
+            <>
+              <ReactivateVolunteerButton
+                onClick={onReactivate}
+                label={reactivateLabel}
+                disabled={primaryDisabled}
+              />
+              <AdminTableEditButton
+                onClick={onPrimaryClick}
+                label={primaryLabel}
+                disabled={primaryDisabled}
+              />
+              <AdminTableViewButton
+                onClick={onViewDetails}
+                label={viewLabel}
+                disabled={primaryDisabled}
+              />
+            </>
+          ) : (
+            <>
+              {onDeactivate ? (
+                <AdminTableDeleteButton
+                  onClick={onDeactivate}
+                  label={deactivateLabel}
+                  disabled={deactivateDisabled || primaryDisabled}
+                />
+              ) : null}
+              <AdminTableEditButton
+                onClick={onPrimaryClick}
+                label={primaryLabel}
+                disabled={primaryDisabled}
+              />
+              <AdminTableViewButton
+                onClick={onViewDetails}
+                label={viewLabel}
+                disabled={primaryDisabled}
+              />
+            </>
+          )}
         </AdminTableActions>
       </div>
     </li>

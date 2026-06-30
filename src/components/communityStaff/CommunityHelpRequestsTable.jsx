@@ -1,6 +1,7 @@
 import { useCallback, useEffect, useMemo, useState } from "react";
 import {
   approveHelpRequestMatch,
+  getHelpRequestStatistics,
   getPendingHomeHelpRequests,
   getSuggestedVolunteersForRequest,
 } from "../../services/communityStaff/communityStaffService";
@@ -8,15 +9,11 @@ import CommunityStaffMessage, {
   useCommunityStaffMessage,
 } from "./CommunityStaffMessage";
 import CommunityStaffConfirmModal from "./CommunityStaffConfirmModal.jsx";
+import { ClipboardList, HeartHandshake, Languages, Link2 } from "lucide-react";
 import {
   CommunityStaffCompactCard,
   CommunityStaffEmptyState,
-  CommunityStaffListToolbar,
-  CommunityStaffPagination,
   CommunityStaffStatusBadge,
-  CommunityStaffStatusOverview,
-  Link2,
-  buildRequestStatusOverviewItems,
 } from "./CommunityStaffListUi.jsx";
 import CommunityHelpRequestDetailsModal from "./CommunityHelpRequestDetailsModal.jsx";
 
@@ -243,6 +240,11 @@ function MatchModal({
 
 function CommunityHelpRequestsTable() {
   const [requests, setRequests] = useState([]);
+  const [requestStats, setRequestStats] = useState({
+    total: 0,
+    pending: 0,
+    matched: 0,
+  });
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
   const [searchTerm, setSearchTerm] = useState("");
@@ -252,7 +254,7 @@ function CommunityHelpRequestsTable() {
   const [detailsRequest, setDetailsRequest] = useState(null);
   const { message, showSuccess, clearMessage } = useCommunityStaffMessage();
 
-  const PAGE_SIZE_OPTIONS = [5, 10, 25];
+  const PAGE_SIZE_OPTIONS = [5, 10, 20];
 
   function matchesSearch(request, term) {
     if (!term) {
@@ -279,8 +281,12 @@ function CommunityHelpRequestsTable() {
     setError(null);
 
     try {
-      const pendingRequests = await getPendingHomeHelpRequests();
+      const [pendingRequests, statistics] = await Promise.all([
+        getPendingHomeHelpRequests(),
+        getHelpRequestStatistics(),
+      ]);
       setRequests(pendingRequests);
+      setRequestStats(statistics);
     } catch (err) {
       console.error("Failed to load home help requests:", err);
       setError("שגיאה בטעינת בקשות הסיוע");
@@ -327,74 +333,151 @@ function CommunityHelpRequestsTable() {
     }
   }, [currentPage, totalPages]);
 
-  if (loading) {
-    return (
-      <p className="community-help-requests__loading">טוען בקשות סיוע...</p>
-    );
-  }
-
-  if (error) {
-    return <p className="community-help-requests__error">{error}</p>;
-  }
+  const safePage = Math.min(currentPage, totalPages);
 
   return (
     <div className="community-help-requests">
-      <CommunityStaffStatusOverview
-        items={buildRequestStatusOverviewItems(requests)}
-      />
-
       <CommunityStaffMessage message={message} onDismiss={clearMessage} />
 
-      <CommunityStaffListToolbar
-        searchId="help-requests-search"
-        searchValue={searchTerm}
-        onSearchChange={(event) => setSearchTerm(event.target.value)}
-        searchPlaceholder="חיפוש לפי שם, טלפון או תיאור..."
-        pageSizeId="help-requests-page-size"
-        pageSizeValue={pageSize}
-        onPageSizeChange={(event) => setPageSize(Number(event.target.value))}
-        pageSizeOptions={PAGE_SIZE_OPTIONS}
-        showFilter={false}
-      />
+      {!loading && !error ? (
+        <section
+          className="activities-mgmt-summary"
+          aria-label="סיכום בקשות סיוע"
+        >
+          <div className="activities-mgmt-summary__card activities-mgmt-summary__card--neutral">
+            <span className="activities-mgmt-summary__icon">
+              <ClipboardList size={22} strokeWidth={2} aria-hidden="true" />
+            </span>
+            <span className="activities-mgmt-summary__value">
+              {requestStats.total}
+            </span>
+            <span className="activities-mgmt-summary__label">סה״כ בקשות</span>
+            <span className="activities-mgmt-summary__hint">
+              כל בקשות הסיוע במערכת
+            </span>
+          </div>
+          <div className="activities-mgmt-summary__card activities-mgmt-summary__card--participants">
+            <span className="activities-mgmt-summary__icon">
+              <HeartHandshake size={22} strokeWidth={2} aria-hidden="true" />
+            </span>
+            <span className="activities-mgmt-summary__value">
+              {requestStats.pending}
+            </span>
+            <span className="activities-mgmt-summary__label">
+              בקשות ממתינות
+            </span>
+            <span className="activities-mgmt-summary__hint">
+              ממתינות להתאמת מתנדב
+            </span>
+          </div>
+          <div className="activities-mgmt-summary__card activities-mgmt-summary__card--open">
+            <span className="activities-mgmt-summary__icon">
+              <Languages size={22} strokeWidth={2} aria-hidden="true" />
+            </span>
+            <span className="activities-mgmt-summary__value">
+              {requestStats.matched}
+            </span>
+            <span className="activities-mgmt-summary__label">
+              בקשות מותאמות
+            </span>
+            <span className="activities-mgmt-summary__hint">
+              בקשות עם התאמה פעילה
+            </span>
+          </div>
+        </section>
+      ) : null}
 
-      <div className="community-staff-request-list community-help-requests__card">
-        {filteredRequests.length === 0 ? (
-          <CommunityStaffEmptyState
-            icon={Link2}
-            message={
-              requests.length === 0
-                ? "אין בקשות ממתינות כרגע"
-                : "לא נמצאו בקשות התואמות לחיפוש"
-            }
+      <div className="admin-list-toolbar staff-form staff-list-filters">
+        <div className="admin-list-toolbar__search">
+          <label htmlFor="help-requests-search">חיפוש</label>
+          <input
+            id="help-requests-search"
+            type="search"
+            value={searchTerm}
+            onChange={(event) => setSearchTerm(event.target.value)}
+            placeholder="חיפוש לפי שם, טלפון או תיאור..."
           />
-        ) : (
-          <ul className="community-staff-compact-list">
-            {paginatedRequests.map((request) => (
-              <CommunityStaffCompactCard
-                key={request.id}
-                name={request.participantFullName}
-                phone={request.participantPhone}
-                status={<CommunityStaffStatusBadge status={request.status} />}
-                viewLabel="צפייה"
-                primaryLabel="התאמה"
-                onPrimaryClick={() => handleOpenMatch(request)}
-                onViewDetails={() => setDetailsRequest(request)}
-              />
+        </div>
+
+        <div className="admin-list-toolbar__page-size">
+          <label htmlFor="help-requests-page-size">מספר בקשות בעמוד</label>
+          <select
+            id="help-requests-page-size"
+            value={pageSize}
+            onChange={(event) => setPageSize(Number(event.target.value))}
+          >
+            {PAGE_SIZE_OPTIONS.map((size) => (
+              <option key={size} value={size}>
+                {size}
+              </option>
             ))}
-          </ul>
-        )}
+          </select>
+        </div>
       </div>
 
-      {filteredRequests.length > 0 && (
-        <CommunityStaffPagination
-          currentPage={currentPage}
-          totalPages={totalPages}
-          onPrevious={() => setCurrentPage((page) => Math.max(1, page - 1))}
-          onNext={() =>
-            setCurrentPage((page) => Math.min(totalPages, page + 1))
-          }
-        />
-      )}
+      {error ? (
+        <p className="staff-alert staff-alert--error">{error}</p>
+      ) : null}
+
+      {loading ? (
+        <p className="activities-mgmt-loading">טוען בקשות סיוע...</p>
+      ) : null}
+
+      {!loading && !error ? (
+        <div className="community-staff-request-list community-help-requests__card">
+          {filteredRequests.length === 0 ? (
+            <CommunityStaffEmptyState
+              icon={Link2}
+              message={
+                requests.length === 0
+                  ? "אין בקשות ממתינות כרגע"
+                  : "לא נמצאו בקשות התואמות לחיפוש"
+              }
+            />
+          ) : (
+            <ul className="community-staff-compact-list">
+              {paginatedRequests.map((request) => (
+                <CommunityStaffCompactCard
+                  key={request.id}
+                  name={request.participantFullName}
+                  phone={request.participantPhone}
+                  status={<CommunityStaffStatusBadge status={request.status} />}
+                  viewLabel="צפייה"
+                  primaryLabel="התאמה"
+                  onPrimaryClick={() => handleOpenMatch(request)}
+                  onViewDetails={() => setDetailsRequest(request)}
+                />
+              ))}
+            </ul>
+          )}
+        </div>
+      ) : null}
+
+      {!loading && !error && filteredRequests.length > 0 ? (
+        <div className="activities-mgmt-pagination">
+          <button
+            type="button"
+            className="activities-mgmt-pagination__btn"
+            onClick={() => setCurrentPage((page) => Math.max(1, page - 1))}
+            disabled={safePage <= 1}
+          >
+            הקודם
+          </button>
+          <span className="activities-mgmt-pagination__label">
+            עמוד {safePage} מתוך {totalPages}
+          </span>
+          <button
+            type="button"
+            className="activities-mgmt-pagination__btn"
+            onClick={() =>
+              setCurrentPage((page) => Math.min(totalPages, page + 1))
+            }
+            disabled={safePage >= totalPages}
+          >
+            הבא
+          </button>
+        </div>
+      ) : null}
 
       <CommunityHelpRequestDetailsModal
         request={detailsRequest}

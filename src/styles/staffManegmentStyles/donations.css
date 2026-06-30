@@ -2,11 +2,170 @@
   background: #f7f8f3;
 }
 
+/* Period filter on donations — stats CSS variables exist only under .staff-statistics-page */
+.staff-page--donations .staff-statistics-filter-card {
+  --stats-primary: #2e7d32;
+  --stats-primary-dark: #1b5e20;
+  --stats-primary-light: #e8f5e9;
+  --stats-border: #c8e6c9;
+  --stats-text-secondary: #6b7280;
+  --stats-card-bg: #ffffff;
+  --stats-text: #1f2937;
+  --stats-shadow: 0 2px 10px rgba(46, 125, 50, 0.07);
+  --stats-radius: 16px;
+}
+
+.staff-page--donations .staff-statistics-filter-card button {
+  width: auto;
+  min-height: 0;
+  opacity: 1;
+}
+
+.staff-page--donations .staff-statistics-view-toggle {
+  background: #e8f5e9;
+  border-color: #c8e6c9;
+}
+
+.staff-page--donations .staff-statistics-view-toggle__btn {
+  background: #e8f5e9;
+  color: #1b5e20;
+  opacity: 1;
+}
+
+.staff-page--donations .staff-statistics-view-toggle__btn:hover,
+.staff-page--donations .staff-statistics-view-toggle__btn:focus-visible {
+  background: #dff0e1;
+  color: #1b5e20;
+}
+
+.staff-page--donations .staff-statistics-view-toggle__btn--active,
+.staff-page--donations .staff-statistics-view-toggle__btn--active:hover,
+.staff-page--donations .staff-statistics-view-toggle__btn--active:focus-visible {
+  background: #2e7d32;
+  color: #ffffff;
+}
+
+.staff-page--donations .staff-statistics-month-filter__submit,
+.staff-page--donations .staff-statistics-month-filter__submit:hover,
+.staff-page--donations .staff-statistics-month-filter__submit:focus-visible {
+  background: #2e7d32;
+  color: #ffffff;
+  opacity: 1;
+  border: none;
+}
+
+.staff-page--donations .staff-statistics-month-filter__submit:hover,
+.staff-page--donations .staff-statistics-month-filter__submit:focus-visible {
+  background: #1b5e20;
+}
+
+.staff-page--donations .staff-statistics-month-filter__reset {
+  background: #ffffff;
+  color: #1b5e20;
+  border: 1.5px solid #2e7d32;
+  opacity: 1;
+}
+
+.staff-page--donations .staff-statistics-month-filter__reset:hover,
+.staff-page--donations .staff-statistics-month-filter__reset:focus-visible {
+  background: #e8f5e9;
+  border-color: #2e7d32;
+  color: #1b5e20;
+}
+
+.staff-page--donations .staff-statistics-month-filter__reset:disabled {
+  opacity: 0.55;
+  cursor: not-allowed;
+}
+
 .staff-container--donations {
   display: flex;
   flex-direction: column;
   gap: 1.25rem;
   padding-block: 0.5rem 1.5rem;
+}
+
+/* ===== Donations page aligned to the shared Management (list-mgmt) template =====
+   The page reuses the shared list-mgmt header, summary cards, toolbar, table and
+   pagination styling; these rules only adapt the donation-specific pieces. */
+
+/* The back button now lives in the page header (like the Participants page). */
+[data-dashboard-page="manageDonations"] > .staff-subpage-toolbar {
+  display: none;
+}
+
+/* Vertical rhythm comes from the container's flex gap. */
+.staff-page--donations .list-mgmt-page__header,
+.staff-page--donations .list-mgmt-summary {
+  margin-bottom: 0;
+}
+
+/* The table section is a transparent wrapper — the toolbar and table render as
+   their own cards (like the Participants page), not nested inside an outer card. */
+.list-mgmt-page .donations-table-section {
+  background: transparent;
+  border: none;
+  box-shadow: none;
+  padding: 0;
+}
+
+/* Summary cards hold currency amounts and long labels (e.g. a top-donor name),
+   so give them more width and lay the content out top-to-bottom with enough
+   clearance below the corner icon — nothing overlaps and heights stay equal. */
+.list-mgmt-page .donations-summary .donations-summary__cards.list-mgmt-summary {
+  grid-template-columns: repeat(auto-fit, minmax(240px, 1fr));
+}
+
+.list-mgmt-page .donations-summary .list-mgmt-summary__item {
+  justify-content: flex-start;
+  /* top padding clears the absolutely-positioned corner icon */
+  padding: 3.75rem 1.2rem 1.2rem;
+  min-height: 150px;
+  height: 100%;
+  text-align: center;
+}
+
+/* Currency / text values: keep the shared card chrome but size them so long
+   amounts stay readable, on their own line(s), separate from the label. */
+.list-mgmt-page .donations-summary .list-mgmt-summary__value {
+  width: 100%;
+  font-size: clamp(1.15rem, 2.2vw, 1.6rem);
+  line-height: 1.25;
+  letter-spacing: normal;
+  word-break: break-word;
+}
+
+.list-mgmt-page .donations-summary .list-mgmt-summary__label {
+  width: 100%;
+  white-space: normal;
+  word-break: break-word;
+  line-height: 1.35;
+}
+
+/* Search + "rows per page" on a single clean row, like the Participants page. */
+.list-mgmt-page
+  .donations-table-section
+  .admin-list-toolbar.staff-form.staff-list-filters {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) auto;
+  gap: 0.85rem;
+  align-items: end;
+}
+
+.list-mgmt-page .donations-table-section .admin-list-toolbar__search,
+.list-mgmt-page .donations-table-section .admin-list-toolbar__page-size {
+  display: flex;
+  flex-direction: column;
+  gap: 0.4rem;
+  min-width: 0;
+}
+
+@media (max-width: 768px) {
+  .list-mgmt-page
+    .donations-table-section
+    .admin-list-toolbar.staff-form.staff-list-filters {
+    grid-template-columns: 1fr;
+  }
 }
 
 .donations-summary {
@@ -79,6 +238,87 @@
   border: 1px solid #c8e6c9;
   box-shadow: 0 4px 12px rgba(0, 0, 0, 0.08);
   font-size: 0.8125rem;
+}
+
+.donations-filters {
+  display: flex;
+  flex-direction: column;
+  gap: 0.75rem;
+  padding: 1rem 1.1rem;
+  border-radius: calc(var(--staff-radius) * 0.65);
+  background: #ffffff;
+  box-shadow: 0 8px 24px rgba(0, 0, 0, 0.05);
+  border: 1px solid #e8f5e9;
+}
+
+.donations-filters__title {
+  margin: 0;
+  font-size: 1rem;
+  font-weight: 700;
+  color: var(--staff-color-primary, #2d7d46);
+}
+
+.donations-filters__grid {
+  display: grid;
+  grid-template-columns: repeat(6, minmax(0, 1fr));
+  gap: 0.75rem;
+  align-items: end;
+  margin: 0;
+}
+
+.donations-filters__field {
+  display: flex;
+  flex-direction: column;
+  gap: 0.35rem;
+  min-width: 0;
+}
+
+.donations-filters__field--wide {
+  grid-column: span 2;
+}
+
+.donations-filters__field label {
+  margin: 0;
+  font-size: 0.8125rem;
+  font-weight: 600;
+  color: #6b7280;
+}
+
+.donations-filters__field input,
+.donations-filters__field select {
+  width: 100%;
+  min-height: 2.5rem;
+  padding: 0.5rem 0.65rem;
+  border: 1px solid #d1d5db;
+  border-radius: 0.5rem;
+  background: #ffffff;
+  font-family: inherit;
+  font-size: 0.875rem;
+  color: var(--staff-color-text, #1f2937);
+}
+
+.donations-filters__field input:focus-visible,
+.donations-filters__field select:focus-visible {
+  outline: 2px solid #c8e6c9;
+  outline-offset: 1px;
+  border-color: var(--staff-color-primary, #2d7d46);
+}
+
+.donations-filters__actions {
+  display: flex;
+  align-items: flex-end;
+  justify-content: flex-start;
+}
+
+.donations-filters__clear {
+  width: 100%;
+  min-height: 2.5rem;
+  white-space: nowrap;
+}
+
+.donations-filters__clear:disabled {
+  opacity: 0.55;
+  cursor: not-allowed;
 }
 
 .donations-table-section {
@@ -229,11 +469,36 @@
   .donations-summary__cards {
     grid-template-columns: repeat(2, minmax(0, 1fr));
   }
+
+  .donations-filters__grid {
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+  }
+
+  .donations-filters__field--wide {
+    grid-column: span 3;
+  }
+
+  .donations-filters__actions {
+    grid-column: 1 / -1;
+  }
 }
 
 @media (max-width: 640px) {
   .donations-summary__cards {
     grid-template-columns: 1fr;
+  }
+
+  .donations-filters {
+    padding: 0.85rem;
+  }
+
+  .donations-filters__grid {
+    grid-template-columns: 1fr;
+  }
+
+  .donations-filters__field--wide,
+  .donations-filters__actions {
+    grid-column: auto;
   }
 
   .donations-table-section {

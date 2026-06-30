@@ -1,4 +1,7 @@
 import { useNavigate } from "react-router-dom";
+import ExpandableDescription from "./ExpandableDescription";
+import { formatActivityPrice } from "../../services/Payment/formatPrice";
+import { isFreeActivityData } from "../../utils/HomeUtils/activityPricing";
 import { toActivityDate } from "../../utils/staffManegmentUtils/dateUtils";
 
 function isActivityExpired(activity, now = new Date()) {
@@ -41,6 +44,9 @@ function ActivityCard({ activity, programId = "" }) {
     if (resolvedProgramId) {
       params.set("programId", resolvedProgramId);
     }
+    if (isFreeActivityData(activity)) {
+      params.set("free", "1");
+    }
     navigate(`/pay?${params.toString()}`);
   };
 
@@ -48,62 +54,72 @@ function ActivityCard({ activity, programId = "" }) {
 
   const startDate = toActivityDate(activity.start_date);
   const endDate = toActivityDate(activity.end_date);
+  const dateLabel = startDate
+    ? startDate.toLocaleDateString("he-IL", {
+        day: "numeric",
+        month: "short",
+        year: "numeric",
+      })
+    : "";
+  const timeLabel = startDate
+    ? `${startDate.toLocaleTimeString("he-IL", {
+        hour: "2-digit",
+        minute: "2-digit",
+      })}${
+        endDate
+          ? ` - ${endDate.toLocaleTimeString("he-IL", {
+              hour: "2-digit",
+              minute: "2-digit",
+            })}`
+          : ""
+      }`
+    : "";
 
   return (
-    <div className="activity-card">
-      {activity.image_url && (
-        <img src={activity.image_url} alt={activity.name} />
-      )}
+    <article className="activity-card">
+      <div className="activity-card__media">
+        {activity.image_url ? (
+          <img src={activity.image_url} alt={activity.name} />
+        ) : (
+          <div className="activity-card__media-placeholder" aria-hidden="true" />
+        )}
+      </div>
 
       <div className="activity-info">
-        <div className={isClosed ? "status closed" : "status open"}>
-          {isClosed ? "סגור" : "פתוח"}
+        <div className="activity-card__head">
+          <h2>{activity.name}</h2>
+          {dateLabel ? (
+            <span className="activity-card__date">{dateLabel}</span>
+          ) : null}
         </div>
 
-        <h2>{activity.name}</h2>
-        
-        <p>{activity.description}</p>
+        <ExpandableDescription
+          text={activity.description}
+          textClassName="activity-card__description"
+          toggleClassName="activity-card__desc-toggle"
+        />
 
-        <div className="activity-meta">
+        <div className="activity-card__footer">
+          <button
+            type="button"
+            className="activity-card__register"
+            onClick={goToPayment}
+            disabled={isClosed}
+          >
+            {isClosed ? "סגור להרשמה" : "להרשמה"}
+          </button>
 
-          <div className="meta-item">
-            <span>📅</span>
-            <strong>
-              {startDate?.toLocaleDateString("he-IL")}
-            </strong>
+          <div className="activity-card__details">
+            {timeLabel ? (
+              <span className="activity-card__detail">{timeLabel}</span>
+            ) : null}
+            <span className="activity-card__detail">
+              {formatActivityPrice(activity.price)}
+            </span>
           </div>
-
-          <div className="meta-item">
-            <span>🕒</span>
-            <strong>
-              {startDate?.toLocaleTimeString("he-IL", {
-                hour: "2-digit",
-                minute: "2-digit",
-              })}
-              {" - "}
-              {endDate?.toLocaleTimeString("he-IL", {
-                hour: "2-digit",
-                minute: "2-digit",
-              })}
-            </strong>
-          </div>
-
-          <div className="meta-item">
-            <span>₪</span>
-            <strong>{activity.price}</strong>
-          </div>
-
         </div>
-        <div className="activity-divider"></div>
-        <button
-          type="button"
-          onClick={goToPayment}
-          disabled={isClosed}
-        >
-          {isClosed ? "סגור להרשמה" : "השתתף"}
-        </button>
       </div>
-    </div>
+    </article>
   );
 }
 

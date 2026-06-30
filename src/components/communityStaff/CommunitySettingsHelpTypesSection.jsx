@@ -6,16 +6,10 @@ import {
 import CommunitySettingsItemCard from "./CommunitySettingsItemCard.jsx";
 import HelpTypeFormModal from "./HelpTypeFormModal.jsx";
 import CommunityStaffConfirmModal from "./CommunityStaffConfirmModal.jsx";
-import {
-  CommunityStaffEmptyState,
-  CommunityStaffListToolbar,
-  CommunityStaffPagination,
-  CommunityStaffStatusOverview,
-  buildActiveInactiveOverviewItems,
-  ClipboardList,
-} from "./CommunityStaffListUi.jsx";
+import { ClipboardList, CheckCircle2, XCircle } from "lucide-react";
+import { CommunityStaffEmptyState } from "./CommunityStaffListUi.jsx";
 
-const PAGE_SIZE_OPTIONS = [5, 10, 25];
+const PAGE_SIZE_OPTIONS = [5, 10, 20];
 
 function matchesSearch(helpType, searchTerm) {
   if (!searchTerm) {
@@ -106,6 +100,24 @@ function CommunitySettingsHelpTypesSection({ refreshKey = 0, onShowSuccess, onSh
     }
   }, [currentPage, totalPages]);
 
+  const helpTypeStats = useMemo(() => {
+    let active = 0;
+
+    helpTypes.forEach((helpType) => {
+      if (helpType.is_active === true) {
+        active += 1;
+      }
+    });
+
+    return {
+      total: helpTypes.length,
+      active,
+      inactive: helpTypes.length - active,
+    };
+  }, [helpTypes]);
+
+  const safePage = Math.min(currentPage, totalPages);
+
   const handleConfirmToggle = async () => {
     if (!pendingToggleHelpType) {
       return;
@@ -163,32 +175,96 @@ function CommunitySettingsHelpTypesSection({ refreshKey = 0, onShowSuccess, onSh
         </p>
       ) : (
         <>
-          <CommunityStaffStatusOverview
-            items={buildActiveInactiveOverviewItems(
-              helpTypes,
-              (helpType) => helpType.is_active === true
-            )}
-          />
+          <section
+            className="activities-mgmt-summary"
+            aria-label="סיכום סוגי עזרה"
+          >
+            <div className="activities-mgmt-summary__card activities-mgmt-summary__card--neutral">
+              <span className="activities-mgmt-summary__icon">
+                <ClipboardList size={22} strokeWidth={2} aria-hidden="true" />
+              </span>
+              <span className="activities-mgmt-summary__value">
+                {helpTypeStats.total}
+              </span>
+              <span className="activities-mgmt-summary__label">
+                סה״כ סוגי עזרה
+              </span>
+              <span className="activities-mgmt-summary__hint">
+                כל סוגי העזרה במערכת
+              </span>
+            </div>
+            <div className="activities-mgmt-summary__card activities-mgmt-summary__card--participants">
+              <span className="activities-mgmt-summary__icon">
+                <CheckCircle2 size={22} strokeWidth={2} aria-hidden="true" />
+              </span>
+              <span className="activities-mgmt-summary__value">
+                {helpTypeStats.active}
+              </span>
+              <span className="activities-mgmt-summary__label">פעילים</span>
+              <span className="activities-mgmt-summary__hint">
+                סוגי עזרה זמינים לשימוש
+              </span>
+            </div>
+            <div className="activities-mgmt-summary__card activities-mgmt-summary__card--open">
+              <span className="activities-mgmt-summary__icon">
+                <XCircle size={22} strokeWidth={2} aria-hidden="true" />
+              </span>
+              <span className="activities-mgmt-summary__value">
+                {helpTypeStats.inactive}
+              </span>
+              <span className="activities-mgmt-summary__label">לא פעילים</span>
+              <span className="activities-mgmt-summary__hint">
+                סוגי עזרה מושבתים כרגע
+              </span>
+            </div>
+          </section>
 
-          <CommunityStaffListToolbar
-            searchId="community-settings-help-types-search"
-            searchValue={searchTerm}
-            onSearchChange={(event) => setSearchTerm(event.target.value)}
-            searchPlaceholder="חיפוש לפי שם או תיאור..."
-            filterId="community-settings-help-types-filter"
-            filterValue={activeFilter}
-            onFilterChange={(event) => setActiveFilter(event.target.value)}
-            filterLabel="סטטוס"
-            filterOptions={[
-              { value: "all", label: "כל סוגי העזרה" },
-              { value: "active", label: "פעילים" },
-              { value: "inactive", label: "לא פעילים" },
-            ]}
-            pageSizeId="community-settings-help-types-page-size"
-            pageSizeValue={pageSize}
-            onPageSizeChange={(event) => setPageSize(Number(event.target.value))}
-            pageSizeOptions={PAGE_SIZE_OPTIONS}
-          />
+          <div className="admin-list-toolbar staff-form staff-list-filters">
+            <div className="admin-list-toolbar__search">
+              <label htmlFor="community-settings-help-types-search">חיפוש</label>
+              <input
+                id="community-settings-help-types-search"
+                type="search"
+                value={searchTerm}
+                onChange={(event) => setSearchTerm(event.target.value)}
+                placeholder="חיפוש לפי שם או תיאור..."
+              />
+            </div>
+
+            <div className="admin-list-toolbar__filters">
+              <div>
+                <label htmlFor="community-settings-help-types-filter">
+                  סטטוס
+                </label>
+                <select
+                  id="community-settings-help-types-filter"
+                  value={activeFilter}
+                  onChange={(event) => setActiveFilter(event.target.value)}
+                >
+                  <option value="all">כל סוגי העזרה</option>
+                  <option value="active">פעילים</option>
+                  <option value="inactive">לא פעילים</option>
+                </select>
+              </div>
+            </div>
+
+            <div className="admin-list-toolbar__page-size">
+              <label htmlFor="community-settings-help-types-page-size">
+                מספר סוגים בעמוד
+              </label>
+              <select
+                id="community-settings-help-types-page-size"
+                value={pageSize}
+                onChange={(event) => setPageSize(Number(event.target.value))}
+              >
+                {PAGE_SIZE_OPTIONS.map((size) => (
+                  <option key={size} value={size}>
+                    {size}
+                  </option>
+                ))}
+              </select>
+            </div>
+          </div>
 
           <div className="community-staff-request-list community-settings-section__list">
             {filteredHelpTypes.length === 0 ? (
@@ -220,16 +296,31 @@ function CommunitySettingsHelpTypesSection({ refreshKey = 0, onShowSuccess, onSh
             )}
           </div>
 
-          {filteredHelpTypes.length > 0 && (
-            <CommunityStaffPagination
-              currentPage={currentPage}
-              totalPages={totalPages}
-              onPrevious={() => setCurrentPage((page) => Math.max(1, page - 1))}
-              onNext={() =>
-                setCurrentPage((page) => Math.min(totalPages, page + 1))
-              }
-            />
-          )}
+          {filteredHelpTypes.length > 0 ? (
+            <div className="activities-mgmt-pagination">
+              <button
+                type="button"
+                className="activities-mgmt-pagination__btn"
+                onClick={() => setCurrentPage((page) => Math.max(1, page - 1))}
+                disabled={safePage <= 1}
+              >
+                הקודם
+              </button>
+              <span className="activities-mgmt-pagination__label">
+                עמוד {safePage} מתוך {totalPages}
+              </span>
+              <button
+                type="button"
+                className="activities-mgmt-pagination__btn"
+                onClick={() =>
+                  setCurrentPage((page) => Math.min(totalPages, page + 1))
+                }
+                disabled={safePage >= totalPages}
+              >
+                הבא
+              </button>
+            </div>
+          ) : null}
         </>
       )}
 

@@ -1,4 +1,5 @@
 import { useCallback, useEffect, useMemo, useState } from "react";
+import { Users, UserCheck, UserX } from "lucide-react";
 import {
   getAllVolunteers,
   updateVolunteerActiveStatus,
@@ -7,15 +8,10 @@ import {
   CommunityStaffCompactCard,
   CommunityStaffActiveBadge,
   CommunityStaffEmptyState,
-  CommunityStaffListToolbar,
-  CommunityStaffPagination,
-  CommunityStaffStatusOverview,
-  Users,
-  buildActiveInactiveOverviewItems,
 } from "./CommunityStaffListUi.jsx";
 import CommunityStaffConfirmModal from "./CommunityStaffConfirmModal.jsx";
 
-const PAGE_SIZE_OPTIONS = [5, 10, 25];
+const PAGE_SIZE_OPTIONS = [5, 10, 20];
 
 function matchesSearch(volunteer, searchTerm) {
   if (!searchTerm) {
@@ -54,6 +50,22 @@ function matchesActiveFilter(volunteer, activeFilter) {
   return true;
 }
 
+function sortVolunteersActiveFirst(items) {
+  return [...items].sort((left, right) => {
+    const leftActive = left.is_active === true;
+    const rightActive = right.is_active === true;
+
+    if (leftActive !== rightActive) {
+      return leftActive ? -1 : 1;
+    }
+
+    return (left.fullNameDisplay || "").localeCompare(
+      right.fullNameDisplay || "",
+      "he"
+    );
+  });
+}
+
 function VolunteersManagementTable({
   refreshKey = 0,
   onEditVolunteer,
@@ -68,9 +80,9 @@ function VolunteersManagementTable({
   const [activeFilter, setActiveFilter] = useState("all");
   const [pageSize, setPageSize] = useState(10);
   const [currentPage, setCurrentPage] = useState(1);
-  const [pendingDeactivateVolunteer, setPendingDeactivateVolunteer] =
-    useState(null);
-  const [deactivating, setDeactivating] = useState(false);
+  const [pendingActionVolunteer, setPendingActionVolunteer] = useState(null);
+  const [pendingActionType, setPendingActionType] = useState(null);
+  const [isProcessing, setIsProcessing] = useState(false);
 
   const loadVolunteers = useCallback(async () => {
     setLoading(true);
@@ -92,13 +104,15 @@ function VolunteersManagementTable({
   }, [loadVolunteers, refreshKey]);
 
   const filteredVolunteers = useMemo(() => {
-    return volunteers.filter((volunteer) => {
+    const filtered = volunteers.filter((volunteer) => {
       if (!matchesSearch(volunteer, searchTerm)) {
         return false;
       }
 
       return matchesActiveFilter(volunteer, activeFilter);
     });
+
+    return sortVolunteersActiveFirst(filtered);
   }, [volunteers, searchTerm, activeFilter]);
 
   const totalPages = Math.max(1, Math.ceil(filteredVolunteers.length / pageSize));
@@ -119,68 +133,151 @@ function VolunteersManagementTable({
     }
   }, [currentPage, totalPages]);
 
-  const handleConfirmDeactivate = async () => {
-    if (!pendingDeactivateVolunteer) {
+  const volunteerStats = useMemo(() => {
+    let active = 0;
+
+    volunteers.forEach((volunteer) => {
+      if (volunteer.is_active === true) {
+        active += 1;
+      }
+    });
+
+    return {
+      total: volunteers.length,
+      active,
+      inactive: volunteers.length - active,
+    };
+  }, [volunteers]);
+
+  const handleConfirmAction = async () => {
+    if (!pendingActionVolunteer || !pendingActionType) {
       return;
     }
 
-    setDeactivating(true);
+    setIsProcessing(true);
 
     try {
-      await updateVolunteerActiveStatus(pendingDeactivateVolunteer.id, false);
+      const isActive = pendingActionType === "reactivate";
+      await updateVolunteerActiveStatus(pendingActionVolunteer.id, isActive);
       onVolunteerUpdated?.({
-        successMessage: "המתנדב הושבת בהצלחה",
+        successMessage: isActive
+          ? "המתנדב הופעל בהצלחה"
+          : "המתנדב הושבת בהצלחה",
       });
-      setPendingDeactivateVolunteer(null);
+      setPendingActionVolunteer(null);
+      setPendingActionType(null);
       await loadVolunteers();
     } catch (err) {
       console.error("Failed to update volunteer active status:", err);
       onShowError?.("אירעה שגיאה. נסה שוב.");
     } finally {
-      setDeactivating(false);
+      setIsProcessing(false);
     }
   };
 
-  if (loading) {
-    return (
-      <p className="community-volunteers-mgmt__loading">טוען מתנדבים...</p>
-    );
-  }
-
-  if (error) {
-    return <p className="community-volunteers-mgmt__error">{error}</p>;
-  }
+  const safePage = Math.min(currentPage, totalPages);
 
   return (
     <div className="community-volunteers-mgmt">
-      <CommunityStaffStatusOverview
-        items={buildActiveInactiveOverviewItems(
-          volunteers,
-          (volunteer) => volunteer.is_active === true
-        )}
-      />
+      {!loading && !error ? (
+        <section
+          className="activities-mgmt-summary"
+          aria-label="סיכום מתנדבים"
+        >
+          <div className="activities-mgmt-summary__card activities-mgmt-summary__card--neutral">
+            <span className="activities-mgmt-summary__icon">
+              <Users size={22} strokeWidth={2} aria-hidden="true" />
+            </span>
+            <span className="activities-mgmt-summary__value">
+              {volunteerStats.total}
+            </span>
+            <span className="activities-mgmt-summary__label">סה״כ מתנדבים</span>
+            <span className="activities-mgmt-summary__hint">
+              כל המתנדבים במערכת
+            </span>
+          </div>
+          <div className="activities-mgmt-summary__card activities-mgmt-summary__card--participants">
+            <span className="activities-mgmt-summary__icon">
+              <UserCheck size={22} strokeWidth={2} aria-hidden="true" />
+            </span>
+            <span className="activities-mgmt-summary__value">
+              {volunteerStats.active}
+            </span>
+            <span className="activities-mgmt-summary__label">
+              מתנדבים פעילים
+            </span>
+            <span className="activities-mgmt-summary__hint">
+              פעילים כרגע במערכת
+            </span>
+          </div>
+          <div className="activities-mgmt-summary__card activities-mgmt-summary__card--open">
+            <span className="activities-mgmt-summary__icon">
+              <UserX size={22} strokeWidth={2} aria-hidden="true" />
+            </span>
+            <span className="activities-mgmt-summary__value">
+              {volunteerStats.inactive}
+            </span>
+            <span className="activities-mgmt-summary__label">לא פעילים</span>
+            <span className="activities-mgmt-summary__hint">
+              מתנדבים מושבתים כרגע
+            </span>
+          </div>
+        </section>
+      ) : null}
 
-      <CommunityStaffListToolbar
-        searchId="volunteers-mgmt-search"
-        searchValue={searchTerm}
-        onSearchChange={(event) => setSearchTerm(event.target.value)}
-        searchPlaceholder="חיפוש לפי שם, טלפון או כתובת..."
-        filterId="volunteers-mgmt-filter"
-        filterValue={activeFilter}
-        onFilterChange={(event) => setActiveFilter(event.target.value)}
-        filterLabel="סטטוס"
-        filterOptions={[
-          { value: "all", label: "כל המתנדבים" },
-          { value: "active", label: "פעילים" },
-          { value: "inactive", label: "לא פעילים" },
-        ]}
-        pageSizeId="volunteers-mgmt-page-size"
-        pageSizeValue={pageSize}
-        onPageSizeChange={(event) => setPageSize(Number(event.target.value))}
-        pageSizeOptions={PAGE_SIZE_OPTIONS}
-      />
+      <div className="admin-list-toolbar staff-form staff-list-filters">
+        <div className="admin-list-toolbar__search">
+          <label htmlFor="volunteers-mgmt-search">חיפוש</label>
+          <input
+            id="volunteers-mgmt-search"
+            type="search"
+            value={searchTerm}
+            onChange={(event) => setSearchTerm(event.target.value)}
+            placeholder="חיפוש לפי שם, טלפון או כתובת..."
+          />
+        </div>
 
-      <div className="community-staff-request-list community-volunteers-mgmt__card">
+        <div className="admin-list-toolbar__filters">
+          <div>
+            <label htmlFor="volunteers-mgmt-filter">סטטוס</label>
+            <select
+              id="volunteers-mgmt-filter"
+              value={activeFilter}
+              onChange={(event) => setActiveFilter(event.target.value)}
+            >
+              <option value="all">כל המתנדבים</option>
+              <option value="active">פעילים</option>
+              <option value="inactive">לא פעילים</option>
+            </select>
+          </div>
+        </div>
+
+        <div className="admin-list-toolbar__page-size">
+          <label htmlFor="volunteers-mgmt-page-size">מספר מתנדבים בעמוד</label>
+          <select
+            id="volunteers-mgmt-page-size"
+            value={pageSize}
+            onChange={(event) => setPageSize(Number(event.target.value))}
+          >
+            {PAGE_SIZE_OPTIONS.map((size) => (
+              <option key={size} value={size}>
+                {size}
+              </option>
+            ))}
+          </select>
+        </div>
+      </div>
+
+      {error ? (
+        <p className="staff-alert staff-alert--error">{error}</p>
+      ) : null}
+
+      {loading ? (
+        <p className="activities-mgmt-loading">טוען מתנדבים...</p>
+      ) : null}
+
+      {!loading && !error ? (
+        <div className="community-staff-request-list community-volunteers-mgmt__card">
         {filteredVolunteers.length === 0 ? (
           <CommunityStaffEmptyState
             icon={Users}
@@ -192,45 +289,89 @@ function VolunteersManagementTable({
           />
         ) : (
           <ul className="community-staff-compact-list">
-            {paginatedVolunteers.map((volunteer) => (
+            {paginatedVolunteers.map((volunteer) => {
+              const isActive = volunteer.is_active === true;
+
+              return (
               <CommunityStaffCompactCard
                 key={volunteer.id}
                 name={volunteer.fullNameDisplay}
                 phone={volunteer.phoneDisplay}
+                inactive={!isActive}
                 status={
-                  <CommunityStaffActiveBadge isActive={volunteer.is_active === true} />
+                  <CommunityStaffActiveBadge isActive={isActive} />
                 }
                 viewLabel="צפייה"
                 primaryLabel="עריכה"
                 onPrimaryClick={() => onEditVolunteer(volunteer)}
                 onViewDetails={() => onViewDetails(volunteer)}
-                onDeactivate={() => setPendingDeactivateVolunteer(volunteer)}
+                onDeactivate={
+                  isActive
+                    ? () => {
+                        setPendingActionVolunteer(volunteer);
+                        setPendingActionType("deactivate");
+                      }
+                    : undefined
+                }
+                onReactivate={
+                  !isActive
+                    ? () => {
+                        setPendingActionVolunteer(volunteer);
+                        setPendingActionType("reactivate");
+                      }
+                    : undefined
+                }
                 deactivateLabel="השבתה"
-                deactivateDisabled={volunteer.is_active !== true}
               />
-            ))}
+              );
+            })}
           </ul>
         )}
-      </div>
+        </div>
+      ) : null}
 
-      {filteredVolunteers.length > 0 && (
-        <CommunityStaffPagination
-          currentPage={currentPage}
-          totalPages={totalPages}
-          onPrevious={() => setCurrentPage((page) => Math.max(1, page - 1))}
-          onNext={() =>
-            setCurrentPage((page) => Math.min(totalPages, page + 1))
-          }
-        />
-      )}
+      {!loading && !error && filteredVolunteers.length > 0 ? (
+        <div className="activities-mgmt-pagination">
+          <button
+            type="button"
+            className="activities-mgmt-pagination__btn"
+            onClick={() => setCurrentPage((page) => Math.max(1, page - 1))}
+            disabled={safePage <= 1}
+          >
+            הקודם
+          </button>
+          <span className="activities-mgmt-pagination__label">
+            עמוד {safePage} מתוך {totalPages}
+          </span>
+          <button
+            type="button"
+            className="activities-mgmt-pagination__btn"
+            onClick={() =>
+              setCurrentPage((page) => Math.min(totalPages, page + 1))
+            }
+            disabled={safePage >= totalPages}
+          >
+            הבא
+          </button>
+        </div>
+      ) : null}
 
       <CommunityStaffConfirmModal
         message={
-          pendingDeactivateVolunteer ? "להשבית את המתנדב/ה?" : null
+          pendingActionVolunteer
+            ? pendingActionType === "deactivate"
+              ? "להשבית את המתנדב/ה?"
+              : pendingActionType === "reactivate"
+                ? "להפעיל את המתנדב/ה מחדש?"
+                : null
+            : null
         }
-        onConfirm={handleConfirmDeactivate}
-        onCancel={() => setPendingDeactivateVolunteer(null)}
-        confirming={deactivating}
+        onConfirm={handleConfirmAction}
+        onCancel={() => {
+          setPendingActionVolunteer(null);
+          setPendingActionType(null);
+        }}
+        confirming={isProcessing}
       />
     </div>
   );

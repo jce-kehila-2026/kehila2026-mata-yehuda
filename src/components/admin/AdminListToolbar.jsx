@@ -13,6 +13,7 @@ function AdminListToolbar({
     pageSize,
     onPageSizeChange,
     pageSizeLabel = "הצג בעמוד",
+    pageSizeOptions = ADMIN_PAGE_SIZE_OPTIONS,
     layout = "default"
 }) {
     return (
@@ -50,7 +51,7 @@ function AdminListToolbar({
                     value={String(pageSize)}
                     onChange={(event) => onPageSizeChange(event.target.value)}
                 >
-                    {ADMIN_PAGE_SIZE_OPTIONS.map((option) => (
+                    {pageSizeOptions.map((option) => (
                         <option key={option} value={option}>
                             {option}
                         </option>

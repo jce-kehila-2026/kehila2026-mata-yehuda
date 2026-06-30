@@ -3,7 +3,7 @@ import { Timestamp } from "firebase/firestore";
 import { ImageUp, Pencil, Trash2 } from "lucide-react";
 import {
     ACTIVITY_IMAGE_ACCEPT,
-    uploadActivityImage,
+    prepareActivityImageUrl,
     validateActivityImageFile
 } from "../../services/staffManegmentServices/activityImageService";
 import FormActionRow from "../shared/FormActionRow";
@@ -251,6 +251,23 @@ function ActivityForm({
             return;
         }
 
+        const maxParticipantsNumber = Number(maxParticipants);
+
+        if (
+            !Number.isInteger(maxParticipantsNumber) ||
+            maxParticipantsNumber <= 0
+        ) {
+            alert("מספר משתתפים חייב להיות מספר שלם גדול מ-0");
+            return;
+        }
+
+        const priceNumber = Number(price);
+
+        if (!Number.isFinite(priceNumber) || priceNumber < 0) {
+            alert("מחיר חייב להיות מספר שאינו שלילי");
+            return;
+        }
+
         if (imageError) {
             return;
         }
@@ -261,10 +278,7 @@ function ActivityForm({
             let imageUrl = savedImageUrl;
 
             if (selectedFile) {
-                imageUrl = await uploadActivityImage(
-                    selectedFile,
-                    editingActivity?.id
-                );
+                imageUrl = await prepareActivityImageUrl(selectedFile);
             } else if (!previewUrl) {
                 imageUrl = "";
             }
@@ -283,11 +297,11 @@ function ActivityForm({
                 ),
 
                 day_of_week: getDayOfWeekFromActivityDate(startDate, startTime),
-                max_participants: Number(maxParticipants),
+                max_participants: maxParticipantsNumber,
                 current_participants: editingActivity
                     ? editingActivity.data.current_participants || 0
                     : 0,
-                price: Number(price),
+                price: priceNumber,
                 price_note: priceNote,
                 is_open: isRegistrationOpenForDeadlineInput(registrationDeadLine)
             };
@@ -301,8 +315,8 @@ function ActivityForm({
             await onSubmit(activityData);
             resetFormFields();
         } catch (error) {
-            console.error("Activity image upload failed:", error);
-            setImageError(error.message || "שגיאה בהעלאת התמונה");
+            console.error("Activity image processing failed:", error);
+            setImageError(error.message || "שגיאה בעיבוד התמונה");
         } finally {
             setIsUploading(false);
         }
@@ -499,7 +513,7 @@ function ActivityForm({
             <FormActionRow
                 submitLabel={
                     isUploading
-                        ? "מעלה תמונה..."
+                        ? "שומר..."
                         : editingActivity
                           ? "שמירת שינויים"
                           : "הוספת פעילות"

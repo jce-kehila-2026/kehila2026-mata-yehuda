@@ -2,10 +2,6 @@ import { useState } from "react";
 import { Link, useNavigate } from "react-router-dom";
 import "../../styles/supportive community/SupportiveCommunityPage.css";
 
-/* Demo hero image — replace with organization photo when available */
-const HERO_IMAGE =
-  "https://images.unsplash.com/photo-1762955911431-4c44c7c3f408?w=1000&auto=format&fit=crop&q=60&ixlib=rb-4.1.0&ixid=M3wxMjA3fDB8MHxzZWFyY2h8MjZ8fGVsZGVybHklMjB2b2x1bnRlZXJ8ZW58MHx8MHx8fDA%3D";
-
 const VOLUNTEER_INITIAL_COUNT = 6;
 
 const FIXED_SERVICES = [
@@ -237,6 +233,33 @@ function ServiceIcon({ type }) {
   return <span className="sc-icon">{icons[type] || icons.extra}</span>;
 }
 
+function ProcessIcon({ step }) {
+  const icons = {
+    1: (
+      <svg viewBox="0 0 24 24" fill="currentColor" aria-hidden="true">
+        <path d="M16 11c1.66 0 2.99-1.34 2.99-3S17.66 5 16 5s-3 1.34-3 3 1.34 3 3 3zm-8 0c1.66 0 2.99-1.34 2.99-3S9.66 5 8 5 5 6.34 5 8s1.34 3 3 3zm0 2c-2.33 0-7 1.17-7 3.5V19h14v-2.5C15 14.17 10.33 13 8 13zm8 0c-.29 0-.62.02-.97.05 1.16.84 1.97 1.97 1.97 3.45V19h6v-2.5c0-2.33-4.67-3.5-7-3.5z" />
+      </svg>
+    ),
+    2: (
+      <svg viewBox="0 0 24 24" fill="currentColor" aria-hidden="true">
+        <path d="M20 2H4a2 2 0 0 0-2 2v12a2 2 0 0 0 2 2h2v3l4-3h8a2 2 0 0 0 2-2V4a2 2 0 0 0-2-2zM8 11a1.2 1.2 0 1 1 1.2-1.2A1.2 1.2 0 0 1 8 11zm4 0a1.2 1.2 0 1 1 1.2-1.2A1.2 1.2 0 0 1 12 11zm4 0a1.2 1.2 0 1 1 1.2-1.2A1.2 1.2 0 0 1 16 11z" />
+      </svg>
+    ),
+    3: (
+      <svg viewBox="0 0 24 24" fill="currentColor" aria-hidden="true">
+        <path d="M9 2a1 1 0 0 0-1 1H6a2 2 0 0 0-2 2v15a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V5a2 2 0 0 0-2-2h-2a1 1 0 0 0-1-1H9zm0 2h6v2H9V4zm-.3 14-2.4-2.4 1.4-1.4 1 1 3.1-3.1 1.4 1.4z" />
+      </svg>
+    ),
+    4: (
+      <svg viewBox="0 0 24 24" fill="currentColor" aria-hidden="true">
+        <path d="M12 5.6a3 3 0 0 0-5.1 2.1c0 2 2.1 3.7 5.1 6.1 3-2.4 5.1-4.1 5.1-6.1A3 3 0 0 0 12 5.6zM3.5 14a1 1 0 0 0-1 1v4a1 1 0 0 0 1 1h11.2a4 4 0 0 0 1.5-.3l4.3-1.8a1.5 1.5 0 1 0-1.1-2.8l-3.6 1.4a2.5 2.5 0 0 1-.9.2H10v-1.5h3.2a1.2 1.2 0 0 0 0-2.4H9.3l-1.7-.8a3 3 0 0 0-1.2-.3H4.5z" />
+      </svg>
+    ),
+  };
+
+  return <span className="sc-step__glyph">{icons[step] || null}</span>;
+}
+
 function SupportiveCommunityPage() {
   const navigate = useNavigate();
   const [expandedService, setExpandedService] = useState(null);
@@ -262,6 +285,19 @@ function SupportiveCommunityPage() {
         דלג לתוכן העיקרי
       </a>
 
+      <img
+        src="/images/minitree.png"
+        alt=""
+        aria-hidden="true"
+        className="sc-page-deco sc-page-deco--top-right"
+      />
+      <img
+        src="/images/minitree.png"
+        alt=""
+        aria-hidden="true"
+        className="sc-page-deco sc-page-deco--bottom-left"
+      />
+
       <div className="site-header">
         <div className="site-header-inner">
           <span className="site-brand">עמותת ותיקי מטה יהודה</span>
@@ -269,50 +305,67 @@ function SupportiveCommunityPage() {
         </div>
       </div>
 
-      <nav className="community-home-nav" aria-label="ניווט חזרה">
-        <div className="community-home-nav-inner">
-          <Link className="community-home-nav-link" to="/">
-            ← חזרה לדף הראשי
+      <section className="sc-hero-area">
+        <div className="sc-hero__topbar">
+          <Link className="sc-hero__back" to="/">
+            <span>חזרה לדף הראשי</span>
+            <span className="sc-hero__back-arrow" aria-hidden="true">
+              →
+            </span>
           </Link>
         </div>
-      </nav>
 
-      <header className="community-hero">
-        <div className="hero-shell">
-          <div className="hero-banner">
-            <img
-              className="hero-image"
-              src={HERO_IMAGE}
-              alt="מתנדבים מסייעים לאזרחים ותיקים — תמיכה קהילתית וליווי"
-              width={1000}
-              height={560}
-              decoding="async"
-              referrerPolicy="no-referrer"
-            />
-            <div className="hero-panel">
-              <p className="hero-org">עמותת ותיקי מטה יהודה</p>
-              <h1>קהילה תומכת</h1>
-              <p className="hero-lead">
-                שירותי תמיכה, ליווי וסיוע לבני 62+ בבית ובקהילה.
-              </p>
-              <button
-                type="button"
-                className="btn btn-primary btn-hero"
-                onClick={() => navigate("/community-join")}
-              >
-                בקשת הצטרפות לקהילה תומכת
-              </button>
-            </div>
-          </div>
+        <header className="sc-hero" aria-label="קהילה תומכת">
+        <img
+          className="sc-hero__photo"
+          src="/images/supportive-community.png"
+          alt="מתנדבים מסייעים לאזרחים ותיקים — תמיכה קהילתית וליווי"
+        />
+        <div className="sc-hero__scrim" aria-hidden="true" />
+        <img
+          className="sc-hero__foliage"
+          src="/images/leaf-decoration.png"
+          alt=""
+          aria-hidden="true"
+        />
+
+        <div className="sc-hero__panel">
+          <svg
+            className="sc-hero__heart"
+            viewBox="0 0 120 96"
+            fill="none"
+            aria-hidden="true"
+          >
+            <path d="M60 82 C30 60 14 44 14 28 C14 16 24 8 36 12 C46 15 55 24 60 33 C65 24 74 15 84 12 C96 8 106 16 106 28 C106 44 90 60 60 82 Z" />
+          </svg>
+          <p className="sc-hero__kicker">עמותת ותיקי מטה יהודה</p>
+          <h1 className="sc-hero__title">קהילה תומכת</h1>
+          <p className="sc-hero__lead">
+            שירותי תמיכה, ליווי וסיוע לבני 62+ בבית ובקהילה.
+          </p>
+          <button
+            type="button"
+            className="sc-hero__btn"
+            onClick={() => navigate("/community-join")}
+          >
+            בקשת הצטרפות לקהילה תומכת
+          </button>
         </div>
-      </header>
+        </header>
+      </section>
 
       <main id="main-content" className="page-main">
         <section
-          className="page-section page-section--white"
+          className="page-section page-section--white sc-fixed-section"
           aria-labelledby="fixed-services-title"
         >
           <div className="page-wrap">
+            <img
+              className="sc-fixed-section__leaf"
+              src="/images/leaf-decoration.png"
+              alt=""
+              aria-hidden="true"
+            />
             <div className="section-header">
               <span className="section-eyebrow">מה מקבלים</span>
               <h2 id="fixed-services-title">שירותים קבועים</h2>
@@ -350,10 +403,16 @@ function SupportiveCommunityPage() {
         </section>
 
         <section
-          className="page-section page-section--accent"
+          className="page-section page-section--accent sc-price-section"
           aria-labelledby="payment-title"
         >
           <div className="page-wrap">
+            <img
+              className="sc-panel-leaf"
+              src="/images/leaf-decoration.png"
+              alt=""
+              aria-hidden="true"
+            />
             <div className="section-header">
               <span className="section-eyebrow">שקיפות</span>
               <h2 id="payment-title">מחיר ותנאים</h2>
@@ -361,26 +420,66 @@ function SupportiveCommunityPage() {
 
             <div className="pricing-block">
               <div className="price-highlight">
-                <span className="price-label">עלות חודשית רגילה</span>
-                <span className="price-value">160 ₪</span>
+                <span className="price-highlight__icon" aria-hidden="true">
+                  <svg viewBox="0 0 24 24" fill="currentColor">
+                    <path d="M12 21.35l-1.45-1.32C5.4 15.36 2 12.28 2 8.5 2 5.42 4.42 3 7.5 3c1.74 0 3.41.81 4.5 2.09C13.09 3.81 14.76 3 16.5 3 19.58 3 22 5.42 22 8.5c0 3.78-3.4 6.86-8.55 11.54L12 21.35z" />
+                  </svg>
+                </span>
+                <div className="price-highlight__text">
+                  <span className="price-label">עלות חודשית רגילה</span>
+                  <span className="price-value">160 ₪</span>
+                </div>
               </div>
 
-              <p className="payment-discounts">
-                קיימות הנחות לזכאים, לדוגמה ניצולי שואה, מוכרי רווחה ובעלי חוק
-                סיעוד.
-              </p>
-
               <ul className="payment-details">
-                <li>
-                  ביקור רופא בבית — <strong>25 ₪</strong>
+                <li className="payment-detail">
+                  <span className="payment-detail__icon" aria-hidden="true">
+                    <svg viewBox="0 0 24 24" fill="currentColor">
+                      <path d="M12 3 3 10.5V21h6v-5h6v5h6V10.5L12 3zm1 6h2v2h-2v2h-2v-2H9V9h2V7h2v2z" />
+                    </svg>
+                  </span>
+                  <span className="payment-detail__text">
+                    <span className="payment-detail__label">ביקור רופא בבית</span>
+                    <span className="payment-detail__amount">25 ₪</span>
+                  </span>
                 </li>
-                <li>
-                  נסיעה באמבולנס — <strong>35 ₪</strong>
+                <li className="payment-detail">
+                  <span className="payment-detail__icon" aria-hidden="true">
+                    <svg viewBox="0 0 24 24" fill="currentColor">
+                      <path d="M3 6a1 1 0 0 1 1-1h9a1 1 0 0 1 1 1v2h3.4a2 2 0 0 1 1.6.8l1.6 2.13a2 2 0 0 1 .4 1.2V16a1 1 0 0 1-1 1h-1.05a2.5 2.5 0 0 1-4.9 0H8.95a2.5 2.5 0 0 1-4.9 0H4a1 1 0 0 1-1-1V6zm4 2V6.5H5.5V8H4v1.5h1.5V11H7V9.5h1.5V8H7zm9 0v2h3.9l-1.5-2H16zM6.5 15.5a1 1 0 1 0 1 1 1 1 0 0 0-1-1zm9 0a1 1 0 1 0 1 1 1 1 0 0 0-1-1z" />
+                    </svg>
+                  </span>
+                  <span className="payment-detail__text">
+                    <span className="payment-detail__label">נסיעה באמבולנס</span>
+                    <span className="payment-detail__amount">35 ₪</span>
+                  </span>
                 </li>
-                <li>
-                  בדיקת אמבולנס ללא פינוי — עד <strong>200 ₪</strong>
+                <li className="payment-detail">
+                  <span className="payment-detail__icon" aria-hidden="true">
+                    <svg viewBox="0 0 24 24" fill="currentColor">
+                      <path d="M9 2a1 1 0 0 0-1 1H6a2 2 0 0 0-2 2v15a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V5a2 2 0 0 0-2-2h-2a1 1 0 0 0-1-1H9zm0 2h6v2H9V4zm4 5h-2v2H9v2h2v2h2v-2h2v-2h-2V9z" />
+                    </svg>
+                  </span>
+                  <span className="payment-detail__text">
+                    <span className="payment-detail__label">
+                      בדיקת אמבולנס ללא פינוי
+                    </span>
+                    <span className="payment-detail__amount">עד 200 ₪</span>
+                  </span>
                 </li>
               </ul>
+
+              <div className="payment-discounts">
+                <span className="payment-discounts__icon" aria-hidden="true">
+                  <svg viewBox="0 0 24 24" fill="currentColor">
+                    <path d="M19.4 11.6 12.4 4.6A2 2 0 0 0 11 4H5a1 1 0 0 0-1 1v6a2 2 0 0 0 .6 1.4l7 7a2 2 0 0 0 2.8 0l5-5a2 2 0 0 0 0-2.8zM7.5 9A1.5 1.5 0 1 1 9 7.5 1.5 1.5 0 0 1 7.5 9z" />
+                  </svg>
+                </span>
+                <p>
+                  קיימות הנחות לזכאים, לדוגמה ניצולי שואה, מוכרי רווחה ובעלי חוק
+                  סיעוד.
+                </p>
+              </div>
 
               <p className="payment-note">
                 ההצטרפות היא בקשה ראשונית בלבד. צוות העמותה יצור קשר להשלמת
@@ -391,22 +490,52 @@ function SupportiveCommunityPage() {
         </section>
 
         <section
-          className="page-section page-section--surface"
+          className="page-section page-section--surface sc-process-section"
           aria-labelledby="how-it-works-title"
         >
+          <img
+            src="/images/leaf-decoration.png"
+            alt=""
+            aria-hidden="true"
+            className="sc-process-section__leaf sc-process-section__leaf--right"
+          />
+          <img
+            src="/images/leaf-decoration.png"
+            alt=""
+            aria-hidden="true"
+            className="sc-process-section__leaf sc-process-section__leaf--left"
+          />
+
           <div className="page-wrap">
             <div className="section-header section-header--center">
               <span className="section-eyebrow">איך זה עובד</span>
               <h2 id="how-it-works-title">התהליך בקצרה</h2>
+              <span className="sc-head-divider" aria-hidden="true">
+                <span className="sc-head-divider__line" />
+                <svg viewBox="0 0 24 24" fill="currentColor">
+                  <path d="M12 21.35l-1.45-1.32C5.4 15.36 2 12.28 2 8.5 2 5.42 4.42 3 7.5 3c1.74 0 3.41.81 4.5 2.09C13.09 3.81 14.76 3 16.5 3 19.58 3 22 5.42 22 8.5c0 3.78-3.4 6.86-8.55 11.54L12 21.35z" />
+                </svg>
+                <span className="sc-head-divider__line" />
+              </span>
             </div>
 
-            <ol className="steps-timeline">
+            <ol className="sc-process">
               {HOW_IT_WORKS.map((item) => (
-                <li className="step-card" key={item.step}>
-                  <span className="step-number">{item.step}</span>
-                  <div className="step-content">
-                    <h3>{item.title}</h3>
-                    <p>{item.text}</p>
+                <li className="sc-step" key={item.step}>
+                  <span className="sc-step__num">{item.step}</span>
+                  <div className="sc-step__card">
+                    <span className="sc-step__icon">
+                      <ProcessIcon step={item.step} />
+                    </span>
+                    <h3 className="sc-step__title">{item.title}</h3>
+                    <p className="sc-step__text">{item.text}</p>
+                    <span className="sc-step__divider" aria-hidden="true">
+                      <span className="sc-step__divider-line" />
+                      <svg viewBox="0 0 24 24" fill="currentColor">
+                        <path d="M12 21.35l-1.45-1.32C5.4 15.36 2 12.28 2 8.5 2 5.42 4.42 3 7.5 3c1.74 0 3.41.81 4.5 2.09C13.09 3.81 14.76 3 16.5 3 19.58 3 22 5.42 22 8.5c0 3.78-3.4 6.86-8.55 11.54L12 21.35z" />
+                      </svg>
+                      <span className="sc-step__divider-line" />
+                    </span>
                   </div>
                 </li>
               ))}
@@ -452,10 +581,16 @@ function SupportiveCommunityPage() {
         </section>
 
         <section
-          className="page-section page-section--white"
+          className="page-section page-section--white sc-volunteer-section"
           aria-labelledby="volunteer-services-title"
         >
           <div className="page-wrap">
+            <img
+              className="sc-panel-leaf"
+              src="/images/leaf-decoration.png"
+              alt=""
+              aria-hidden="true"
+            />
             <div className="section-header">
               <span className="section-eyebrow">בקשה לפי צורך</span>
               <h2 id="volunteer-services-title">
@@ -487,13 +622,56 @@ function SupportiveCommunityPage() {
         </section>
 
         <section
-          className="page-section page-section--surface"
+          className="page-section page-section--surface sc-faq-section"
           aria-labelledby="faq-title"
         >
           <div className="page-wrap page-wrap--compact">
+            <svg
+              className="sc-faq-bubbles"
+              viewBox="0 0 128 120"
+              fill="currentColor"
+              aria-hidden="true"
+            >
+              <path d="M24 8h52a18 18 0 0 1 18 18v24a18 18 0 0 1-18 18H44L26 84V68h-2A18 18 0 0 1 6 50V26A18 18 0 0 1 24 8z" />
+              <text
+                x="50"
+                y="51"
+                textAnchor="middle"
+                fontSize="38"
+                fontWeight="800"
+                fontFamily="Heebo, system-ui, sans-serif"
+                fill="#ffffff"
+              >
+                ?
+              </text>
+              <circle cx="100" cy="88" r="22" />
+              <circle cx="92" cy="88" r="2.6" fill="#ffffff" />
+              <circle cx="100" cy="88" r="2.6" fill="#ffffff" />
+              <circle cx="108" cy="88" r="2.6" fill="#ffffff" />
+            </svg>
+            <img
+              className="sc-panel-leaf sc-panel-leaf--faq"
+              src="/images/leaf-decoration.png"
+              alt=""
+              aria-hidden="true"
+            />
+            <img
+              className="sc-faq-leaf-right"
+              src="/images/leaf-decoration.png"
+              alt=""
+              aria-hidden="true"
+            />
+
             <div className="section-header section-header--center">
               <span className="section-eyebrow">שאלות נפוצות</span>
               <h2 id="faq-title">שאלות ותשובות</h2>
+              <span className="sc-head-divider" aria-hidden="true">
+                <span className="sc-head-divider__line" />
+                <svg viewBox="0 0 24 24" fill="currentColor">
+                  <path d="M12 21.35l-1.45-1.32C5.4 15.36 2 12.28 2 8.5 2 5.42 4.42 3 7.5 3c1.74 0 3.41.81 4.5 2.09C13.09 3.81 14.76 3 16.5 3 19.58 3 22 5.42 22 8.5c0 3.78-3.4 6.86-8.55 11.54L12 21.35z" />
+                </svg>
+                <span className="sc-head-divider__line" />
+              </span>
             </div>
 
             <div className="faq-list">
@@ -525,8 +703,27 @@ function SupportiveCommunityPage() {
       </main>
 
       <footer className="community-footer">
+        <img
+          className="community-footer__leaf community-footer__leaf--left"
+          src="/images/leaf-decoration.png"
+          alt=""
+          aria-hidden="true"
+        />
+        <img
+          className="community-footer__leaf community-footer__leaf--right"
+          src="/images/leaf-decoration.png"
+          alt=""
+          aria-hidden="true"
+        />
         <div className="footer-inner">
           <p className="footer-org">עמותת ותיקי מטה יהודה</p>
+          <span className="footer-divider" aria-hidden="true">
+            <span className="footer-divider__line" />
+            <svg viewBox="0 0 24 24" fill="currentColor">
+              <path d="M12 21.35l-1.45-1.32C5.4 15.36 2 12.28 2 8.5 2 5.42 4.42 3 7.5 3c1.74 0 3.41.81 4.5 2.09C13.09 3.81 14.76 3 16.5 3 19.58 3 22 5.42 22 8.5c0 3.78-3.4 6.86-8.55 11.54L12 21.35z" />
+            </svg>
+            <span className="footer-divider__line" />
+          </span>
           <p className="footer-tagline">
             מלווים אתכם בכבוד, בחמימות ובאמון — לחיים טובים יותר בבית ובקהילה
           </p>

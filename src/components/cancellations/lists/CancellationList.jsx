@@ -18,8 +18,6 @@ import {
 } from "../helpers/cancellationHelpers";
 import AdminDataTable from "../../admin/AdminDataTable";
 import AdminListEmptyState from "../../admin/AdminListEmptyState";
-import AdminListPagination from "../../admin/AdminListPagination";
-import AdminListSummary from "../../admin/AdminListSummary";
 import AdminListToolbar from "../../admin/AdminListToolbar";
 import AdminResponsiveList from "../../admin/AdminResponsiveList";
 import {
@@ -283,12 +281,11 @@ function CancellationList() {
 
     return (
         <div className="staff-list-section admin-list-section admin-list-section--cancellations">
-            <div className="admin-list-header admin-list-header--split">
-                <h2 className="admin-list-header__title">רשימת ביטולים</h2>
-            </div>
+            {!loading && filteredItems.length > 0 ? (
+                <CancellationListStats stats={cancellationStats} />
+            ) : null}
 
             <AdminListToolbar
-                layout="cancellations"
                 searchId="cancellation-search"
                 searchLabel="חיפוש"
                 searchPlaceholder="שם משתתף או טלפון"
@@ -298,31 +295,20 @@ function CancellationList() {
                 pageSize={list.pageSize}
                 onPageSizeChange={list.setPageSize}
                 pageSizeLabel="הצג בעמוד"
+                pageSizeOptions={[5, 10, 20]}
             />
-
-            <AdminListSummary
-                totalCount={list.totalCount}
-                totalFiltered={list.totalFiltered}
-                pageCount={list.pageCount}
-                page={list.page}
-                totalPages={list.totalPages}
-                showAll={list.showAll}
-            />
-
-            {!loading && filteredItems.length > 0 ? (
-                <CancellationListStats stats={cancellationStats} />
-            ) : null}
 
             {error ? (
                 <p className="staff-alert staff-alert--error">{error}</p>
             ) : null}
 
-            {loading ? <p>טוען...</p> : null}
+            {loading ? <p className="list-mgmt-loading">טוען...</p> : null}
 
             {!loading && emptyState}
 
             {!loading && list.totalFiltered > 0 ? (
                 <>
+                    <div className="list-mgmt-list">
                     <AdminResponsiveList
                         desktopTable={
                             <AdminDataTable
@@ -393,12 +379,31 @@ function CancellationList() {
                             </div>
                         }
                     />
+                    </div>
 
-                    <AdminListPagination
-                        page={list.page}
-                        totalPages={list.totalPages}
-                        onPageChange={list.setPage}
-                    />
+                    {list.totalPages > 1 ? (
+                        <div className="list-mgmt-pagination">
+                            <button
+                                type="button"
+                                className="list-mgmt-pagination__btn"
+                                onClick={() => list.setPage(list.page - 1)}
+                                disabled={list.page <= 1}
+                            >
+                                הקודם
+                            </button>
+                            <span className="list-mgmt-pagination__label">
+                                עמוד {list.page} מתוך {list.totalPages}
+                            </span>
+                            <button
+                                type="button"
+                                className="list-mgmt-pagination__btn"
+                                onClick={() => list.setPage(list.page + 1)}
+                                disabled={list.page >= list.totalPages}
+                            >
+                                הבא
+                            </button>
+                        </div>
+                    ) : null}
                 </>
             ) : null}
 

@@ -1,6 +1,13 @@
 import { useState } from "react";
 import { registerToDayCenter } from "../../services/HomeServices/dayCenterService";
 import NotificationOptInFields from "../notifications/NotificationOptInFields";
+import {
+  INVALID_ID_NUMBER_MESSAGE,
+  INVALID_PHONE_MESSAGE,
+  isValidIsraeliIdNumber,
+  isValidIsraeliPhoneNumber,
+} from "../../services/dayCenterVolunteerRequestService";
+import { nameContainsNumber } from "../../utils/nameValidation";
 
 function DayCenterRegisterForm({ onClose }) {
   const [firstName, setFirstName] = useState("");
@@ -22,18 +29,20 @@ function DayCenterRegisterForm({ onClose }) {
       return;
     }
 
-    if (!/^\d{9}$/.test(idNumber)) {
-      setMessage("מספר זהות חייב להיות 9 ספרות");
+    if (nameContainsNumber(firstName) || nameContainsNumber(lastName)) {
+      setMessage("השם אינו יכול להכיל מספרים");
       setMessageType("error");
       return;
     }
 
-    if (
-      !/^(\+972\d{8,9}|972\d{8,9}|0\d{8,9})$/.test(
-        phone.replace(/[\s-]/g, "")
-      )
-    ) {
-      setMessage("מספר טלפון לא תקין");
+    if (!isValidIsraeliIdNumber(idNumber)) {
+      setMessage(INVALID_ID_NUMBER_MESSAGE);
+      setMessageType("error");
+      return;
+    }
+
+    if (!isValidIsraeliPhoneNumber(phone)) {
+      setMessage(INVALID_PHONE_MESSAGE);
       setMessageType("error");
       return;
     }
@@ -82,16 +91,22 @@ function DayCenterRegisterForm({ onClose }) {
 
         <input
           type="text"
+          inputMode="numeric"
           placeholder="מספר זהות"
           value={idNumber}
-          onChange={(e) => setIdNumber(e.target.value)}
+          onChange={(e) =>
+            setIdNumber(e.target.value.replace(/\D/g, "").slice(0, 9))
+          }
         />
 
         <input
           type="text"
+          inputMode="numeric"
           placeholder="מספר טלפון"
           value={phone}
-          onChange={(e) => setPhone(e.target.value)}
+          onChange={(e) =>
+            setPhone(e.target.value.replace(/\D/g, "").slice(0, 10))
+          }
         />
 
         <NotificationOptInFields />

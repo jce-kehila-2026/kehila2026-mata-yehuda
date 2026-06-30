@@ -2,11 +2,11 @@ import { useState, useEffect, useRef } from "react";
 import {
     Calendar,
     BarChart3,
-    CalendarDays,
     CheckCircle2,
     ClipboardList,
     FileText,
     HandCoins,
+    HeartHandshake,
     Mail,
     Menu,
     MessageCircle,
@@ -28,7 +28,7 @@ import SendMessages from "./SendMessages";
 import StaffStatistics from "./StaffStatistics";
 import AttendancePage from "../attendance/AttendancePage";
 import ManageDonations from "../staff/ManageDonations";
-import ManageDayCenterSchedule from "./ManageDayCenterSchedule";
+import ManageDayCenterVolunteers from "../staff/ManageDayCenterVolunteers";
 import RequestsPage from "../RespOneonRequest/RequestsPage";
 import DashboardControlPanels from "../../components/dashboard/DashboardControlPanels";
 import { fetchDashboardOverview } from "../../services/staffManegmentServices/dashboardService";
@@ -57,7 +57,7 @@ import { useMediaQuery } from "../../hooks/useMediaQuery";
 const DASHBOARD_ACTION_ICONS = {
     activities: Calendar,
     programs: ClipboardList,
-    dayCenterSchedule: CalendarDays,
+    dayCenterVolunteers: HeartHandshake,
     manageStaff: Users,
     manageParticipants: UserRound,
     messages: MessageCircle,
@@ -73,9 +73,9 @@ const DASHBOARD_ACTIONS = [
     { id: "activities", label: "פעילויות", page: "activities" },
     { id: "programs", label: "תוכניות", page: "programs" },
     {
-        id: "dayCenterSchedule",
-        label: "לוח זמנים מרכז יום",
-        page: "dayCenterSchedule"
+        id: "dayCenterVolunteers",
+        label: "ניהול מתנדבי מרכז יום",
+        page: "dayCenterVolunteers"
     },
     { id: "manageStaff", label: "אנשי צוות", page: "manageStaff" },
     {
@@ -107,11 +107,25 @@ const DASHBOARD_SUMMARY_LABELS = [
     { id: "open-activities", label: "פעילויות פתוחות" }
 ];
 
+const DASHBOARD_SUMMARY_ICONS = {
+    "pending-requests": FileText,
+    "new-cancellations": Undo2,
+    "new-inquiries": Mail,
+    "open-activities": Calendar
+};
+
+const DASHBOARD_SUMMARY_HINTS = {
+    "pending-requests": "בקשות הממתינות לטיפול שלך",
+    "new-cancellations": "ביטולים אחרונים",
+    "new-inquiries": "פניות חדשות שטרם טופלו",
+    "open-activities": "פעילויות פתוחות כעת"
+};
+
 const SUBPAGE_TITLES = {
     activities: "ניהול פעילויות",
     manageStaff: "ניהול אנשי צוות",
     programs: "ניהול תוכניות",
-    dayCenterSchedule: "לוח זמנים מרכז יום",
+    dayCenterVolunteers: "ניהול מתנדבי מרכז יום",
     manageParticipants: "ניהול משתתפים",
     registrations: "צפייה בבקשות",
     inquiries: "ניהול פניות",
@@ -415,11 +429,11 @@ function StaffDashboard({ onLogout }) {
                         />
                     </div>
                 );
-            case "dayCenterSchedule":
+            case "dayCenterVolunteers":
                 return (
-                    <div data-dashboard-page="dayCenterSchedule">
-                        {renderSubpageToolbar(SUBPAGE_TITLES.dayCenterSchedule)}
-                        <ManageDayCenterSchedule />
+                    <div data-dashboard-page="dayCenterVolunteers">
+                        {renderSubpageToolbar(SUBPAGE_TITLES.dayCenterVolunteers)}
+                        <ManageDayCenterVolunteers onNavigate={goToPage} />
                     </div>
                 );
             case "manageParticipants":
@@ -449,21 +463,21 @@ function StaffDashboard({ onLogout }) {
                 return (
                     <div data-dashboard-page="cancellations">
                         {renderSubpageToolbar(SUBPAGE_TITLES.cancellations)}
-                        <ManageCancellations />
+                        <ManageCancellations onNavigate={goToPage} />
                     </div>
                 );
             case "inquiries":
                 return (
                     <div data-dashboard-page="inquiries">
                         {renderSubpageToolbar(SUBPAGE_TITLES.inquiries)}
-                        <RequestsPage />
+                        <RequestsPage onNavigate={goToPage} />
                     </div>
                 );
             case "messages":
                 return (
                     <div data-dashboard-page="messages">
                         {renderSubpageToolbar(SUBPAGE_TITLES.messages)}
-                        <SendMessages />
+                        <SendMessages onBack={goToDashboard} />
                     </div>
                 );
             case "attendance":
@@ -474,6 +488,7 @@ function StaffDashboard({ onLogout }) {
                             onNavigate={(view) =>
                                 goToPage(buildStaffPage("attendance", view))
                             }
+                            onBackToDashboard={goToDashboard}
                         />
                     </div>
                 );
@@ -487,7 +502,7 @@ function StaffDashboard({ onLogout }) {
                 return (
                     <div data-dashboard-page="manageDonations">
                         {renderSubpageToolbar(SUBPAGE_TITLES.manageDonations)}
-                        <ManageDonations />
+                        <ManageDonations onNavigate={goToPage} />
                     </div>
                 );
             case "dashboard":
@@ -543,7 +558,33 @@ function StaffDashboard({ onLogout }) {
         >
             {currentPage === "dashboard" && (
                 <div className="staff-dashboard-page staff-dashboard-page--home">
+                    <div
+                        className="staff-dashboard-decorations"
+                        aria-hidden="true"
+                    >
+                        <img
+                            src="/images/minitree.png"
+                            alt=""
+                            className="staff-dashboard-decoration staff-dashboard-decoration--bottom-left"
+                        />
+                    </div>
+                    <img
+                        src="/images/minitree.png"
+                        alt=""
+                        className="staff-dashboard-decoration staff-dashboard-decoration--top-right"
+                        aria-hidden="true"
+                    />
                     <header className="staff-dashboard-hero">
+                        <div
+                            className="staff-dashboard-hero__decor"
+                            aria-hidden="true"
+                        >
+                            <img
+                                src="/images/minitree.png"
+                                alt=""
+                                className="staff-dashboard-hero__leaf staff-dashboard-hero__leaf--header"
+                            />
+                        </div>
                         <div className="staff-dashboard-hero__bar">
                             <div className="staff-dashboard-hero__brand">
                                 <div
@@ -583,7 +624,8 @@ function StaffDashboard({ onLogout }) {
                                     >
                                         <Menu
                                             className="staff-dashboard-desktop-menu-toggle__icon"
-                                            strokeWidth={2}
+                                            strokeWidth={2.25}
+                                            size={22}
                                             aria-hidden="true"
                                         />
                                     </button>
@@ -631,19 +673,46 @@ function StaffDashboard({ onLogout }) {
                         <section className="staff-dashboard-summary staff-dashboard-summary--primary">
                             <h2 className="staff-dashboard-section-title">סיכום מהיר</h2>
                             <div className="staff-dashboard-summary-grid">
-                                {DASHBOARD_SUMMARY_LABELS.map((item) => (
-                                    <article
-                                        key={item.id}
-                                        className="staff-dashboard-summary-card"
-                                    >
-                                        <span className="staff-dashboard-summary-card__value">
-                                            {getSummaryValue(item.id)}
-                                        </span>
-                                        <span className="staff-dashboard-summary-card__label">
-                                            {item.label}
-                                        </span>
-                                    </article>
-                                ))}
+                                {DASHBOARD_SUMMARY_LABELS.map((item) => {
+                                    const SummaryIcon =
+                                        DASHBOARD_SUMMARY_ICONS[item.id];
+
+                                    return (
+                                        <article
+                                            key={item.id}
+                                            className="staff-dashboard-summary-card"
+                                        >
+                                            <div className="staff-dashboard-summary-card__top">
+                                                <div className="staff-dashboard-summary-card__text">
+                                                    <span className="staff-dashboard-summary-card__value">
+                                                        {getSummaryValue(item.id)}
+                                                    </span>
+                                                    <span className="staff-dashboard-summary-card__label">
+                                                        {item.label}
+                                                    </span>
+                                                    <span className="staff-dashboard-summary-card__hint">
+                                                        {
+                                                            DASHBOARD_SUMMARY_HINTS[
+                                                                item.id
+                                                            ]
+                                                        }
+                                                    </span>
+                                                </div>
+                                                {SummaryIcon ? (
+                                                    <span
+                                                        className="staff-dashboard-summary-card__icon"
+                                                        aria-hidden="true"
+                                                    >
+                                                        <SummaryIcon
+                                                            strokeWidth={2}
+                                                            size={22}
+                                                        />
+                                                    </span>
+                                                ) : null}
+                                            </div>
+                                        </article>
+                                    );
+                                })}
                             </div>
                         </section>
 

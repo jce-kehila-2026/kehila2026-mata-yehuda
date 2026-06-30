@@ -4,6 +4,8 @@ import {
 } from "../../config/organizationLocation";
 import LocationMapModal from "./LocationMapModal";
 
+const CONTACT_PHONE = "041234567";
+
 function PhoneIcon() {
   return (
     <svg viewBox="0 0 24 24" aria-hidden="true" className="home-contact-footer__icon">
@@ -43,31 +45,53 @@ function ContactFooter() {
   return (
     <>
       <footer id="contact" className="home-contact-footer">
+        <div className="home-contact-footer__wave" aria-hidden="true">
+          <svg viewBox="0 0 1440 56" preserveAspectRatio="none" xmlns="http://www.w3.org/2000/svg">
+            <path d="M0,56 L0,34 C120,18 240,42 360,28 C480,14 600,40 720,26 C840,12 960,38 1080,24 C1200,10 1320,36 1440,22 L1440,56 Z" />
+          </svg>
+        </div>
+
         <div className="home-contact-footer__main">
           <h2 className="home-contact-footer__title">רוצים לשמוע עוד?</h2>
+          <div className="home-contact-footer__title-divider" aria-hidden="true">
+            <span className="home-contact-footer__title-line" />
+            <span className="home-contact-footer__title-heart">♡</span>
+            <span className="home-contact-footer__title-line" />
+          </div>
           <p className="home-contact-footer__subtitle">
             צוות שלנו זמין לענות על כל שאלה ולתאם ביקור היכרות ללא התחייבות.
           </p>
 
+          <a
+            href={`tel:${CONTACT_PHONE}`}
+            className="home-contact-footer__cta"
+          >
+            <span>צרו קשר</span>
+            <PhoneIcon />
+          </a>
+
           <div className="home-contact-footer__items">
-            <a href="tel:041234567" className="home-contact-footer__item">
-              <PhoneIcon />
-              <span>04-1234567</span>
-            </a>
-            <a href="mailto:info@shalva.org.il" className="home-contact-footer__item">
-              <MailIcon />
-              <span>info@shalva.org.il</span>
-            </a>
             <button
               type="button"
               className="home-contact-footer__item home-contact-footer__item--button"
               onClick={() => setShowMap(true)}
             >
-              <LocationIcon />
+              <span className="home-contact-footer__icon-wrap">
+                <LocationIcon />
+              </span>
               <span>
                 {ORGANIZATION_LOCATION.street}, {ORGANIZATION_LOCATION.locality}
               </span>
             </button>
+
+            <span className="home-contact-footer__divider" aria-hidden="true" />
+
+            <a href="mailto:info@shalva.org.il" className="home-contact-footer__item">
+              <span className="home-contact-footer__icon-wrap">
+                <MailIcon />
+              </span>
+              <span>info@shalva.org.il</span>
+            </a>
           </div>
         </div>
 

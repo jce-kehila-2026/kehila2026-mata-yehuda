@@ -135,6 +135,26 @@ export function isActivityDisplayOpen(data, now = new Date()) {
     return getActivityDisplayStatus(data, now).status === ACTIVITY_DISPLAY_STATUS.OPEN;
 }
 
+export function isActivityRegistrationAvailable(data, now = new Date()) {
+    if (!isActivityDisplayOpen(data, now)) {
+        return false;
+    }
+
+    const maxParticipants = Number(data?.max_participants ?? 0);
+    const currentParticipants = Number(data?.current_participants ?? 0);
+
+    if (
+        Number.isFinite(maxParticipants) &&
+        maxParticipants > 0 &&
+        Number.isFinite(currentParticipants) &&
+        currentParticipants >= maxParticipants
+    ) {
+        return false;
+    }
+
+    return true;
+}
+
 export function matchesActivityOpenFilter(data, openFilter, now = new Date()) {
     if (!openFilter) {
         return true;

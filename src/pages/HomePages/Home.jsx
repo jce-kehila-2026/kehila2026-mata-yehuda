@@ -1,5 +1,5 @@
 import { useEffect, useState } from "react";
-import { useNavigate } from "react-router-dom";
+import { useLocation, useNavigate } from "react-router-dom";
 import ProgramCard from "../../components/Homecomponents/ProgramCard";
 import { getAllPrograms } from "../../services/HomeServices/programService";
 import RequestBox from "../../components/Homecomponents/RequestBox";
@@ -9,6 +9,7 @@ import ContactFooter from "../../components/Homecomponents/ContactFooter";
 import DayCenterRegisterForm from "../../components/Homecomponents/DayCenterRegisterForm";
 import VolunteerForm from "../../components/Homecomponents/VolunteerForm";
 import ProgramRegistrationForm from "../../components/Homecomponents/ProgramRegistrationForm";
+import { scrollToHomeSection } from "../../utils/homeSectionScroll";
 
 import "../../styles/HomeStyle/Home.css";
 import "../../styles/HomeStyle/ProgramCard.css";
@@ -23,22 +24,9 @@ const HOME_PROGRAM_TITLES = {
 
 const PROGRAMS_PAGE_SIZE = 3;
 
-function scrollToSection(sectionId) {
-  const element = document.getElementById(sectionId);
-  if (!element) {
-    return;
-  }
-
-  element.scrollIntoView({ behavior: "smooth", block: "start" });
-  element.classList.add("section-highlight");
-
-  window.setTimeout(() => {
-    element.classList.remove("section-highlight");
-  }, 2000);
-}
-
 function Home() {
   const navigate = useNavigate();
+  const location = useLocation();
   const [programs, setPrograms] = useState([]);
   const [loading, setLoading] = useState(true);
   const [showDayCenterForm, setShowDayCenterForm] = useState(false);
@@ -68,18 +56,30 @@ function Home() {
   }, []);
 
   useEffect(() => {
-    const hash = window.location.hash.replace("#", "");
-    if (!hash) {
+    const hash = location.hash.replace("#", "");
+    if (!hash || loading) {
       return undefined;
     }
 
-    const timer = window.setTimeout(() => {
-      scrollToSection(hash);
-      window.history.replaceState(null, "", window.location.pathname);
-    }, 150);
+    let cancelled = false;
 
-    return () => window.clearTimeout(timer);
-  }, []);
+    const runScroll = () => {
+      if (cancelled) {
+        return;
+      }
+
+      if (scrollToHomeSection(hash)) {
+        window.history.replaceState(null, "", location.pathname);
+      }
+    };
+
+    const timer = window.setTimeout(runScroll, 120);
+
+    return () => {
+      cancelled = true;
+      window.clearTimeout(timer);
+    };
+  }, [location.pathname, location.hash, loading]);
 
   const visiblePrograms = programs.slice(0, visibleProgramCount);
   const hasMorePrograms = programs.length > PROGRAMS_PAGE_SIZE;
@@ -98,7 +98,11 @@ function Home() {
   function renderProgramButtons(program) {
     if (program.id === "supportive_community") {
       return (
-        <button onClick={() => navigate("/supportive-community")}>
+        <button
+          type="button"
+          className="program-card__btn program-card__btn--primary"
+          onClick={() => navigate("/supportive-community")}
+        >
           מידע נוסף והרשמה
         </button>
       );
@@ -106,18 +110,29 @@ function Home() {
 
     if (program.id === "60_plus_minus") {
       return (
-        <button onClick={() => navigate("/plus60")}>הצג פעילויות</button>
+        <button
+          type="button"
+          className="program-card__btn program-card__btn--primary"
+          onClick={() => navigate("/plus60")}
+        >
+          הצג פעילויות
+        </button>
       );
     }
 
     if (program.id === "day_center") {
       return (
         <div className="program-card__day-actions">
-          <button onClick={() => navigate("/day-center")}>
+          <button
+            type="button"
+            className="program-card__btn program-card__btn--primary"
+            onClick={() => navigate("/day-center")}
+          >
             מידע נוסף והרשמה
           </button>
           <button
-            className="volunteer-btn"
+            type="button"
+            className="program-card__btn program-card__btn--volunteer"
             onClick={() => setShowVolunteerForm(true)}
           >
             התנדב
@@ -126,76 +141,120 @@ function Home() {
       );
     }
 
-    return <button onClick={() => setSelectedProgram(program)}>הרשמה</button>;
+    return (
+      <button
+        type="button"
+        className="program-card__btn program-card__btn--primary"
+        onClick={() => setSelectedProgram(program)}
+      >
+        הרשמה
+      </button>
+    );
   }
 
   return (
     <div className="home-page">
       <HomeNavbar />
 
-      <section className="hero-section">
-        <div className="hero-overlay">
-          <h1>הבית החם של ותיקי מטה יהודה</h1>
-          <p>
-            אנחנו כאן כדי להעניק לכם קהילה תומכת,
-            פעילויות עשירות וביטחון אישי.
-          </p>
-        </div>
-      </section>
+      <div className="home-hero-block">
+        <section className="hero-section">
+          <div className="hero-overlay">
+            <h1>הבית החם של ותיקי מטה יהודה</h1>
+            <p>
+              אנחנו כאן כדי להעניק לכם קהילה תומכת,
+              פעילויות עשירות וביטחון אישי.
+            </p>
+          </div>
+        </section>
 
-      <header id="services" className="home-services-header">
-        <div className="home-services-header__divider">
-          <span className="home-services-header__line" aria-hidden="true" />
-          <h2 className="home-services-header__title">השירותים שלנו</h2>
-          <span className="home-services-header__line" aria-hidden="true" />
-        </div>
-      </header>
-
-      {loading && <p>טוען תוכניות...</p>}
-
-      <div className="programs-grid">
-        {visiblePrograms.map((program) => (
-          <ProgramCard
-            key={program.id}
-            program={{
-              ...program,
-              title: HOME_PROGRAM_TITLES[program.id] || program.title,
-            }}
-            buttons={renderProgramButtons(program)}
+        <div className="home-hero-block__transition" aria-hidden="true">
+          <svg viewBox="0 0 1440 56" preserveAspectRatio="none" xmlns="http://www.w3.org/2000/svg">
+            <path d="M0,56 L0,40 C180,18 360,46 540,30 C720,14 900,42 1080,26 C1260,10 1320,34 1440,20 L1440,56 Z" />
+          </svg>
+          <img
+            src="/images/minitree.png"
+            alt=""
+            className="home-hero-block__minitree"
           />
-        ))}
+        </div>
       </div>
 
-      {hasMorePrograms && (
-        <div className="home-programs-actions">
-          {canShowMorePrograms ? (
-            <button
-              type="button"
-              className="home-programs-more-btn"
-              onClick={handleShowMorePrograms}
-              aria-label="הצג עוד תוכניות"
-            >
-              ↓
-            </button>
-          ) : (
-            <button
-              type="button"
-              className="home-programs-more-btn"
-              onClick={handleShowLessPrograms}
-              aria-label="הצג פחות תוכניות"
-            >
-              ↑
-            </button>
-          )}
+      <section
+        id="services"
+        className="home-services-section home-section-anchor"
+        aria-labelledby="home-services-title"
+      >
+        <header className="home-services-header home-services-section__header">
+          <div className="home-services-header__divider">
+            <span className="home-services-header__line" aria-hidden="true" />
+            <div className="home-services-header__core">
+              <img
+                src="/images/minitree.png"
+                alt=""
+                className="home-services-header__leaf"
+                aria-hidden="true"
+              />
+              <h2 id="home-services-title" className="home-services-header__title">
+                השירותים שלנו
+              </h2>
+              <img
+                src="/images/minitree.png"
+                alt=""
+                className="home-services-header__leaf home-services-header__leaf--flip"
+                aria-hidden="true"
+              />
+            </div>
+            <span className="home-services-header__line" aria-hidden="true" />
+          </div>
+        </header>
+
+        {loading && <p className="home-loading-text">טוען תוכניות...</p>}
+
+        <div className="programs-grid">
+          {visiblePrograms.map((program) => (
+            <ProgramCard
+              key={program.id}
+              program={{
+                ...program,
+                title: HOME_PROGRAM_TITLES[program.id] || program.title,
+              }}
+              buttons={renderProgramButtons(program)}
+            />
+          ))}
         </div>
-      )}
+
+        {hasMorePrograms && (
+          <div className="home-programs-actions">
+            {canShowMorePrograms ? (
+              <button
+                type="button"
+                className="home-programs-more-btn"
+                onClick={handleShowMorePrograms}
+                aria-label="הצג עוד תוכניות"
+              >
+                ↓
+              </button>
+            ) : (
+              <button
+                type="button"
+                className="home-programs-more-btn"
+                onClick={handleShowLessPrograms}
+                aria-label="הצג פחות תוכניות"
+              >
+                ↑
+              </button>
+            )}
+          </div>
+        )}
+
+      </section>
 
       <div className="home-action-cards">
-        <RequestBox />
-        <div className="home-donations-landscape">
-          <div id="donations" className="home-donations-section">
-            <DonationBox />
-          </div>
+        <div id="requests" className="home-requests-wrap home-section-anchor">
+          <RequestBox />
+        </div>
+        <div id="donations" className="home-donations-wrap home-section-anchor">
+          <DonationBox />
         </div>
       </div>
 

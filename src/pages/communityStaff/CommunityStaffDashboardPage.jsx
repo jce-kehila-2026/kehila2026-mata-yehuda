@@ -122,6 +122,20 @@ function CommunityStaffDashboardPage() {
 
     <div className="community-staff-dashboard" dir="rtl">
 
+      <img
+        src="/images/minitree.png"
+        alt=""
+        aria-hidden="true"
+        className="community-staff-dashboard__decoration community-staff-dashboard__decoration--top-right"
+      />
+
+      <img
+        src="/images/minitree.png"
+        alt=""
+        aria-hidden="true"
+        className="community-staff-dashboard__decoration community-staff-dashboard__decoration--bottom-left"
+      />
+
       <div className="community-staff-dashboard__container">
 
         <header className="community-staff-dashboard__header">
@@ -183,30 +197,6 @@ function CommunityStaffDashboardPage() {
           onNavigate={navigate}
 
           onUnavailableClick={() => showInfo("המודול עדיין לא זמין")}
-
-        />
-
-      </div>
-
-
-
-      <div className="community-staff-dashboard__landscape-wrap">
-
-        <img
-
-          className="community-staff-dashboard__landscape-image"
-
-          src="/images/community-staff-dashboard/landscape-footer.png"
-
-          alt=""
-
-          aria-hidden="true"
-
-          loading="lazy"
-
-          decoding="async"
-
-          draggable="false"
 
         />
 

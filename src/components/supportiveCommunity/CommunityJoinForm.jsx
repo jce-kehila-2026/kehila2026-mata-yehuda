@@ -1,11 +1,16 @@
 import { useState } from "react";
+import { Link } from "react-router-dom";
 import HelpServicesSelector from "./HelpServicesSelector";
 import LanguagesSelector from "./LanguagesSelector";
-import SupportiveCommunityBackNav from "./SupportiveCommunityBackNav";
 
 import "../../styles/supportive community/CommunityJoinPage.css";
 import "../../styles/supportive community/CommunityJoinForm.css";
 import { saveCommunityJoinRequest } from "../../services/supportive community/supportiveCommunityService";
+import {
+  INVALID_ADDRESS_MESSAGE,
+  isValidAddress,
+  nameContainsNumber,
+} from "../../utils/nameValidation";
 
 const VALIDATION_SUMMARY = "יש לתקן את השדות המסומנים באדום";
 
@@ -14,6 +19,8 @@ function validateJoinForm(form) {
 
   if (!form.participantName.trim()) {
     errors.participantName = "שגיאה: נא למלא את כל שדות החובה";
+  } else if (nameContainsNumber(form.participantName)) {
+    errors.participantName = "השם אינו יכול להכיל מספרים";
   }
 
   if (!form.participantId.trim()) {
@@ -24,16 +31,14 @@ function validateJoinForm(form) {
 
   if (!form.phone.trim()) {
     errors.phone = "שגיאה: נא למלא את כל שדות החובה";
-  } else if (!/^05\d{8}$/.test(form.phone)) {
-    errors.phone = "מספר טלפון חייב להיות מספר תקין בן 10 ספרות";
+  } else if (!/^0\d{8,9}$/.test(form.phone)) {
+    errors.phone = "מספר הטלפון חייב להתחיל ב-0 ולהכיל 9 או 10 ספרות";
   }
 
   if (!form.address.trim()) {
     errors.address = "שגיאה: נא למלא את כל שדות החובה";
-  }
-
-  if (form.services.length === 0) {
-    errors.services = "שגיאה: נא לבחור לפחות סוג עזרה אחד";
+  } else if (!isValidAddress(form.address)) {
+    errors.address = INVALID_ADDRESS_MESSAGE;
   }
 
   if (form.services.includes("other") && !form.otherService.trim()) {
@@ -120,21 +125,52 @@ function CommunityJoinForm() {
   };
 
   return (
-    <div className="supportive-community-page">
-      <SupportiveCommunityBackNav />
+    <div className="community-join-staff-page list-mgmt-page" dir="rtl">
+      <img
+        src="/images/minitree.png"
+        alt=""
+        aria-hidden="true"
+        className="list-mgmt-decoration list-mgmt-decoration--top"
+      />
+      <img
+        src="/images/minitree.png"
+        alt=""
+        aria-hidden="true"
+        className="list-mgmt-decoration list-mgmt-decoration--bottom"
+      />
 
-      <section className="community-hero">
-        <h1>בקשת הצטרפות לקהילה תומכת</h1>
-        <p>מלאו את הפרטים ונחזור אליכם בהקדם</p>
-      </section>
+      <div className="staff-container">
+        <header className="list-mgmt-page__header">
+          <div className="list-mgmt-page__header-main">
+            <h1 className="list-mgmt-page__title">בקשת הצטרפות לקהילה תומכת</h1>
+            <p className="list-mgmt-page__subtitle">
+              מלאו את הפרטים ונחזור אליכם בהקדם להשלמת ההרשמה
+            </p>
+          </div>
+          <div className="list-mgmt-page__actions">
+            <Link to="/supportive-community" className="staff-back-button">
+              <span className="staff-back-button__icon" aria-hidden="true">
+                →
+              </span>
+              חזרה לקהילה תומכת
+            </Link>
+          </div>
+        </header>
 
-      <form className="community-join-form" onSubmit={handleSubmit} noValidate>
-        <section className="form-section">
-          <h2>פרטים אישיים</h2>
-          <p className="form-hint">כל השדות בשלב זה הם שדות חובה</p>
+        <form
+          className="community-join-staff-form community-join-form"
+          onSubmit={handleSubmit}
+          noValidate
+        >
+          <div className="community-join-staff-card">
+            <section className="form-section">
+              <div className="community-join-staff-section__head">
+                <h2>פרטים אישיים</h2>
+                <p className="form-hint">כל השדות בשלב זה הם שדות חובה</p>
+              </div>
 
-          <div className="form-fields">
-            <div className="form-field">
+              <div className="form-fields">
+                <div className="form-field">
               <label htmlFor="participantName">
                 שם מלא <span className="required">*</span>
               </label>
@@ -244,7 +280,9 @@ function CommunityJoinForm() {
         <section className="form-section">
           <div
             className={
-              fieldErrors.services ? "form-selector-wrapper form-selector--invalid" : "form-selector-wrapper"
+              fieldErrors.services
+                ? "form-selector-wrapper help-services-wrapper form-selector--invalid"
+                : "form-selector-wrapper help-services-wrapper"
             }
           >
             <HelpServicesSelector
@@ -312,18 +350,20 @@ function CommunityJoinForm() {
           </div>
         </section>
 
-        <div className="form-submit">
-          {message.text && (
-            <div
-              className={`form-message form-message--${message.type}`}
-              role={message.type === "error" ? "alert" : "status"}
-            >
-              {message.text}
+            <div className="community-join-staff-submit form-submit">
+              {message.text && (
+                <div
+                  className={`form-message form-message--${message.type}`}
+                  role={message.type === "error" ? "alert" : "status"}
+                >
+                  {message.text}
+                </div>
+              )}
+              <button type="submit">שליחת בקשה</button>
             </div>
-          )}
-          <button type="submit">שליחת בקשה</button>
-        </div>
-      </form>
+          </div>
+        </form>
+      </div>
     </div>
   );
 }

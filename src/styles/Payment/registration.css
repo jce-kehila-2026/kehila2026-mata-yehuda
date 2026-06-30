@@ -1,15 +1,15 @@
 @import url("https://fonts.googleapis.com/css2?family=Heebo:wght@400;500;600;700&display=swap");
 
 .supportive-community-page {
-  --color-bg: #ffffff;
-  --color-primary: #2d7d46;
-  --color-primary-hover: #236b38;
+  --color-bg: #fcf9f8;
+  --color-primary: #006d37;
+  --color-primary-hover: #005a2d;
   --color-accent-light: #faf4ec;
   --color-border: #e5c29f;
-  --color-card-border: #e8e2dc;
-  --color-text: #1f1f1f;
-  --color-muted: #444444;
-  --radius: 18px;
+  --color-card-border: #eae7e7;
+  --color-text: #1c1b1b;
+  --color-muted: #636363;
+  --radius: 12px;
   --max-width: 760px;
 
   font-family: "Heebo", system-ui, sans-serif;
@@ -851,33 +851,28 @@
   gap: 0.75rem;
   padding: 1rem 1.1rem;
   border-radius: 0.5rem;
-  border: 1px solid #bccabc;
-  background: #f6f3f2;
+  border: 1px solid var(--color-card-border);
+  background: #fafafa;
   transition:
     border-color 0.15s ease,
     background 0.15s ease;
 }
 
+.supportive-community-page .payment-flow-shell .lookup-registration-item {
+  background: #ffffff;
+}
+
 .supportive-community-page .lookup-registration-item:hover {
-  border-color: rgba(0, 109, 55, 0.45);
-  background: rgba(0, 109, 55, 0.04);
+  border-color: rgba(0, 109, 55, 0.35);
+  background: rgba(0, 109, 55, 0.03);
 }
 
 .supportive-community-page .lookup-registration-cancel-btn {
   width: 100%;
   max-width: 100%;
-  padding: 0.65rem 1rem;
-  font-size: 0.875rem;
-  font-weight: 700;
-  color: #ffffff;
-  background: var(--color-primary);
-  border: none;
-  border-radius: 0.5rem;
-  cursor: pointer;
-}
-
-.supportive-community-page .lookup-registration-cancel-btn:hover:not(:disabled) {
-  opacity: 0.92;
+  margin-top: 0;
+  min-height: 48px;
+  font-size: 0.95rem;
 }
 
 .supportive-community-page .lookup-registration-meta {
@@ -949,4 +944,357 @@
 
 .supportive-community-page .registration-flow.community-section {
   padding-top: 1.2rem;
+}
+
+/* Payment flow card layout */
+.supportive-community-page .payment-flow-page {
+  width: 100%;
+  padding: clamp(1.25rem, 4vw, 2.5rem) var(--app-padding-x, 1rem);
+  box-sizing: border-box;
+  display: flex;
+  justify-content: center;
+  align-items: flex-start;
+  min-height: min(80vh, 720px);
+}
+
+.supportive-community-page .payment-flow-shell {
+  position: relative;
+  width: 100%;
+  max-width: 32rem;
+  background: #ffffff;
+  border: 1px solid var(--color-card-border);
+  border-radius: 0.75rem;
+  padding: clamp(1.5rem, 4vw, 2.5rem) clamp(1.25rem, 4vw, 2rem);
+  box-shadow: 0 1px 3px rgba(28, 27, 27, 0.06);
+  box-sizing: border-box;
+  overflow: hidden;
+}
+
+.supportive-community-page .payment-flow-shell__content {
+  position: relative;
+  z-index: 2;
+}
+
+/* Action buttons with optional leaf on each button corner */
+.supportive-community-page .payment-flow-actions-wrap {
+  margin-top: 0.75rem;
+}
+
+.supportive-community-page .payment-flow-actions {
+  display: flex;
+  flex-direction: column;
+  gap: 0.75rem;
+  margin-top: 0;
+  padding: 0;
+}
+
+.supportive-community-page .payment-flow-action-decor {
+  position: relative;
+  width: 100%;
+  min-width: 0;
+}
+
+.supportive-community-page .payment-flow-action-decor__leaf {
+  position: absolute;
+  bottom: 0;
+  inset-inline-start: 0;
+  width: clamp(56px, 14vw, 88px);
+  height: auto;
+  object-fit: contain;
+  object-position: left bottom;
+  pointer-events: none;
+  z-index: 2;
+  transform: translate(8%, 22%);
+  opacity: 0.95;
+}
+
+.supportive-community-page .payment-flow-action-decor--both-leaves .payment-flow-action-decor__leaf {
+  width: clamp(64px, 16vw, 96px);
+  transform: translate(6%, 20%);
+}
+
+.supportive-community-page .payment-flow-action-decor__leaf--start {
+  inset-inline-start: 0;
+  inset-inline-end: auto;
+}
+
+.supportive-community-page .payment-flow-action-decor__leaf--end {
+  inset-inline-start: auto;
+  inset-inline-end: 0;
+}
+
+.supportive-community-page .payment-flow-action-decor__leaf--flip {
+  inset-inline-start: auto;
+  inset-inline-end: 0;
+  object-position: right bottom;
+  transform: scaleX(-1) translate(12%, 20%);
+}
+
+.supportive-community-page
+  .payment-flow-action-decor--both-leaves
+  .payment-flow-action-decor__leaf--flip {
+  transform: scaleX(-1) translate(12%, 20%);
+}
+
+.supportive-community-page .payment-flow-action-decor .primary-btn,
+.supportive-community-page .payment-flow-action-decor .secondary-btn,
+.supportive-community-page .payment-flow-action-decor button[type="submit"] {
+  position: relative;
+  z-index: 1;
+  width: 100%;
+}
+
+.supportive-community-page .payment-flow-action-decor--split .payment-flow-action-decor__leaf {
+  width: clamp(48px, 12vw, 72px);
+  transform: translate(12%, 20%);
+}
+
+.supportive-community-page
+  .payment-flow-action-decor--split
+  .payment-flow-action-decor__leaf--flip {
+  transform: scaleX(-1) translate(12%, 20%);
+}
+
+.supportive-community-page .payment-flow-btn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.35rem;
+  font-size: 1rem;
+  font-weight: 700;
+  min-height: 52px;
+  border-radius: 0.5rem;
+  box-shadow: 0 1px 2px rgba(0, 0, 0, 0.06);
+}
+
+/* Step header — title with sprigs + extending lines */
+.supportive-community-page .payment-step-header {
+  text-align: center;
+  margin-bottom: 1.5rem;
+}
+
+.supportive-community-page .payment-step-header__title-row {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: clamp(0.35rem, 1.5vw, 0.55rem);
+  width: 100%;
+  margin-bottom: 0.65rem;
+}
+
+.supportive-community-page .payment-step-header__title-row--plain {
+  gap: 0;
+}
+
+.supportive-community-page .payment-step-header__title-row--plain .payment-step-header__title {
+  width: 100%;
+  text-align: center;
+}
+
+.supportive-community-page .payment-step-header__ornament {
+  flex: 1 1 0;
+  display: flex;
+  align-items: center;
+  min-width: 0;
+}
+
+.supportive-community-page .payment-step-header__line {
+  flex: 1 1 auto;
+  height: 2px;
+  min-width: 1.25rem;
+  background: #8fb996;
+  border-radius: 999px;
+  opacity: 0.85;
+}
+
+.supportive-community-page .payment-step-header__sprig {
+  flex-shrink: 0;
+  width: clamp(48px, 13vw, 72px);
+  height: auto;
+  object-fit: contain;
+}
+
+.supportive-community-page .payment-step-header__sprig--flipped {
+  transform: scaleX(-1);
+}
+
+.supportive-community-page .payment-step-header__title {
+  flex-shrink: 0;
+  margin: 0;
+  font-family: "Manrope", "Heebo", system-ui, sans-serif;
+  font-size: clamp(1.25rem, 3.5vw, 1.5rem);
+  font-weight: 800;
+  color: var(--color-primary);
+  line-height: 1.3;
+  white-space: nowrap;
+}
+
+.supportive-community-page .payment-step-header__hint {
+  margin: 0 auto;
+  max-width: 22rem;
+  font-size: 0.95rem;
+  line-height: 1.65;
+  color: var(--color-muted);
+  text-align: center;
+}
+
+/* Input with icon — side-by-side layout */
+.supportive-community-page .payment-input-wrap {
+  display: flex;
+  align-items: stretch;
+  border: 1px solid #bccabc;
+  border-radius: 0.5rem;
+  background: #ffffff;
+  overflow: hidden;
+  transition:
+    border-color 0.15s ease,
+    box-shadow 0.15s ease;
+}
+
+.supportive-community-page .payment-input-wrap:focus-within {
+  border-color: var(--color-primary);
+  box-shadow: 0 0 0 1px var(--color-primary);
+}
+
+.supportive-community-page .payment-input-icon {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+  width: 3rem;
+  font-size: 1.35rem;
+  color: #9ca3af;
+  background: #fafafa;
+  border-inline-start: 1px solid #e5e7eb;
+}
+
+.supportive-community-page .payment-input,
+.supportive-community-page .payment-form .payment-input {
+  flex: 1 1 auto;
+  min-width: 0;
+  box-sizing: border-box;
+  padding: 0.75rem 1rem;
+  font-size: 1rem;
+  font-family: "Heebo", system-ui, sans-serif;
+  border: none;
+  border-radius: 0;
+  text-align: right;
+  direction: ltr;
+  color: var(--color-text);
+  background: transparent;
+}
+
+.supportive-community-page .payment-input::placeholder {
+  color: #9ca3af;
+  opacity: 1;
+}
+
+.supportive-community-page .payment-input:focus {
+  outline: none;
+}
+
+/* Payment flow actions */
+.supportive-community-page .payment-flow-actions--split {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 0.75rem;
+}
+
+.supportive-community-page .payment-flow-action-decor--split.payment-flow-action-decor--primary,
+.supportive-community-page .payment-flow-actions--split .payment-flow-action-decor--primary {
+  grid-column: 2;
+}
+
+.supportive-community-page .payment-flow-action-decor--split.payment-flow-action-decor--secondary,
+.supportive-community-page .payment-flow-actions--split .payment-flow-action-decor--secondary {
+  grid-column: 1;
+}
+
+.supportive-community-page .payment-flow-actions--split .primary-btn,
+.supportive-community-page .payment-flow-actions--split button[type="submit"] {
+  grid-column: auto;
+}
+
+.supportive-community-page .payment-flow-actions--split .secondary-btn {
+  grid-column: auto;
+}
+
+.supportive-community-page .payment-flow-btn__chevron {
+  font-size: 1.35rem;
+  line-height: 1;
+  font-weight: 400;
+}
+
+.supportive-community-page .payment-flow-page .registration-stepper {
+  margin-bottom: 1.75rem;
+  padding: 0;
+  max-width: none;
+}
+
+.supportive-community-page .payment-flow-page .registration-stepper__marker {
+  width: 36px;
+  height: 36px;
+  font-size: 0.9rem;
+  border-width: 2px;
+  border-color: #d1d5db;
+  color: #6b7280;
+  background: #fff;
+}
+
+.supportive-community-page .payment-flow-page .registration-stepper__item--current .registration-stepper__marker {
+  border-color: var(--color-primary);
+  color: var(--color-primary);
+  box-shadow: none;
+  background: #fff;
+}
+
+.supportive-community-page .payment-flow-page .registration-stepper__item--complete .registration-stepper__marker {
+  border-color: var(--color-primary);
+  background: var(--color-primary);
+  color: #fff;
+}
+
+.supportive-community-page .payment-flow-page .registration-stepper__label {
+  font-size: 0.7rem;
+  color: #9ca3af;
+}
+
+.supportive-community-page .payment-flow-page .registration-stepper__item--current .registration-stepper__label {
+  color: var(--color-text);
+  font-weight: 600;
+}
+
+.supportive-community-page .payment-flow-page .registration-stepper__item--complete .registration-stepper__label {
+  color: var(--color-primary);
+}
+
+.supportive-community-page .payment-flow-page .registration-stepper__item:not(:last-child)::after {
+  top: 18px;
+  background: #e5e7eb;
+  height: 2px;
+}
+
+.supportive-community-page .payment-flow-page .registration-stepper__item--complete:not(:last-child)::after {
+  background: var(--color-primary);
+}
+
+.supportive-community-page .payment-flow-page .payment-form {
+  margin-top: 0;
+}
+
+.supportive-community-page .payment-flow-page .form-label {
+  font-size: 0.875rem;
+  font-weight: 600;
+  color: var(--color-text);
+  margin-bottom: 0.15rem;
+}
+
+.supportive-community-page .payment-flow-page .form-field {
+  margin-bottom: 0.25rem;
+}
+
+.supportive-community-page .payment-flow-page .primary-btn,
+.supportive-community-page .payment-flow-page .secondary-btn {
+  width: 100%;
+  margin-top: 0;
 }

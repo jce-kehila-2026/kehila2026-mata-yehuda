@@ -1,9 +1,7 @@
 import { useCallback, useMemo } from "react";
-import { HandCoins, Plus } from "lucide-react";
+import { HandCoins } from "lucide-react";
 import AdminDataTable from "../admin/AdminDataTable";
 import AdminListEmptyState from "../admin/AdminListEmptyState";
-import AdminListPagination from "../admin/AdminListPagination";
-import AdminListSummary from "../admin/AdminListSummary";
 import AdminListToolbar from "../admin/AdminListToolbar";
 import AdminResponsiveList from "../admin/AdminResponsiveList";
 import {
@@ -56,6 +54,7 @@ function DonationTable({
     loading = false,
     error = "",
     actionMessage = "",
+    hasPageFilters = false,
     onAddDonation,
     onEditDonation,
     onDeleteDonation
@@ -96,13 +95,17 @@ function DonationTable({
                 <AdminListEmptyState
                     icon={HandCoins}
                     title="לא נמצאו תוצאות"
-                    message="נסו לשנות את החיפוש כדי למצוא תרומות אחרות."
+                    message={
+                        hasPageFilters
+                            ? "נסו לשנות את הסינון כדי למצוא תרומות אחרות."
+                            : "נסו לשנות את החיפוש כדי למצוא תרומות אחרות."
+                    }
                 />
             );
         }
 
         return null;
-    }, [loading, donations.length, list.totalFiltered, onAddDonation]);
+    }, [loading, donations.length, hasPageFilters, list.totalFiltered, onAddDonation]);
 
     function renderDonationActions(donation) {
         return (
@@ -159,26 +162,7 @@ function DonationTable({
 
     return (
         <div className="donations-table-section admin-list-section">
-            <div className="admin-list-header admin-list-header--split">
-                <h2 className="admin-list-header__title">רשימת תרומות</h2>
-                {onAddDonation ? (
-                    <button
-                        type="button"
-                        className="staff-button staff-button--small admin-list-header__action admin-list-header__action--compact"
-                        onClick={onAddDonation}
-                    >
-                        <Plus
-                            className="admin-list-header__action-icon"
-                            strokeWidth={2.25}
-                            aria-hidden="true"
-                        />
-                        <span>הוסף תרומה</span>
-                    </button>
-                ) : null}
-            </div>
-
             <AdminListToolbar
-                layout="staff"
                 searchId="donations-search"
                 searchLabel="חיפוש"
                 searchPlaceholder="שם תורם או טלפון"
@@ -187,15 +171,7 @@ function DonationTable({
                 pageSize={list.pageSize}
                 onPageSizeChange={list.setPageSize}
                 pageSizeLabel="הצג בעמוד"
-            />
-
-            <AdminListSummary
-                totalCount={list.totalCount}
-                totalFiltered={list.totalFiltered}
-                pageCount={list.pageCount}
-                page={list.page}
-                totalPages={list.totalPages}
-                showAll={list.showAll}
+                pageSizeOptions={[5, 10, 20]}
             />
 
             {error ? (
@@ -211,7 +187,8 @@ function DonationTable({
 
             {!loading && list.totalFiltered > 0 ? (
                 <>
-                    <AdminResponsiveList
+                    <div className="list-mgmt-list">
+                        <AdminResponsiveList
                         desktopTable={
                             <AdminDataTable
                                 ariaLabel="טבלת תרומות"
@@ -254,13 +231,30 @@ function DonationTable({
                                 {list.pageItems.map(renderMobileCard)}
                             </div>
                         }
-                    />
+                        />
+                    </div>
 
-                    <AdminListPagination
-                        page={list.page}
-                        totalPages={list.totalPages}
-                        onPageChange={list.setPage}
-                    />
+                    <div className="list-mgmt-pagination">
+                        <button
+                            type="button"
+                            className="list-mgmt-pagination__btn"
+                            onClick={() => list.setPage(list.page - 1)}
+                            disabled={list.page <= 1}
+                        >
+                            הקודם
+                        </button>
+                        <span className="list-mgmt-pagination__label">
+                            עמוד {list.page} מתוך {list.totalPages}
+                        </span>
+                        <button
+                            type="button"
+                            className="list-mgmt-pagination__btn"
+                            onClick={() => list.setPage(list.page + 1)}
+                            disabled={list.page >= list.totalPages}
+                        >
+                            הבא
+                        </button>
+                    </div>
                 </>
             ) : null}
         </div>

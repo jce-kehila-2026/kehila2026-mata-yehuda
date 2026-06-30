@@ -5,8 +5,6 @@ import StaffListStats from "./StaffListStats";
 import StaffStatusBadge from "./StaffStatusBadge";
 import AdminDataTable from "../admin/AdminDataTable";
 import AdminListEmptyState from "../admin/AdminListEmptyState";
-import AdminListPagination from "../admin/AdminListPagination";
-import AdminListSummary from "../admin/AdminListSummary";
 import AdminListToolbar from "../admin/AdminListToolbar";
 import AdminResponsiveList from "../admin/AdminResponsiveList";
 import {
@@ -38,7 +36,7 @@ const STAFF_COLUMNS = [
     { key: "actions", label: "פעולות" }
 ];
 
-function StaffList({ refreshKey = 0, onEditStaff, onAddStaff }) {
+function StaffList({ refreshKey = 0, onEditStaff, onAddStaff, onBack }) {
     const [sourceItems, setSourceItems] = useState([]);
     const [totalCount, setTotalCount] = useState(0);
     const [loading, setLoading] = useState(true);
@@ -189,23 +187,51 @@ function StaffList({ refreshKey = 0, onEditStaff, onAddStaff }) {
 
     return (
         <div className="staff-list-section admin-list-section admin-list-section--staff">
-            <div className="admin-list-header admin-list-header--split">
-                <h2 className="admin-list-header__title">רשימת אנשי צוות</h2>
-                {onAddStaff ? (
-                    <button
-                        type="button"
-                        className="staff-button staff-button--small admin-list-header__action admin-list-header__action--compact"
-                        onClick={onAddStaff}
-                    >
-                        <Plus
-                            className="admin-list-header__action-icon"
-                            strokeWidth={2.25}
-                            aria-hidden="true"
-                        />
-                        <span>הוספת איש צוות</span>
-                    </button>
-                ) : null}
-            </div>
+            <header className="list-mgmt-page__header">
+                <div className="list-mgmt-page__header-main">
+                    <h2 className="list-mgmt-page__title">רשימת אנשי צוות</h2>
+                    <p className="list-mgmt-page__subtitle">
+                        ניהול, צפייה וחיפוש של כל אנשי הצוות במערכת
+                    </p>
+                </div>
+                <div className="list-mgmt-page__actions">
+                    {onAddStaff ? (
+                        <button
+                            type="button"
+                            className="list-mgmt-page__action"
+                            onClick={onAddStaff}
+                        >
+                            <Plus
+                                className="list-mgmt-page__action-icon"
+                                strokeWidth={2.25}
+                                aria-hidden="true"
+                            />
+                            <span>הוספת איש צוות</span>
+                        </button>
+                    ) : null}
+                    {onBack ? (
+                        <button
+                            type="button"
+                            className="staff-back-button"
+                            onClick={onBack}
+                        >
+                            <span
+                                className="staff-back-button__icon"
+                                aria-hidden="true"
+                            >
+                                →
+                            </span>
+                            <span className="staff-back-button__label">
+                                חזרה ללוח הבקרה
+                            </span>
+                        </button>
+                    ) : null}
+                </div>
+            </header>
+
+            {!loading && filteredStaff.length > 0 ? (
+                <StaffListStats stats={staffStats} />
+            ) : null}
 
             <AdminListToolbar
                 layout="staff"
@@ -218,20 +244,8 @@ function StaffList({ refreshKey = 0, onEditStaff, onAddStaff }) {
                 pageSize={list.pageSize}
                 onPageSizeChange={list.setPageSize}
                 pageSizeLabel="הצג בעמוד"
+                pageSizeOptions={[5, 10, 20]}
             />
-
-            <AdminListSummary
-                totalCount={list.totalCount}
-                totalFiltered={list.totalFiltered}
-                pageCount={list.pageCount}
-                page={list.page}
-                totalPages={list.totalPages}
-                showAll={list.showAll}
-            />
-
-            {!loading && filteredStaff.length > 0 ? (
-                <StaffListStats stats={staffStats} />
-            ) : null}
 
             {error ? (
                 <p className="staff-alert staff-alert--error">{error}</p>
@@ -240,58 +254,78 @@ function StaffList({ refreshKey = 0, onEditStaff, onAddStaff }) {
                 <p className="staff-alert staff-alert--success">{actionMessage}</p>
             ) : null}
 
-            {loading ? <p>טוען...</p> : null}
+            {loading ? (
+                <p className="list-mgmt-loading">טוען...</p>
+            ) : null}
 
             {!loading && emptyState}
 
             {!loading && list.totalFiltered > 0 ? (
                 <>
-                    <AdminResponsiveList
-                        desktopTable={
-                            <AdminDataTable
-                                ariaLabel="טבלת אנשי צוות"
-                                compact
-                                columns={STAFF_COLUMNS}
-                                sortField={list.sortField}
-                                sortDirection={list.sortDirection}
-                                onSort={list.handleSort}
-                                rows={list.pageItems.map((staff) => (
-                                    <tr key={staff.id}>
-                                        <td className="admin-data-table__name-cell">
-                                            {getStaffFullName(staff) || "—"}
-                                        </td>
-                                        <td>{toSafeString(staff.email) || "—"}</td>
-                                        <td className="admin-data-table__numeric">
-                                            {toSafeString(staff.phone) || "—"}
-                                        </td>
-                                        <td>
-                                            <StaffStatusBadge isActive={staff.is_active} />
-                                        </td>
-                                        <td>{renderStaffActions(staff)}</td>
-                                    </tr>
-                                ))}
-                            />
-                        }
-                        mobileCards={
-                            <div className="staff-members-list staff-grid staff-grid--cards">
-                                {list.pageItems.map((staff) => (
-                                    <StaffCard
-                                        key={staff.id}
-                                        staff={staff}
-                                        onEdit={onEditStaff}
-                                        onView={onEditStaff}
-                                        onDisable={handleDisableStaff}
-                                    />
-                                ))}
-                            </div>
-                        }
-                    />
+                    <div className="list-mgmt-list">
+                        <AdminResponsiveList
+                            desktopTable={
+                                <AdminDataTable
+                                    ariaLabel="טבלת אנשי צוות"
+                                    compact
+                                    columns={STAFF_COLUMNS}
+                                    sortField={list.sortField}
+                                    sortDirection={list.sortDirection}
+                                    onSort={list.handleSort}
+                                    rows={list.pageItems.map((staff) => (
+                                        <tr key={staff.id}>
+                                            <td className="admin-data-table__name-cell">
+                                                {getStaffFullName(staff) || "—"}
+                                            </td>
+                                            <td>{toSafeString(staff.email) || "—"}</td>
+                                            <td className="admin-data-table__numeric">
+                                                {toSafeString(staff.phone) || "—"}
+                                            </td>
+                                            <td>
+                                                <StaffStatusBadge isActive={staff.is_active} />
+                                            </td>
+                                            <td>{renderStaffActions(staff)}</td>
+                                        </tr>
+                                    ))}
+                                />
+                            }
+                            mobileCards={
+                                <div className="staff-members-list staff-grid staff-grid--cards">
+                                    {list.pageItems.map((staff) => (
+                                        <StaffCard
+                                            key={staff.id}
+                                            staff={staff}
+                                            onEdit={onEditStaff}
+                                            onView={onEditStaff}
+                                            onDisable={handleDisableStaff}
+                                        />
+                                    ))}
+                                </div>
+                            }
+                        />
+                    </div>
 
-                    <AdminListPagination
-                        page={list.page}
-                        totalPages={list.totalPages}
-                        onPageChange={list.setPage}
-                    />
+                    <div className="list-mgmt-pagination">
+                        <button
+                            type="button"
+                            className="list-mgmt-pagination__btn"
+                            onClick={() => list.setPage(list.page - 1)}
+                            disabled={list.page <= 1}
+                        >
+                            הקודם
+                        </button>
+                        <span className="list-mgmt-pagination__label">
+                            עמוד {list.page} מתוך {list.totalPages}
+                        </span>
+                        <button
+                            type="button"
+                            className="list-mgmt-pagination__btn"
+                            onClick={() => list.setPage(list.page + 1)}
+                            disabled={list.page >= list.totalPages}
+                        >
+                            הבא
+                        </button>
+                    </div>
                 </>
             ) : null}
         </div>
