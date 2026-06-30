@@ -4,6 +4,7 @@ import ActivityCard from "../../components/Homecomponents/ActivityCard";
 import { getAllActivities } from "../../services/HomeServices/activitiesService";
 import { PROGRAM_60_PLUS_MINUS_ID } from "../../utils/staffManegmentUtils/programConstants";
 import { toActivityDate } from "../../utils/staffManegmentUtils/dateUtils";
+import { isActivityDisplayOpen } from "../../utils/staffManegmentUtils/activityStatus";
 import ActivityCalendar from "../../components/Homecomponents/ActivityCalendar";
 
 import "../../styles/HomeStyle/Plus60Page.css";
@@ -87,7 +88,9 @@ function Plus60Page() {
       sortUpcomingActivities(
         activities.filter(
           (activity) =>
-            !isArchivedActivity(activity) && isUpcomingActivity(activity)
+            !isArchivedActivity(activity) &&
+            isUpcomingActivity(activity) &&
+            isActivityDisplayOpen(activity)
         )
       ),
     [activities]
@@ -226,7 +229,7 @@ function Plus60Page() {
           >
             {displayActivities.length === 0 ? (
               <p className="plus60-cards-panel__empty">
-                אין פעילויות קרובות כרגע
+                אין פעילויות פתוחות להרשמה כרגע
               </p>
             ) : (
               <>
@@ -279,7 +282,7 @@ function Plus60Page() {
           <div className="plus60-upcoming-panel">
             {displayActivities.length === 0 ? (
               <p className="plus60-upcoming-panel__empty">
-                אין פעילויות קרובות כרגע
+                אין פעילויות פתוחות להרשמה כרגע
               </p>
             ) : (
               <>
