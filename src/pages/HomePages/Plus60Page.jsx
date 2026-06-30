@@ -4,7 +4,6 @@ import ActivityCard from "../../components/Homecomponents/ActivityCard";
 import { getAllActivities } from "../../services/HomeServices/activitiesService";
 import { PROGRAM_60_PLUS_MINUS_ID } from "../../utils/staffManegmentUtils/programConstants";
 import { toActivityDate } from "../../utils/staffManegmentUtils/dateUtils";
-import { isActivityRegistrationAvailable } from "../../utils/staffManegmentUtils/activityStatus";
 import ActivityCalendar from "../../components/Homecomponents/ActivityCalendar";
 
 import "../../styles/HomeStyle/Plus60Page.css";
@@ -83,30 +82,28 @@ function Plus60Page() {
     loadActivities();
   }, []);
 
-  const activeActivities = useMemo(
+  const displayActivities = useMemo(
     () =>
       sortUpcomingActivities(
         activities.filter(
           (activity) =>
-            !isArchivedActivity(activity) &&
-            isUpcomingActivity(activity) &&
-            isActivityRegistrationAvailable(activity)
+            !isArchivedActivity(activity) && isUpcomingActivity(activity)
         )
       ),
     [activities]
   );
 
-  const visibleCardsActivities = activeActivities.slice(
+  const visibleCardsActivities = displayActivities.slice(
     0,
     cardsVisibleCount
   );
-  const visibleUpcomingActivities = activeActivities.slice(
+  const visibleUpcomingActivities = displayActivities.slice(
     0,
     upcomingVisibleCount
   );
 
   function handleShowMoreCards() {
-    setCardsVisibleCount(activeActivities.length);
+    setCardsVisibleCount(displayActivities.length);
   }
 
   function handleShowLessCards() {
@@ -114,7 +111,7 @@ function Plus60Page() {
   }
 
   function handleShowMoreUpcoming() {
-    setUpcomingVisibleCount(activeActivities.length);
+    setUpcomingVisibleCount(displayActivities.length);
   }
 
   function handleShowLessUpcoming() {
@@ -217,7 +214,7 @@ function Plus60Page() {
             aria-labelledby="plus60-tab-calendar"
             className="plus60-main__panel"
           >
-            <ActivityCalendar activities={activeActivities} />
+            <ActivityCalendar activities={displayActivities} />
           </div>
         ) : (
           <section
@@ -227,9 +224,9 @@ function Plus60Page() {
             className="plus60-main__panel plus60-cards-panel"
             aria-label="תצוגת כרטיסים"
           >
-            {activeActivities.length === 0 ? (
+            {displayActivities.length === 0 ? (
               <p className="plus60-cards-panel__empty">
-                אין פעילויות פתוחות להרשמה כרגע
+                אין פעילויות קרובות כרגע
               </p>
             ) : (
               <>
@@ -243,9 +240,9 @@ function Plus60Page() {
                   ))}
                 </div>
 
-                {activeActivities.length > CARDS_PAGE_SIZE && (
+                {displayActivities.length > CARDS_PAGE_SIZE && (
                   <div className="activities-actions">
-                    {cardsVisibleCount < activeActivities.length ? (
+                    {cardsVisibleCount < displayActivities.length ? (
                       <button
                         type="button"
                         className="show-more-circle"
@@ -280,9 +277,9 @@ function Plus60Page() {
           </header>
 
           <div className="plus60-upcoming-panel">
-            {activeActivities.length === 0 ? (
+            {displayActivities.length === 0 ? (
               <p className="plus60-upcoming-panel__empty">
-                אין פעילויות פתוחות להרשמה כרגע
+                אין פעילויות קרובות כרגע
               </p>
             ) : (
               <>
@@ -296,9 +293,9 @@ function Plus60Page() {
                   ))}
                 </div>
 
-                {activeActivities.length > UPCOMING_PAGE_SIZE && (
+                {displayActivities.length > UPCOMING_PAGE_SIZE && (
                   <div className="activities-actions">
-                    {upcomingVisibleCount < activeActivities.length ? (
+                    {upcomingVisibleCount < displayActivities.length ? (
                       <button
                         type="button"
                         className="show-more-circle"

@@ -6,6 +6,7 @@ import "react-calendar/dist/Calendar.css";
 import { getActivityColorIndex } from "../../utils/HomeUtils/activityColorUtils";
 import { isFreeActivityData } from "../../utils/HomeUtils/activityPricing";
 import { formatActivityPrice } from "../../services/Payment/formatPrice";
+import { toActivityDate } from "../../utils/staffManegmentUtils/dateUtils";
 import ExpandableDescription from "./ExpandableDescription";
 
 const COMPACT_CALENDAR_BREAKPOINT = 1180;
@@ -50,10 +51,8 @@ function ActivityCalendar({ activities }) {
     const selected = formatDate(date);
 
     return activities.filter((activity) => {
-      if (!activity.start_date) return false;
-
-      const activityDate = activity.start_date.toDate();
-      return formatDate(activityDate) === selected;
+      const activityDate = toActivityDate(activity?.start_date);
+      return activityDate ? formatDate(activityDate) === selected : false;
     });
   }
 
@@ -170,8 +169,8 @@ function ActivityCalendar({ activities }) {
         ) : (
           <div className="calendar-sidebar-panel__list">
             {selectedDayActivities.map((activity) => {
-              const start = activity.start_date.toDate();
-              const end = activity.end_date.toDate();
+              const start = toActivityDate(activity.start_date);
+              const end = toActivityDate(activity.end_date);
 
               return (
                 <div
@@ -188,15 +187,19 @@ function ActivityCalendar({ activities }) {
                       <strong>{activity.name}</strong>
                       <p className="calendar-sidebar-card__meta">
                         <span>
-                          {start.toLocaleTimeString("he-IL", {
-                            hour: "2-digit",
-                            minute: "2-digit",
-                          })}
-                          {" - "}
-                          {end.toLocaleTimeString("he-IL", {
-                            hour: "2-digit",
-                            minute: "2-digit",
-                          })}
+                          {start
+                            ? start.toLocaleTimeString("he-IL", {
+                                hour: "2-digit",
+                                minute: "2-digit",
+                              })
+                            : ""}
+                          {start && end ? " - " : ""}
+                          {end
+                            ? end.toLocaleTimeString("he-IL", {
+                                hour: "2-digit",
+                                minute: "2-digit",
+                              })
+                            : ""}
                         </span>
                         <span>{formatActivityPrice(activity.price)}</span>
                       </p>
@@ -308,7 +311,7 @@ function ActivityCalendar({ activities }) {
                   <div className="calendar-tile-events">
                     {dayActivities.slice(0, 3).map((activity) => {
                       const colorIndex = getActivityColorIndex(activity.id);
-                      const start = activity.start_date?.toDate?.();
+                      const start = toActivityDate(activity.start_date);
                       const timeLabel = start
                         ? start.toLocaleTimeString("he-IL", {
                             hour: "2-digit",
