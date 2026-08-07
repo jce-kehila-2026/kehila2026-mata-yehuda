@@ -4,7 +4,8 @@ import {
 } from "../../config/organizationLocation";
 import LocationMapModal from "./LocationMapModal";
 
-const CONTACT_PHONE = "041234567";
+const CONTACT_PHONE = "02-9958684";
+const CONTACT_EMAIL = "A.V.M.Y.1985@GMAIL.COM";
 
 function PhoneIcon() {
   return (
@@ -63,7 +64,7 @@ function ContactFooter() {
           </p>
 
           <a
-            href={`tel:${CONTACT_PHONE}`}
+            href={`tel:${CONTACT_PHONE.replace(/-/g, "")}`}
             className="home-contact-footer__cta"
           >
             <span>צרו קשר</span>
@@ -86,11 +87,11 @@ function ContactFooter() {
 
             <span className="home-contact-footer__divider" aria-hidden="true" />
 
-            <a href="mailto:info@shalva.org.il" className="home-contact-footer__item">
+            <a href={`mailto:${CONTACT_EMAIL}`} className="home-contact-footer__item">
               <span className="home-contact-footer__icon-wrap">
                 <MailIcon />
               </span>
-              <span>info@shalva.org.il</span>
+              <span>{CONTACT_EMAIL}</span>
             </a>
           </div>
         </div>
