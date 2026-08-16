@@ -64,6 +64,47 @@ function Plus60Page() {
   const UPCOMING_PAGE_SIZE = 3;
 
   useEffect(() => {
+      document.title = "פעילויות +60 במטה יהודה | ותיקי מטה יהודה";
+    
+      const description =
+        "פעילויות +60 במטה יהודה – חוגים, סדנאות, מפגשים ואירועים לוותיקים, כולל לוח פעילויות והרשמה.";
+    
+      const metaDescription = document.querySelector('meta[name="description"]');
+    
+      if (metaDescription) {
+        metaDescription.setAttribute("content", description);
+      }
+    
+      const canonical = document.querySelector('link[rel="canonical"]');
+    
+      if (canonical) {
+        canonical.setAttribute(
+          "href",
+          "https://matayehuda-frontend.onrender.com/plus60"
+        );
+      }
+    
+      return () => {
+        document.title =
+          "ותיקי מטה יהודה | קהילה תומכת, מרכז יום ופעילויות";
+    
+        if (metaDescription) {
+          metaDescription.setAttribute(
+            "content",
+            "אתר ותיקי מטה יהודה - קהילה תומכת, מרכז יום, פעילויות, התנדבות, תרומות ושירותים לקהילה."
+          );
+        }
+    
+        if (canonical) {
+          canonical.setAttribute(
+            "href",
+            "https://matayehuda-frontend.onrender.com/"
+          );
+        }
+      };
+    }, []);
+  
+  useEffect(() => {
     async function loadActivities() {
       const data = await getAllActivities();
 
