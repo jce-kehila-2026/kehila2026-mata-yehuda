@@ -1,3 +1,4 @@
+import { useEffect } from "react";
 import HomeNavbar from "../../components/Homecomponents/HomeNavbar";
 
 import "../../styles/HomeStyle/Home.css";
@@ -60,6 +61,46 @@ function PillarIcon({ type }) {
 }
 
 function AboutPage() {
+  useEffect(() => {
+  document.title = "אודות עמותת ותיקי מטה יהודה | ותיקי מטה יהודה";
+
+  const description =
+    "הכירו את עמותת ותיקי מטה יהודה, החזון שלה והשירותים שהיא מעניקה לתושבי המועצה הוותיקים ולבני הגיל השלישי.";
+
+  const metaDescription = document.querySelector('meta[name="description"]');
+
+  if (metaDescription) {
+    metaDescription.setAttribute("content", description);
+  }
+
+  const canonical = document.querySelector('link[rel="canonical"]');
+
+  if (canonical) {
+    canonical.setAttribute(
+      "href",
+      "https://matayehuda-frontend.onrender.com/about"
+    );
+  }
+
+  return () => {
+    document.title =
+      "ותיקי מטה יהודה | קהילה תומכת, מרכז יום ופעילויות";
+
+    if (metaDescription) {
+      metaDescription.setAttribute(
+        "content",
+        "אתר ותיקי מטה יהודה - קהילה תומכת, מרכז יום, פעילויות, התנדבות, תרומות ושירותים לקהילה."
+      );
+    }
+
+    if (canonical) {
+      canonical.setAttribute(
+        "href",
+        "https://matayehuda-frontend.onrender.com/"
+      );
+    }
+  };
+}, []);
   return (
     <div className="home-page about2">
       <HomeNavbar />
