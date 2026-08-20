@@ -204,6 +204,46 @@ function DayCenterPage() {
   const [showScheduleModal, setShowScheduleModal] = useState(false);
 
   useEffect(() => {
+    document.title = "מרכז יום לותיק במטה יהודה | ותיקי מטה יהודה";
+  
+    const description =
+      "מרכז יום לותיק במטה יהודה – מסגרת חברתית וקהילתית עם פעילויות, חוגים, הסעות, ארוחות ושירותים לוותיקים.";
+  
+    let metaDescription = document.querySelector('meta[name="description"]');
+  
+    if (metaDescription) {
+      metaDescription.setAttribute("content", description);
+    }
+
+    const canonical = document.querySelector('link[rel="canonical"]');
+
+    if (canonical) {
+      canonical.setAttribute(
+        "href",
+        "https://matayehuda-frontend.onrender.com/day-center"
+      );
+    }
+  
+    return () => {
+        document.title =
+          "ותיקי מטה יהודה | קהילה תומכת, מרכז יום ופעילויות";
+
+        if (metaDescription) {
+          metaDescription.setAttribute(
+            "content",
+            "אתר ותיקי מטה יהודה - קהילה תומכת, מרכז יום, פעילויות, התנדבות, תרומות ושירותים לקהילה."
+          );
+        }
+        if (canonical) {
+          canonical.setAttribute(
+            "href",
+            "https://matayehuda-frontend.onrender.com/"
+          );
+        }
+      };
+    }, []);
+    
+  useEffect(() => {
     let cancelled = false;
 
     async function loadDayCenterImage() {

@@ -1,5 +1,5 @@
 import { useEffect, useState } from "react";
-import { useNavigate } from "react-router-dom";
+import { useLocation, useNavigate } from "react-router-dom";
 import ProgramCard from "../../components/Homecomponents/ProgramCard";
 import { getAllPrograms } from "../../services/HomeServices/programService";
 import RequestBox from "../../components/Homecomponents/RequestBox";
@@ -26,6 +26,7 @@ const PROGRAMS_PAGE_SIZE = 3;
 
 function Home() {
   const navigate = useNavigate();
+  const location = useLocation();
   const [programs, setPrograms] = useState([]);
   const [loading, setLoading] = useState(true);
   const [showDayCenterForm, setShowDayCenterForm] = useState(false);
@@ -55,18 +56,30 @@ function Home() {
   }, []);
 
   useEffect(() => {
-    const hash = window.location.hash.replace("#", "");
-    if (!hash) {
+    const hash = location.hash.replace("#", "");
+    if (!hash || loading) {
       return undefined;
     }
 
-    const timer = window.setTimeout(() => {
-      scrollToHomeSection(hash);
-      window.history.replaceState(null, "", window.location.pathname);
-    }, 200);
+    let cancelled = false;
 
-    return () => window.clearTimeout(timer);
-  }, []);
+    const runScroll = () => {
+      if (cancelled) {
+        return;
+      }
+
+      if (scrollToHomeSection(hash)) {
+        window.history.replaceState(null, "", location.pathname);
+      }
+    };
+
+    const timer = window.setTimeout(runScroll, 120);
+
+    return () => {
+      cancelled = true;
+      window.clearTimeout(timer);
+    };
+  }, [location.pathname, location.hash, loading]);
 
   const visiblePrograms = programs.slice(0, visibleProgramCount);
   const hasMorePrograms = programs.length > PROGRAMS_PAGE_SIZE;

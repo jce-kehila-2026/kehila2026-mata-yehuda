@@ -1004,13 +1004,13 @@
   object-position: left bottom;
   pointer-events: none;
   z-index: 2;
-  transform: translate(-8%, 22%);
+  transform: translate(8%, 22%);
   opacity: 0.95;
 }
 
 .supportive-community-page .payment-flow-action-decor--both-leaves .payment-flow-action-decor__leaf {
   width: clamp(64px, 16vw, 96px);
-  transform: translate(-6%, 20%);
+  transform: translate(6%, 20%);
 }
 
 .supportive-community-page .payment-flow-action-decor__leaf--start {
@@ -1027,13 +1027,13 @@
   inset-inline-start: auto;
   inset-inline-end: 0;
   object-position: right bottom;
-  transform: scaleX(-1) translate(-6%, 20%);
+  transform: scaleX(-1) translate(12%, 20%);
 }
 
 .supportive-community-page
   .payment-flow-action-decor--both-leaves
   .payment-flow-action-decor__leaf--flip {
-  transform: scaleX(-1) translate(-6%, 20%);
+  transform: scaleX(-1) translate(12%, 20%);
 }
 
 .supportive-community-page .payment-flow-action-decor .primary-btn,
@@ -1046,13 +1046,13 @@
 
 .supportive-community-page .payment-flow-action-decor--split .payment-flow-action-decor__leaf {
   width: clamp(48px, 12vw, 72px);
-  transform: translate(-6%, 18%);
+  transform: translate(12%, 20%);
 }
 
 .supportive-community-page
   .payment-flow-action-decor--split
   .payment-flow-action-decor__leaf--flip {
-  transform: scaleX(-1) translate(-6%, 18%);
+  transform: scaleX(-1) translate(12%, 20%);
 }
 
 .supportive-community-page .payment-flow-btn {

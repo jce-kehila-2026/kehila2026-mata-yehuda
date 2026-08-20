@@ -1,4 +1,5 @@
 import { useNavigate } from "react-router-dom";
+import ExpandableDescription from "./ExpandableDescription";
 import { formatActivityPrice } from "../../services/Payment/formatPrice";
 import { isFreeActivityData } from "../../utils/HomeUtils/activityPricing";
 import { toActivityDate } from "../../utils/staffManegmentUtils/dateUtils";
@@ -92,7 +93,11 @@ function ActivityCard({ activity, programId = "" }) {
           ) : null}
         </div>
 
-        {activity.description ? <p>{activity.description}</p> : null}
+        <ExpandableDescription
+          text={activity.description}
+          textClassName="activity-card__description"
+          toggleClassName="activity-card__desc-toggle"
+        />
 
         <div className="activity-card__footer">
           <button

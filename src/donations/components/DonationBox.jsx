@@ -46,7 +46,13 @@ function DonationBox() {
 
   return (
     <div className="donation-box-section">
-      <div className="donation-box donation-box--home">
+      <form
+        className="donation-box donation-box--home"
+        onSubmit={(event) => {
+          event.preventDefault();
+          handleDonate();
+        }}
+      >
         <div className="donation-box__content">
           <h2 className="donation-box__title">
             <span className="donation-box__heart" aria-hidden="true">
@@ -87,9 +93,8 @@ function DonationBox() {
           )}
 
           <button
-            type="button"
+            type="submit"
             className="donation-box__submit"
-            onClick={handleDonate}
           >
             <span className="donation-box__submit-heart" aria-hidden="true">
               ♡
@@ -105,7 +110,7 @@ function DonationBox() {
             alt=""
           />
         </div>
-      </div>
+      </form>
     </div>
   );
 }

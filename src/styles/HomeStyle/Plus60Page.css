@@ -187,6 +187,7 @@
   text-align: center;
   cursor: pointer;
   transition: background 0.18s ease, color 0.18s ease, border-color 0.18s ease;
+  -webkit-tap-highlight-color: transparent;
 }
 
 .plus60-view-tabs__tab svg {
@@ -200,9 +201,34 @@
   stroke-linejoin: round;
 }
 
-.plus60-view-tabs__tab:hover:not(.plus60-view-tabs__tab--active) {
-  background: #ddd7ce;
-  color: var(--plus60-text);
+.plus60-page .plus60-view-tabs button.plus60-view-tabs__tab:hover,
+.plus60-page button.plus60-view-tabs__tab:hover,
+.plus60-page .plus60-view-tabs button.plus60-view-tabs__tab--active:hover,
+.plus60-page button.plus60-view-tabs__tab--active:hover {
+  background: var(--plus60-green, #2d7d46) !important;
+  color: #ffffff !important;
+  -webkit-text-fill-color: #ffffff !important;
+  border-color: var(--plus60-green, #2d7d46) !important;
+}
+
+.plus60-page .plus60-view-tabs button.plus60-view-tabs__tab:hover svg,
+.plus60-page button.plus60-view-tabs__tab:hover svg {
+  stroke: #ffffff !important;
+}
+
+.plus60-page .plus60-view-tabs button.plus60-view-tabs__tab:active,
+.plus60-page button.plus60-view-tabs__tab:active,
+.plus60-page .plus60-view-tabs button.plus60-view-tabs__tab--active:active,
+.plus60-page button.plus60-view-tabs__tab--active:active {
+  background: var(--plus60-green, #2d7d46) !important;
+  color: #ffffff !important;
+  -webkit-text-fill-color: #ffffff !important;
+  border-color: var(--plus60-green, #2d7d46) !important;
+}
+
+.plus60-page .plus60-view-tabs button.plus60-view-tabs__tab:active svg,
+.plus60-page button.plus60-view-tabs__tab:active svg {
+  stroke: #ffffff !important;
 }
 
 .plus60-view-tabs__tab--active {
