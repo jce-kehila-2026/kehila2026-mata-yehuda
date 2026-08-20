@@ -1,4 +1,14 @@
 User-agent: *
 Allow: /
 
+Disallow: /staff
+Disallow: /staff-login
+Disallow: /attendance
+Disallow: /requests
+Disallow: /pay
+Disallow: /payment-success
+Disallow: /payment-cancel
+Disallow: /donations/success
+Disallow: /donations/cancel
+
 Sitemap: https://matayehuda-frontend.onrender.com/sitemap.xml

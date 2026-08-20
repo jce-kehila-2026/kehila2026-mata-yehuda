@@ -3,46 +3,55 @@
 
   <url>
     <loc>https://matayehuda-frontend.onrender.com/</loc>
+    <changefreq>weekly</changefreq>
     <priority>1.0</priority>
   </url>
 
   <url>
     <loc>https://matayehuda-frontend.onrender.com/about</loc>
+    <changefreq>monthly</changefreq>
     <priority>0.8</priority>
   </url>
 
   <url>
     <loc>https://matayehuda-frontend.onrender.com/services</loc>
+    <changefreq>monthly</changefreq>
     <priority>0.9</priority>
   </url>
 
   <url>
     <loc>https://matayehuda-frontend.onrender.com/day-center</loc>
+    <changefreq>weekly</changefreq>
     <priority>0.9</priority>
   </url>
 
   <url>
     <loc>https://matayehuda-frontend.onrender.com/plus60</loc>
+    <changefreq>weekly</changefreq>
     <priority>0.8</priority>
   </url>
 
   <url>
     <loc>https://matayehuda-frontend.onrender.com/supportive-community</loc>
+    <changefreq>weekly</changefreq>
     <priority>0.9</priority>
   </url>
 
   <url>
     <loc>https://matayehuda-frontend.onrender.com/community-join</loc>
+    <changefreq>monthly</changefreq>
     <priority>0.8</priority>
   </url>
 
   <url>
     <loc>https://matayehuda-frontend.onrender.com/community-volunteer</loc>
+    <changefreq>monthly</changefreq>
     <priority>0.8</priority>
   </url>
 
   <url>
     <loc>https://matayehuda-frontend.onrender.com/donations</loc>
+    <changefreq>monthly</changefreq>
     <priority>0.8</priority>
   </url>
 
