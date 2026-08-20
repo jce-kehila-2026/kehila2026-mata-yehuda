@@ -9,7 +9,6 @@ import DateMismatchNotice from "../../components/attendance/DateMismatchNotice";
 import ActivityInfoCard from "../../components/attendance/ActivityInfoCard";
 import "../../styles/attendance/AttendanceRecordsPage.css";
 import "../../styles/attendance/AttendanceButtons.css";
-import { useNavigate } from "react-router-dom";
 
 import {
   formatActivityNameLabel,
@@ -27,15 +26,6 @@ const INITIAL_HINT = "בחרו פעילות או תאריך כדי להתחיל.
 const EMPTY_RESULTS_MESSAGE = "לא נמצאו רשומות נוכחות.";
 
 function AttendanceRecordsPage({ onBack }) {
-  const navigate = useNavigate();
-
-  const handleBack = () => {
-    if (window.history.length > 1) {
-      navigate(-1);
-    } else {
-      navigate("/staff/dashboard");
-    }
-  };
   const [activities, setActivities] = useState([]);
   const [loadingActivities, setLoadingActivities] = useState(true);
   const [selectedActivityId, setSelectedActivityId] = useState("");
@@ -262,7 +252,7 @@ function AttendanceRecordsPage({ onBack }) {
             <button
               type="button"
               className="staff-back-button"
-              onClick={handleBack}
+              onClick={onBack}
             >
               <span className="staff-back-button__icon" aria-hidden="true">
                 →
@@ -273,46 +263,46 @@ function AttendanceRecordsPage({ onBack }) {
         </header>
 
         <div className="attendance-records-page__content">
-          <div className="attendance-records-page__search-wrap">
-            <AttendanceSearch
-              classPrefix="attendance-records-page"
-              showToolbarTitle={false}
-              searchButtonLabel="הצג"
-              formatActivityLabel={formatActivityNameLabel}
-              activities={activities}
-              loadingActivities={loadingActivities}
-              selectedActivityId={selectedActivityId}
-              setSelectedActivityId={setSelectedActivityId}
-              selectedDate={selectedDate}
-              setSelectedDate={setSelectedDate}
-              handleSearch={handleSearch}
-            />
+        <div className="attendance-records-page__search-wrap">
+          <AttendanceSearch
+            classPrefix="attendance-records-page"
+            showToolbarTitle={false}
+            searchButtonLabel="הצג"
+            formatActivityLabel={formatActivityNameLabel}
+            activities={activities}
+            loadingActivities={loadingActivities}
+            selectedActivityId={selectedActivityId}
+            setSelectedActivityId={setSelectedActivityId}
+            selectedDate={selectedDate}
+            setSelectedDate={setSelectedDate}
+            handleSearch={handleSearch}
+          />
+        </div>
+
+        {showInitialHint && (
+          <div className="attendance-records-page__hint-card">
+            <p className="attendance-records-page__hint">{INITIAL_HINT}</p>
           </div>
+        )}
 
-          {showInitialHint && (
-            <div className="attendance-records-page__hint-card">
-              <p className="attendance-records-page__hint">{INITIAL_HINT}</p>
-            </div>
-          )}
+        {isPageLoading && (
+          <p className="attendance-records-page__loading" role="status">
+            {loadingMessage}
+          </p>
+        )}
 
-          {isPageLoading && (
-            <p className="attendance-records-page__loading" role="status">
-              {loadingMessage}
+        {error && !isPageLoading && (
+          <div className="attendance-records-page__message-block attendance-records-page__message-block--error">
+            <p
+              className="attendance-records-page__message attendance-records-page__message--error"
+              role="alert"
+            >
+              {error}
             </p>
-          )}
+          </div>
+        )}
 
-          {error && !isPageLoading && (
-            <div className="attendance-records-page__message-block attendance-records-page__message-block--error">
-              <p
-                className="attendance-records-page__message attendance-records-page__message--error"
-                role="alert"
-              >
-                {error}
-              </p>
-            </div>
-          )}
-
-          {!isPageLoading && !error && hasRequestedData && renderPageContent()}
+        {!isPageLoading && !error && hasRequestedData && renderPageContent()}
         </div>
       </div>
     </div>
