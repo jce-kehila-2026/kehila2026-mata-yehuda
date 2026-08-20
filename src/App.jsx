@@ -1,6 +1,7 @@
 import "./App.css";
 import { BrowserRouter, Routes, Route } from "react-router-dom";
 import ScrollToTop from "./components/ScrollToTop";
+import SeoManager from "./components/SeoManager";
 import PublicNotificationRegistration from "./components/notifications/PublicNotificationRegistration";
 
 import AttendancePage from "./pages/attendance/AttendancePage";
@@ -29,6 +30,7 @@ function App() {
   return (
     <BrowserRouter>
       <ScrollToTop />
+      <SeoManager />
       <PublicNotificationRegistration>
       <Routes>
         <Route path="/" element={<Home />} />
