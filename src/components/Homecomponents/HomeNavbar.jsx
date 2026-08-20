@@ -1,5 +1,8 @@
+import { useEffect, useState } from "react";
 import { useLocation, useNavigate } from "react-router-dom";
 import { scrollToHomeSection } from "../../utils/homeSectionScroll";
+
+const HOME_SECTION_IDS = ["requests", "donations", "contact"];
 
 const NAV_ITEMS = [
   { id: "about", label: "מי אנחנו", type: "page", path: "/about" },
@@ -11,22 +14,40 @@ const NAV_ITEMS = [
 function HomeNavbar() {
   const navigate = useNavigate();
   const location = useLocation();
+  const [activeSection, setActiveSection] = useState("");
+
+  useEffect(() => {
+    if (location.pathname !== "/") {
+      setActiveSection("");
+      return;
+    }
+
+    const hash = location.hash.replace("#", "");
+    if (HOME_SECTION_IDS.includes(hash)) {
+      setActiveSection(hash);
+    }
+  }, [location.pathname, location.hash]);
 
   const handleNavClick = (item) => {
     if (item.type === "page") {
+      setActiveSection("");
       navigate(item.path);
       return;
     }
+
+    setActiveSection(item.id);
 
     if (location.pathname === "/") {
       scrollToHomeSection(item.id);
       return;
     }
 
-    navigate(`/#${item.id}`);
+    navigate({ pathname: "/", hash: item.id });
   };
 
   const handleBrandClick = () => {
+    setActiveSection("");
+
     if (location.pathname !== "/") {
       navigate("/");
       return;
@@ -50,7 +71,10 @@ function HomeNavbar() {
 
         <nav className="home-navbar__nav" aria-label="ניווט ראשי">
           {NAV_ITEMS.map((item) => {
-            const isActive = item.type === "page" && location.pathname === item.path;
+            const isActive =
+              item.type === "page"
+                ? location.pathname === item.path
+                : location.pathname === "/" && activeSection === item.id;
 
             return (
               <button

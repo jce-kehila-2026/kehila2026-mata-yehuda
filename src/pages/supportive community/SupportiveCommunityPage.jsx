@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { Link, useNavigate } from "react-router-dom";
 import "../../styles/supportive community/SupportiveCommunityPage.css";
 
@@ -267,6 +267,47 @@ function SupportiveCommunityPage() {
   const [showAllVolunteerServices, setShowAllVolunteerServices] = useState(false);
   const [contactOpen, setContactOpen] = useState(false);
 
+  useEffect(() => {
+    document.title = "קהילה תומכת במטה יהודה | ותיקי מטה יהודה";
+  
+    const description =
+      "קהילה תומכת של ותיקי מטה יהודה – שירותי תמיכה, ליווי וסיוע לבני 62+ בבית ובקהילה, כולל מוקד מצוקה, אב קהילה, ביקורי בית וסיוע נוסף.";
+  
+    const metaDescription = document.querySelector('meta[name="description"]');
+  
+    if (metaDescription) {
+      metaDescription.setAttribute("content", description);
+    }
+  
+    const canonical = document.querySelector('link[rel="canonical"]');
+  
+    if (canonical) {
+      canonical.setAttribute(
+        "href",
+        "https://matayehuda-frontend.onrender.com/supportive-community"
+      );
+    }
+  
+    return () => {
+      document.title =
+        "ותיקי מטה יהודה | קהילה תומכת, מרכז יום ופעילויות";
+  
+      if (metaDescription) {
+        metaDescription.setAttribute(
+          "content",
+          "אתר ותיקי מטה יהודה - קהילה תומכת, מרכז יום, פעילויות, התנדבות, תרומות ושירותים לקהילה."
+        );
+      }
+  
+      if (canonical) {
+        canonical.setAttribute(
+          "href",
+          "https://matayehuda-frontend.onrender.com/"
+        );
+      }
+    };
+  }, []);
+    
   const visibleVolunteerServices = showAllVolunteerServices
     ? VOLUNTEER_SERVICES
     : VOLUNTEER_SERVICES.slice(0, VOLUNTEER_INITIAL_COUNT);
